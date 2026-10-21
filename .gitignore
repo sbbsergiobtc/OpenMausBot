@@ -40,3 +40,7 @@ deploy/podman/.env
 deploy/podman/.env.*
 !deploy/podman/.env.example
 /.env
+
+Almacenamiento/
+*.mp4
+graphify-out/cache/
