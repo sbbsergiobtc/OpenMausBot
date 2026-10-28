@@ -87,7 +87,7 @@ def build_chart_payload(strat_id: str, window_bars: int = 1500) -> Dict[str, Any
     open_ = df_window['open'].values.astype(float)
     volume = df_window['volume'].values.astype(float)
     
-    # CONVERSIÓN CORRECTA A SEGUNDOS UNIX EPOCH (Universal para ms, us, ns)
+    # CONVERSIÓN CORRECTA A SEGUNDOS UNIX EPOCH
     timestamps = [int(ts.timestamp()) for ts in df_window.index]
     n = len(close)
     
@@ -109,7 +109,7 @@ def build_chart_payload(strat_id: str, window_bars: int = 1500) -> Dict[str, Any
             "color": "#22c55e" if close[i] >= open_[i] else "#ef4444"
         })
         
-    # 3. Indicadores Superpuestos (Overlays en gráfico principal)
+    # 3. Indicadores Superpuestos (Líneas finas de 1px con colores profesionales)
     s_close = pd.Series(close)
     ema50 = s_close.ewm(span=50, adjust=False).mean().values
     ema200 = s_close.ewm(span=200, adjust=False).mean().values
@@ -118,15 +118,15 @@ def build_chart_payload(strat_id: str, window_bars: int = 1500) -> Dict[str, Any
         {
             "id": "ema50",
             "name": "EMA 50",
-            "color": "#38bdf8", # Cyan / Light Blue
-            "lineWidth": 2,
+            "color": "#38bdf8", # Cyan
+            "lineWidth": 1,     # Línea fina elegante 1px
             "data": [{"time": timestamps[i], "value": round(float(ema50[i]), 2)} for i in range(n)]
         },
         {
             "id": "ema200",
             "name": "EMA 200",
-            "color": "#f59e0b", # Amber
-            "lineWidth": 2,
+            "color": "#f59e0b", # Ámbar
+            "lineWidth": 1,     # Línea fina elegante 1px
             "data": [{"time": timestamps[i], "value": round(float(ema200[i]), 2)} for i in range(n)]
         }
     ]
@@ -141,8 +141,8 @@ def build_chart_payload(strat_id: str, window_bars: int = 1500) -> Dict[str, Any
             "id": "donchian30",
             "name": "Donchian High (30h)",
             "color": "#10b981", # Verde esmeralda
-            "lineWidth": 2,
-            "lineStyle": 2, # Discontinua
+            "lineWidth": 1,     # Línea fina 1px
+            "lineStyle": 2,     # Discontinua sutil
             "data": [{"time": timestamps[i], "value": round(float(hh30[i]), 2)} for i in range(30, n) if not np.isnan(hh30[i])]
         })
         
@@ -164,9 +164,9 @@ def build_chart_payload(strat_id: str, window_bars: int = 1500) -> Dict[str, Any
             "id": "shannon_entropy",
             "name": "Entropía de Shannon (48h)",
             "color": "#f43f5e", # Rose
-            "lineWidth": 2,
+            "lineWidth": 1,     # Fina 1px
             "thresholds": [
-                {"value": 0.72, "color": "#ef4444", "title": "Umbral Máx 0.72 (Baja Entropía)"}
+                {"value": 0.72, "color": "#ef4444", "title": "Máx 0.72"}
             ],
             "data": [{"time": timestamps[i], "value": round(float(h_norm[i]), 3)} for i in range(window_ent, n) if not np.isnan(h_norm[i])]
         })
@@ -181,10 +181,10 @@ def build_chart_payload(strat_id: str, window_bars: int = 1500) -> Dict[str, Any
             "id": "cmf20",
             "name": "Chaikin Money Flow (20)",
             "color": "#06b6d4",
-            "lineWidth": 1.5,
+            "lineWidth": 1,     # Fina 1px
             "thresholds": [
-                {"value": 0.05, "color": "#22c55e", "title": "Bull Flow +0.05"},
-                {"value": 0.0, "color": "#64748b", "title": "Zero"}
+                {"value": 0.05, "color": "#22c55e", "title": "Flow +0.05"},
+                {"value": 0.0, "color": "#64748b", "title": "0"}
             ],
             "data": [{"time": timestamps[i], "value": round(float(cmf20[i]), 3)} for i in range(20, n) if not np.isnan(cmf20[i])]
         })
@@ -199,14 +199,14 @@ def build_chart_payload(strat_id: str, window_bars: int = 1500) -> Dict[str, Any
             "id": "bb_upper",
             "name": "Bollinger Upper (20, 2)",
             "color": "#a855f7",
-            "lineWidth": 1.5,
+            "lineWidth": 1,     # Fina 1px
             "data": [{"time": timestamps[i], "value": round(float(bb_upper[i]), 2)} for i in range(20, n) if not np.isnan(bb_upper[i])]
         })
         overlays.append({
             "id": "bb_lower",
             "name": "Bollinger Lower (20, 2)",
             "color": "#a855f7",
-            "lineWidth": 1.5,
+            "lineWidth": 1,     # Fina 1px
             "data": [{"time": timestamps[i], "value": round(float(bb_lower[i]), 2)} for i in range(20, n) if not np.isnan(bb_lower[i])]
         })
         
@@ -223,10 +223,10 @@ def build_chart_payload(strat_id: str, window_bars: int = 1500) -> Dict[str, Any
             "id": "rsi14",
             "name": "RSI (14)",
             "color": "#818cf8",
-            "lineWidth": 2,
+            "lineWidth": 1,     # Fina 1px
             "thresholds": [
-                {"value": 70.0, "color": "#ef4444", "title": "Sobrecompra 70"},
-                {"value": 30.0, "color": "#22c55e", "title": "Sobreventa 30"}
+                {"value": 70.0, "color": "#ef4444", "title": "70"},
+                {"value": 30.0, "color": "#22c55e", "title": "30"}
             ],
             "data": [{"time": timestamps[i], "value": round(float(rsi14[i]), 2)} for i in range(14, n) if not np.isnan(rsi14[i])]
         })
@@ -235,7 +235,6 @@ def build_chart_payload(strat_id: str, window_bars: int = 1500) -> Dict[str, Any
     trades = []
     markers = []
     
-    # Ver si existen operaciones en el historial de forward testing
     hist_file = BASE_DIR / 'data/paper_trades/full_trade_history.json'
     trade_list = []
     if hist_file.exists():
@@ -247,7 +246,6 @@ def build_chart_payload(strat_id: str, window_bars: int = 1500) -> Dict[str, Any
         except Exception:
             trade_list = []
             
-    # Si no hay trades en el archivo de paper trading o es STRAT-035, simulamos las entradas exactas
     if not trade_list and ('035' in strat_upper or 'BTC' in strat_upper):
         tr = np.maximum(high - low, np.maximum(np.abs(high - np.roll(close, 1)), np.abs(low - np.roll(close, 1))))
         tr[0] = high[0] - low[0]
@@ -292,7 +290,7 @@ def build_chart_payload(strat_id: str, window_bars: int = 1500) -> Dict[str, Any
                     "color": "#22c55e",
                     "shape": "arrowUp",
                     "text": f"BUY #{trade_id} @ ${entry_p:,.2f}",
-                    "size": 2
+                    "size": 1.5
                 })
             elif in_pos:
                 hit_tp = high[i] >= tp_p
@@ -309,7 +307,7 @@ def build_chart_payload(strat_id: str, window_bars: int = 1500) -> Dict[str, Any
                         "color": "#10b981" if is_win else "#ef4444",
                         "shape": "arrowDown",
                         "text": f"EXIT #{trade_id}: {pnl_pct:+.2f}%",
-                        "size": 1.5
+                        "size": 1.2
                     })
                     
                     trades.append({
@@ -343,11 +341,3 @@ def build_chart_payload(strat_id: str, window_bars: int = 1500) -> Dict[str, Any
         "trades": trades,
         "markers": markers
     }
-
-if __name__ == '__main__':
-    res = build_chart_payload('STRAT-20261028-035')
-    print("SUCCESS STRAT-035:")
-    print(f"  Velas: {len(res['candles'])}")
-    print(f"  Primer timestamp: {res['candles'][0]['time']} -> {pd.to_datetime(res['candles'][0]['time'], unit='s', utc=True)}")
-    print(f"  Último timestamp: {res['candles'][-1]['time']} -> {pd.to_datetime(res['candles'][-1]['time'], unit='s', utc=True)}")
-    print(f"  Trades: {len(res['trades'])}")
