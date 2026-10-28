@@ -44,3 +44,7 @@ deploy/podman/.env.*
 Almacenamiento/
 *.mp4
 graphify-out/cache/
+VPS.txt
+PROGRESO OMB.txt
+__pycache__/
+*.pyc
