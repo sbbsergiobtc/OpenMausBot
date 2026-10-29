@@ -421,7 +421,7 @@
 
           <button onclick="switchTab('backtests')" id="side-tab-backtests" class="sidebar-link">
             <i class="fa-solid fa-chart-line text-xs text-[#5865F2] mr-2.5 w-4 text-center"></i>
-            <span>1. Backtests (Multi-Horizonte)</span>
+            <span>Backtests</span>
           </button>
 
           <button onclick="switchTab('forward')" id="side-tab-forward" class="sidebar-link">
@@ -445,7 +445,7 @@
           </button>
 
           <button onclick="switchTab('chart')" id="side-tab-chart" class="sidebar-link">
-            <i class="fa-solid fa-chart-candlestick text-xs text-[#5865F2] mr-2.5 w-4 text-center"></i>
+            <i class="fa-solid fa-chart-simple text-xs text-[#5865F2] mr-2.5 w-4 text-center"></i>
             <span>Gráficos TradingView</span>
           </button>
 
@@ -1169,7 +1169,7 @@
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-slate-800/80 pb-4">
           <div>
             <h3 class="text-base font-bold text-white flex items-center">
-              <i class="fa-solid fa-list-check mr-2 text-emerald-400"></i> Historial Exhaustivo de Operaciones
+              <i class="fa-solid fa-list-check mr-2 text-emerald-400"></i> Historial de Operaciones
             </h3>
             <p class="text-xs text-slate-400">Registro detallado con días, horas, precios, TP, SL, comisiones y mini gráfica de balance por trade</p>
           </div>
@@ -1197,7 +1197,8 @@
           <table class="w-full text-left text-[11px] font-mono whitespace-nowrap">
             <thead class="bg-dark-950/95 backdrop-blur-sm sticky top-0 z-10 text-slate-400 border-b border-slate-800 uppercase tracking-wider text-[10px]">
               <tr>
-                <th class="py-2.5 px-3">Trade & Mini Curva</th>
+                <th class="py-2.5 px-3">Estrategia</th>
+                <th class="py-2.5 px-3 text-center">Minigráfico</th>
                 <th class="py-2.5 px-3">Activo</th>
                 <th class="py-2.5 px-3">Día</th>
                 <th class="py-2.5 px-3">Inicio (Fecha/Hora)</th>
@@ -1705,59 +1706,23 @@
 
       </div>
 
-      <!-- ==================== TARJETA DE CURVA DE RENTABILIDAD EN TIEMPO REAL (FORWARD TEST) ==================== -->
-      <div class="glass-card rounded-2xl p-5 space-y-4 motion-sweep stagger-3 shimmer-active border-t-2 border-amber-500 w-full">
-        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-slate-800 pb-3">
+      <!-- ==================== TARJETA DE CURVA DE RENTABILIDAD EN TIEMPO REAL (ESTILO INSTITUCIONAL BACKTEST) ==================== -->
+      <div class="glass-card rounded-xl p-5 space-y-3 motion-sweep stagger-3 shimmer-active w-full">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <div>
-            <div class="flex items-center gap-2 flex-wrap mb-1">
-              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse whitespace-nowrap">CURVA VIVA EN TIEMPO REAL</span>
-              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 whitespace-nowrap">MONITOREO CONTINUO</span>
-            </div>
-            <h3 class="text-base font-bold text-white mt-1 flex items-center gap-2">
-              <i class="fa-solid fa-chart-line text-amber-400"></i> Curva de Rentabilidad y Equidad Acumulada
+            <h3 class="text-base font-bold text-white flex items-center">
+              <i class="fa-solid fa-chart-area mr-2 text-amber-400"></i> <span id="ft-curve-title">Curva de Rentabilidad Acumulada ($ USD)</span>
             </h3>
-            <p class="text-xs text-slate-400">Evolución de saldo y equity de forward testing multi-cuenta (MT5 TradFi, Hyperliquid DEX y Desafío Prop Firm).</p>
+            <p class="text-xs text-slate-400" id="ft-chart-subtitle">Evolución cerrada operación a operación con comisiones y deslizamiento real en vivo</p>
           </div>
-
-          <!-- Selector de Vista de la Curva -->
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="text-xs text-slate-400 font-mono whitespace-nowrap">Ver Cartera:</span>
-            <div class="inline-flex flex-wrap rounded-lg bg-dark-950 p-1 border border-slate-800 text-xs font-mono gap-1">
-              <button id="ft-curve-btn-real" onclick="setFtCurveSegment('REAL')" class="px-2.5 py-1 rounded font-bold transition bg-amber-500/20 text-amber-300 border border-amber-500/30 whitespace-nowrap">Capital Real ($2.0k)</button>
-              <button id="ft-curve-btn-mt5" onclick="setFtCurveSegment('MT5')" class="px-2.5 py-1 rounded text-slate-400 hover:text-white transition whitespace-nowrap">IC Markets MT5</button>
-              <button id="ft-curve-btn-hl" onclick="setFtCurveSegment('HL')" class="px-2.5 py-1 rounded text-slate-400 hover:text-white transition whitespace-nowrap">Hyperliquid DEX</button>
-              <button id="ft-curve-btn-pf" onclick="setFtCurveSegment('PF')" class="px-2.5 py-1 rounded text-slate-400 hover:text-white transition whitespace-nowrap">Prop Firm ($100k)</button>
-            </div>
+          <div class="flex items-center space-x-2">
+            <span class="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/20 font-bold" id="badge-ft-chart-pnl">
+              +$2.18 USD (+0.11%)
+            </span>
           </div>
         </div>
-
-        <!-- Fila de Métricas Clave de la Curva -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-          <div class="p-2.5 rounded-xl bg-dark-950/70 border border-slate-800">
-            <span class="text-[10px] text-slate-400 uppercase font-mono">Saldo Actual</span>
-            <div class="text-sm font-bold text-white font-mono mt-1" id="ft-chart-kpi-balance">$2,002.18 USD</div>
-          </div>
-          <div class="p-2.5 rounded-xl bg-dark-950/70 border border-slate-800">
-            <span class="text-[10px] text-slate-400 uppercase font-mono">Rentabilidad Neta</span>
-            <div class="text-sm font-bold text-emerald-400 font-mono mt-1" id="ft-chart-kpi-pnl">+$2.18 (+0.11%)</div>
-          </div>
-          <div class="p-2.5 rounded-xl bg-dark-950/70 border border-slate-800">
-            <span class="text-[10px] text-slate-400 uppercase font-mono">Max Drawdown EOD</span>
-            <div class="text-sm font-bold text-emerald-400 font-mono mt-1" id="ft-chart-kpi-dd">0.00% ($0.00)</div>
-          </div>
-          <div class="p-2.5 rounded-xl bg-dark-950/70 border border-slate-800">
-            <span class="text-[10px] text-slate-400 uppercase font-mono">Tiempo en Forward Test</span>
-            <div class="text-sm font-bold text-cyan-300 font-mono mt-1" id="ft-chart-kpi-hours">48 Horas (Día 2)</div>
-          </div>
-        </div>
-
-        <!-- Contenedor del Gráfico ApexCharts -->
-        <div class="p-3 bg-dark-950/60 rounded-xl border border-slate-800 relative">
-          <div id="ft-equity-apexchart" class="w-full h-72"></div>
-        </div>
-      </div>
-
-      <!-- Registro de Órdenes y Eventos en Vivo de Forward Test -->
+        <div id="ft-equity-apexchart" class="w-full h-80"></div>
+      </div><!-- Registro de Órdenes y Eventos en Vivo de Forward Test -->
       <div class="glass-card rounded-2xl p-5 space-y-4 motion-sweep stagger-4 shimmer-active w-full">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-800 pb-3">
           <div>
@@ -1973,9 +1938,9 @@
             <thead class="bg-dark-950/80 text-slate-400 border-b border-slate-800 uppercase">
               <tr>
                 <th class="py-3 px-3">Estrategia & Segmento</th>
-                <th class="py-3 px-3 text-center border-x border-slate-800/60 text-slate-300">1. Backtest Teórico Python</th>
-                <th class="py-3 px-3 text-center border-r border-slate-800/60 text-slate-300">2. Broker Simulado (IC Markets / DEX)</th>
-                <th class="py-3 px-3 text-center border-r border-slate-800/60 text-slate-300">3. Live / Forward Real</th>
+                <th class="py-3 px-3 text-center border-x border-slate-800/30 text-slate-300">1. Backtest Teórico Python</th>
+                <th class="py-3 px-3 text-center border-r border-slate-800/30 text-slate-300">2. Broker Simulado (IC Markets / DEX)</th>
+                <th class="py-3 px-3 text-center border-r border-slate-800/30 text-slate-300">3. Live / Forward Real</th>
                 <th class="py-3 px-3 text-right">Veredicto & Factor</th>
               </tr>
             </thead>
@@ -2624,7 +2589,7 @@
             </div>
             <div class="flex items-center gap-2 text-txtSecondary text-[11px]">
               <i class="fa-solid fa-circle-info text-[#5865F2]"></i>
-              <span>Personaliza colores de velas, fondo y escalas con clic derecho &rarr; Configuración</span>
+              <span>Haz doble clic en el lienzo o pulsa el icono de engranaje ⚙️ arriba para configurar velas, escalas y apariencia</span>
             </div>
           </div>
 
@@ -3344,7 +3309,7 @@
       }
     }
 
-    // Estado de Paginación para Historial Exhaustivo de Operaciones
+    // Estado de Paginación para Historial de Operaciones
     let currentFilteredTrades = [];
     let tradeCurrentPage = 1;
     let tradeRowsPerPage = 50;
@@ -3448,15 +3413,33 @@
         const esStartDate = formatSpanishDate(t.start_date);
         const esEndDate = formatSpanishDate(t.end_date);
 
+        // Asignación de Badge de Activo según requerimiento de color de Sergio:
+        // BTC: Ámbar original | ETH: Gris | NDX: Azul (como barras rendimiento) | SPX: Rojo (como barras negativas) | SOL: Morado
+        let assetBadgeHtml = '';
+        const ast = (t.asset || '').toUpperCase();
+        if (ast.includes('BTC') || ast.includes('BITCOIN')) {
+          assetBadgeHtml = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono">BTC</span>';
+        } else if (ast.includes('ETH') || ast.includes('ETHEREUM')) {
+          assetBadgeHtml = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-700/60 text-slate-200 border border-slate-600 font-mono">ETH</span>';
+        } else if (ast.includes('NDX') || ast.includes('NASDAQ')) {
+          assetBadgeHtml = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#5865F2]/20 text-[#5865F2] border border-[#5865F2]/40 font-mono">NDX</span>';
+        } else if (ast.includes('SPX') || ast.includes('SP500') || ast.includes('S&P')) {
+          assetBadgeHtml = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/40 font-mono">SPX</span>';
+        } else if (ast.includes('SOL') || ast.includes('SOLANA')) {
+          assetBadgeHtml = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/40 font-mono">SOL</span>';
+        } else {
+          assetBadgeHtml = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700 font-mono">${t.asset}</span>`;
+        }
+
         tr.innerHTML = `
-          <td class="py-2.5 px-3">
-            <div class="flex items-center space-x-2">
-              <span class="font-bold text-white">${t.trade_id}</span>
-              ${sparklineSvg}
-            </div>
+          <td class="py-2.5 px-3 font-bold text-white whitespace-nowrap">
+            ${t.strategy || t.trade_id}
           </td>
-          <td class="py-2.5 px-3">
-            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${t.asset === 'NDX' ? 'bg-cyan-500/20 text-cyan-300' : (t.asset === 'SPX' ? 'bg-purple-500/20 text-purple-300' : 'bg-amber-500/20 text-amber-300')}">${t.asset}</span>
+          <td class="py-2.5 px-3 text-center whitespace-nowrap">
+            ${sparklineSvg}
+          </td>
+          <td class="py-2.5 px-3 whitespace-nowrap">
+            ${assetBadgeHtml}
           </td>
           <td class="py-2.5 px-3 text-slate-300">${t.day_es || '--'}</td>
           <td class="py-2.5 px-3 text-slate-400">
@@ -3467,7 +3450,7 @@
             <div class="font-mono text-white">${esEndDate || ''}</div>
             <div class="text-[10px] text-slate-500 font-mono">${t.end_time || ''}</div>
           </td>
-          <td class="py-2.5 px-3 text-right text-slate-200">${Number(t.entry_price).toLocaleString('es-ES', {minimumFractionDigits: 2})}</td>
+          <td class="py-2.5 px-3 text-right font-bold text-white">${Number(t.entry_price).toLocaleString('es-ES', {minimumFractionDigits: 2})}</td>
           <td class="py-2.5 px-3 text-right text-emerald-400">${Number(t.tp_price).toLocaleString('es-ES', {minimumFractionDigits: 2})}</td>
           <td class="py-2.5 px-3 text-right text-rose-400">${Number(t.sl_price).toLocaleString('es-ES', {minimumFractionDigits: 2})}</td>
           <td class="py-2.5 px-3 text-right font-bold text-white">${Number(t.exit_price).toLocaleString('es-ES', {minimumFractionDigits: 2})}</td>
@@ -3565,11 +3548,11 @@
                 <span>Especialidad:</span>
                 <span class="text-slate-300 text-right">${agent.focus || 'Cuantitativo'}</span>
               </div>
-              <div class="flex justify-between items-center text-slate-500 pt-1">
+              <div class="flex justify-between items-center text-slate-600 pt-1">
                 <span>Motor IA:</span>
                 ${(agent.engine || '').includes('High')
-                  ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/25 text-amber-200 border border-amber-500/50 whitespace-nowrap shadow-xs"><i class="fa-solid fa-brain mr-1 text-[9px] text-amber-300"></i>${agent.engine}</span>`
-                  : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-200 border border-indigo-500/40 whitespace-nowrap shadow-xs"><i class="fa-solid fa-bolt mr-1 text-[9px] text-indigo-300"></i>${agent.engine}</span>`
+                  ? `<span style="background-color: #FEF3C7; color: #78350F; border: 1px solid #F59E0B;" class="px-2.5 py-0.5 rounded text-[11px] font-bold font-mono inline-flex items-center gap-1.5 whitespace-nowrap shadow-xs"><i class="fa-solid fa-brain text-[10px]" style="color: #B45309;"></i>${agent.engine}</span>`
+                  : `<span style="background-color: #EDE9FE; color: #3B0764; border: 1px solid #8B5CF6;" class="px-2.5 py-0.5 rounded text-[11px] font-bold font-mono inline-flex items-center gap-1.5 whitespace-nowrap shadow-xs"><i class="fa-solid fa-bolt text-[10px]" style="color: #6D28D9;"></i>${agent.engine}</span>`
                 }
               </div>
             </div>
@@ -3769,7 +3752,7 @@
             <div class="text-[10px] text-amber-400 font-mono mt-1">${s.sizing || ''}</div>
           </td>
 
-          <td class="py-3 px-3 align-top border-x border-slate-800/60">
+          <td class="py-3 px-3 align-top border-x border-slate-800/30">
             <div class="flex items-center justify-between">
               <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-slate-800 text-slate-300 border border-slate-700">${py.status || 'EVALUADO'}</span>
               <span class="text-xs font-bold font-mono ${py.return_pct >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${py.return_pct >= 0 ? '+' : ''}${py.return_pct}%</span>
@@ -3783,7 +3766,7 @@
             <div class="text-[9px] text-slate-400 mt-2 italic border-t border-slate-800/80 pt-1">${py.notes || ''}</div>
           </td>
 
-          <td class="py-3 px-3 align-top border-r border-slate-800/60">
+          <td class="py-3 px-3 align-top border-r border-slate-800/30">
             <div class="flex items-center justify-between">
               <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-slate-800 text-slate-300 border border-slate-700">${brk.status || 'SIMULADO'}</span>
               <span class="text-xs font-bold font-mono ${brk.return_pct >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${brk.return_pct >= 0 ? '+' : ''}${brk.return_pct}%</span>
@@ -3801,7 +3784,7 @@
             </div>
           </td>
 
-          <td class="py-3 px-3 align-top border-r border-slate-800/60">
+          <td class="py-3 px-3 align-top border-r border-slate-800/30">
             <div class="flex items-center justify-between">
               <span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${live.status && live.status.includes('ACTIVO') ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 animate-pulse' : 'bg-slate-800 text-slate-400'}">${live.status || 'MONITORIZANDO'}</span>
               <span class="text-xs font-bold font-mono text-slate-300">${live.trades_count || 0} Trades</span>
@@ -3895,15 +3878,20 @@
           ? `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 inline-block"></span>Aprobada</span>`
           : `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap bg-amber-500/15 text-amber-400 border border-amber-500/30"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5 inline-block"></span>Pendiente</span>`;
 
-        // Columna de Activo: especificar activo concreto (ej. STRAT-014 -> Cesta ETH, SOL, AVAX, NEAR, LINK)
+        // Columna de Activo: Ancho de columna fijo, badge ajustado al texto (inline-block) y resolución de activos directos
         let rawAsset = s.asset || 'N/A';
+        const rawUpper = rawAsset.toUpperCase();
         if (s.id && (s.id.includes('014') || s.id === 'STRAT-20261021-014')) {
-          rawAsset = 'Cesta ETH, SOL, AVAX, NEAR, LINK';
+          rawAsset = 'ETH, SOL, AVAX, NEAR, LINK';
+        } else if (rawUpper.includes('CRIPTO MULTI') || rawUpper.includes('CESTA') || rawUpper.includes('TOP 6')) {
+          rawAsset = 'BTC, ETH, SOL, AVAX, NEAR, LINK';
+        } else if (rawUpper === 'CRYPTO' || rawUpper === 'CRIPTO') {
+          rawAsset = 'BTC, ETH, SOL';
         }
         const safeAsset = rawAsset.replace(/"/g, '&quot;');
         const assetCell = `
-          <td class="py-3 px-4 max-w-[190px] xl:max-w-[240px]" title="${safeAsset}">
-            <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-bold block truncate" title="${safeAsset}">${rawAsset}</span>
+          <td class="py-3 px-4 w-[210px] min-w-[210px] max-w-[210px] overflow-hidden whitespace-nowrap" title="${safeAsset}">
+            <span class="inline-block max-w-full px-2.5 py-0.5 rounded bg-slate-800 text-slate-200 font-bold font-mono text-xs truncate align-middle border border-slate-700/60" title="${safeAsset}">${rawAsset}</span>
           </td>
         `;
 
@@ -4333,9 +4321,11 @@
           type: 'line',
           height: 310,
           background: 'transparent',
+          fontFamily: 'JetBrains Mono, monospace',
           toolbar: { show: false },
           animations: { enabled: true, easing: 'easeinout', speed: 800 }
         },
+        theme: { mode: 'dark' },
         series: series,
         xaxis: {
           categories: steps,
@@ -5524,6 +5514,15 @@
         } else {
           ftPfCard.classList.add('ring-2', 'ring-cyan-400/40');
           ftHlCard.classList.remove('ring-2', 'ring-amber-400/40');
+        }
+      }
+
+      // 5. Sincronizar Curva de Rentabilidad en Forward Test según el modo activo (Capital Propio vs Fondeo)
+      if (typeof setFtCurveSegment === 'function') {
+        if (mode === 'PROP_FIRM') {
+          setFtCurveSegment('PF');
+        } else {
+          setFtCurveSegment('REAL');
         }
       }
     }
