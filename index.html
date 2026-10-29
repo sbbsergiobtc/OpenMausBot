@@ -2287,12 +2287,13 @@
                 <th class="py-3 px-4">ID Estrategia</th>
                 <th class="py-3 px-4">Activo</th>
                 <th class="py-3 px-4">Timeframe</th>
-                <th class="py-3 px-4">Linaje / Origen</th>
                 <th class="py-3 px-4">Win Rate</th>
+                <th class="py-3 px-4">PNL</th>
+                <th class="py-3 px-4">Max DD</th>
                 <th class="py-3 px-4">Profit Factor</th>
                 <th class="py-3 px-4">OOS R/DD</th>
                 <th class="py-3 px-4">Estancamiento</th>
-                <th class="py-3 px-4">Max DD</th>
+                <th class="py-3 px-4">Linaje / Origen</th>
                 <th class="py-3 px-4">Estado</th>
                 <th class="py-3 px-4 text-center">Ver Ficha</th>
               </tr>
@@ -2580,16 +2581,30 @@
       <!-- ==================== VISTA 1: TRADINGVIEW PRO (HERRAMIENTAS OFICIALES DE DIBUJO) ==================== -->
       <div id="tv-mode-pro-container" class="space-y-4">
         <div class="bg-card border border-borderWarm rounded-2xl p-4 shadow-sm relative overflow-hidden">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 px-1 text-xs">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3 px-1 text-xs">
             <div class="flex items-center gap-2 text-txtPrimary font-medium">
               <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               <span class="font-bold">Barra Lateral de Herramientas de Dibujo Activa</span>
               <span class="text-txtSecondary">·</span>
-              <span class="text-txtSecondary">Líneas de tendencia, canales, retrocesos Fibonacci, pincel, textos y reglas</span>
+              <span class="text-txtSecondary">Líneas de tendencia, canales, Fibonacci, pincel y reglas</span>
             </div>
-            <div class="flex items-center gap-2 text-txtSecondary text-[11px]">
-              <i class="fa-solid fa-circle-info text-[#5865F2]"></i>
-              <span>Haz doble clic en el lienzo o pulsa el icono de engranaje ⚙️ arriba para configurar velas, escalas y apariencia</span>
+            <!-- Selector Directo y Funcional de Color del Lienzo TradingView -->
+            <div class="flex items-center gap-2 bg-[#FAF7F2] border border-borderWarm rounded-xl px-2.5 py-1 text-xs shadow-xs">
+              <span class="text-txtPrimary font-bold flex items-center gap-1.5 text-[11px]">
+                <i class="fa-solid fa-palette text-[#5865F2]"></i> Color del Lienzo:
+              </span>
+              <div class="flex items-center gap-1.5">
+                <input type="color" id="tv-pro-custom-picker" onchange="applyTvProCustomBg(this.value)" value="#131722" class="w-6 h-6 rounded cursor-pointer border border-borderWarm p-0 bg-transparent shadow-xs" title="Elige cualquier color personalizado para el lienzo de TradingView">
+                <input type="text" id="tv-pro-hex-input" onchange="applyTvProCustomBg(this.value)" onkeydown="if(event.key==='Enter') applyTvProCustomBg(this.value)" placeholder="#131722" value="#131722" class="w-20 px-1.5 py-0.5 rounded text-[11px] font-mono border border-borderWarm bg-white text-txtPrimary font-semibold outline-none" title="Introduce el código HEX del color y pulsa Enter">
+                <div class="flex items-center gap-1 ml-1 border-l border-borderWarm pl-1.5">
+                  <button type="button" onclick="applyTvProCustomBg('#131722')" class="w-4 h-4 rounded-full border border-slate-700 bg-[#131722] hover:scale-125 transition" title="Oscuro TradingView (#131722)"></button>
+                  <button type="button" onclick="applyTvProCustomBg('#090D16')" class="w-4 h-4 rounded-full border border-slate-800 bg-[#090D16] hover:scale-125 transition" title="Negro Azabache (#090D16)"></button>
+                  <button type="button" onclick="applyTvProCustomBg('#1E222D')" class="w-4 h-4 rounded-full border border-slate-600 bg-[#1E222D] hover:scale-125 transition" title="Gris Carbón (#1E222D)"></button>
+                  <button type="button" onclick="applyTvProCustomBg('#0B132B')" class="w-4 h-4 rounded-full border border-slate-800 bg-[#0B132B] hover:scale-125 transition" title="Azul Medianoche (#0B132B)"></button>
+                  <button type="button" onclick="applyTvProCustomBg('#FAF7F2')" class="w-4 h-4 rounded-full border border-[#D5D0C5] bg-[#FAF7F2] hover:scale-125 transition" title="Marfil Institucional (#FAF7F2)"></button>
+                  <button type="button" onclick="applyTvProCustomBg('#FFFFFF')" class="w-4 h-4 rounded-full border border-slate-300 bg-[#FFFFFF] hover:scale-125 transition" title="Blanco Puro (#FFFFFF)"></button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -3907,16 +3922,31 @@
           </td>
         `;
 
+        // Columna PNL dinámico y formateado
+        const retVal = (s.return_pct !== undefined && s.return_pct !== null && !isNaN(s.return_pct)) ? Number(s.return_pct) : null;
+        let pnlDisplay = '-';
+        let pnlClass = 'text-slate-400 font-mono';
+        if (retVal !== null && retVal !== 0) {
+          const isPos = retVal > 0;
+          pnlDisplay = (isPos ? '+' : '') + retVal.toFixed(2) + '%';
+          pnlClass = isPos ? 'text-emerald-400 font-bold font-mono' : 'text-rose-400 font-bold font-mono';
+        } else if (s.net_profit_usd !== undefined && s.net_profit_usd !== null) {
+          const p = Number(s.net_profit_usd);
+          pnlDisplay = (p >= 0 ? '+$' : '-$') + Math.abs(p).toFixed(2);
+          pnlClass = p >= 0 ? 'text-emerald-400 font-bold font-mono' : 'text-rose-400 font-bold font-mono';
+        }
+
         tr.innerHTML = `
           <td class="py-3 px-4 font-bold text-white whitespace-nowrap">${s.id}</td>
           ${assetCell}
           ${tfCell}
-          <td class="py-3 px-4 whitespace-nowrap">${provenanceBadge}</td>
           <td class="py-3 px-4 text-emerald-400 font-bold whitespace-nowrap">${s.win_rate}%</td>
+          <td class="py-3 px-4 ${pnlClass} whitespace-nowrap">${pnlDisplay}</td>
+          <td class="py-3 px-4 text-slate-300 whitespace-nowrap">${s.max_dd}%</td>
           <td class="py-3 px-4 text-white whitespace-nowrap">${s.profit_factor}</td>
           <td class="py-3 px-4 whitespace-nowrap">${oosInfo}</td>
           <td class="py-3 px-4 whitespace-nowrap">${stagInfo}</td>
-          <td class="py-3 px-4 text-slate-300 whitespace-nowrap">${s.max_dd}%</td>
+          <td class="py-3 px-4 whitespace-nowrap">${provenanceBadge}</td>
           <td class="py-3 px-4 whitespace-nowrap">${statusBadge}</td>
           <td class="py-3 px-4 text-center whitespace-nowrap">
             <button onclick="viewStrategy('${s.id}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#FAF7F2] text-[#181A20] hover:bg-[#EAE5DC] transition border border-[#D5D0C5] shadow-xs cursor-pointer font-sans">
@@ -4827,14 +4857,101 @@
       }
     }
 
+    let tvCustomCanvasBg = localStorage.getItem('tv_custom_canvas_bg') || '#131722';
+
+    function isLightHexColor(hex) {
+      const c = hex.replace('#', '');
+      if (c.length === 3) {
+        const r = parseInt(c[0] + c[0], 16);
+        const g = parseInt(c[1] + c[1], 16);
+        const b = parseInt(c[2] + c[2], 16);
+        return ((r * 299) + (g * 587) + (b * 114)) / 1000 > 155;
+      } else if (c.length >= 6) {
+        const r = parseInt(c.substring(0, 2), 16);
+        const g = parseInt(c.substring(2, 4), 16);
+        const b = parseInt(c.substring(4, 6), 16);
+        return ((r * 299) + (g * 587) + (b * 114)) / 1000 > 155;
+      }
+      return false;
+    }
+
+    function applyTvProCustomBg(hexColor) {
+      if (!hexColor) return;
+      let cleanHex = hexColor.trim();
+      if (!cleanHex.startsWith('#') && (cleanHex.length === 3 || cleanHex.length === 6)) {
+        cleanHex = '#' + cleanHex;
+      }
+      if (!/^#[0-9A-Fa-f]{3,8}$/.test(cleanHex)) return;
+      
+      tvCustomCanvasBg = cleanHex;
+      try { localStorage.setItem('tv_custom_canvas_bg', cleanHex); } catch(e){}
+
+      const p1 = document.getElementById('tv-pro-custom-picker');
+      const h1 = document.getElementById('tv-pro-hex-input');
+      const p2 = document.getElementById('tv-custom-color-picker');
+      if (p1) p1.value = cleanHex;
+      if (h1) h1.value = cleanHex;
+      if (p2) p2.value = cleanHex;
+
+      const isLight = isLightHexColor(cleanHex);
+      const themeMode = isLight ? 'light' : 'dark';
+      const textColor = isLight ? '#181A20' : '#cbd5e1';
+      const gridColor = isLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.08)';
+
+      TV_THEME_MAP['custom'] = {
+        theme: themeMode,
+        bg: cleanHex,
+        toolbar: cleanHex,
+        text: textColor,
+        grid: gridColor
+      };
+
+      currentTvThemeKey = 'custom';
+
+      const strat = tvStrategiesCatalog.find(s => s.id === tvCurrentStrategyId);
+      loadTvProWidget(resolveTvSymbol(tvCurrentStrategyId, strat ? strat.asset : ''), 'custom');
+
+      if (tvMainChart) {
+        tvMainChart.applyOptions({
+          layout: { background: { color: cleanHex }, textColor: textColor },
+          grid: { vertLines: { color: gridColor }, horzLines: { color: gridColor } }
+        });
+      }
+      if (tvSubChart) {
+        tvSubChart.applyOptions({
+          layout: { background: { color: cleanHex }, textColor: textColor },
+          grid: { vertLines: { color: gridColor }, horzLines: { color: gridColor } }
+        });
+      }
+    }
+
     // 2. Cargar Widget Oficial de TradingView con Barra de Herramientas de Dibujo Completa
     function loadTvProWidget(symbol, themeKey) {
       const container = document.getElementById('tv-pro-widget-container');
       if (!container) return;
       container.innerHTML = '';
 
-      const key = themeKey || currentTvThemeKey || 'dark';
+      let key = themeKey || currentTvThemeKey;
+      if (!key && tvCustomCanvasBg && tvCustomCanvasBg !== '#131722') {
+        key = 'custom';
+        const isLight = isLightHexColor(tvCustomCanvasBg);
+        TV_THEME_MAP['custom'] = {
+          theme: isLight ? 'light' : 'dark',
+          bg: tvCustomCanvasBg,
+          toolbar: tvCustomCanvasBg,
+          text: isLight ? '#181A20' : '#cbd5e1',
+          grid: isLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.08)'
+        };
+      }
+      if (!key) key = 'dark';
+
       const themeConfig = (typeof TV_THEME_MAP !== 'undefined' && TV_THEME_MAP[key]) ? TV_THEME_MAP[key] : { theme: 'dark', bg: '#131722', toolbar: '#131722', text: '#cbd5e1', grid: 'rgba(30, 41, 59, 0.4)' };
+      
+      // Sincronizar inputs si existen
+      const p1 = document.getElementById('tv-pro-custom-picker');
+      const h1 = document.getElementById('tv-pro-hex-input');
+      if (p1 && themeConfig.bg) p1.value = themeConfig.bg;
+      if (h1 && themeConfig.bg) h1.value = themeConfig.bg;
 
       try {
         if (typeof TradingView !== 'undefined') {
