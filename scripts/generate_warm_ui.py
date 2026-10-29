@@ -363,6 +363,16 @@ def build_template():
 
     tab_panes_html = tab_panes_before_chart + new_chart_tab_html
 
+    # Reemplazo 2b: Enjambre subtitle y tabla de catálogo headers
+    tab_panes_html = tab_panes_html.replace(
+        'con motor <strong class="text-brand-300">Gemini 3.8 Flash High</strong> (sin límites de tokens ni costes de X/Grok).',
+        'con arquitectura optimizada: <strong class="text-amber-500 font-bold">Gemini 3.8 Flash High</strong> (Razonamiento & Cuant) y <strong class="text-emerald-500 font-bold">Gemini 3.8 Flash Low</strong> (Supervisión & Ejecución).'
+    )
+    tab_panes_html = tab_panes_html.replace(
+        '<th class="py-3 px-4 text-right">Acción</th>',
+        '<th class="py-3 px-4 text-center">Ver Ficha</th>'
+    )
+
     # =========================================================================
     # REEMPLAZO 3: Script Completo del Controlador TradingView & Segmented Desk
     # =========================================================================
@@ -375,18 +385,110 @@ def build_template():
     else:
         scripts_before_tv = scripts_html
 
+    # Reemplazo 2c: Motor badge en tarjetas de enjambre
+    old_roster_engine = re.compile(
+        r'<div class="flex justify-between text-slate-500">\s*'
+        r'<span>Motor:</span>\s*'
+        r'<span class="text-brand-300 font-bold">\$\{agent\.engine\}</span>\s*'
+        r'</div>'
+    )
+    new_roster_engine = """<div class="flex justify-between items-center text-slate-500 pt-1">
+                <span>Motor:</span>
+                ${(agent.engine || '').includes('High')
+                  ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 whitespace-nowrap"><i class="fa-solid fa-brain mr-1 text-[9px]"></i>${agent.engine}</span>`
+                  : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 whitespace-nowrap"><i class="fa-solid fa-bolt mr-1 text-[9px]"></i>${agent.engine}</span>`
+                }
+              </div>"""
+    scripts_before_tv = old_roster_engine.sub(new_roster_engine, scripts_before_tv)
+
+    # Reemplazo 2d: renderStrategiesTable en Catálogo de Modelos (Linaje continuo, Pendiente limpio, Ver Ficha botón)
+    old_render_strat = re.compile(
+        r'function renderStrategiesTable\(strategies\)\s*\{[\s\S]*?tbody\.appendChild\(tr\);\s*\}\);\s*\}',
+        re.DOTALL
+    )
+    new_render_strat = """function renderStrategiesTable(strategies) {
+      const tbody = document.getElementById('strategies-table-body');
+      tbody.innerHTML = '';
+      strategies.forEach((s, index) => {
+        const rawStatus = (s.status || '').toUpperCase();
+        const isApproved = rawStatus.includes('APROBADA');
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-900/40 transition motion-sweep';
+        const delay = Math.min((index + 1) * 0.02, 0.4);
+        tr.style.animationDelay = delay + 's';
+
+        // Badge de Linaje / Origen: SIEMPRE continuo en una sola línea (whitespace-nowrap)
+        const isHybrid = s.source_type === 'HYBRID_VECTORBT';
+        const provenanceBadge = isHybrid
+          ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap bg-purple-500/15 text-purple-300 border border-purple-500/30" title="Exploración en meseta paramétrica VectorBT"><i class="fa-solid fa-microchip text-[11px]"></i> Híbrido VectorBT</span>`
+          : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap bg-cyan-500/15 text-cyan-300 border border-cyan-500/30" title="Lógica heurística cualitativa de agente"><i class="fa-solid fa-brain text-[11px]"></i> Agente Heurístico</span>`;
+
+        // Métricas OOS y Estancamiento
+        const oosInfo = s.oos_r_dd ? `
+          <div class="flex items-center space-x-1.5 whitespace-nowrap">
+            <span class="text-white font-bold">${s.oos_r_dd.oos_r_dd}</span>
+            <span class="text-[10px] ${s.oos_r_dd.degradation_pct < -30 ? 'text-amber-400' : 'text-emerald-400'} font-mono">(${s.oos_r_dd.degradation_pct}%)</span>
+          </div>
+        ` : `<span class="text-slate-500">-</span>`;
+
+        const stagInfo = s.stagnation_days ? `
+          <span class="text-slate-300 font-mono font-medium whitespace-nowrap">${s.stagnation_days}d</span>
+        ` : `<span class="text-slate-500">-</span>`;
+
+        // Badge de Estado: "Pendiente" o "Aprobada" limpio sin sufijos ni guiones
+        const statusBadge = isApproved
+          ? `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 inline-block"></span>Aprobada</span>`
+          : `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap bg-amber-500/15 text-amber-400 border border-amber-500/30"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5 inline-block"></span>Pendiente</span>`;
+
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-bold text-white whitespace-nowrap">${s.id}</td>
+          <td class="py-3 px-4 whitespace-nowrap"><span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-bold">${s.asset}</span> <span class="text-slate-400 text-[11px]">${s.timeframe}</span></td>
+          <td class="py-3 px-4 whitespace-nowrap">${provenanceBadge}</td>
+          <td class="py-3 px-4 text-emerald-400 font-bold whitespace-nowrap">${s.win_rate}%</td>
+          <td class="py-3 px-4 text-white whitespace-nowrap">${s.profit_factor}</td>
+          <td class="py-3 px-4 whitespace-nowrap">${oosInfo}</td>
+          <td class="py-3 px-4 whitespace-nowrap">${stagInfo}</td>
+          <td class="py-3 px-4 text-slate-300 whitespace-nowrap">${s.max_dd}%</td>
+          <td class="py-3 px-4 whitespace-nowrap">${statusBadge}</td>
+          <td class="py-3 px-4 text-center whitespace-nowrap">
+            <button onclick="viewStrategy('${s.id}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#FAF7F2] text-[#181A20] hover:bg-[#EAE5DC] transition border border-[#D5D0C5] shadow-xs cursor-pointer font-sans">
+              <i class="fa-solid fa-file-lines text-xs text-brand-600"></i> Ver Ficha
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }"""
+    scripts_before_tv = old_render_strat.sub(new_render_strat, scripts_before_tv)
+
     full_tv_and_desk_script = """  <!-- ============================================================================== -->
   <!-- CONTROLADOR TRADINGVIEW PRO & AUDITORÍA CUANTITATIVA (ALGROKQUANT) -->
   <!-- ============================================================================== -->
   <script>
     const TV_SYMBOL_MAP = {
       'STRAT-20261028-035': 'BINANCE:BTCUSDT',
-      'PROP-NDX-005': 'NASDAQ:NDX',
-      'PROP-FX-EUR-001': 'FX:EURUSD',
-      'PROP-SPX-005': 'SP:SPX',
+      'PROP-NDX-005': 'ICMARKETS:USTEC',
+      'CAP-NDX-005': 'ICMARKETS:USTEC',
+      'PROP-NDX-006': 'ICMARKETS:USTEC',
+      'PROP-FX-EUR-001': 'ICMARKETS:EURUSD',
+      'PROP-SPX-005': 'ICMARKETS:US500',
+      'CAP-SPX-006': 'ICMARKETS:US500',
+      'PROP-SPX-001': 'ICMARKETS:US500',
       'STRAT-20261021-018': 'BINANCE:BTCUSDT',
       'STRAT-20261024-022': 'BINANCE:BTCUSDT'
     };
+
+    function resolveTvSymbol(stratId, asset) {
+      if (TV_SYMBOL_MAP[stratId]) return TV_SYMBOL_MAP[stratId];
+      const a = (asset || '').toUpperCase();
+      const s = (stratId || '').toUpperCase();
+      if (a.includes('NDX') || a.includes('USTEC') || s.includes('NDX')) return 'ICMARKETS:USTEC';
+      if (a.includes('SPX') || a.includes('US500') || s.includes('SPX')) return 'ICMARKETS:US500';
+      if (a.includes('EUR') || s.includes('EUR')) return 'ICMARKETS:EURUSD';
+      if (a.includes('ETH') || s.includes('ETH')) return 'BINANCE:ETHUSDT';
+      if (a.includes('SOL') || s.includes('SOL')) return 'BINANCE:SOLUSDT';
+      return 'BINANCE:BTCUSDT';
+    }
 
     let tvDisplayMode = 'PRO';
     let tvStrategiesCatalog = [];
@@ -417,7 +519,8 @@ def build_template():
         if (auditBtn) auditBtn.className = 'segmented-pill';
         if (proCont) proCont.classList.remove('hidden');
         if (auditCont) auditCont.classList.add('hidden');
-        loadTvProWidget(TV_SYMBOL_MAP[tvCurrentStrategyId] || 'BINANCE:BTCUSDT');
+        const strat = tvStrategiesCatalog.find(s => s.id === tvCurrentStrategyId);
+        loadTvProWidget(resolveTvSymbol(tvCurrentStrategyId, strat ? strat.asset : ''));
       } else {
         if (auditBtn) auditBtn.className = 'segmented-pill active';
         if (proBtn) proBtn.className = 'segmented-pill';
@@ -475,7 +578,8 @@ def build_template():
       if (!tvInitialized) {
         initTvChartInstances();
         await fetchTvStrategyCatalog(currentDeskMode);
-        loadTvProWidget(TV_SYMBOL_MAP[tvCurrentStrategyId] || 'BINANCE:BTCUSDT');
+        const strat = tvStrategiesCatalog.find(s => s.id === tvCurrentStrategyId);
+        loadTvProWidget(resolveTvSymbol(tvCurrentStrategyId, strat ? strat.asset : ''));
         tvInitialized = true;
       }
       setTimeout(resizeTvCharts, 120);
@@ -634,7 +738,8 @@ def build_template():
     // 5. Cambiar de Estrategia
     async function changeTvStrategy(stratId) {
       tvCurrentStrategyId = stratId;
-      const symbol = TV_SYMBOL_MAP[stratId] || 'BINANCE:BTCUSDT';
+      const strat = tvStrategiesCatalog.find(s => s.id === stratId);
+      const symbol = resolveTvSymbol(stratId, strat ? strat.asset : '');
 
       if (tvDisplayMode === 'PRO') {
         loadTvProWidget(symbol);

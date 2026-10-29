@@ -95,10 +95,12 @@
 * **VPS (`/root/AlgrokQuant`):**
   * `06ffcce`: *feat(ui): restrict active portfolio header to cockpit and forward tabs, and finish warm styling of forward test account cards*
   * `6d95e98`: *feat(ui): add native TradingView drawing toolbar, trade jumper, and desk mode filtering*
+  * `ed47eff`: *feat: IC Markets tickers in TV, real swarm dual engine roster, and catalog table badges/button*
   * Working tree: 100% limpio.
 * **Local (`OpenMausBot`):**
   * Rama activa: `algrokquant-fleet`.
   * `daf0c924a`: *feat(ui): restrict active portfolio header to cockpit and forward tabs, and finish warm styling of forward test account cards*
+  * `2dc88dcb0`: *feat(ui): add native TradingView drawing tools, populate strategy and trade dropdowns, and implement desk mode filter*
 
 ---
 
@@ -126,3 +128,39 @@
 * Los botones del menú lateral izquierdo `[ Capital Propio ]` y `[ Fondeo ]` pasaron de ser puramente decorativos a un filtro reactivo global:
   * **Capital Propio:** Muestra las estrategias institucionales de cuenta propia (BTC/USDT, SPX-006, NDX-005), actualiza el contador de estrategias activas y filtra el catálogo de TradingView a modelos de capital propio.
   * **Fondeo:** Muestra las estrategias asignadas a cuentas de fondeo protegidas (PROP-FX-EUR-001, PROP-SPX-005, PROP-NDX-006) y sincroniza los selectores del catálogo y backtests a la cartera correspondiente.
+
+---
+
+## 8. Sincronización de Tickers IC Markets, Gobernanza de Motores IA y Catálogo
+
+### A. Tickers TradingView de IC Markets (`USTEC`, `US500`)
+* **Problema:** Al seleccionar estrategias de Nasdaq o S&P 500, TradingView bloqueaba el gráfico con un modal de error: *"Símbolo solo disponible en TradingView"*, debido a que los índices oficiales (`NASDAQ:NDX`, `SP:SPX`) tienen restricciones de licencia en widgets incrustados gratuitos.
+* **Solución:**
+  * Se configuraron los feeds institucionales de IC Markets CFD disponibles en TradingView:
+    * Nasdaq 100: `ICMARKETS:USTEC`
+    * S&P 500: `ICMARKETS:US500`
+    * Forex EUR/USD: `ICMARKETS:EURUSD`
+    * Criptomonedas: `BINANCE:BTCUSDT`, `BINANCE:ETHUSDT`, `BINANCE:SOLUSDT`
+  * Se implementó el asistente `resolveTvSymbol(stratId, asset)` que enruta de forma automática cualquier estrategia o activo a su feed correspondiente sin errores de carga.
+
+### B. Contraste y Corrección de Motores IA del Enjambre (10 Agentes)
+* **Auditoría:** Se confirmó que el valor `Gemini 3.8 Flash High` estaba **hardcodeado** en el endpoint `/api/roster` para los 10 agentes por igual, desalineado con el acuerdo de arquitectura y ahorro de cuota establecido previamente.
+* **Segmentación Real Aplicada:**
+  1. **Agentes de Razonamiento Estratégico y Modelado Cuantitativo (`Gemini 3.8 Flash High`):**
+     * `@Nexus` (Desk Lead & Orquestador)
+     * `@CoderQuant` (Quant Developer & VectorBT Master)
+     * `@StratFinder` (Investigador Cuantitativo & Cazador de Alfas)
+     * `@Ideator` (Generador de Tesis Cuantitativas)
+  2. **Agentes de Supervisión, Auditoría y Ejecución Mecánica (`Gemini 3.8 Flash Low`):**
+     * `@Auditor` (Robustez Monte Carlo & Walk-Forward)
+     * `@Skeptic` (Filtro Anti-Overfitting & Estrés de Costes)
+     * `@RiskFilter` (Kelly Criterion & Kill-Switch)
+     * `@ExecCrypto` (Ejecución Paper Trading Hyperliquid)
+     * `@Reporter` (Documentación Obsidian & Reportes Oficiales)
+     * `@PaperTrading` (Supervisor de Test-Forward 24/7)
+* **Frontend:** Se actualizaron las tarjetas con badges diferenciados (ámbar para *High Reasoning* y esmeralda eco para *Low/Fast*), y se actualizó el subtítulo del encabezado reflejando la arquitectura híbrida.
+
+### C. Ajustes de la Tabla del Catálogo de Modelos
+* **Linaje / Origen:** Los badges `🤖 Agente Heurístico` y `⚙️ Híbrido VectorBT` se configuraron con `whitespace-nowrap inline-flex items-center gap-1.5` en un contenedor sin saltos de línea forzados.
+* **Estado:** Se depuró el valor devuelto (`PENDIENTE_BACKTEST`), mostrándose ahora de forma limpia y sobria como `Pendiente` (o `Aprobada`), sin guiones bajos ni sufijos.
+* **Ver Ficha:** La columna pasó a titularse `Ver Ficha` y la acción se renderiza mediante un botón táctil destacado con icono (`<i class="fa-solid fa-file-lines"></i> Ver Ficha`), accesible y operativo.
