@@ -73,12 +73,28 @@
 
 ---
 
-## 5. Control de Versiones Git
+## 5. Perfeccionamiento de UI y Encabezado de Cuentas Activas
+
+### A. Condicionalidad del Encabezado de Cartera Activa
+* El encabezado superior con el grid de tarjetas de cuentas/estrategias activas (`#active-portfolio-section`: CAP-SPX-006, CAP-NDX-005, CRYPTO-BTC-001, PROP-FX-EUR-001, etc.) aparecía de forma persistente en todas las pestañas de la plataforma.
+* Se configuró para que **únicamente se muestre en `Cockpit General` (`dashboard`) y en `Forward Tests (En Vivo)` (`forward`)**.
+* En cualquier otra pestaña (Backtests, Contraste Tri-Faceta, Enjambre, VectorBT Lab, TradingView, Catálogo, Reglas de Riesgo, Bitácora), se oculta automáticamente de forma limpia sin solapamientos.
+
+### B. Corrección y Acabado de Tarjetas de Forward Test
+* Las dos sub-tarjetas inferiores de estado operativo en Forward Test (Cuenta Demo IC Markets SC y Hyperliquid Testnet) mantenían un contenedor gris oscuro heredado (`bg-slate-900/60`) con texto ilegible.
+* Se unificaron con la paleta Warm Minimalist:
+  * Contenedores con fondo marfil cálido (`#FAF7F2`) y bordes nítidos (`#E6E2D8`).
+  * Badges contrastados para posición flotante (`#EAE5DC` con texto `#181A20` y `#EEF2FF` con `#3730A3`).
+  * Indicadores de estado activo en verde esmeralda institucional (`#065F46`) e indigo corporativo (`#5865F2`).
+  * Sincronización estática en HTML y dinámica en tiempo real mediante `fetchForwardState()`.
+
+---
+
+## 6. Control de Versiones Git
 
 * **VPS (`/root/AlgrokQuant`):**
-  * `e125e81`: *fix: resolve JS syntax error blocking sidebar navigation and remove all sidebar badges*
-  * `4348f6c`: *chore(perf): add daily performance report for 2026-10-28*
+  * `06ffcce`: *feat(ui): restrict active portfolio header to cockpit and forward tabs, and finish warm styling of forward test account cards*
   * Working tree: 100% limpio.
 * **Local (`OpenMausBot`):**
   * Rama activa: `algrokquant-fleet`.
-  * Bitácora registrada en [`docs/SESSION_JOURNAL_2026-10-29.md`](file:///c:/Users/Sergio/Documents/Antigravity/OpenMausBot/docs/SESSION_JOURNAL_2026-10-29.md).
+  * `daf0c924a`: *feat(ui): restrict active portfolio header to cockpit and forward tabs, and finish warm styling of forward test account cards*
