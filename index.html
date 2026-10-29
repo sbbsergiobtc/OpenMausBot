@@ -415,52 +415,52 @@
         <nav class="space-y-1" id="sidebar-nav">
           
           <button onclick="switchTab('dashboard')" id="side-tab-dashboard" class="sidebar-link active">
-            <i class="fa-solid fa-diamond text-[8px] text-[#5865F2] mr-2.5"></i>
+            <i class="fa-solid fa-gauge-high text-xs text-[#5865F2] mr-2.5 w-4 text-center"></i>
             <span>Cockpit General</span>
           </button>
 
           <button onclick="switchTab('backtests')" id="side-tab-backtests" class="sidebar-link">
-            <i class="fa-solid fa-diamond text-[8px] text-[#5865F2] mr-2.5"></i>
+            <i class="fa-solid fa-chart-line text-xs text-[#5865F2] mr-2.5 w-4 text-center"></i>
             <span>1. Backtests (Multi-Horizonte)</span>
           </button>
 
           <button onclick="switchTab('forward')" id="side-tab-forward" class="sidebar-link">
-            <i class="fa-solid fa-diamond text-[8px] text-[#5865F2] mr-2.5"></i>
+            <i class="fa-solid fa-satellite-dish text-xs text-[#5865F2] mr-2.5 w-4 text-center"></i>
             <span>2. Forward Tests (En Vivo)</span>
           </button>
 
           <button onclick="switchTab('tri_facet')" id="side-tab-tri_facet" class="sidebar-link">
-            <i class="fa-solid fa-diamond text-[8px] text-[#5865F2] mr-2.5"></i>
+            <i class="fa-solid fa-scale-balanced text-xs text-[#5865F2] mr-2.5 w-4 text-center"></i>
             <span>3. Contraste Tri-Faceta</span>
           </button>
 
           <button onclick="switchTab('roster')" id="side-tab-roster" class="sidebar-link">
-            <i class="fa-solid fa-diamond text-[8px] text-[#5865F2] mr-2.5"></i>
+            <i class="fa-solid fa-users-gear text-xs text-[#5865F2] mr-2.5 w-4 text-center"></i>
             <span>Enjambre (10 Agentes)</span>
           </button>
 
           <button onclick="switchTab('lab')" id="side-tab-lab" class="sidebar-link">
-            <i class="fa-solid fa-diamond text-[8px] text-[#5865F2] mr-2.5"></i>
+            <i class="fa-solid fa-flask-vial text-xs text-[#5865F2] mr-2.5 w-4 text-center"></i>
             <span>Creación & Lab (VectorBT)</span>
           </button>
 
           <button onclick="switchTab('chart')" id="side-tab-chart" class="sidebar-link">
-            <i class="fa-solid fa-diamond text-[8px] text-[#5865F2] mr-2.5"></i>
+            <i class="fa-solid fa-chart-candlestick text-xs text-[#5865F2] mr-2.5 w-4 text-center"></i>
             <span>Gráficos TradingView</span>
           </button>
 
           <button onclick="switchTab('strategies')" id="side-tab-strategies" class="sidebar-link">
-            <i class="fa-solid fa-diamond text-[8px] text-[#5865F2] mr-2.5"></i>
+            <i class="fa-solid fa-book-bookmark text-xs text-[#5865F2] mr-2.5 w-4 text-center"></i>
             <span>Catálogo de Modelos</span>
           </button>
 
           <button onclick="switchTab('config')" id="side-tab-config" class="sidebar-link">
-            <i class="fa-solid fa-diamond text-[8px] text-[#5865F2] mr-2.5"></i>
+            <i class="fa-solid fa-shield-halved text-xs text-[#5865F2] mr-2.5 w-4 text-center"></i>
             <span>Reglas de Riesgo</span>
           </button>
 
           <button onclick="switchTab('journal')" id="side-tab-journal" class="sidebar-link">
-            <i class="fa-solid fa-diamond text-[8px] text-[#5865F2] mr-2.5"></i>
+            <i class="fa-solid fa-file-lines text-xs text-[#5865F2] mr-2.5 w-4 text-center"></i>
             <span>Bitácora & Informes</span>
           </button>
 
@@ -923,7 +923,7 @@
         </div>
         <div class="text-left sm:text-right bg-dark-950/60 p-2.5 rounded-lg border border-slate-800">
           <div class="text-[10px] text-slate-400 font-mono">Periodo de Prueba Obligatorio:</div>
-          <div class="text-xs font-bold font-mono text-purple-300">2025-10-22 al 2026-10-25 (12.0 Meses)</div>
+          <div class="text-xs font-bold font-mono text-purple-300">22/10/2025 al 25/10/2026 (12.0 Meses)</div>
         </div>
       </div>
 
@@ -1100,7 +1100,7 @@
               <span>Mejor Día Histórico</span>
               <i class="fa-solid fa-trophy text-amber-400"></i>
             </div>
-            <div class="text-sm font-bold font-mono text-white mt-1 truncate" id="stat-best-day-date">2026-04-13</div>
+            <div class="text-sm font-bold font-mono text-white mt-1 truncate" id="stat-best-day-date">13/04/2026</div>
             <div class="text-xs text-emerald-400 font-bold font-mono mt-0.5" id="stat-best-day-pnl">+$1,167.18</div>
             <div class="text-[10px] text-slate-400 mt-1" id="stat-best-day-sub">Lunes récord</div>
           </div>
@@ -1111,7 +1111,7 @@
               <span>Peor Día Histórico</span>
               <i class="fa-solid fa-skull-crossbones text-rose-400"></i>
             </div>
-            <div class="text-sm font-bold font-mono text-white mt-1 truncate" id="stat-worst-day-date">2026-09-29</div>
+            <div class="text-sm font-bold font-mono text-white mt-1 truncate" id="stat-worst-day-date">29/09/2026</div>
             <div class="text-xs text-rose-400 font-bold font-mono mt-0.5" id="stat-worst-day-pnl">-$689.08</div>
             <div class="text-[10px] text-slate-400 mt-1" id="stat-worst-day-sub">Bajo límite diario (-$2k)</div>
           </div>
@@ -1192,10 +1192,10 @@
           </div>
         </div>
 
-        <!-- Tabla de Operaciones con Mini Curva Sparkline Integrada -->
-        <div class="overflow-x-auto">
+                <!-- Tabla de Operaciones con Scroll Determinado, Thead Sticky y Paginación -->
+        <div class="overflow-x-auto max-h-[560px] overflow-y-auto border border-slate-800/80 rounded-xl relative">
           <table class="w-full text-left text-[11px] font-mono whitespace-nowrap">
-            <thead class="bg-dark-950/80 text-slate-400 border-b border-slate-800 uppercase tracking-wider text-[10px]">
+            <thead class="bg-dark-950/95 backdrop-blur-sm sticky top-0 z-10 text-slate-400 border-b border-slate-800 uppercase tracking-wider text-[10px]">
               <tr>
                 <th class="py-2.5 px-3">Trade & Mini Curva</th>
                 <th class="py-2.5 px-3">Activo</th>
@@ -1208,14 +1208,31 @@
                 <th class="py-2.5 px-3 text-right">Precio Salida</th>
                 <th class="py-2.5 px-3 text-right">Comisión</th>
                 <th class="py-2.5 px-3 text-right">Beneficio Neto</th>
-                <th class="py-2.5 px-3 text-right">Balance</th>
-                <th class="py-2.5 px-3">Motivo Salida</th>
+                <th class="py-2.5 px-3 text-right">Balance Acumulado</th>
+                <th class="py-2.5 px-3">Condición Salida</th>
               </tr>
             </thead>
             <tbody id="trades-table-body" class="divide-y divide-slate-800/60">
               <!-- Dynamically populated -->
             </tbody>
           </table>
+        </div>
+
+        <!-- Footer de Paginación y Selector de Filas por Página para Historial de Operaciones -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-slate-800 text-xs font-mono">
+          <div class="flex items-center gap-3">
+            <span class="text-slate-400">Mostrar por página:</span>
+            <select id="trade-rows-per-page" onchange="changeTradeRowsPerPage(this.value)" class="bg-dark-900 border border-slate-700 rounded-lg px-2.5 py-1 text-white font-semibold outline-none cursor-pointer">
+              <option value="25">25</option>
+              <option value="50" selected>50</option>
+              <option value="100">100</option>
+              <option value="200">200</option>
+              <option value="ALL">Todas</option>
+            </select>
+            <span id="trade-pagination-info" class="text-slate-400"></span>
+          </div>
+
+          <div class="flex items-center gap-1.5" id="trade-pagination-controls"></div>
         </div>
 
       </div>
@@ -1956,9 +1973,9 @@
             <thead class="bg-dark-950/80 text-slate-400 border-b border-slate-800 uppercase">
               <tr>
                 <th class="py-3 px-3">Estrategia & Segmento</th>
-                <th class="py-3 px-3 text-center bg-purple-950/30 border-x border-purple-900/30 text-purple-300">🐍 1. Backtest Teorico Python</th>
-                <th class="py-3 px-3 text-center bg-cyan-950/30 border-r border-cyan-900/30 text-cyan-300">🏛️ 2. Broker Simulado (IC Markets / DEX)</th>
-                <th class="py-3 px-3 text-center bg-emerald-950/30 border-r border-emerald-900/30 text-emerald-300">🔴 3. Live / Forward Real</th>
+                <th class="py-3 px-3 text-center border-x border-slate-800/60 text-slate-300">1. Backtest Teórico Python</th>
+                <th class="py-3 px-3 text-center border-r border-slate-800/60 text-slate-300">2. Broker Simulado (IC Markets / DEX)</th>
+                <th class="py-3 px-3 text-center border-r border-slate-800/60 text-slate-300">3. Live / Forward Real</th>
                 <th class="py-3 px-3 text-right">Veredicto & Factor</th>
               </tr>
             </thead>
@@ -2503,18 +2520,23 @@
           </div>
 
           <div class="flex items-center gap-3 flex-wrap">
-            <!-- Selector de Color de Fondo / Tema del Gráfico (Siempre Accesible) -->
-            <div class="flex items-center gap-1.5 bg-[#EAE5DC]/60 border border-borderWarm rounded-xl px-2.5 py-1 text-xs">
+            <!-- Selector de Color de Fondo / Tema del Gráfico (Siempre Accesible + Selector Hexadecimal) -->
+            <div class="flex items-center gap-2 bg-[#EAE5DC]/60 border border-borderWarm rounded-xl px-2.5 py-1 text-xs">
               <span class="text-txtSecondary font-medium flex items-center gap-1">
-                <i class="fa-solid fa-palette text-[#5865F2]"></i> Fondo Gráfico:
+                <i class="fa-solid fa-palette text-[#5865F2]"></i> Fondo Lienzo:
               </span>
               <select id="tv-global-theme-select" onchange="toggleTvChartTheme(this.value)" class="text-xs font-semibold px-2 py-1 rounded-lg border border-borderWarm bg-white text-txtPrimary outline-none cursor-pointer">
                 <option value="dark" selected>Oscuro TradFi (#131722)</option>
-                <option value="black">Negro Absoluto (#090D16)</option>
-                <option value="warm">Marfil Cálido (#FAF7F2)</option>
-                <option value="light">Blanco Puro (#FFFFFF)</option>
+                <option value="black">Negro Azabache (#090D16)</option>
+                <option value="charcoal">Gris Carbón (#1E222D)</option>
                 <option value="midnight">Azul Medianoche (#0B132B)</option>
+                <option value="light">Blanco Puro (#FFFFFF)</option>
+                <option value="warm">Marfil Cálido (#FAF7F2)</option>
               </select>
+              <div class="flex items-center gap-1 pl-2 border-l border-borderWarm">
+                <span class="text-[10px] text-txtSecondary font-mono hidden sm:inline">Color:</span>
+                <input type="color" id="tv-custom-color-picker" onchange="applyCustomTvBgColor(this.value)" value="#131722" class="w-6 h-6 rounded cursor-pointer border border-borderWarm p-0 bg-transparent" title="Elige cualquier color personalizado para el lienzo">
+              </div>
             </div>
 
             <!-- Selector de Modo: Pro con herramientas de dibujo vs Auditoría Cuantitativa -->
@@ -2774,19 +2796,64 @@
     let dowChart = null;
     let hourlyChart = null;
 
-    // Reloj Dual en vivo: UTC y Hora Oficial de España (Europe/Madrid · Invierno CET / Verano CEST)
+    // ==============================================================================
+    // UTILIDADES GLOBALES DE FORMATEO DE FECHAS EN FORMATO ESPAÑOL (DD/MM/AAAA)
+    // ==============================================================================
+    function formatSpanishDate(dateInput) {
+      if (!dateInput) return '';
+      const str = String(dateInput).trim();
+      const m = str.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+      if (m) {
+        return `${m[3].padStart(2, '0')}/${m[2].padStart(2, '0')}/${m[1]}`;
+      }
+      const dt = new Date(dateInput);
+      if (!isNaN(dt.getTime())) {
+        const d = String(dt.getDate()).padStart(2, '0');
+        const mo = String(dt.getMonth() + 1).padStart(2, '0');
+        return `${d}/${mo}/${dt.getFullYear()}`;
+      }
+      return str;
+    }
+
+    function formatSpanishDateTime(dateInput) {
+      if (!dateInput) return '';
+      const str = String(dateInput).trim();
+      const m = str.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})[ T](\d{1,2}):(\d{1,2})(?::(\d{1,2}))?/);
+      if (m) {
+        const sec = m[6] ? `:${m[6].padStart(2, '0')}` : '';
+        return `${m[3].padStart(2, '0')}/${m[2].padStart(2, '0')}/${m[1]} ${m[4].padStart(2, '0')}:${m[5].padStart(2, '0')}${sec}`;
+      }
+      const dt = new Date(dateInput);
+      if (!isNaN(dt.getTime())) {
+        const d = String(dt.getDate()).padStart(2, '0');
+        const mo = String(dt.getMonth() + 1).padStart(2, '0');
+        const y = dt.getFullYear();
+        const h = String(dt.getHours()).padStart(2, '0');
+        const mi = String(dt.getMinutes()).padStart(2, '0');
+        const s = String(dt.getSeconds()).padStart(2, '0');
+        return `${d}/${mo}/${y} ${h}:${mi}:${s}`;
+      }
+      return str;
+    }
+
+    // Reloj Dual en vivo: UTC y Hora Oficial de España en formato español DD/MM/AAAA
     setInterval(() => {
       const now = new Date();
-      const utcStr = now.toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
-      const esTimeStr = new Intl.DateTimeFormat('es-ES', {
-        timeZone: 'Europe/Madrid',
-        hour: '2-digit', minute: '2-digit', second: '2-digit',
-        hour12: false
-      }).format(now);
+      const d = String(now.getUTCDate()).padStart(2, '0');
+      const mo = String(now.getUTCMonth() + 1).padStart(2, '0');
+      const y = now.getUTCFullYear();
+      const h = String(now.getUTCHours()).padStart(2, '0');
+      const mi = String(now.getUTCMinutes()).padStart(2, '0');
+      const s = String(now.getUTCSeconds()).padStart(2, '0');
+      const utcStr = `${d}/${mo}/${y} ${h}:${mi}:${s} UTC`;
+
+      const esDateStr = now.toLocaleDateString('es-ES', { timeZone: 'Europe/Madrid' });
+      const esTimeStr = now.toLocaleTimeString('es-ES', { timeZone: 'Europe/Madrid', hour12: false });
+      const esFullStr = `${esDateStr} ${esTimeStr} CET (España)`;
       
       const clockEl = document.getElementById('live-clock');
       if (clockEl) {
-        clockEl.innerHTML = `<span class="text-slate-300 font-mono text-[11px]">${utcStr}</span> <span class="text-slate-600 font-bold mx-1">|</span> <span class="text-cyan-400 font-mono text-[11px] font-semibold">${esTimeStr} CET (España)</span>`;
+        clockEl.innerHTML = `<span class="text-slate-300 font-mono text-[11px]">${utcStr}</span> <span class="text-slate-600 font-bold mx-1">|</span> <span class="text-cyan-400 font-mono text-[11px] font-semibold">${esFullStr}</span>`;
       }
     }, 1000);
 
@@ -2975,9 +3042,10 @@
       `;
     }
 
-    // Renderizar Gráfico de Curva de Rentabilidad Principal (Animación de barrido suave)
+    // Renderizar Gráfico de Curva de Rentabilidad Principal (Eje X en formato español DD/MM/AAAA y Tooltip enriquecido)
     function renderMainEquityChart(curveData) {
-      const categories = curveData.map(d => d.timestamp.substring(5, 16));
+      // Formatear eje X en español DD/MM/AAAA (autoajustable por ApexCharts)
+      const categories = curveData.map(d => formatSpanishDate(d.timestamp));
       const balances = curveData.map(d => d.balance);
 
       const options = {
@@ -3020,17 +3088,18 @@
         }],
         xaxis: {
           categories: categories,
+          tickAmount: Math.min(10, categories.length),
           labels: { 
-            style: { colors: '#64748b', fontSize: '10px' },
-            rotate: -45,
+            style: { colors: '#94a3b8', fontSize: '10px', fontFamily: 'monospace' },
+            rotate: -35,
             rotateAlways: false
           },
           axisBorder: { show: false }
         },
         yaxis: {
           labels: {
-            formatter: (val) => '$' + val.toLocaleString(undefined, {minimumFractionDigits: 0}),
-            style: { colors: '#64748b', fontSize: '11px' }
+            formatter: (val) => '$' + val.toLocaleString('es-ES', {minimumFractionDigits: 0}),
+            style: { colors: '#94a3b8', fontSize: '11px', fontFamily: 'monospace' }
           }
         },
         grid: {
@@ -3051,8 +3120,22 @@
         },
         tooltip: {
           theme: 'dark',
-          y: {
-            formatter: (val) => '$' + val.toLocaleString(undefined, {minimumFractionDigits: 2})
+          custom: function({series, seriesIndex, dataPointIndex, w}) {
+            const d = curveData[dataPointIndex];
+            const dateStr = formatSpanishDateTime(d.timestamp);
+            const val = series[seriesIndex][dataPointIndex];
+            const bal = '$' + Number(val).toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' USD';
+            return `
+              <div class="p-2.5 bg-slate-900 border border-slate-700 rounded-lg shadow-xl font-mono text-xs">
+                <div class="text-slate-400 text-[10px] flex items-center gap-1.5 mb-1">
+                  <i class="fa-regular fa-calendar text-cyan-400"></i> ${dateStr}
+                </div>
+                <div class="text-white font-bold flex items-center justify-between gap-3">
+                  <span class="text-slate-400">Balance Cuenta:</span>
+                  <span class="text-cyan-300 font-mono text-sm">${bal}</span>
+                </div>
+              </div>
+            `;
           }
         }
       };
@@ -3261,23 +3344,109 @@
       }
     }
 
-    // Renderizar Tabla de Operaciones con Mini Curva Sparkline en Cada Fila
-    function renderTradesTable(trades) {
-      const tbody = document.getElementById('trades-table-body');
-      tbody.innerHTML = '';
-      if (!trades || trades.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="13" class="text-center py-6 text-slate-500">Sin operaciones para el filtro seleccionado</td></tr>';
+    // Estado de Paginación para Historial Exhaustivo de Operaciones
+    let currentFilteredTrades = [];
+    let tradeCurrentPage = 1;
+    let tradeRowsPerPage = 50;
+
+    function changeTradeRowsPerPage(val) {
+      tradeRowsPerPage = val;
+      tradeCurrentPage = 1;
+      renderTradesTable(currentFilteredTrades);
+    }
+
+    function renderTradePaginationControls(total, startIdx, endIdx) {
+      const infoEl = document.getElementById('trade-pagination-info');
+      const ctrlsEl = document.getElementById('trade-pagination-controls');
+      if (!infoEl || !ctrlsEl) return;
+
+      if (total === 0) {
+        infoEl.innerText = '0 operaciones';
+        ctrlsEl.innerHTML = '';
         return;
       }
 
-      trades.forEach((t, index) => {
+      infoEl.innerText = `Mostrando ${startIdx + 1} - ${endIdx} de ${total} operaciones`;
+
+      if (tradeRowsPerPage === 'ALL') {
+        ctrlsEl.innerHTML = '<span class="text-slate-500 text-xs">Página única</span>';
+        return;
+      }
+
+      const perPage = parseInt(tradeRowsPerPage, 10);
+      const totalPages = Math.ceil(total / perPage);
+      if (totalPages <= 1) {
+        ctrlsEl.innerHTML = '';
+        return;
+      }
+
+      let html = '';
+      html += `<button onclick="goToTradePage(${tradeCurrentPage - 1})" ${tradeCurrentPage === 1 ? 'disabled class="px-2.5 py-1 rounded bg-dark-900 text-slate-600 border border-slate-800 cursor-not-allowed"' : 'class="px-2.5 py-1 rounded bg-dark-900 text-slate-300 hover:text-white border border-slate-700 hover:bg-slate-800 transition cursor-pointer"'}>Anterior</button>`;
+
+      const maxBtns = 5;
+      let startP = Math.max(1, tradeCurrentPage - Math.floor(maxBtns / 2));
+      let endP = Math.min(totalPages, startP + maxBtns - 1);
+      if (endP - startP < maxBtns - 1) {
+        startP = Math.max(1, endP - maxBtns + 1);
+      }
+
+      for (let p = startP; p <= endP; p++) {
+        if (p === tradeCurrentPage) {
+          html += `<button class="px-2.5 py-1 rounded bg-emerald-500 text-white font-bold border border-emerald-400 cursor-default">${p}</button>`;
+        } else {
+          html += `<button onclick="goToTradePage(${p})" class="px-2.5 py-1 rounded bg-dark-900 text-slate-300 hover:text-white border border-slate-700 hover:bg-slate-800 transition cursor-pointer">${p}</button>`;
+        }
+      }
+
+      html += `<button onclick="goToTradePage(${tradeCurrentPage + 1})" ${tradeCurrentPage === totalPages ? 'disabled class="px-2.5 py-1 rounded bg-dark-900 text-slate-600 border border-slate-800 cursor-not-allowed"' : 'class="px-2.5 py-1 rounded bg-dark-900 text-slate-300 hover:text-white border border-slate-700 hover:bg-slate-800 transition cursor-pointer"'}>Siguiente</button>`;
+
+      ctrlsEl.innerHTML = html;
+    }
+
+    function goToTradePage(page) {
+      tradeCurrentPage = page;
+      renderTradesTable(currentFilteredTrades);
+    }
+
+    // Renderizar Tabla de Operaciones con Paginación, Thead Sticky y Fechas en Español
+    function renderTradesTable(trades) {
+      currentFilteredTrades = trades || allTrades;
+      const tbody = document.getElementById('trades-table-body');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      if (!currentFilteredTrades || currentFilteredTrades.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="13" class="text-center py-6 text-slate-500 font-mono text-xs">Sin operaciones para el filtro seleccionado</td></tr>';
+        renderTradePaginationControls(0, 0, 0);
+        return;
+      }
+
+      const total = currentFilteredTrades.length;
+      let startIdx = 0;
+      let endIdx = total;
+
+      if (tradeRowsPerPage !== 'ALL') {
+        const perPage = parseInt(tradeRowsPerPage, 10);
+        const maxPage = Math.max(1, Math.ceil(total / perPage));
+        if (tradeCurrentPage > maxPage) tradeCurrentPage = maxPage;
+        if (tradeCurrentPage < 1) tradeCurrentPage = 1;
+        startIdx = (tradeCurrentPage - 1) * perPage;
+        endIdx = Math.min(startIdx + perPage, total);
+      }
+
+      const paged = currentFilteredTrades.slice(startIdx, endIdx);
+
+      paged.forEach((t, index) => {
         const isWin = t.net_pnl_usd > 0;
         const sparklineSvg = generateSparklineSvg(t.sparkline, isWin);
 
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-900/60 transition motion-sweep';
-        const delay = Math.min((index + 1) * 0.02, 0.4);
+        const delay = Math.min((index + 1) * 0.02, 0.3);
         tr.style.animationDelay = delay + 's';
+
+        // Formato español de fechas en la tabla: DD/MM/AAAA
+        const esStartDate = formatSpanishDate(t.start_date);
+        const esEndDate = formatSpanishDate(t.end_date);
 
         tr.innerHTML = `
           <td class="py-2.5 px-3">
@@ -3291,28 +3460,30 @@
           </td>
           <td class="py-2.5 px-3 text-slate-300">${t.day_es || '--'}</td>
           <td class="py-2.5 px-3 text-slate-400">
-            <div>${t.start_date || ''}</div>
-            <div class="text-[10px] text-slate-500">${t.start_time || ''}</div>
+            <div class="font-mono text-white">${esStartDate || ''}</div>
+            <div class="text-[10px] text-slate-500 font-mono">${t.start_time || ''}</div>
           </td>
           <td class="py-2.5 px-3 text-slate-400">
-            <div>${t.end_date || ''}</div>
-            <div class="text-[10px] text-slate-500">${t.end_time || ''}</div>
+            <div class="font-mono text-white">${esEndDate || ''}</div>
+            <div class="text-[10px] text-slate-500 font-mono">${t.end_time || ''}</div>
           </td>
-          <td class="py-2.5 px-3 text-right text-slate-200">${Number(t.entry_price).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-          <td class="py-2.5 px-3 text-right text-emerald-400">${Number(t.tp_price).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-          <td class="py-2.5 px-3 text-right text-rose-400">${Number(t.sl_price).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-          <td class="py-2.5 px-3 text-right font-bold text-white">${Number(t.exit_price).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+          <td class="py-2.5 px-3 text-right text-slate-200">${Number(t.entry_price).toLocaleString('es-ES', {minimumFractionDigits: 2})}</td>
+          <td class="py-2.5 px-3 text-right text-emerald-400">${Number(t.tp_price).toLocaleString('es-ES', {minimumFractionDigits: 2})}</td>
+          <td class="py-2.5 px-3 text-right text-rose-400">${Number(t.sl_price).toLocaleString('es-ES', {minimumFractionDigits: 2})}</td>
+          <td class="py-2.5 px-3 text-right font-bold text-white">${Number(t.exit_price).toLocaleString('es-ES', {minimumFractionDigits: 2})}</td>
           <td class="py-2.5 px-3 text-right text-slate-400">$${Number(t.fees_usd).toFixed(2)}</td>
           <td class="py-2.5 px-3 text-right font-bold ${isWin ? 'text-emerald-400' : 'text-rose-400'}">
             <span class="px-2 py-0.5 rounded ${isWin ? 'bg-emerald-500/10' : 'bg-rose-500/10'} font-semibold">
               ${isWin ? '+' : ''}$${Number(t.net_pnl_usd).toFixed(2)}
             </span>
           </td>
-          <td class="py-2.5 px-3 text-right text-cyan-300 font-bold">$${Number(t.running_balance).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+          <td class="py-2.5 px-3 text-right text-cyan-300 font-bold">$${Number(t.running_balance).toLocaleString('es-ES', {minimumFractionDigits: 2})}</td>
           <td class="py-2.5 px-3"><span class="text-[10px] ${isWin ? 'text-emerald-400/90' : 'text-rose-400/90'} font-semibold">${t.exit_reason}</span></td>
         `;
         tbody.appendChild(tr);
       });
+
+      renderTradePaginationControls(total, startIdx, endIdx);
     }
 
     function setTradeFilter(filterType) {
@@ -3395,10 +3566,10 @@
                 <span class="text-slate-300 text-right">${agent.focus || 'Cuantitativo'}</span>
               </div>
               <div class="flex justify-between items-center text-slate-500 pt-1">
-                <span>Motor:</span>
+                <span>Motor IA:</span>
                 ${(agent.engine || '').includes('High')
-                  ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 whitespace-nowrap"><i class="fa-solid fa-brain mr-1 text-[9px]"></i>${agent.engine}</span>`
-                  : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 whitespace-nowrap"><i class="fa-solid fa-bolt mr-1 text-[9px]"></i>${agent.engine}</span>`
+                  ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/25 text-amber-200 border border-amber-500/50 whitespace-nowrap shadow-xs"><i class="fa-solid fa-brain mr-1 text-[9px] text-amber-300"></i>${agent.engine}</span>`
+                  : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-200 border border-indigo-500/40 whitespace-nowrap shadow-xs"><i class="fa-solid fa-bolt mr-1 text-[9px] text-indigo-300"></i>${agent.engine}</span>`
                 }
               </div>
             </div>
@@ -3583,8 +3754,8 @@
 
         const isCap = s.segment && s.segment.includes('Capital Propio');
         const segBadge = isCap 
-          ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"><i class="fa-solid fa-coins mr-1"></i>${s.segment}</span>`
-          : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30"><i class="fa-solid fa-building-columns mr-1"></i>${s.segment}</span>`;
+          ? `<div class="inline-flex flex-col items-start px-2 py-1 rounded-lg border text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border-emerald-500/30 leading-tight"><span><i class="fa-solid fa-coins mr-1"></i>${s.segment}</span></div>`
+          : `<div class="inline-flex flex-col items-start px-2 py-1 rounded-lg border text-[10px] font-bold bg-cyan-500/15 text-cyan-300 border-cyan-500/30 leading-tight"><span><i class="fa-solid fa-building-columns mr-1"></i>${s.segment}</span></div>`;
 
         tr.innerHTML = `
           <td class="py-3 px-3 align-top">
@@ -3598,9 +3769,9 @@
             <div class="text-[10px] text-amber-400 font-mono mt-1">${s.sizing || ''}</div>
           </td>
 
-          <td class="py-3 px-3 align-top bg-purple-950/10 border-x border-purple-900/20">
+          <td class="py-3 px-3 align-top border-x border-slate-800/60">
             <div class="flex items-center justify-between">
-              <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">${py.status || 'EVALUADO'}</span>
+              <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-slate-800 text-slate-300 border border-slate-700">${py.status || 'EVALUADO'}</span>
               <span class="text-xs font-bold font-mono ${py.return_pct >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${py.return_pct >= 0 ? '+' : ''}${py.return_pct}%</span>
             </div>
             <div class="grid grid-cols-2 gap-1 mt-2 text-[10px] text-slate-300">
@@ -3609,12 +3780,12 @@
               <div>Max DD: <span class="text-amber-400 font-bold">${py.max_dd}%</span></div>
               <div>Trades: <span class="text-slate-400 font-bold">${py.trades_count}</span></div>
             </div>
-            <div class="text-[9px] text-slate-400 mt-2 italic border-t border-purple-900/30 pt-1">${py.notes || ''}</div>
+            <div class="text-[9px] text-slate-400 mt-2 italic border-t border-slate-800/80 pt-1">${py.notes || ''}</div>
           </td>
 
-          <td class="py-3 px-3 align-top bg-cyan-950/10 border-r border-cyan-900/20">
+          <td class="py-3 px-3 align-top border-r border-slate-800/60">
             <div class="flex items-center justify-between">
-              <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">${brk.status || 'SIMULADO'}</span>
+              <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-slate-800 text-slate-300 border border-slate-700">${brk.status || 'SIMULADO'}</span>
               <span class="text-xs font-bold font-mono ${brk.return_pct >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${brk.return_pct >= 0 ? '+' : ''}${brk.return_pct}%</span>
             </div>
             <div class="text-[11px] font-bold font-mono text-cyan-300 mt-0.5">${brk.net_profit_usd !== undefined ? '+$' + brk.net_profit_usd + ' USD' : ''}</div>
@@ -3624,13 +3795,13 @@
               <div>Max DD: <span class="text-amber-400 font-bold">${brk.max_dd}%</span></div>
               <div>Trades: <span class="text-slate-400 font-bold">${brk.trades_count}</span></div>
             </div>
-            <div class="text-[9px] text-slate-400 mt-2 border-t border-cyan-900/30 pt-1">
+            <div class="text-[9px] text-slate-400 mt-2 border-t border-slate-800/80 pt-1">
               <div class="text-slate-300 font-sans font-semibold">${brk.venue || ''}</div>
               <div class="italic">${brk.notes || ''}</div>
             </div>
           </td>
 
-          <td class="py-3 px-3 align-top bg-emerald-950/10 border-r border-emerald-900/20">
+          <td class="py-3 px-3 align-top border-r border-slate-800/60">
             <div class="flex items-center justify-between">
               <span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${live.status && live.status.includes('ACTIVO') ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 animate-pulse' : 'bg-slate-800 text-slate-400'}">${live.status || 'MONITORIZANDO'}</span>
               <span class="text-xs font-bold font-mono text-slate-300">${live.trades_count || 0} Trades</span>
@@ -3639,19 +3810,17 @@
               <div>Slippage: <span class="text-slate-400 font-mono">${live.slippage_mean_pts !== undefined ? live.slippage_mean_pts + ' pts' : '0.0 pts'}</span></div>
               <div>Retorno: <span class="text-slate-400 font-mono">${live.return_pct || 0}%</span></div>
             </div>
-            <div class="text-[9px] text-slate-400 mt-2 border-t border-emerald-900/30 pt-1">
+            <div class="text-[9px] text-slate-400 mt-2 border-t border-slate-800/80 pt-1">
               <div class="text-slate-300 font-sans font-semibold">${live.venue || ''}</div>
               <div class="text-slate-400">${live.notes || ''}</div>
             </div>
           </td>
 
           <td class="py-3 px-3 align-top text-right">
-            <span class="px-2 py-1 rounded text-[10px] font-bold ${py.profit_factor >= 1.3 && brk.profit_factor >= 1.3 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}">
-              ${py.profit_factor >= 1.3 && brk.profit_factor >= 1.3 ? 'ROBUSTO & VIABLE' : 'CALIBRACION'}
-            </span>
-            <div class="text-[10px] text-slate-400 font-mono mt-2">Divergencia PF:</div>
-            <div class="text-xs font-bold font-mono ${(brk.profit_factor - py.profit_factor) >= 0 ? 'text-emerald-400' : 'text-amber-400'}">
-              ${(brk.profit_factor - py.profit_factor).toFixed(2)} pts
+            <!-- Badge único de 2 filas para Veredicto y Factor sin cortes -->
+            <div class="inline-flex flex-col items-end px-2.5 py-1.5 rounded-lg border text-right ${py.profit_factor >= 1.3 && brk.profit_factor >= 1.3 ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300' : 'bg-amber-500/15 border-amber-500/30 text-amber-300'}">
+              <span class="text-[10px] font-bold tracking-wide">${py.profit_factor >= 1.3 && brk.profit_factor >= 1.3 ? 'ROBUSTO & VIABLE' : 'CALIBRACIÓN'}</span>
+              <span class="text-[10px] font-mono mt-0.5 text-slate-300">Div PF: <strong class="${(brk.profit_factor - py.profit_factor) >= 0 ? 'text-emerald-400' : 'text-amber-400'}">${(brk.profit_factor - py.profit_factor).toFixed(2)} pts</strong></span>
             </div>
           </td>
         `;
@@ -3703,11 +3872,11 @@
         const delay = Math.min((index + 1) * 0.02, 0.3);
         tr.style.animationDelay = delay + 's';
 
-        // Linaje / Origen: Badge continuo sin cortes
+        // Linaje / Origen: "Híbrido" o "Heurístico" limpio
         const isHybrid = s.source_type === 'HYBRID_VECTORBT';
         const provenanceBadge = isHybrid
-          ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap bg-purple-500/15 text-purple-300 border border-purple-500/30" title="Exploración en meseta paramétrica VectorBT"><i class="fa-solid fa-microchip text-[11px]"></i> Híbrido VectorBT</span>`
-          : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap bg-cyan-500/15 text-cyan-300 border border-cyan-500/30" title="Lógica heurística cualitativa de agente"><i class="fa-solid fa-brain text-[11px]"></i> Agente Heurístico</span>`;
+          ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap bg-purple-500/15 text-purple-300 border border-purple-500/30" title="Exploración en meseta paramétrica VectorBT"><i class="fa-solid fa-microchip text-[11px]"></i> Híbrido</span>`
+          : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap bg-cyan-500/15 text-cyan-300 border border-cyan-500/30" title="Lógica heurística cualitativa de agente"><i class="fa-solid fa-brain text-[11px]"></i> Heurístico</span>`;
 
         // Métricas OOS y Estancamiento
         const oosInfo = s.oos_r_dd ? `
@@ -3726,8 +3895,11 @@
           ? `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 inline-block"></span>Aprobada</span>`
           : `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap bg-amber-500/15 text-amber-400 border border-amber-500/30"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5 inline-block"></span>Pendiente</span>`;
 
-        // Columna de Activo con truncado por elipsis (...) para que nombres largos no deformen la tabla
-        const rawAsset = s.asset || 'N/A';
+        // Columna de Activo: especificar activo concreto (ej. STRAT-014 -> Cesta ETH, SOL, AVAX, NEAR, LINK)
+        let rawAsset = s.asset || 'N/A';
+        if (s.id && (s.id.includes('014') || s.id === 'STRAT-20261021-014')) {
+          rawAsset = 'Cesta ETH, SOL, AVAX, NEAR, LINK';
+        }
         const safeAsset = rawAsset.replace(/"/g, '&quot;');
         const assetCell = `
           <td class="py-3 px-4 max-w-[190px] xl:max-w-[240px]" title="${safeAsset}">
@@ -3735,10 +3907,15 @@
           </td>
         `;
 
-        // Columna separada para Timeframe
+        // Columna separada para Timeframe compactada sin textos largos que ensanchen la columna
+        let cleanTf = (s.timeframe || '-').split('(')[0].trim();
+        cleanTf = cleanTf.split('/')[0].trim();
+        cleanTf = cleanTf.replace(/minutos?/i, 'm').replace(/horas?/i, 'h').replace(/d[ií]as?/i, 'd').replace(/\s+/g, '');
+        if (!cleanTf) cleanTf = s.timeframe || '-';
+
         const tfCell = `
-          <td class="py-3 px-4 whitespace-nowrap font-mono text-xs">
-            <span class="px-1.5 py-0.5 rounded bg-dark-900 border border-slate-700 text-slate-300 font-medium">${s.timeframe || '-'}</span>
+          <td class="py-3 px-4 whitespace-nowrap font-mono text-xs text-center" title="${(s.timeframe || '').replace(/"/g, '&quot;')}">
+            <span class="px-2 py-0.5 rounded bg-dark-900 border border-slate-700 text-slate-300 font-bold">${cleanTf}</span>
           </td>
         `;
 
@@ -3849,16 +4026,47 @@
         rContainer.innerHTML = '';
         reports.forEach((r, index) => {
           const card = document.createElement('div');
-          card.className = 'p-3 rounded-lg bg-dark-900/60 border border-slate-800 hover:border-slate-700 transition flex flex-col justify-between motion-sweep shimmer-active';
-          card.style.animationDelay = (index * 0.05) + 's';
+          card.className = 'p-3.5 rounded-xl bg-dark-900/70 border border-slate-800 hover:border-slate-700 transition flex flex-col justify-between motion-sweep shimmer-active shadow-sm';
+          card.style.animationDelay = (index * 0.03) + 's';
+
+          // Helper para clasificar tipo de informe y asignar icono descriptivo y badge oficial
+          const t = (r.title || '').toLowerCase();
+          const f = (r.filename || '').toLowerCase();
+          const cleanTitle = (r.title || '').replace(/^[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}]\s*/u, '').trim();
+
+          let iconHtml = '<i class="fa-solid fa-file-lines text-slate-300 text-sm"></i>';
+          let badgeHtml = '<span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-slate-800 text-slate-300 border border-slate-700">REPORTE</span>';
+
+          if (t.includes('destructiva') || t.includes('forense') || t.includes('sesgos') || f.includes('skeptic')) {
+            iconHtml = '<i class="fa-solid fa-fire-flame-curved text-rose-400 text-sm"></i>';
+            badgeHtml = '<span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-rose-500/15 text-rose-300 border border-rose-500/30">SKEPTIC</span>';
+          } else if (t.includes('robustez') || t.includes('auditoría cuantitativa') || f.includes('auditor') || f.includes('robustness')) {
+            iconHtml = '<i class="fa-solid fa-shield-halved text-cyan-400 text-sm"></i>';
+            badgeHtml = '<span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">AUDITOR</span>';
+          } else if (t.includes('riesgo') || t.includes('liquidez') || f.includes('risk')) {
+            iconHtml = '<i class="fa-solid fa-scale-balanced text-amber-400 text-sm"></i>';
+            badgeHtml = '<span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">RIESGO</span>';
+          } else if (t.includes('backtest') || t.includes('técnico') || f.includes('report') || f.includes('strat')) {
+            iconHtml = '<i class="fa-solid fa-chart-line text-emerald-400 text-sm"></i>';
+            badgeHtml = '<span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">BACKTEST</span>';
+          } else if (t.includes('ejecutivo') || t.includes('ciclo') || t.includes('maestro') || t.includes('aprobación')) {
+            iconHtml = '<i class="fa-solid fa-file-circle-check text-purple-400 text-sm"></i>';
+            badgeHtml = '<span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30">EJECUTIVO</span>';
+          }
 
           card.innerHTML = `
             <div>
-              <div class="text-[10px] font-mono text-cyan-400 mb-1">${r.filename}</div>
-              <h5 class="text-xs font-bold text-white mb-2 leading-tight">${r.title}</h5>
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2 overflow-hidden">
+                  ${iconHtml}
+                  <span class="text-[10px] font-mono text-cyan-400 truncate" title="${r.filename}">${r.filename}</span>
+                </div>
+                <div class="shrink-0 ml-2">${badgeHtml}</div>
+              </div>
+              <h5 class="text-xs font-bold text-white mb-2 leading-tight">${cleanTitle}</h5>
             </div>
-            <button onclick="viewReport('${r.filename}')" class="text-xs text-brand-400 hover:text-brand-300 text-left font-medium mt-2">
-              Leer Informe &rarr;
+            <button onclick="viewReport('${r.filename}')" class="text-xs text-brand-400 hover:text-brand-300 text-left font-medium mt-2 flex items-center gap-1 cursor-pointer">
+              <span>Leer Informe Oficial</span> &rarr;
             </button>
           `;
           rContainer.appendChild(card);
@@ -3876,7 +4084,7 @@
             tr.style.animationDelay = delay + 's';
 
             tr.innerHTML = `
-              <td class="py-2.5 px-3 text-slate-400">${e.timestamp}</td>
+              <td class="py-2.5 px-3 text-slate-400 font-mono">${formatSpanishDateTime(e.timestamp)}</td>
               <td class="py-2.5 px-3 font-bold text-white">${e.strategy}</td>
               <td class="py-2.5 px-3 text-cyan-400">${e.action}</td>
               <td class="py-2.5 px-3 font-mono">${e.entry_p}</td>
@@ -3972,7 +4180,7 @@
       let seriesName = 'Capital Real Consolidado ($ USD)';
       let seriesColor = '#f59e0b';
       let chartData = [];
-      const categories = equityData.map(d => d.timestamp.split(' ')[1] || d.timestamp);
+      const categories = equityData.map(d => formatSpanishDateTime(d.timestamp));
 
       if (currentFtCurveSegment === 'REAL') {
         seriesName = 'Capital Real (MT5 + Hyperliquid)';
@@ -4049,7 +4257,23 @@
         dataLabels: { enabled: false },
         tooltip: {
           theme: 'dark',
-          y: { formatter: val => '$' + Number(val).toLocaleString(undefined, {minimumFractionDigits: 2}) + ' USD' }
+          custom: function({series, seriesIndex, dataPointIndex, w}) {
+            const d = equityData[dataPointIndex];
+            const dateStr = formatSpanishDateTime(d.timestamp);
+            const val = series[seriesIndex][dataPointIndex];
+            const bal = (currentFtCurveSegment === 'HL' ? Number(val).toFixed(2) + ' USDC' : '$' + Number(val).toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' USD');
+            return `
+              <div class="p-2.5 bg-slate-900 border border-slate-700 rounded-lg shadow-xl font-mono text-xs">
+                <div class="text-slate-400 text-[10px] flex items-center gap-1.5 mb-1">
+                  <i class="fa-regular fa-calendar text-amber-400"></i> ${dateStr}
+                </div>
+                <div class="text-white font-bold flex items-center justify-between gap-3">
+                  <span class="text-slate-400">${seriesName}:</span>
+                  <span class="text-emerald-400 font-mono text-sm">${bal}</span>
+                </div>
+              </div>
+            `;
+          }
         }
       };
 
@@ -5160,10 +5384,23 @@
     const TV_THEME_MAP = {
       'dark': { theme: 'dark', bg: '#131722', toolbar: '#131722', text: '#cbd5e1', grid: 'rgba(30, 41, 59, 0.4)' },
       'black': { theme: 'dark', bg: '#090D16', toolbar: '#090D16', text: '#94a3b8', grid: 'rgba(25, 30, 45, 0.5)' },
-      'warm': { theme: 'light', bg: '#FAF7F2', toolbar: '#EAE5DC', text: '#181A20', grid: 'rgba(230, 226, 216, 0.8)' },
+      'charcoal': { theme: 'dark', bg: '#1E222D', toolbar: '#1E222D', text: '#cbd5e1', grid: 'rgba(42, 46, 57, 0.6)' },
+      'midnight': { theme: 'dark', bg: '#0B132B', toolbar: '#0B132B', text: '#a0aec0', grid: 'rgba(28, 37, 65, 0.6)' },
       'light': { theme: 'light', bg: '#FFFFFF', toolbar: '#F3F4F6', text: '#111827', grid: 'rgba(229, 231, 235, 0.8)' },
-      'midnight': { theme: 'dark', bg: '#0B132B', toolbar: '#0B132B', text: '#a0aec0', grid: 'rgba(28, 37, 65, 0.6)' }
+      'warm': { theme: 'light', bg: '#FAF7F2', toolbar: '#EAE5DC', text: '#181A20', grid: 'rgba(230, 226, 216, 0.8)' }
     };
+
+    function applyCustomTvBgColor(hexColor) {
+      if (!hexColor) return;
+      TV_THEME_MAP['custom'] = {
+        theme: 'dark',
+        bg: hexColor,
+        toolbar: hexColor,
+        text: '#cbd5e1',
+        grid: 'rgba(255, 255, 255, 0.1)'
+      };
+      toggleTvChartTheme('custom');
+    }
     let currentTvThemeKey = 'dark';
 
     function toggleTvChartTheme(themeKey) {
