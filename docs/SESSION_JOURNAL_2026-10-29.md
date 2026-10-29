@@ -94,7 +94,35 @@
 
 * **VPS (`/root/AlgrokQuant`):**
   * `06ffcce`: *feat(ui): restrict active portfolio header to cockpit and forward tabs, and finish warm styling of forward test account cards*
+  * `6d95e98`: *feat(ui): add native TradingView drawing toolbar, trade jumper, and desk mode filtering*
   * Working tree: 100% limpio.
 * **Local (`OpenMausBot`):**
   * Rama activa: `algrokquant-fleet`.
   * `daf0c924a`: *feat(ui): restrict active portfolio header to cockpit and forward tabs, and finish warm styling of forward test account cards*
+
+---
+
+## 7. Módulo TradingView y Segmentador de Mesa (Capital Propio vs Fondeo)
+
+### A. Diagnóstico de Carga de Gráficos y Selectores Vacíos
+* **Causa Raíz:** El bloque de JavaScript de cliente en la plantilla de dashboard se encontraba truncado al final del archivo, impidiendo que se ejecutasen las funciones `fetchTvStrategyCatalog()`, `changeTvStrategy()`, `renderTvChartData()` y `populateTvTrades()`.
+* **Solución:**
+  1. Se completó el controlador de cliente con la carga de todo el catálogo multi-estrategia (`STRAT-035`, `PROP-NDX-005`, `PROP-FX-EUR-001`, `PROP-SPX-005`, `STRAT-018`, `STRAT-022`).
+  2. El selector de operaciones (`tv-trade-select`) ahora se puebla con todos los trades históricos auditados (hasta 120 operaciones en Forex, 30 en NDX, 32 en SPX), permitiendo saltar directamente a la vela de apertura con zoom automático e inspección de PnL y motivo de salida.
+
+### B. Incorporación de Herramientas de Dibujo y Edición TradingView
+* Se integró la librería oficial de TradingView (`https://s3.tradingview.com/tv.js`) activando la barra de herramientas de dibujo lateral completa (`hide_side_toolbar: false`), que incluye:
+  * Líneas de tendencia, canales paralelos y rayos.
+  * Retrocesos y extensiones de Fibonacci.
+  * Pincel, rectángulos, elipses y resaltador.
+  * Herramientas de texto, llamadas y notas.
+  * Regla de medición de pips / porcentaje y barras de rango.
+  * Menú contextual de configuración de colores de velas, bordes y fondo.
+* Se implementó una vista dual con pestañas:
+  1. **TradingView Pro:** Gráfico profesional oficial con barra de herramientas de dibujo y personalización completa.
+  2. **Auditoría Algorítmica:** Gráfico Lightweight con marcadores de trade inyectados, selector de operaciones y barra de utilidades de color y soporte/resistencia.
+
+### C. Segmentador de Cartera: Capital Propio vs Fondeo
+* Los botones del menú lateral izquierdo `[ Capital Propio ]` y `[ Fondeo ]` pasaron de ser puramente decorativos a un filtro reactivo global:
+  * **Capital Propio:** Muestra las estrategias institucionales de cuenta propia (BTC/USDT, SPX-006, NDX-005), actualiza el contador de estrategias activas y filtra el catálogo de TradingView a modelos de capital propio.
+  * **Fondeo:** Muestra las estrategias asignadas a cuentas de fondeo protegidas (PROP-FX-EUR-001, PROP-SPX-005, PROP-NDX-006) y sincroniza los selectores del catálogo y backtests a la cartera correspondiente.
