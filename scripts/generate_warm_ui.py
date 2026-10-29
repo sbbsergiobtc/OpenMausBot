@@ -15,6 +15,104 @@ def build_template():
     tab_panes_html = orig[tab_start_idx:tab_end_idx]
     scripts_html = orig[tab_end_idx + 7:]
 
+    # =========================================================================
+    # REEMPLAZO 1: Formato y Acabado Cálido de las 2 tarjetas de Forward Test
+    # =========================================================================
+    pattern_box_1 = re.compile(
+        r'<div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 space-y-2 text-xs font-mono">\s*'
+        r'<div class="flex justify-between items-center text-slate-300">\s*'
+        r'<span>Posici.*?n Flotante Actual:</span>\s*'
+        r'<span class="px-2 py-0\.5 rounded bg-slate-800 text-slate-400 font-bold" id="ft-pf-floating-pos">.*?</span>\s*'
+        r'</div>\s*'
+        r'<div class="flex justify-between items-center text-slate-400 text-\[11px\]">\s*'
+        r'<span>Stop Loss Calibrado:</span>\s*'
+        r'<span class="text-slate-400" id="ft-pf-floating-sl">.*?</span>\s*'
+        r'</div>\s*'
+        r'<div class="flex justify-between items-center text-slate-400 text-\[11px\]">\s*'
+        r'<span>Estado de la Operativa:</span>\s*'
+        r'<span class="text-cyan-300" id="ft-pf-floating-status">.*?</span>\s*'
+        r'</div>\s*'
+        r'</div>',
+        re.DOTALL
+    )
+
+    replacement_box_1 = """<div class="p-3.5 rounded-xl bg-[#FAF7F2] border border-[#E6E2D8] space-y-2.5 text-xs font-mono">
+            <div class="flex justify-between items-center text-[#4A4944]">
+              <span class="font-medium">Posición Flotante Actual:</span>
+              <span class="px-2.5 py-1 rounded-md bg-[#EAE5DC] text-[#181A20] font-bold border border-[#DDD7CD]" id="ft-pf-floating-pos">NINGUNA (Flat / 100% Liquidez)</span>
+            </div>
+            <div class="flex justify-between items-center text-[#6E6D68] text-[11px]">
+              <span>Stop Loss Calibrado:</span>
+              <span class="text-[#181A20] font-bold" id="ft-pf-floating-sl">N/A (Sin posición abierta)</span>
+            </div>
+            <div class="flex justify-between items-center text-[#6E6D68] text-[11px]">
+              <span>Estado de la Operativa:</span>
+              <span class="text-[#5865F2] font-semibold flex items-center gap-1.5" id="ft-pf-floating-status"><span class="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse inline-block"></span> Escaneando señales de entrada en tiempo real (CME Abierto)</span>
+            </div>
+          </div>"""
+
+    tab_panes_html = pattern_box_1.sub(replacement_box_1, tab_panes_html)
+
+    # Tarjeta 2: Hyperliquid Testnet (Estrategia Activa info box)
+    pattern_box_2 = re.compile(
+        r'<div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 space-y-2 text-xs font-mono">\s*'
+        r'<div class="flex justify-between items-center text-slate-300">\s*'
+        r'<span>Estrategia Activa Principal:</span>\s*'
+        r'<span class="text-cyan-300 font-bold">STRAT-028 \(SOL 5m VWAP\)</span>\s*'
+        r'</div>\s*'
+        r'<div class="flex justify-between items-center text-slate-400 text-\[11px\]">\s*'
+        r'<span>Ejecu.*?n:</span>\s*'
+        r'<span class="text-emerald-400">Microestructura de comisiones 0\.14% verificada</span>\s*'
+        r'</div>\s*'
+        r'<div class="flex justify-between items-center text-slate-400 text-\[11px\]">\s*'
+        r'<span>Feed de .*?rdenes:</span>\s*'
+        r'<span class="text-slate-300">Websockets Hyperliquid en l.*?nea</span>\s*'
+        r'</div>\s*'
+        r'</div>',
+        re.DOTALL
+    )
+
+    replacement_box_2 = """<div class="p-3.5 rounded-xl bg-[#FAF7F2] border border-[#E6E2D8] space-y-2.5 text-xs font-mono">
+            <div class="flex justify-between items-center text-[#4A4944]">
+              <span class="font-medium">Estrategia Activa Principal:</span>
+              <span class="px-2.5 py-1 rounded-md bg-[#EEF2FF] text-[#3730A3] font-bold border border-[#C7D2FE]">STRAT-028 (SOL 5m VWAP)</span>
+            </div>
+            <div class="flex justify-between items-center text-[#6E6D68] text-[11px]">
+              <span>Ejecución:</span>
+              <span class="text-[#065F46] font-semibold">Microestructura de comisiones 0.14% verificada</span>
+            </div>
+            <div class="flex justify-between items-center text-[#6E6D68] text-[11px]">
+              <span>Feed de Órdenes:</span>
+              <span class="text-[#181A20] font-semibold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#10b981] inline-block"></span> Websockets Hyperliquid en línea</span>
+            </div>
+          </div>"""
+
+    tab_panes_html = pattern_box_2.sub(replacement_box_2, tab_panes_html)
+
+    # Actualización en JS de la función fetchForwardState para badges y estado cálidos
+    pattern_js_dynamic = re.compile(
+        r'if \(posEl\) posEl\.innerHTML = `<span class="px-2 py-0\.5 rounded bg-purple-500/20 text-purple-300 font-bold">\$\{sym\} \$\{pos\.side \|\| \'LONG\'\} \(\$\{Number\(pos\.shares\)\.toFixed\(2\)\} sh @ \$\$\{Number\(pos\.entry_price\)\.toFixed\(2\)\}\)</span>`;\s*'
+        r'if \(slEl\) slEl\.innerText = \'\$\' \+ Number\(pos\.sl_price\)\.toFixed\(2\) \+ \' USD\';\s*'
+        r'if \(statusEl\) statusEl\.innerHTML = \'<span class="text-emerald-400 font-bold">Posici.*?n viva en mercado.*?</span>\';\s*'
+        r'\} else \{\s*'
+        r'if \(posEl\) posEl\.innerHTML = \'<span class="px-2 py-0\.5 rounded bg-slate-800 text-slate-400 font-bold">NINGUNA \(Flat / 100% Liquidez\)</span>\';\s*'
+        r'if \(slEl\) slEl\.innerText = \'N/A \(Sin posici.*?n abierta\)\';\s*'
+        r'if \(statusEl\) statusEl\.innerHTML = \'<span class="text-cyan-400">Escaneando se.*?ales de entrada en tiempo real \(CME Abierto\)</span>\';\s*'
+        r'\}',
+        re.DOTALL
+    )
+
+    replacement_js_dynamic = """if (posEl) posEl.innerHTML = `<span class="px-2.5 py-1 rounded-md bg-[#EEF2FF] text-[#3730A3] font-bold border border-[#C7D2FE]">${sym} ${pos.side || 'LONG'} (${Number(pos.shares).toFixed(2)} sh @ $${Number(pos.entry_price).toFixed(2)})</span>`;
+            if (slEl) slEl.innerText = '$' + Number(pos.sl_price).toFixed(2) + ' USD';
+            if (statusEl) statusEl.innerHTML = '<span class="text-[#065F46] font-bold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#10b981] animate-pulse inline-block"></span> Posición viva en mercado — Gestión activa de SL</span>';
+          } else {
+            if (posEl) posEl.innerHTML = '<span class="px-2.5 py-1 rounded-md bg-[#EAE5DC] text-[#181A20] font-bold border border-[#DDD7CD]">NINGUNA (Flat / 100% Liquidez)</span>';
+            if (slEl) slEl.innerText = 'N/A (Sin posición abierta)';
+            if (statusEl) statusEl.innerHTML = '<span class="text-[#5865F2] font-semibold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#10b981] animate-pulse inline-block"></span> Escaneando señales de entrada en tiempo real (CME Abierto)</span>';
+          }"""
+
+    scripts_html = pattern_js_dynamic.sub(replacement_js_dynamic, scripts_html)
+
     html = f'''<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -321,6 +419,19 @@ def build_template():
       color: var(--text-primary) !important;
     }}
 
+    /* Eliminación total de fondos oscuros / inacabados heredados */
+    .bg-slate-900, .bg-slate-900\\/60, .bg-slate-900\\/80, .bg-slate-900\\/90, .bg-slate-900\\/40, .bg-slate-900\\/70 {{
+      background-color: #FAF7F2 !important;
+      border-color: var(--border-solid) !important;
+      color: var(--text-primary) !important;
+    }}
+
+    .bg-slate-800, .bg-slate-800\\/60, .bg-slate-800\\/80, .bg-slate-800\\/90 {{
+      background-color: #EAE5DC !important;
+      border-color: var(--border-solid) !important;
+      color: var(--text-primary) !important;
+    }}
+
     .border-slate-800, .border-slate-800\\/80, .border-slate-800\\/90, .border-slate-700 {{
       border-color: var(--border-solid) !important;
     }}
@@ -523,8 +634,9 @@ def build_template():
         </div>
       </header>
 
-      <!-- ==================== GRID DE TARJETAS DE ESTRATEGIAS (100% Coherentes & Homogéneas) ==================== -->
-      <div>
+      <!-- ==================== GRID DE TARJETAS DE ESTRATEGIAS / CUENTAS ACTIVAS ==================== -->
+      <!-- Control de visibilidad: Solo se muestra en Cockpit General y Forward Tests en Vivo -->
+      <div id="active-portfolio-section">
         <div class="flex items-center justify-between mb-3 px-1">
           <span class="overline-text">CARTERA ACTIVA EN TIEMPO REAL</span>
           <span class="badge-neutral-soft font-mono">7 ESTRATEGIAS DESPLEGADAS</span>
@@ -747,7 +859,7 @@ def build_template():
       }}
     }}
 
-    // Enganche para sincronizar estado visual del menú lateral único
+    // Enganche para sincronizar estado visual del menú lateral único y visibilidad de cartera
     const origSwitchTab = window.switchTab;
     window.switchTab = function(tabId) {{
       // Actualizar botones del Sidebar
@@ -757,6 +869,16 @@ def build_template():
       const sideBtn = document.getElementById('side-tab-' + tabId);
       if (sideBtn) {{
         sideBtn.className = 'sidebar-link active';
+      }}
+
+      // VISIBILIDAD DE CARTERA ACTIVA: Solo en Cockpit General ('dashboard') y Forward Tests en Vivo ('forward')
+      const activePortfolio = document.getElementById('active-portfolio-section');
+      if (activePortfolio) {{
+        if (tabId === 'dashboard' || tabId === 'forward') {{
+          activePortfolio.style.display = 'block';
+        }} else {{
+          activePortfolio.style.display = 'none';
+        }}
       }}
 
       // Llamar a la función original de navegación
