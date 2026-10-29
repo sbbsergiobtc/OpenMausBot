@@ -96,11 +96,13 @@
   * `06ffcce`: *feat(ui): restrict active portfolio header to cockpit and forward tabs, and finish warm styling of forward test account cards*
   * `6d95e98`: *feat(ui): add native TradingView drawing toolbar, trade jumper, and desk mode filtering*
   * `ed47eff`: *feat: IC Markets tickers in TV, real swarm dual engine roster, and catalog table badges/button*
+  * `7b42048`: *feat: add AlphaReporter agent and display active scanned strategies in IC Markets card*
   * Working tree: 100% limpio.
 * **Local (`OpenMausBot`):**
   * Rama activa: `algrokquant-fleet`.
   * `daf0c924a`: *feat(ui): restrict active portfolio header to cockpit and forward tabs, and finish warm styling of forward test account cards*
   * `2dc88dcb0`: *feat(ui): add native TradingView drawing tools, populate strategy and trade dropdowns, and implement desk mode filter*
+  * `a1c833019`: *feat(ui): IC Markets tickers for TV, real dual-engine swarm roster, and catalog table badges/button*
 
 ---
 
@@ -164,3 +166,26 @@
 * **Linaje / Origen:** Los badges `🤖 Agente Heurístico` y `⚙️ Híbrido VectorBT` se configuraron con `whitespace-nowrap inline-flex items-center gap-1.5` en un contenedor sin saltos de línea forzados.
 * **Estado:** Se depuró el valor devuelto (`PENDIENTE_BACKTEST`), mostrándose ahora de forma limpia y sobria como `Pendiente` (o `Aprobada`), sin guiones bajos ni sufijos.
 * **Ver Ficha:** La columna pasó a titularse `Ver Ficha` y la acción se renderiza mediante un botón táctil destacado con icono (`<i class="fa-solid fa-file-lines"></i> Ver Ficha`), accesible y operativo.
+
+---
+
+## 9. Agente AlphaReporter, Visibilidad de Forward Test y Cobertura Multi-Activo
+
+### A. Despliegue de @AlphaReporter en OpenMausBot y Dashboard
+* **Especialista #11 del Enjambre:** Creado y registrado en `/root/.openmausbot/bots.json` y en el endpoint `/api/roster` de AlgrokQuant.
+* **Misión Operativa:** Notificador oficial conjunto en OpenMausBot de estrategias **Aprobadas** y **Rechazadas** tras finalizar el ciclo de validación de meseta paramétrica de CoderQuant y Auditor.
+* **Gobernanza:**
+  * Motor asignado: `Gemini 3.8 Flash Low` (preservación del 90% de la cuota de razonamiento).
+  * Despacho consolidado: no fragmenta mensajes; espera a que concluya la auditoría para emitir el dictamen global con métricas y causas de rechazo.
+
+### B. Visibilidad de Estrategias en Escaneo en Forward Test
+* En la pestaña *2. Forward Tests (En Vivo)*, la tarjeta de la cuenta IC Markets MT5 `#53120791` ahora muestra de forma explícita y permanente la fila:
+  * **Estrategias en Escaneo:** `PROP-FX-EUR-001` (Forex Fondeo), `CAP-NDX-005` (Nasdaq Capital Propio), `CAP-SPX-006` (S&P 500 Capital Propio).
+
+### C. Estado del Universo de Capital Propio (Los 5 Activos)
+* **Bitcoin (`BTC`):** `STRAT-FAST-035` auditada a 5 años (2021-2026) y **APROBADA CUM LAUDE** con CAGR +34.29% y Max DD 14.82% batiendo a Buy & Hold (+336.80% vs +146.50%).
+* **Ethereum (`ETH`):** Tesis `RESEARCH-017` completada en `ETH/USDC` 15m (`STRAT-FAST-036`), proyectando CAGR +38.50%; pendiente de consolidar su corrida multianual en el informe final.
+* **Solana (`SOL`):** Tesis `RESEARCH-018` completada en `SOL/USDC` 1h (`STRAT-FAST-037`), proyectando CAGR +42.00%; además cuenta con `STRAT-028` (5m VWAP) activa en paper Hyperliquid.
+* **Nasdaq 100 (`NDX`):** Modelo `CAP-NDX-005` (2h) activo en el daemon con riesgo compuesto del 1.50%.
+* **S&P 500 (`SPX`):** Modelo `CAP-SPX-006` (4h) activo en el daemon con riesgo compuesto del 1.50%.
+* **Conclusión:** No han sido rechazadas; las 5 estrategias están estructuradas y programadas, restando integrar las matrices multianuales completas de ETH, SOL, NDX y SPX en el informe conjunto.

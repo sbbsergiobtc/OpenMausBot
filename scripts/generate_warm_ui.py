@@ -50,6 +50,14 @@ def build_template():
               <span>Estado de la Operativa:</span>
               <span class="text-[#5865F2] font-semibold flex items-center gap-1.5" id="ft-pf-floating-status"><span class="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse inline-block"></span> Escaneando señales de entrada en tiempo real (CME Abierto)</span>
             </div>
+            <div class="flex justify-between items-center text-[#6E6D68] text-[11px] pt-2 border-t border-[#E6E2D8]">
+              <span class="font-medium text-[#4A4944]">Estrategias en Escaneo:</span>
+              <span class="flex items-center gap-1.5 font-bold">
+                <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200" title="Forex EURUSD 1h (Fondeo)">PROP-FX-EUR-001</span>
+                <span class="px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200" title="Nasdaq 100 2h (Capital Propio)">CAP-NDX-005</span>
+                <span class="px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200" title="S&P 500 4h (Capital Propio)">CAP-SPX-006</span>
+              </span>
+            </div>
           </div>"""
 
     tab_panes_html = pattern_box_1.sub(replacement_box_1, tab_panes_html)
@@ -368,6 +376,8 @@ def build_template():
         'con motor <strong class="text-brand-300">Gemini 3.8 Flash High</strong> (sin límites de tokens ni costes de X/Grok).',
         'con arquitectura optimizada: <strong class="text-amber-500 font-bold">Gemini 3.8 Flash High</strong> (Razonamiento & Cuant) y <strong class="text-emerald-500 font-bold">Gemini 3.8 Flash Low</strong> (Supervisión & Ejecución).'
     )
+    tab_panes_html = tab_panes_html.replace('10 ACTIVOS', '11 ACTIVOS')
+    tab_panes_html = tab_panes_html.replace('10 especialistas', '11 especialistas')
     tab_panes_html = tab_panes_html.replace(
         '<th class="py-3 px-4 text-right">Acción</th>',
         '<th class="py-3 px-4 text-center">Ver Ficha</th>'
