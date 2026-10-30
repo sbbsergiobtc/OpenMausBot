@@ -25,3 +25,9 @@ name, a type, an extracted function, one shared helper. A rule ("never X",
 rule that guards correctness; fix the code.
 
 More specific `AGENTS.md` files override this note within their directories.
+
+## AlgrokQuant Quantitative Fleet Rules
+
+### Auto-Deploy Directo a Forward Test (Norma Mandatoria Oficial)
+A partir de ahora, cuando se encuentre una estrategia válida que haya pasado por todos los agentes (@Researcher, @CoderQuant, @Auditor, @RiskManager) y sea auditada y aprobada con los filtros de robustez y riesgo (Monte Carlo 1.000 simulaciones, Walk-Forward Analysis, 30% Out-of-Sample ciego, Sharpe ≥ 1.50 y Retorno Anualizado ≥ 30%), **se añadirá DIRECTAMENTE y de forma inmediata a Forward Test en vivo** (cripto o TradFi/índices), asignándosele un libro contable virtual de **$1.000 USD/USDC de balance base inicial**.
+
