@@ -426,7 +426,7 @@
 
           <button onclick="switchTab('forward')" id="side-tab-forward" class="sidebar-link">
             <i class="fa-solid fa-satellite-dish text-xs text-[#5865F2] mr-2.5 w-4 text-center"></i>
-            <span>2. Forward Tests (En Vivo)</span>
+            <span>2. Forward Tests</span>
           </button>
 
           <button onclick="switchTab('tri_facet')" id="side-tab-tri_facet" class="sidebar-link">
@@ -436,12 +436,12 @@
 
           <button onclick="switchTab('roster')" id="side-tab-roster" class="sidebar-link">
             <i class="fa-solid fa-users-gear text-xs text-[#5865F2] mr-2.5 w-4 text-center"></i>
-            <span>Enjambre (10 Agentes)</span>
+            <span>Enjambre</span>
           </button>
 
           <button onclick="switchTab('lab')" id="side-tab-lab" class="sidebar-link">
             <i class="fa-solid fa-flask-vial text-xs text-[#5865F2] mr-2.5 w-4 text-center"></i>
-            <span>Creación & Lab (VectorBT)</span>
+            <span>Creación & Lab</span>
           </button>
 
           <button onclick="switchTab('chart')" id="side-tab-chart" class="sidebar-link">
@@ -778,7 +778,7 @@
             </div>
           </div>
           <button onclick="switchTab('backtests')" class="w-full py-2.5 px-3 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 font-semibold text-xs flex items-center justify-center space-x-2 transition border border-purple-500/30">
-            <span>Acceder a Backtests (12M)</span>
+            <span>Acceder a Backtests</span>
             <i class="fa-solid fa-arrow-right text-xs"></i>
           </button>
         </div>
@@ -1200,7 +1200,8 @@
                 <th class="py-2.5 px-3">Estrategia</th>
                 <th class="py-2.5 px-3 text-center">Minigráfico</th>
                 <th class="py-2.5 px-3">Activo</th>
-                <th class="py-2.5 px-3">Día</th>
+                <th class="py-2.5 px-3 text-right">Beneficio Neto</th>
+                <th class="py-2.5 px-3 text-right">Balance Acumulado</th>
                 <th class="py-2.5 px-3">Inicio (Fecha/Hora)</th>
                 <th class="py-2.5 px-3">Fin (Fecha/Hora)</th>
                 <th class="py-2.5 px-3 text-right">Precio Entrada</th>
@@ -1208,8 +1209,6 @@
                 <th class="py-2.5 px-3 text-right">Stop Loss</th>
                 <th class="py-2.5 px-3 text-right">Precio Salida</th>
                 <th class="py-2.5 px-3 text-right">Comisión</th>
-                <th class="py-2.5 px-3 text-right">Beneficio Neto</th>
-                <th class="py-2.5 px-3 text-right">Balance Acumulado</th>
                 <th class="py-2.5 px-3">Condición Salida</th>
               </tr>
             </thead>
@@ -1747,13 +1746,85 @@
                 <th class="py-2.5 px-3 text-right whitespace-nowrap">Precio Ejecutado</th>
                 <th class="py-2.5 px-3 text-right whitespace-nowrap">Take Profit</th>
                 <th class="py-2.5 px-3 text-right whitespace-nowrap">Stop Loss</th>
-                <th class="py-2.5 px-3 text-right whitespace-nowrap">PnL Realizado</th>
+                <th class="py-2.5 px-3 text-right whitespace-nowrap">PnL Flotante</th>
                 <th class="py-2.5 px-3 text-right whitespace-nowrap">Comisión CFD</th>
                 <th class="py-2.5 px-3 whitespace-nowrap">Notas / Condiciones</th>
               </tr>
             </thead>
             <tbody id="ft-orders-tbody" class="divide-y divide-slate-800/60"></tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- Tarjeta: Historial de Operaciones Exclusivo de Forward Test -->
+      <div class="glass-card rounded-2xl p-5 space-y-4 motion-sweep stagger-5 shimmer-active w-full">
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-slate-800 pb-3">
+          <div>
+            <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center">
+              <i class="fa-solid fa-clock-rotate-left mr-2 text-cyan-400"></i> Historial de Operaciones (Forward Test)
+            </h3>
+            <p class="text-xs text-slate-400">Registro granular de operaciones cerradas ejecutadas en tiempo real por el daemon en broker y DEX</p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+            <div class="relative w-full sm:w-48">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-500"></i>
+              <input type="text" id="ft-trade-search" oninput="filterFtTrades()" placeholder="Buscar ID, activo..." 
+                     class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono">
+            </div>
+
+            <button onclick="setFtTradeFilter('ALL')" id="filter-btn-ft-ALL" class="trade-filter-btn px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-800 text-white border border-slate-700">Todas (<span id="ft-trades-count-all">0</span>)</button>
+            <button onclick="setFtTradeFilter('TRADFI')" id="filter-btn-ft-TRADFI" class="trade-filter-btn px-2.5 py-1 text-xs font-medium rounded-lg text-slate-400 hover:text-white bg-slate-900/60">TradFi MT5 (<span id="ft-trades-count-mt5">0</span>)</button>
+            <button onclick="setFtTradeFilter('DEX')" id="filter-btn-ft-DEX" class="trade-filter-btn px-2.5 py-1 text-xs font-medium rounded-lg text-slate-400 hover:text-white bg-slate-900/60">Cripto DEX (<span id="ft-trades-count-dex">0</span>)</button>
+            <button onclick="setFtTradeFilter('WIN')" id="filter-btn-ft-WIN" class="trade-filter-btn px-2.5 py-1 text-xs font-medium rounded-lg text-slate-400 hover:text-emerald-400 bg-slate-900/60">Ganadoras</button>
+            <button onclick="setFtTradeFilter('LOSS')" id="filter-btn-ft-LOSS" class="trade-filter-btn px-2.5 py-1 text-xs font-medium rounded-lg text-slate-400 hover:text-rose-400 bg-slate-900/60">Perdedoras</button>
+            <button onclick="exportFtTradesCSV()" class="px-2.5 py-1 text-xs font-medium rounded-lg text-cyan-300 bg-cyan-500/20 hover:bg-cyan-500/30 transition">
+              <i class="fa-solid fa-file-csv mr-1"></i> Exportar CSV
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabla de Operaciones de Forward Test con Scroll Determinado, Thead Sticky y Paginación -->
+        <div class="overflow-x-auto max-h-[560px] overflow-y-auto border border-slate-800/80 rounded-xl relative">
+          <table class="w-full text-left text-[11px] font-mono whitespace-nowrap">
+            <thead class="bg-dark-950/95 backdrop-blur-sm sticky top-0 z-10 text-slate-400 border-b border-slate-800 uppercase tracking-wider text-[10px]">
+              <tr>
+                <th class="py-2.5 px-3">Estrategia</th>
+                <th class="py-2.5 px-3 text-center">Minigráfico</th>
+                <th class="py-2.5 px-3">Activo</th>
+                <th class="py-2.5 px-3 text-right">Beneficio Neto</th>
+                <th class="py-2.5 px-3 text-right">Balance Acumulado</th>
+                <th class="py-2.5 px-3">Inicio (Fecha/Hora)</th>
+                <th class="py-2.5 px-3">Fin (Fecha/Hora)</th>
+                <th class="py-2.5 px-3 text-right">Precio Entrada</th>
+                <th class="py-2.5 px-3 text-right">Take Profit</th>
+                <th class="py-2.5 px-3 text-right">Stop Loss</th>
+                <th class="py-2.5 px-3 text-right">Precio Salida</th>
+                <th class="py-2.5 px-3 text-right">Comisión</th>
+                <th class="py-2.5 px-3">Condición Salida</th>
+              </tr>
+            </thead>
+            <tbody id="ft-trades-table-body" class="divide-y divide-slate-800/60">
+              <!-- Dynamically populated from /api/forward_trades -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Footer de Paginación para Forward Test -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-slate-800 text-xs font-mono">
+          <div class="flex items-center gap-3">
+            <span class="text-slate-400">Mostrar por página:</span>
+            <select id="ft-trade-rows-per-page" onchange="changeFtTradeRowsPerPage(this.value)" class="bg-dark-900 border border-slate-700 rounded-lg px-2.5 py-1 text-white font-semibold outline-none cursor-pointer">
+              <option value="25">25</option>
+              <option value="50" selected>50</option>
+              <option value="100">100</option>
+              <option value="200">200</option>
+              <option value="ALL">Todas</option>
+            </select>
+            <span id="ft-trade-pagination-info" class="text-slate-400"></span>
+          </div>
+
+          <div class="flex items-center gap-1.5" id="ft-trade-pagination-controls"></div>
         </div>
       </div>
 
@@ -2899,6 +2970,7 @@
 
       if (tabId === 'forward') {
         fetchForwardState();
+      fetchFtTradesData();
       }
       if (tabId === 'live') {
         fetchLiveState();
@@ -3448,7 +3520,7 @@
 
         tr.innerHTML = `
           <td class="py-2.5 px-3 font-bold text-white whitespace-nowrap">
-            ${t.strategy || t.trade_id}
+            ${t.strategy || t.strategy_id || t.trade_id}
           </td>
           <td class="py-2.5 px-3 text-center whitespace-nowrap">
             ${sparklineSvg}
@@ -3456,7 +3528,12 @@
           <td class="py-2.5 px-3 whitespace-nowrap">
             ${assetBadgeHtml}
           </td>
-          <td class="py-2.5 px-3 text-slate-300">${t.day_es || '--'}</td>
+          <td class="py-2.5 px-3 text-right font-bold ${isWin ? 'text-emerald-400' : 'text-rose-400'}">
+            <span class="px-2 py-0.5 rounded ${isWin ? 'bg-emerald-500/10' : 'bg-rose-500/10'} font-semibold">
+              ${isWin ? '+' : ''}$${Number(t.net_pnl_usd).toFixed(2)}
+            </span>
+          </td>
+          <td class="py-2.5 px-3 text-right text-cyan-300 font-bold">$${Number(t.running_balance).toLocaleString('es-ES', {minimumFractionDigits: 2})}</td>
           <td class="py-2.5 px-3 text-slate-400">
             <div class="font-mono text-white">${esStartDate || ''}</div>
             <div class="text-[10px] text-slate-500 font-mono">${t.start_time || ''}</div>
@@ -3470,13 +3547,7 @@
           <td class="py-2.5 px-3 text-right text-rose-400">${Number(t.sl_price).toLocaleString('es-ES', {minimumFractionDigits: 2})}</td>
           <td class="py-2.5 px-3 text-right font-bold text-white">${Number(t.exit_price).toLocaleString('es-ES', {minimumFractionDigits: 2})}</td>
           <td class="py-2.5 px-3 text-right text-slate-400">$${Number(t.fees_usd).toFixed(2)}</td>
-          <td class="py-2.5 px-3 text-right font-bold ${isWin ? 'text-emerald-400' : 'text-rose-400'}">
-            <span class="px-2 py-0.5 rounded ${isWin ? 'bg-emerald-500/10' : 'bg-rose-500/10'} font-semibold">
-              ${isWin ? '+' : ''}$${Number(t.net_pnl_usd).toFixed(2)}
-            </span>
-          </td>
-          <td class="py-2.5 px-3 text-right text-cyan-300 font-bold">$${Number(t.running_balance).toLocaleString('es-ES', {minimumFractionDigits: 2})}</td>
-          <td class="py-2.5 px-3"><span class="text-[10px] ${isWin ? 'text-emerald-400/90' : 'text-rose-400/90'} font-semibold">${t.exit_reason}</span></td>
+          <td class="py-2.5 px-3"><span class="text-[10px] ${isWin ? 'text-emerald-400/90' : 'text-rose-400/90'} font-semibold">${t.exit_reason || '--'}</span></td>
         `;
         tbody.appendChild(tr);
       });
@@ -3531,6 +3602,238 @@
       const link = document.createElement('a');
       link.setAttribute('href', encodedUri);
       link.setAttribute('download', 'algrokquant_trade_history.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Cargar Roster Completo de Agentes
+    
+    // ============================================================================
+    // HISTORIAL DE OPERACIONES - FORWARD TEST (EXCLUSIVO)
+    // ============================================================================
+    let allFtTrades = [];
+    let currentFilteredFtTrades = [];
+    let ftTradeCurrentPage = 1;
+    let ftTradeRowsPerPage = 50;
+    let currentFtTradeFilter = 'ALL';
+
+    async function fetchFtTradesData() {
+      try {
+        const res = await fetch('/api/forward_trades');
+        if (!res.ok) {
+          console.warn('/api/forward_trades returned status', res.status);
+          renderFtTradesTable([]);
+          return;
+        }
+        const data = await res.json();
+        allFtTrades = data.trades || [];
+        renderFtTradesTable(allFtTrades);
+      } catch (err) {
+        console.error('Error fetching FT trades:', err);
+        renderFtTradesTable([]);
+      }
+    }
+
+    function changeFtTradeRowsPerPage(val) {
+      ftTradeRowsPerPage = val;
+      ftTradeCurrentPage = 1;
+      renderFtTradesTable(currentFilteredFtTrades);
+    }
+
+    function renderFtTradePaginationControls(total, startIdx, endIdx) {
+      const infoEl = document.getElementById('ft-trade-pagination-info');
+      const ctrlsEl = document.getElementById('ft-trade-pagination-controls');
+      if (!infoEl || !ctrlsEl) return;
+
+      if (total === 0) {
+        infoEl.innerText = '0 operaciones';
+        ctrlsEl.innerHTML = '';
+        return;
+      }
+
+      infoEl.innerText = `Mostrando ${startIdx + 1} - ${endIdx} de ${total}`;
+      if (ftTradeRowsPerPage === 'ALL') {
+        ctrlsEl.innerHTML = '';
+        return;
+      }
+
+      const perPage = parseInt(ftTradeRowsPerPage, 10);
+      const totalPages = Math.ceil(total / perPage);
+      if (totalPages <= 1) {
+        ctrlsEl.innerHTML = '';
+        return;
+      }
+
+      let btnHtml = '';
+      btnHtml += `<button onclick="goFtTradePage(${ftTradeCurrentPage - 1})" ${ftTradeCurrentPage === 1 ? 'disabled class="px-2 py-1 rounded bg-slate-800/40 text-slate-600 text-xs font-mono cursor-not-allowed"' : 'class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-mono transition"'}>&laquo; Ant</button>`;
+
+      for (let p = 1; p <= totalPages; p++) {
+        if (p === 1 || p === totalPages || (p >= ftTradeCurrentPage - 1 && p <= ftTradeCurrentPage + 1)) {
+          const isActive = (p === ftTradeCurrentPage);
+          btnHtml += `<button onclick="goFtTradePage(${p})" class="px-2 py-1 rounded text-xs font-mono transition ${isActive ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}">${p}</button>`;
+        } else if (p === ftTradeCurrentPage - 2 || p === ftTradeCurrentPage + 2) {
+          btnHtml += `<span class="px-1 text-slate-600 font-mono text-xs">...</span>`;
+        }
+      }
+
+      btnHtml += `<button onclick="goFtTradePage(${ftTradeCurrentPage + 1})" ${ftTradeCurrentPage === totalPages ? 'disabled class="px-2 py-1 rounded bg-slate-800/40 text-slate-600 text-xs font-mono cursor-not-allowed"' : 'class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-mono transition"'}>Sig &raquo;</button>`;
+      ctrlsEl.innerHTML = btnHtml;
+    }
+
+    function goFtTradePage(page) {
+      ftTradeCurrentPage = page;
+      renderFtTradesTable(currentFilteredFtTrades);
+    }
+
+    function renderFtTradesTable(trades) {
+      currentFilteredFtTrades = trades || allFtTrades;
+      const tbody = document.getElementById('ft-trades-table-body');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      if (!currentFilteredFtTrades || currentFilteredFtTrades.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="13" class="text-center py-6 text-slate-500 font-mono text-xs">Sin operaciones cerradas de Forward Test para el filtro seleccionado</td></tr>';
+        renderFtTradePaginationControls(0, 0, 0);
+        return;
+      }
+
+      const total = currentFilteredFtTrades.length;
+      let startIdx = 0;
+      let endIdx = total;
+
+      if (ftTradeRowsPerPage !== 'ALL') {
+        const perPage = parseInt(ftTradeRowsPerPage, 10);
+        const maxPage = Math.max(1, Math.ceil(total / perPage));
+        if (ftTradeCurrentPage > maxPage) ftTradeCurrentPage = maxPage;
+        if (ftTradeCurrentPage < 1) ftTradeCurrentPage = 1;
+        startIdx = (ftTradeCurrentPage - 1) * perPage;
+        endIdx = Math.min(startIdx + perPage, total);
+      }
+
+      const paged = currentFilteredFtTrades.slice(startIdx, endIdx);
+
+      paged.forEach((t, index) => {
+        const isWin = (t.net_pnl_usd || t.net_pnl_usdc || 0) > 0;
+        const sparklineSvg = generateSparklineSvg(t.sparkline, isWin);
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-900/60 transition motion-sweep';
+        const delay = Math.min((index + 1) * 0.02, 0.3);
+        tr.style.animationDelay = delay + 's';
+
+        const esStartDate = formatSpanishDate(t.start_date || (t.opened_at ? t.opened_at.split('T')[0] : ''));
+        const esEndDate = formatSpanishDate(t.end_date || (t.closed_at ? t.closed_at.split('T')[0] : ''));
+
+        let assetBadgeHtml = '';
+        const ast = (t.asset || t.symbol || '').toUpperCase();
+        if (ast.includes('BTC') || ast.includes('BITCOIN')) {
+          assetBadgeHtml = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono">BTC</span>';
+        } else if (ast.includes('ETH') || ast.includes('ETHEREUM')) {
+          assetBadgeHtml = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-700/60 text-slate-200 border border-slate-600 font-mono">ETH</span>';
+        } else if (ast.includes('NDX') || ast.includes('NASDAQ')) {
+          assetBadgeHtml = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#5865F2]/20 text-[#5865F2] border border-[#5865F2]/40 font-mono">NDX</span>';
+        } else if (ast.includes('SPX') || ast.includes('SP500') || ast.includes('S&P')) {
+          assetBadgeHtml = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/40 font-mono">SPX</span>';
+        } else if (ast.includes('SOL') || ast.includes('SOLANA')) {
+          assetBadgeHtml = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/40 font-mono">SOL</span>';
+        } else {
+          assetBadgeHtml = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700 font-mono">${t.asset || t.symbol || 'ASSET'}</span>`;
+        }
+
+        const netPnl = Number(t.net_pnl_usd != null ? t.net_pnl_usd : (t.net_pnl_usdc || 0));
+        const runBal = Number(t.running_balance != null ? t.running_balance : (t.running_balance_usd || 1000));
+        const entryPx = Number(t.entry_price || (t.eth_leg ? t.eth_leg.entry_px : 0));
+        const exitPx = Number(t.exit_price || (t.eth_leg ? t.eth_leg.exit_px : 0));
+        const fees = Number(t.fees_usd || t.total_fees || 0);
+
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 font-bold text-white whitespace-nowrap">
+            ${t.strategy || t.strategy_id || t.trade_id}
+          </td>
+          <td class="py-2.5 px-3 text-center whitespace-nowrap">
+            ${sparklineSvg}
+          </td>
+          <td class="py-2.5 px-3 whitespace-nowrap">
+            ${assetBadgeHtml}
+          </td>
+          <td class="py-2.5 px-3 text-right font-bold ${isWin ? 'text-emerald-400' : 'text-rose-400'}">
+            <span class="px-2 py-0.5 rounded ${isWin ? 'bg-emerald-500/10' : 'bg-rose-500/10'} font-semibold">
+              ${isWin ? '+' : ''}$${netPnl.toFixed(2)}
+            </span>
+          </td>
+          <td class="py-2.5 px-3 text-right text-cyan-300 font-bold">$${runBal.toLocaleString('es-ES', {minimumFractionDigits: 2})}</td>
+          <td class="py-2.5 px-3 text-slate-400">
+            <div class="font-mono text-white">${esStartDate || ''}</div>
+            <div class="text-[10px] text-slate-500 font-mono">${t.start_time || ''}</div>
+          </td>
+          <td class="py-2.5 px-3 text-slate-400">
+            <div class="font-mono text-white">${esEndDate || ''}</div>
+            <div class="text-[10px] text-slate-500 font-mono">${t.end_time || ''}</div>
+          </td>
+          <td class="py-2.5 px-3 text-right font-bold text-white">${entryPx.toLocaleString('es-ES', {minimumFractionDigits: 2})}</td>
+          <td class="py-2.5 px-3 text-right text-emerald-400">${t.tp_price ? Number(t.tp_price).toLocaleString('es-ES', {minimumFractionDigits: 2}) : '-'}</td>
+          <td class="py-2.5 px-3 text-right text-rose-400">${t.sl_price ? Number(t.sl_price).toLocaleString('es-ES', {minimumFractionDigits: 2}) : '-'}</td>
+          <td class="py-2.5 px-3 text-right font-bold text-white">${exitPx.toLocaleString('es-ES', {minimumFractionDigits: 2})}</td>
+          <td class="py-2.5 px-3 text-right text-slate-400">$${fees.toFixed(2)}</td>
+          <td class="py-2.5 px-3"><span class="text-[10px] ${isWin ? 'text-emerald-400/90' : 'text-rose-400/90'} font-semibold">${t.exit_reason || t.reason || '--'}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      renderFtTradePaginationControls(total, startIdx, endIdx);
+    }
+
+    function setFtTradeFilter(filterType) {
+      currentFtTradeFilter = filterType;
+      document.querySelectorAll('.ft-trade-filter-btn').forEach(b => {
+        b.classList.remove('bg-slate-800', 'text-white', 'border', 'border-slate-700');
+        b.classList.add('text-slate-400', 'bg-slate-900/60');
+      });
+      const activeBtn = document.getElementById(`ft-filter-btn-${filterType.toLowerCase()}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-slate-400', 'bg-slate-900/60');
+        activeBtn.classList.add('bg-slate-800', 'text-white', 'border', 'border-slate-700');
+      }
+
+      const assetVal = document.getElementById('ft-trades-asset-filter') ? document.getElementById('ft-trades-asset-filter').value : 'ALL';
+      let filtered = (assetVal === 'ALL') ? [...allFtTrades] : allFtTrades.filter(t => (t.asset || t.symbol || '').toUpperCase().includes(assetVal));
+
+      if (filterType === 'WIN') {
+        filtered = filtered.filter(t => (t.net_pnl_usd || t.net_pnl_usdc || 0) > 0);
+      } else if (filterType === 'LOSS') {
+        filtered = filtered.filter(t => (t.net_pnl_usd || t.net_pnl_usdc || 0) <= 0);
+      }
+
+      ftTradeCurrentPage = 1;
+      renderFtTradesTable(filtered);
+    }
+
+    function filterFtTradesByAsset(asset) {
+      let filtered = (asset === 'ALL') ? [...allFtTrades] : allFtTrades.filter(t => (t.asset || t.symbol || '').toUpperCase().includes(asset));
+
+      if (currentFtTradeFilter === 'WIN') {
+        filtered = filtered.filter(t => (t.net_pnl_usd || t.net_pnl_usdc || 0) > 0);
+      } else if (currentFtTradeFilter === 'LOSS') {
+        filtered = filtered.filter(t => (t.net_pnl_usd || t.net_pnl_usdc || 0) <= 0);
+      }
+
+      ftTradeCurrentPage = 1;
+      renderFtTradesTable(filtered);
+    }
+
+    function exportFtTradesCSV() {
+      if (!allFtTrades || allFtTrades.length === 0) return;
+      const headers = ['Trade_ID', 'Strategy', 'Asset', 'Start_Date', 'Start_Time', 'End_Date', 'End_Time', 'Entry_Price', 'TP_Price', 'SL_Price', 'Exit_Price', 'Fees_USD', 'Net_PnL_USD', 'Running_Balance_USD', 'Exit_Reason'];
+      const rows = allFtTrades.map(t => [
+        t.trade_id || '', t.strategy || t.strategy_id || '', t.asset || t.symbol || '', t.start_date || '', t.start_time || '',
+        t.end_date || '', t.end_time || '', t.entry_price || '', t.tp_price || '', t.sl_price || '', t.exit_price || '',
+        t.fees_usd || t.total_fees || 0, t.net_pnl_usd != null ? t.net_pnl_usd : (t.net_pnl_usdc || 0), t.running_balance || t.running_balance_usd || 1000, `"${t.exit_reason || t.reason || ''}"`
+      ]);
+      const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', 'algrokquant_forward_test_trades.csv');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -4564,18 +4867,20 @@
                   slDisplay = '$' + Number(o.sl).toLocaleString(undefined, {minimumFractionDigits: 2});
                 }
 
+                // PnL Flotante en Vivo para operaciones abiertas
                 let pnlDisplay = '<span class="text-slate-600 font-mono">-</span>';
-                if (isClose) {
-                  let pnlVal = o.pnl;
-                  if (pnlVal == null && o.notes) {
-                    const m = o.notes.match(/Net PnL:\s*\$([0-9.]+)/i);
-                    if (m) pnlVal = parseFloat(m[1]);
-                  }
-                  if (pnlVal != null) {
-                    const isPos = pnlVal >= 0;
-                    const pnlSign = isPos ? '+$' : '-$';
-                    pnlDisplay = `<span class="px-2 py-0.5 rounded text-[11px] font-bold font-mono ${isPos ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'}">${pnlSign}${Math.abs(pnlVal).toFixed(2)}</span>`;
-                  }
+                if (!isClose) {
+                  // Operación abierta: computar balance flotante en tiempo real
+                  const brokerSync = pf.live_broker_sync || {};
+                  const curBal = Number(brokerSync.broker_balance || 1000.0);
+                  const curEq = Number(brokerSync.broker_equity || 1001.52);
+                  const floatDiff = curEq - 1000.0;
+                  const isPos = floatDiff >= 0;
+                  const pnlSign = isPos ? '+$' : '-$';
+                  pnlDisplay = `<span class="px-2 py-0.5 rounded text-[11px] font-bold font-mono ${isPos ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'}" title="Balance flotante en directo: $${curEq.toFixed(2)} USD">${pnlSign}${Math.abs(floatDiff).toFixed(2)} USD</span>`;
+                } else if (o.pnl != null) {
+                  const isPos = o.pnl >= 0;
+                  pnlDisplay = `<span class="px-2 py-0.5 rounded text-[11px] font-bold font-mono ${isPos ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}">${isPos ? '+' : ''}$${Number(o.pnl).toFixed(2)}</span>`;
                 }
 
                 return `
