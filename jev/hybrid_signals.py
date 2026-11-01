@@ -137,7 +137,10 @@ class HybridSignalFactory:
         high: np.ndarray,
         low: np.ndarray,
         close: np.ndarray,
-        volume: np.ndarray
+        volume: np.ndarray,
+        timestamps: Any = None,
+        rth_only: bool = True,
+        long_only: bool = True
     ):
         self.open = np.ascontiguousarray(open_p, dtype=np.float64)
         self.high = np.ascontiguousarray(high, dtype=np.float64)
@@ -145,6 +148,8 @@ class HybridSignalFactory:
         self.close = np.ascontiguousarray(close, dtype=np.float64)
         self.volume = np.ascontiguousarray(volume, dtype=np.float64)
         self.n = len(self.close)
+        self.rth_only = rth_only
+        self.long_only = long_only
 
         # Precomputación de Primitivas para Reutilización
         self.delta_p = ts_delta(self.close, 1)
@@ -153,6 +158,23 @@ class HybridSignalFactory:
         self.h_norm = calc_shannon_entropy_fast(self.close, window=48, bins=10)
         self.ofi = calc_order_flow_imbalance_proxy(self.open, self.high, self.low, self.close, self.volume)
         self.diff_hist_norm = calc_diff_hist_norm(self.close, self.high, self.low, 12, 26, 9, 14)
+        self.ema_200 = calc_ema_fast(self.close, 200)
+
+        # Filtro de Sesión Operativa RTH (14:00 a 20:00 UTC)
+        if timestamps is not None:
+            if hasattr(timestamps, "hour"):
+                hours = timestamps.hour
+            elif hasattr(timestamps, "dt"):
+                hours = timestamps.dt.hour.values
+            else:
+                try:
+                    dt_s = pd.to_datetime(timestamps, utc=True)
+                    hours = dt_s.hour if hasattr(dt_s, "hour") else dt_s.dt.hour.values
+                except Exception:
+                    hours = np.full(self.n, 15, dtype=np.int32)
+            self.rth_mask = (hours >= 14) & (hours <= 20)
+        else:
+            self.rth_mask = np.ones(self.n, dtype=np.bool_)
 
     def generate_signal(
         self,
@@ -232,6 +254,18 @@ class HybridSignalFactory:
         # 4. Señal Final Compuesta (Intersección Booleana)
         entries_long = long_macro & long_trigger & regime_mask
         entries_short = short_macro & short_trigger & regime_mask
+
+        # 5. Filtro de Sesión Operativa (RTH)
+        if self.rth_only:
+            entries_long = entries_long & self.rth_mask
+            entries_short = entries_short & self.rth_mask
+
+        # 6. Filtro Direccional Asimétrico (Sesgo Estructural Institucional)
+        entries_long = entries_long & (self.close >= self.ema_200 * 0.99)
+        if self.long_only:
+            entries_short = np.zeros_like(entries_short)
+        else:
+            entries_short = entries_short & (self.close < self.ema_200 * 0.98)
 
         # Limpiar NaNs iniciales
         entries_long[np.isnan(self.close)] = False

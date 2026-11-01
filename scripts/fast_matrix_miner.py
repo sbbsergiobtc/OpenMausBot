@@ -66,14 +66,23 @@ def run_matrix_miner(
     else:
         friction = 0.0002  # ~1 pip FX
 
+    risk_pct = 0.005 if desk_mode == "PROP_FIRM" else 0.01
+    timestamps = df["time"] if "time" in df.columns else None
+    is_equity_index = any(k in asset_u for k in ["NDX", "SPX", "US500", "USTEC", "NASDAQ"])
+
     t0 = time.perf_counter()
-    factory = HybridSignalFactory(open_p, high, low, close, volume)
+    factory = HybridSignalFactory(
+        open_p, high, low, close, volume,
+        timestamps=timestamps,
+        rth_only=is_equity_index,
+        long_only=is_equity_index
+    )
     t_pre = (time.perf_counter() - t0) * 1000.0
-    print(f"Features precomputados en {t_pre:.2f} ms ({len(close)} barras)")
+    print(f"Features precomputados en {t_pre:.2f} ms ({len(close)} barras | RTH Filter: {is_equity_index})")
 
     dummy_mask = np.zeros(len(close), dtype=np.bool_)
     dummy_mask[10] = True
-    _ = simulate_signals_numba(close, high, low, atr, dummy_mask, dummy_mask, 2.0, 3.0, 48, friction)
+    _ = simulate_signals_numba(close, high, low, atr, dummy_mask, dummy_mask, 2.0, 3.0, 48, friction, risk_pct, 1.2, 0.8)
 
     macro_anchors = ["BOLLINGER_REVERSION", "DONCHIAN_BREAKOUT", "VWAP_VALUE_DISCOUNT", "EMA_TREND_PULLBACK"]
     entropy_thresholds = [0.72, 0.75, 0.78, 0.82]
@@ -119,7 +128,7 @@ def run_matrix_miner(
 
                                     num_trades, total_pnl, win_rate, sharpe, max_dd = simulate_signals_numba(
                                         close, high, low, atr, l_mask, s_mask,
-                                        float(sl_m), float(tp_m), 48, friction
+                                        float(sl_m), float(tp_m), 48, friction, risk_pct, 1.2, 0.8
                                     )
 
                                     if num_trades < min_trades:

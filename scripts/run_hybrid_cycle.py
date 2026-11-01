@@ -33,8 +33,8 @@ from jev.auto_deployer import auto_deploy_strategy, dispatch_governance_rejectio
 def execute_hybrid_cycle(
     asset: str = "NDX",
     mode: str = "CAPITAL_PROPIO",
-    max_combinations: int = 5000,
-    top_n: int = 5
+    max_combinations: int = 25000,
+    top_n: int = 25
 ):
     print("\n" + "="*85)
     print(f"ALGROKQUANT HYBRID ALPHA CYCLE · {asset} [{mode}]")
@@ -107,8 +107,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Orquestador del Ciclo Cuantitativo de Alfas Híbridos")
     parser.add_argument("--asset", type=str, default="NDX", help="Activo a evaluar (NDX, EURUSD, BTC, etc.)")
     parser.add_argument("--mode", type=str, default="CAPITAL_PROPIO", choices=["CAPITAL_PROPIO", "PROP_FIRM"], help="Régimen de gobernanza")
-    parser.add_argument("--max", type=int, default=5000, help="Número de combinaciones a evaluar en minado matricial")
-    parser.add_argument("--top", type=int, default=5, help="Número de candidatos finalistas para auditoría")
+    parser.add_argument("--max", type=int, default=25000, help="Número de combinaciones a evaluar en minado matricial")
+    parser.add_argument("--top", type=int, default=25, help="Número de candidatos finalistas para auditoría")
 
     args = parser.parse_args()
     execute_hybrid_cycle(

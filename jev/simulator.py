@@ -10,7 +10,7 @@ Contiene los métodos deterministas de ejecución ultrarrápida compilados en Nu
 
 import sys
 from pathlib import Path
-from typing import Tuple, List, Dict, Any
+from typing import Tuple, List, Dict, Any, Optional
 
 import numpy as np
 import pandas as pd
@@ -71,6 +71,10 @@ def load_market_data(asset: str, desk_mode: str = "CAPITAL_PROPIO") -> pd.DataFr
 
     if df is None:
         raise FileNotFoundError(f"No se encontraron datos históricos para {asset}")
+
+    if isinstance(df.index, pd.DatetimeIndex):
+        df["time"] = df.index
+        df = df.reset_index(drop=True)
 
     cols = {c.lower(): c for c in df.columns}
     rename_dict = {}
@@ -133,7 +137,10 @@ def simulate_signals_numba(
     sl_atr_mult: float,
     tp_atr_mult: float,
     max_holding_bars: int,
-    round_trip_friction: float
+    round_trip_friction: float,
+    risk_per_trade_pct: float = 0.01,
+    trailing_trigger_atr: float = 1.2,
+    trailing_dist_atr: float = 0.8
 ) -> Tuple[int, float, float, float, float]:
     n = len(close)
     in_pos = 0  # 1 = Long, -1 = Short, 0 = Flat
@@ -141,6 +148,9 @@ def simulate_signals_numba(
     sl_px = 0.0
     tp_px = 0.0
     bars_held = 0
+    pos_units = 0.0
+    highest_p = 0.0
+    lowest_p = 0.0
 
     running_eq = 1000.0
     peak_eq = 1000.0
@@ -152,8 +162,25 @@ def simulate_signals_numba(
     sum_sq_ret = 0.0
 
     for i in range(1, n):
+        cur_atr = atr[i] if not np.isnan(atr[i]) and atr[i] > 0 else close[i] * 0.01
+
         if in_pos == 1:
             bars_held += 1
+            if high[i] > highest_p:
+                highest_p = high[i]
+
+            # GESTIÓN DINÁMICA: Break-Even y Trailing ATR
+            gain = highest_p - entry_px
+            if gain >= 1.0 * cur_atr:
+                be_level = entry_px + 0.1 * cur_atr
+                if sl_px < be_level:
+                    sl_px = be_level
+
+            if trailing_trigger_atr > 0.0 and gain >= trailing_trigger_atr * cur_atr:
+                trail_level = highest_p - trailing_dist_atr * cur_atr
+                if trail_level > sl_px:
+                    sl_px = trail_level
+
             exit_trade = False
             exit_px = 0.0
 
@@ -169,16 +196,36 @@ def simulate_signals_numba(
 
             if exit_trade:
                 num_trades += 1
-                net_ret = (exit_px - entry_px) / entry_px - round_trip_friction
-                running_eq += running_eq * net_ret
-                if net_ret > 0:
+                gross_pnl = (exit_px - entry_px) * pos_units
+                notional = entry_px * pos_units
+                comm = notional * round_trip_friction
+                trade_pnl = gross_pnl - comm
+                trade_ret = trade_pnl / running_eq
+                running_eq += trade_pnl
+
+                if trade_pnl > 0.0:
                     wins += 1
-                sum_ret += net_ret
-                sum_sq_ret += net_ret * net_ret
+                sum_ret += trade_ret
+                sum_sq_ret += trade_ret * trade_ret
                 in_pos = 0
+                pos_units = 0.0
 
         elif in_pos == -1:
             bars_held += 1
+            if low[i] < lowest_p:
+                lowest_p = low[i]
+
+            drop = entry_px - lowest_p
+            if drop >= 1.0 * cur_atr:
+                be_level = entry_px - 0.1 * cur_atr
+                if sl_px > be_level:
+                    sl_px = be_level
+
+            if trailing_trigger_atr > 0.0 and drop >= trailing_trigger_atr * cur_atr:
+                trail_level = lowest_p + trailing_dist_atr * cur_atr
+                if trail_level < sl_px:
+                    sl_px = trail_level
+
             exit_trade = False
             exit_px = 0.0
 
@@ -194,28 +241,40 @@ def simulate_signals_numba(
 
             if exit_trade:
                 num_trades += 1
-                net_ret = (entry_px - exit_px) / entry_px - round_trip_friction
-                running_eq += running_eq * net_ret
-                if net_ret > 0:
+                gross_pnl = (entry_px - exit_px) * pos_units
+                notional = entry_px * pos_units
+                comm = notional * round_trip_friction
+                trade_pnl = gross_pnl - comm
+                trade_ret = trade_pnl / running_eq
+                running_eq += trade_pnl
+
+                if trade_pnl > 0.0:
                     wins += 1
-                sum_ret += net_ret
-                sum_sq_ret += net_ret * net_ret
+                sum_ret += trade_ret
+                sum_sq_ret += trade_ret * trade_ret
                 in_pos = 0
+                pos_units = 0.0
 
         if in_pos == 0:
             if entries_long[i]:
                 in_pos = 1
                 entry_px = close[i]
-                cur_atr = atr[i] if not np.isnan(atr[i]) else close[i] * 0.01
-                sl_px = entry_px - sl_atr_mult * cur_atr
+                sl_dist = max(1e-6, sl_atr_mult * cur_atr)
+                sl_px = entry_px - sl_dist
                 tp_px = entry_px + tp_atr_mult * cur_atr
+                risk_cash = running_eq * risk_per_trade_pct
+                pos_units = risk_cash / sl_dist
+                highest_p = high[i]
                 bars_held = 0
             elif entries_short[i]:
                 in_pos = -1
                 entry_px = close[i]
-                cur_atr = atr[i] if not np.isnan(atr[i]) else close[i] * 0.01
-                sl_px = entry_px + sl_atr_mult * cur_atr
+                sl_dist = max(1e-6, sl_atr_mult * cur_atr)
+                sl_px = entry_px + sl_dist
                 tp_px = entry_px - tp_atr_mult * cur_atr
+                risk_cash = running_eq * risk_per_trade_pct
+                pos_units = risk_cash / sl_dist
+                lowest_p = low[i]
                 bars_held = 0
 
         if running_eq > peak_eq:
@@ -238,8 +297,12 @@ def simulate_signals_numba(
     return num_trades, total_pnl, win_rate, sharpe, max_dd_pct
 
 
-def extract_candidate_trade_pnls(candidate: dict, df: pd.DataFrame) -> np.ndarray:
-    """Reconstruye el array de PnLs individuales de cada trade del candidato."""
+def extract_candidate_trade_pnls(
+    candidate: dict,
+    df: pd.DataFrame,
+    risk_per_trade_pct: Optional[float] = None
+) -> np.ndarray:
+    """Reconstruye el array de PnLs individuales de cada trade del candidato con sizing proporcional."""
     close = np.ascontiguousarray(df["close"].values, dtype=np.float64)
     high = np.ascontiguousarray(df["high"].values, dtype=np.float64)
     low = np.ascontiguousarray(df["low"].values, dtype=np.float64)
@@ -247,7 +310,15 @@ def extract_candidate_trade_pnls(candidate: dict, df: pd.DataFrame) -> np.ndarra
     volume = np.ascontiguousarray(df["volume"].values, dtype=np.float64)
     atr = calc_atr_fast(high, low, close, 14)
 
-    factory = HybridSignalFactory(open_p, high, low, close, volume)
+    timestamps = df["time"] if "time" in df.columns else None
+    is_equity_index = any(k in candidate["asset"].upper() for k in ["NDX", "SPX", "US500", "USTEC", "NASDAQ"])
+
+    factory = HybridSignalFactory(
+        open_p, high, low, close, volume,
+        timestamps=timestamps,
+        rth_only=is_equity_index,
+        long_only=is_equity_index
+    )
     l_mask, s_mask = factory.generate_signal(
         macro_anchor=candidate["macro_anchor"],
         entropy_max=candidate["entropy_max"],
@@ -262,18 +333,41 @@ def extract_candidate_trade_pnls(candidate: dict, df: pd.DataFrame) -> np.ndarra
     tp_m = float(candidate["tp_atr_mult"])
     max_h = 48
 
+    if risk_per_trade_pct is None:
+        desk_mode = candidate.get("desk_mode", "CAPITAL_PROPIO")
+        risk_pct = 0.005 if desk_mode == "PROP_FIRM" else 0.01
+    else:
+        risk_pct = float(risk_per_trade_pct)
+
     n = len(close)
     in_pos = 0
     entry_px = 0.0
     sl_px = 0.0
     tp_px = 0.0
     bars_held = 0
+    pos_units = 0.0
+    highest_p = 0.0
+    lowest_p = 0.0
     trade_pnls = []
     running_eq = 1000.0
 
     for i in range(1, n):
+        cur_atr = atr[i] if not np.isnan(atr[i]) and atr[i] > 0 else close[i] * 0.01
+
         if in_pos == 1:
             bars_held += 1
+            if high[i] > highest_p:
+                highest_p = high[i]
+            gain = highest_p - entry_px
+            if gain >= 1.0 * cur_atr:
+                be = entry_px + 0.1 * cur_atr
+                if sl_px < be:
+                    sl_px = be
+            if gain >= 1.2 * cur_atr:
+                trail = highest_p - 0.8 * cur_atr
+                if trail > sl_px:
+                    sl_px = trail
+
             exit_trade = False
             exit_px = 0.0
             if low[i] <= sl_px:
@@ -287,14 +381,29 @@ def extract_candidate_trade_pnls(candidate: dict, df: pd.DataFrame) -> np.ndarra
                 exit_trade = True
 
             if exit_trade:
-                net_ret = (exit_px - entry_px) / entry_px - friction
-                pnl = running_eq * net_ret
+                gross_pnl = (exit_px - entry_px) * pos_units
+                notional = entry_px * pos_units
+                comm = notional * friction
+                pnl = gross_pnl - comm
                 running_eq += pnl
                 trade_pnls.append(pnl)
                 in_pos = 0
+                pos_units = 0.0
 
         elif in_pos == -1:
             bars_held += 1
+            if low[i] < lowest_p:
+                lowest_p = low[i]
+            drop = entry_px - lowest_p
+            if drop >= 1.0 * cur_atr:
+                be = entry_px - 0.1 * cur_atr
+                if sl_px > be:
+                    sl_px = be
+            if drop >= 1.2 * cur_atr:
+                trail = lowest_p + 0.8 * cur_atr
+                if trail < sl_px:
+                    sl_px = trail
+
             exit_trade = False
             exit_px = 0.0
             if high[i] >= sl_px:
@@ -308,26 +417,35 @@ def extract_candidate_trade_pnls(candidate: dict, df: pd.DataFrame) -> np.ndarra
                 exit_trade = True
 
             if exit_trade:
-                net_ret = (entry_px - exit_px) / entry_px - friction
-                pnl = running_eq * net_ret
+                gross_pnl = (entry_px - exit_px) * pos_units
+                notional = entry_px * pos_units
+                comm = notional * friction
+                pnl = gross_pnl - comm
                 running_eq += pnl
                 trade_pnls.append(pnl)
                 in_pos = 0
+                pos_units = 0.0
 
         if in_pos == 0:
             if l_mask[i]:
                 in_pos = 1
                 entry_px = close[i]
-                cur_atr = atr[i] if not np.isnan(atr[i]) else close[i] * 0.01
-                sl_px = entry_px - sl_m * cur_atr
+                sl_dist = max(1e-6, sl_m * cur_atr)
+                sl_px = entry_px - sl_dist
                 tp_px = entry_px + tp_m * cur_atr
+                risk_cash = running_eq * risk_pct
+                pos_units = risk_cash / sl_dist
+                highest_p = high[i]
                 bars_held = 0
             elif s_mask[i]:
                 in_pos = -1
                 entry_px = close[i]
-                cur_atr = atr[i] if not np.isnan(atr[i]) else close[i] * 0.01
-                sl_px = entry_px + sl_m * cur_atr
+                sl_dist = max(1e-6, sl_m * cur_atr)
+                sl_px = entry_px + sl_dist
                 tp_px = entry_px - tp_m * cur_atr
+                risk_cash = running_eq * risk_pct
+                pos_units = risk_cash / sl_dist
+                lowest_p = low[i]
                 bars_held = 0
 
     return np.array(trade_pnls, dtype=np.float64)

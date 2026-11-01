@@ -69,7 +69,15 @@ def run_skeptic_destructive_stress(
     volume = np.ascontiguousarray(df["volume"].values, dtype=np.float64)
     atr = calc_atr_fast(high, low, close, 14)
 
-    factory = HybridSignalFactory(open_p, high, low, close, volume)
+    timestamps = df["time"] if "time" in df.columns else None
+    is_equity_index = any(k in candidate["asset"].upper() for k in ["NDX", "SPX", "US500", "USTEC", "NASDAQ"])
+
+    factory = HybridSignalFactory(
+        open_p, high, low, close, volume,
+        timestamps=timestamps,
+        rth_only=is_equity_index,
+        long_only=is_equity_index
+    )
     l_mask, s_mask = factory.generate_signal(
         macro_anchor=candidate["macro_anchor"],
         entropy_max=candidate["entropy_max"],
@@ -82,6 +90,8 @@ def run_skeptic_destructive_stress(
     base_friction = 0.0006 if any(k in candidate["asset"].upper() for k in ["NDX", "SPX"]) else 0.0014
     sl_m = float(candidate["sl_atr_mult"])
     tp_m = float(candidate["tp_atr_mult"])
+    desk_mode = candidate.get("desk_mode", "CAPITAL_PROPIO")
+    risk_pct = 0.005 if desk_mode == "PROP_FIRM" else 0.01
 
     # Test 1: Latencia forzada de 1 barra
     l_delayed = np.zeros_like(l_mask)
@@ -90,17 +100,17 @@ def run_skeptic_destructive_stress(
     s_delayed[1:] = s_mask[:-1]
 
     trades_del, pnl_del, wr_del, sr_del, dd_del = simulate_signals_numba(
-        close, high, low, atr, l_delayed, s_delayed, sl_m, tp_m, 48, base_friction
+        close, high, low, atr, l_delayed, s_delayed, sl_m, tp_m, 48, base_friction, risk_pct, 1.2, 0.8
     )
 
     # Test 2: Estrés de Fricción 1.5x
     trades_f15, pnl_f15, wr_f15, sr_f15, dd_f15 = simulate_signals_numba(
-        close, high, low, atr, l_mask, s_mask, sl_m, tp_m, 48, base_friction * 1.5
+        close, high, low, atr, l_mask, s_mask, sl_m, tp_m, 48, base_friction * 1.5, risk_pct, 1.2, 0.8
     )
 
     # Test 3: Estrés de Fricción 2.0x
     trades_f20, pnl_f20, wr_f20, sr_f20, dd_f20 = simulate_signals_numba(
-        close, high, low, atr, l_mask, s_mask, sl_m, tp_m, 48, base_friction * 2.0
+        close, high, low, atr, l_mask, s_mask, sl_m, tp_m, 48, base_friction * 2.0, risk_pct, 1.2, 0.8
     )
 
     # Criterios de Aprobación de @Skeptic:
