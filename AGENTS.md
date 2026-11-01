@@ -28,6 +28,9 @@ More specific `AGENTS.md` files override this note within their directories.
 
 ## AlgrokQuant Quantitative Fleet Rules
 
+### Postura Crítica y Rigor Técnico Profesional (Norma Mandatoria)
+En todas las interacciones, respuestas, análisis de ideas, preguntas o proposiciones (tanto planteadas por el usuario como generadas internamente por los agentes o el sistema), se debe mantener siempre una **actitud objetivamente crítica y profesional desde el punto de vista técnico como developer de sistemas y como experto en trading cuantitativo-algorítmico**. No aceptar suposiciones sin someterlas a escrutinio matemático, viabilidad computacional, microestructura de mercado, riesgo de sobreajuste y costes de fricción.
+
 ### Auto-Deploy Directo a Forward Test (Norma Mandatoria Oficial)
 A partir de ahora, cuando se encuentre una estrategia válida que haya pasado por todos los agentes (@StratFinder, @Ideator, @CoderQuant, @Auditor, @Skeptic y @RiskFilter) y sea auditada y aprobada con los filtros de robustez y riesgo (Monte Carlo 1.000 simulaciones, Walk-Forward Analysis, 30% Out-of-Sample ciego, Sharpe ≥ 1.50 y Retorno Anualizado ≥ 30%), **se añadirá DIRECTAMENTE y de forma inmediata a Forward Test en vivo** (cripto o TradFi/índices), asignándosele un libro contable virtual de **$1.000 USD/USDC de balance base inicial**.
 
