@@ -17,105 +17,13 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, '/root/AlgrokQuant')
+base_dir = Path(__file__).resolve().parent.parent
+if str(base_dir) not in sys.path:
+    sys.path.insert(0, str(base_dir))
+
 from jev.metrics import audit_candidate_robustness
 from jev.hybrid_signals import HybridSignalFactory, calc_atr_fast
-from scripts.fast_matrix_miner import load_market_data
-
-
-def extract_candidate_trade_pnls(candidate: dict, df) -> np.ndarray:
-    """Reconstruye el array de PnLs individuales de cada trade del candidato."""
-    close = np.ascontiguousarray(df["close"].values, dtype=np.float64)
-    high = np.ascontiguousarray(df["high"].values, dtype=np.float64)
-    low = np.ascontiguousarray(df["low"].values, dtype=np.float64)
-    open_p = np.ascontiguousarray(df["open"].values, dtype=np.float64)
-    volume = np.ascontiguousarray(df["volume"].values, dtype=np.float64)
-    atr = calc_atr_fast(high, low, close, 14)
-
-    factory = HybridSignalFactory(open_p, high, low, close, volume)
-    l_mask, s_mask = factory.generate_signal(
-        macro_anchor=candidate["macro_anchor"],
-        entropy_max=candidate["entropy_max"],
-        symbolic_trigger=candidate["symbolic_trigger"],
-        param1=candidate["param1"],
-        param2=candidate["param2"],
-        trigger_threshold=candidate["trigger_threshold"]
-    )
-
-    friction = 0.0006 if any(k in candidate["asset"].upper() for k in ["NDX", "SPX"]) else 0.0014
-    sl_m = float(candidate["sl_atr_mult"])
-    tp_m = float(candidate["tp_atr_mult"])
-    max_h = 48
-
-    # Reconstruir lista de trades individual
-    n = len(close)
-    in_pos = 0
-    entry_px = 0.0
-    sl_px = 0.0
-    tp_px = 0.0
-    bars_held = 0
-    trade_pnls = []
-    running_eq = 1000.0
-
-    for i in range(1, n):
-        if in_pos == 1:
-            bars_held += 1
-            exit_trade = False
-            exit_px = 0.0
-            if low[i] <= sl_px:
-                exit_px = sl_px
-                exit_trade = True
-            elif high[i] >= tp_px:
-                exit_px = tp_px
-                exit_trade = True
-            elif bars_held >= max_h:
-                exit_px = close[i]
-                exit_trade = True
-
-            if exit_trade:
-                net_ret = (exit_px - entry_px) / entry_px - friction
-                pnl = running_eq * net_ret
-                running_eq += pnl
-                trade_pnls.append(pnl)
-                in_pos = 0
-
-        elif in_pos == -1:
-            bars_held += 1
-            exit_trade = False
-            exit_px = 0.0
-            if high[i] >= sl_px:
-                exit_px = sl_px
-                exit_trade = True
-            elif low[i] <= tp_px:
-                exit_px = tp_px
-                exit_trade = True
-            elif bars_held >= max_h:
-                exit_px = close[i]
-                exit_trade = True
-
-            if exit_trade:
-                net_ret = (entry_px - exit_px) / entry_px - friction
-                pnl = running_eq * net_ret
-                running_eq += pnl
-                trade_pnls.append(pnl)
-                in_pos = 0
-
-        if in_pos == 0:
-            if l_mask[i]:
-                in_pos = 1
-                entry_px = close[i]
-                cur_atr = atr[i] if not np.isnan(atr[i]) else close[i] * 0.01
-                sl_px = entry_px - sl_m * cur_atr
-                tp_px = entry_px + tp_m * cur_atr
-                bars_held = 0
-            elif s_mask[i]:
-                in_pos = -1
-                entry_px = close[i]
-                cur_atr = atr[i] if not np.isnan(atr[i]) else close[i] * 0.01
-                sl_px = entry_px + sl_m * cur_atr
-                tp_px = entry_px - tp_m * cur_atr
-                bars_held = 0
-
-    return np.array(trade_pnls, dtype=np.float64)
+from jev.simulator import load_market_data, extract_candidate_trade_pnls
 
 
 def run_phase3_audit_on_report(report_json_path: Path):
