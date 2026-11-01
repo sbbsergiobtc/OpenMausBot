@@ -34,11 +34,17 @@ En todas las interacciones, respuestas, análisis de ideas, preguntas o proposic
 ### Auto-Deploy Directo a Forward Test (Norma Mandatoria Oficial)
 A partir de ahora, cuando se encuentre una estrategia válida que haya pasado por todos los agentes (@StratFinder, @Ideator, @CoderQuant, @Auditor, @Skeptic y @RiskFilter) y sea auditada y aprobada con los filtros de robustez y riesgo (Monte Carlo 1.000 simulaciones, Walk-Forward Analysis, 30% Out-of-Sample ciego, Sharpe ≥ 1.50 y Retorno Anualizado ≥ 30%), **se añadirá DIRECTAMENTE y de forma inmediata a Forward Test en vivo** (cripto o TradFi/índices), asignándosele un libro contable virtual de **$1.000 USD/USDC de balance base inicial**.
 
+### Regla Suprema de Fondeo: Exclusivamente End of Day Drawdown (EOD) - Prohibido Trailing DD
+**QUEDA TERMINANTEMENTE PROHIBIDO ASUMIR, MENCIONAR O CALCULAR CONDICIONES DE TRAILING DRAWDOWN.** Sergio **ÚNICAMENTE** trabaja con cuentas que operan bajo **END OF DAY DRAWDOWN (EOD)** calculado al cierre de la sesión diaria.
+- Las fluctuaciones intra-trade o beneficios flotantes jamás mueven la marca de agua del drawdown.
+- En todas las auditorías, simulaciones de Monte Carlo y filtros de riesgo (@Auditor y @RiskFilter), el drawdown se evalúa **EXCLUSIVAMENTE a fin de día (EOD)**.
+
 ### Calibración Dual de Robustez y Drawdown en Auditoría (@Auditor y @RiskFilter)
 - **Cuentas de Fondeo (Prop Firms):**
+  - **Tipo de Drawdown Obligatorio:** **EXCLUSIVAMENTE END OF DAY (EOD)**. Prohibido Trailing Drawdown.
   - **Tasa de Pase / Intervalo de Confianza Monte Carlo:** Se calibra para exigir un **IC de pase $\ge 70\%$** (3 de cada 4 cuentas simuladas aprueban el challenge). No se exige ni busca un 100% de pase, al ser matemáticamente falaz y provocar sobreajuste letal.
   - **Segmentación por Vehículo Operativo:**
-    - **Cuentas de Futuros (CME / Topstep / Apex):** Drawdown máximo estricto de **3.0% a 4.0%** (EOD / Trailing).
+    - **Cuentas de Futuros (CME / Topstep / Apex / Tradovate):** Drawdown máximo estricto de **3.0% a 4.0% END OF DAY (EOD)**.
     - **Cuentas de CFDs / Forex (FTMO, IC Markets Prop, etc.):** Drawdown máximo de **8.0%**.
 - **Cuentas de Capital Propio:**
   - Se mantienen **sin cambios** con sus filtros estrictos de preservación de capital: Max Drawdown continuo $\le 20.0\%$, alert DD $-10.0\%$, Sharpe $\ge 1.50$, Retorno Anualizado $\ge 30.0\%$ y probabilidad de ruina del $0.0\%$.
