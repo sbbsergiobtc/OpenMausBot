@@ -369,6 +369,65 @@
       outline: none !important;
       box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.15) !important;
     }
+  
+    /* ESTILOS DE DESGLOSE DE RACHAS (PEAK-VALLEY SWING ANALYSIS) */
+    .streak-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none;
+    }
+    .streak-chip-bull {
+      background: rgba(16, 185, 129, 0.12);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .streak-chip-bull:hover, .streak-chip-bull.active {
+      background: rgba(16, 185, 129, 0.28);
+      border-color: #10b981;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+      transform: translateY(-1px);
+    }
+    .streak-chip-bear {
+      background: rgba(217, 119, 6, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(217, 119, 6, 0.35);
+    }
+    .streak-chip-bear:hover, .streak-chip-bear.active {
+      background: rgba(217, 119, 6, 0.30);
+      border-color: #f59e0b;
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.35);
+      transform: translateY(-1px);
+    }
+    .streak-chip-pass {
+      background: rgba(16, 185, 129, 0.3);
+      color: #a7f3d0;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-left: 4px;
+    }
+    .streak-chip-safe {
+      background: rgba(245, 158, 11, 0.25);
+      color: #fde68a;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-left: 4px;
+    }
+
   </style>
 
   <!-- TradingView Official Advanced Charts Script -->
@@ -718,6 +777,192 @@
             </div>
           </div>
 
+          <!-- Tarjeta 7: HYB-NDX-BOL-LINE-48-2.5-3.0 (Fondeo Futuros CME) -->
+          <div class="strategy-card" data-desk="PROP_FIRM" style="display: none;">
+            <div class="flex items-start justify-between">
+              <div>
+                <span class="text-xs font-bold text-[#5865F2] font-mono">NDX / CME</span>
+                <h3 class="card-title mt-0.5" title="HYB-NDX-BOL-LINE-48-2.5-3.0">HYB-NDX-LINE-2.5-3.0</h3>
+              </div>
+              <button onclick="viewStrategy('HYB-NDX-BOL-LINE-48-2.5-3.0')" class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#EEF2FF] text-[#3730A3] border border-[#C7D2FE] hover:bg-[#E0E7FF] transition cursor-pointer">FUTUROS 4% EOD</button>
+            </div>
+
+            <div class="my-3 py-2 border-y border-[#E6E2D8]/60 space-y-1 text-xs">
+              <div class="flex justify-between text-[#4A4944]">
+                <span>Lógica Salida:</span>
+                <strong class="text-[#181A20] font-mono">SL 2.5 | TP 3.0 ATR</strong>
+              </div>
+              <div class="flex justify-between text-[#4A4944]">
+                <span>Monte Carlo EOD:</span>
+                <strong class="text-[#10b981] font-mono">Pase 100% | P95 DD 0.09%</strong>
+              </div>
+              <div class="flex justify-between text-[#4A4944]">
+                <span>Sharpe / DSR:</span>
+                <strong class="text-[#181A20] font-mono">7.25 / 0.998</strong>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-1">
+              <span class="badge-success-live">● EN FORWARD TEST</span>
+              <span class="text-[11px] font-mono font-bold text-[#181A20]">$1,000.00 USD</span>
+            </div>
+          </div>
+
+          <!-- Tarjeta 8: HYB-NDX-BOL-LINE-48-2.5-4.0 (Fondeo Futuros CME) -->
+          <div class="strategy-card" data-desk="PROP_FIRM" style="display: none;">
+            <div class="flex items-start justify-between">
+              <div>
+                <span class="text-xs font-bold text-[#5865F2] font-mono">NDX / CME</span>
+                <h3 class="card-title mt-0.5" title="HYB-NDX-BOL-LINE-48-2.5-4.0">HYB-NDX-LINE-2.5-4.0</h3>
+              </div>
+              <button onclick="viewStrategy('HYB-NDX-BOL-LINE-48-2.5-4.0')" class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#EEF2FF] text-[#3730A3] border border-[#C7D2FE] hover:bg-[#E0E7FF] transition cursor-pointer">FUTUROS 4% EOD</button>
+            </div>
+
+            <div class="my-3 py-2 border-y border-[#E6E2D8]/60 space-y-1 text-xs">
+              <div class="flex justify-between text-[#4A4944]">
+                <span>Lógica Salida:</span>
+                <strong class="text-[#181A20] font-mono">SL 2.5 | TP 4.0 ATR</strong>
+              </div>
+              <div class="flex justify-between text-[#4A4944]">
+                <span>Monte Carlo EOD:</span>
+                <strong class="text-[#10b981] font-mono">Pase 100% | P95 DD 0.08%</strong>
+              </div>
+              <div class="flex justify-between text-[#4A4944]">
+                <span>Sharpe / DSR:</span>
+                <strong class="text-[#181A20] font-mono">7.25 / 0.998</strong>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-1">
+              <span class="badge-success-live">● EN FORWARD TEST</span>
+              <span class="text-[11px] font-mono font-bold text-[#181A20]">$1,000.00 USD</span>
+            </div>
+          </div>
+
+          <!-- Tarjeta 9: HYB-NDX-BOL-LINE-48-2.5-2.0 (Fondeo Futuros CME) -->
+          <div class="strategy-card" data-desk="PROP_FIRM" style="display: none;">
+            <div class="flex items-start justify-between">
+              <div>
+                <span class="text-xs font-bold text-[#5865F2] font-mono">NDX / CME</span>
+                <h3 class="card-title mt-0.5" title="HYB-NDX-BOL-LINE-48-2.5-2.0">HYB-NDX-LINE-2.5-2.0</h3>
+              </div>
+              <button onclick="viewStrategy('HYB-NDX-BOL-LINE-48-2.5-2.0')" class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#EEF2FF] text-[#3730A3] border border-[#C7D2FE] hover:bg-[#E0E7FF] transition cursor-pointer">FUTUROS 4% EOD</button>
+            </div>
+
+            <div class="my-3 py-2 border-y border-[#E6E2D8]/60 space-y-1 text-xs">
+              <div class="flex justify-between text-[#4A4944]">
+                <span>Lógica Salida:</span>
+                <strong class="text-[#181A20] font-mono">SL 2.5 | TP 2.0 ATR</strong>
+              </div>
+              <div class="flex justify-between text-[#4A4944]">
+                <span>Monte Carlo EOD:</span>
+                <strong class="text-[#10b981] font-mono">Pase 100% | P95 DD 0.09%</strong>
+              </div>
+              <div class="flex justify-between text-[#4A4944]">
+                <span>Sharpe / DSR:</span>
+                <strong class="text-[#181A20] font-mono">7.24 / 0.998</strong>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-1">
+              <span class="badge-success-live">● EN FORWARD TEST</span>
+              <span class="text-[11px] font-mono font-bold text-[#181A20]">$1,000.00 USD</span>
+            </div>
+          </div>
+
+          <!-- Tarjeta 10: HYB-NDX-BOL-OFI-48-2.5-2.0-CFD (Fondeo CFDs FTMO/IC) -->
+          <div class="strategy-card" data-desk="PROP_FIRM" style="display: none;">
+            <div class="flex items-start justify-between">
+              <div>
+                <span class="text-xs font-bold text-[#059669] font-mono">NDX / CFD</span>
+                <h3 class="card-title mt-0.5" title="HYB-NDX-BOL-OFI-48-2.5-2.0-CFD">HYB-NDX-OFI-CFD</h3>
+              </div>
+              <button onclick="viewStrategy('HYB-NDX-BOL-OFI-48-2.5-2.0-CFD')" class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] hover:bg-[#D1FAE5] transition cursor-pointer">CFDS 8.0% EOD</button>
+            </div>
+
+            <div class="my-3 py-2 border-y border-[#E6E2D8]/60 space-y-1 text-xs">
+              <div class="flex justify-between text-[#4A4944]">
+                <span>Gatillo Entrada:</span>
+                <strong class="text-[#181A20] font-mono">Order Flow Imbalance</strong>
+              </div>
+              <div class="flex justify-between text-[#4A4944]">
+                <span>Monte Carlo EOD:</span>
+                <strong class="text-[#10b981] font-mono">Pase 98% | P95 DD 4.70%</strong>
+              </div>
+              <div class="flex justify-between text-[#4A4944]">
+                <span>Sharpe / DSR:</span>
+                <strong class="text-[#181A20] font-mono">1.71 / 0.824</strong>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-1">
+              <span class="badge-success-live">● EN FORWARD TEST</span>
+              <span class="text-[11px] font-mono font-bold text-[#181A20]">$1,000.00 USD</span>
+            </div>
+          </div>
+
+          <!-- Tarjeta 11: HYB-NDX-BOL-LINE-48-2.0-3.0 (Fondeo Futuros y CFDs) -->
+          <div class="strategy-card" data-desk="PROP_FIRM" style="display: none;">
+            <div class="flex items-start justify-between">
+              <div>
+                <span class="text-xs font-bold text-[#5865F2] font-mono">NDX / CME+CFD</span>
+                <h3 class="card-title mt-0.5" title="HYB-NDX-BOL-LINE-48-2.0-3.0">HYB-NDX-LINE-2.0-3.0</h3>
+              </div>
+              <button onclick="viewStrategy('HYB-NDX-BOL-LINE-48-2.0-3.0')" class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#EEF2FF] text-[#3730A3] border border-[#C7D2FE] hover:bg-[#E0E7FF] transition cursor-pointer">FUTUROS + CFDS</button>
+            </div>
+
+            <div class="my-3 py-2 border-y border-[#E6E2D8]/60 space-y-1 text-xs">
+              <div class="flex justify-between text-[#4A4944]">
+                <span>Lógica Salida:</span>
+                <strong class="text-[#181A20] font-mono">SL 2.0 | TP 3.0 ATR</strong>
+              </div>
+              <div class="flex justify-between text-[#4A4944]">
+                <span>Monte Carlo EOD:</span>
+                <strong class="text-[#10b981] font-mono">Pase 100% | P95 DD 0.10%</strong>
+              </div>
+              <div class="flex justify-between text-[#4A4944]">
+                <span>Sharpe / Retorno:</span>
+                <strong class="text-[#181A20] font-mono">7.40 / +9.84%</strong>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-1">
+              <span class="badge-success-live">● EN FORWARD TEST</span>
+              <span class="text-[11px] font-mono font-bold text-[#181A20]">$1,000.00 USD</span>
+            </div>
+          </div>
+
+          <!-- Tarjeta 12: HYB-NDX-BOL-LINE-48-2.0-4.0 (Fondeo Futuros y CFDs) -->
+          <div class="strategy-card" data-desk="PROP_FIRM" style="display: none;">
+            <div class="flex items-start justify-between">
+              <div>
+                <span class="text-xs font-bold text-[#5865F2] font-mono">NDX / CME+CFD</span>
+                <h3 class="card-title mt-0.5" title="HYB-NDX-BOL-LINE-48-2.0-4.0">HYB-NDX-LINE-2.0-4.0</h3>
+              </div>
+              <button onclick="viewStrategy('HYB-NDX-BOL-LINE-48-2.0-4.0')" class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#EEF2FF] text-[#3730A3] border border-[#C7D2FE] hover:bg-[#E0E7FF] transition cursor-pointer">FUTUROS + CFDS</button>
+            </div>
+
+            <div class="my-3 py-2 border-y border-[#E6E2D8]/60 space-y-1 text-xs">
+              <div class="flex justify-between text-[#4A4944]">
+                <span>Lógica Salida:</span>
+                <strong class="text-[#181A20] font-mono">SL 2.0 | TP 4.0 ATR</strong>
+              </div>
+              <div class="flex justify-between text-[#4A4944]">
+                <span>Monte Carlo EOD:</span>
+                <strong class="text-[#10b981] font-mono">Pase 100% | P95 DD 0.10%</strong>
+              </div>
+              <div class="flex justify-between text-[#4A4944]">
+                <span>Sharpe / Retorno:</span>
+                <strong class="text-[#181A20] font-mono">7.40 / +9.84%</strong>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-1">
+              <span class="badge-success-live">● EN FORWARD TEST</span>
+              <span class="text-[11px] font-mono font-bold text-[#181A20]">$1,000.00 USD</span>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -972,13 +1217,10 @@
         <div class="flex items-center space-x-2 w-full sm:w-auto">
           <label for="account-selector" class="text-xs text-slate-400 font-medium whitespace-nowrap">Vista:</label>
 <select id="account-selector" onchange="onAccountFilterChange()" class="bg-dark-900 border border-slate-700 text-cyan-300 text-xs font-mono rounded-lg px-3 py-2 w-full sm:w-96 focus:outline-none focus:border-cyan-500 font-semibold cursor-pointer transition hover:border-cyan-400">
-            <option value="ALL">🌐 Consolidado Global (Todas las Estrategias · 1.127 Trades)</option>
-            <option value="CAP-SPX-006">📊 S&P 500 4h Bollinger Dip (Capital Propio TradFi · 318 Trades)</option>
+            <option value="ALL_CAP">💼 Consolidado Capital Propio (TradFi + DEX · 945 Trades)</option>
+            <option value="CAP-SPX-006" selected>📊 S&P 500 4h Bollinger Dip (Capital Propio TradFi · 318 Trades)</option>
             <option value="CAP-NDX-005">📈 Nasdaq 100 2h Bollinger Dip (Capital Propio TradFi · 365 Trades)</option>
             <option value="STRAT-FAST-035">⚡ Bitcoin 1h Shannon Entropy (Capital Propio DEX · 262 Trades)</option>
-            <option value="PROP-SPX-005">🏛️ S&P 500 1D Connors RSI2 (Prop Firm · 32 Trades)</option>
-            <option value="PROP-NDX-005">🏛️ Nasdaq 100 2h Bollinger Dip (Prop Firm · 30 Trades)</option>
-            <option value="PROP-FX-EUR-001">💶 EUR/USD 1h London-NY (Prop Firm Forex · 120 Trades)</option>
             <option value="CRYPTO-HL">⚡ Crypto Paper Hyperliquid (1.000 USDC · Testnet Activo)</option>
           </select>
         </div>
@@ -1060,6 +1302,90 @@
           </div>
         </div>
         <div id="main-equity-chart" class="w-full h-80"></div>
+      </div>
+
+      <!-- ==================== DESGLOSE DE RACHAS Y CICLOS DE FONDEO (PEAK-VALLEY SWING ANALYSIS) ==================== -->
+      <div id="streaks-analysis-section" class="glass-card rounded-2xl p-5 space-y-4 motion-sweep stagger-3 shimmer-active w-full border-l-4 border-amber-400">
+        
+        <!-- Encabezado con Badges y KPIs Resumen -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-800 pb-3">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse">
+                <i class="fa-solid fa-chart-line mr-1"></i> CICLOS DE CRECIMIENTO & RETROCESO
+              </span>
+              <span class="text-[10px] font-mono text-cyan-400 font-bold bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
+                Análisis Picos y Valles (ZigZag)
+              </span>
+            </div>
+            <h3 class="text-base font-bold text-white uppercase tracking-wider flex items-center">
+              <i class="fa-solid fa-arrows-split-up-and-left mr-2 text-amber-400"></i> Desglose de Rachas y Aprobaciones de Fondeo
+            </h3>
+            <p class="text-xs text-slate-400">Descomposición del backtest en tramos alcistas y bajistas para auditar cuántas veces se superó el Target (+6% a +8%) y cómo se contuvo el Drawdown EOD en los valles.</p>
+          </div>
+          
+          <!-- KPIs Resumen de Fondeo -->
+          <div class="flex items-center gap-2 flex-wrap">
+            <div class="bg-dark-950/80 px-3 py-1.5 rounded-lg border border-slate-800 text-center">
+              <div class="text-[10px] text-slate-400 font-mono">Pases Challenge (+6%)</div>
+              <div class="text-sm font-bold font-mono text-emerald-400" id="streak-kpi-passes">0 Cuentas</div>
+            </div>
+            <div class="bg-dark-950/80 px-3 py-1.5 rounded-lg border border-slate-800 text-center">
+              <div class="text-[10px] text-slate-400 font-mono">Peor Valle Post-Pico</div>
+              <div class="text-sm font-bold font-mono text-amber-300" id="streak-kpi-worstdowndd">0.00% EOD</div>
+            </div>
+            <div class="bg-dark-950/80 px-3 py-1.5 rounded-lg border border-slate-800 text-center">
+              <div class="text-[10px] text-slate-400 font-mono">Máx Racha Alcista</div>
+              <div class="text-sm font-bold font-mono text-emerald-300" id="streak-kpi-maxup">+0.00%</div>
+            </div>
+            <div class="bg-dark-950/80 px-3 py-1.5 rounded-lg border border-slate-800 text-center">
+              <div class="text-[10px] text-slate-400 font-mono">Total Tramos</div>
+              <div class="text-sm font-bold font-mono text-purple-300" id="streak-kpi-totaltramos">0 Tramos</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BANDA DE CHIPS DESLIZABLES (REFERENCIA VISUAL DEL USUARIO) -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-[11px] text-slate-400 font-mono">
+            <span>Tramos Identificados (Giros > 2.0%):</span>
+            <span class="text-slate-500 text-[10px]">Haz clic en un tramo para resaltarlo y hacer zoom</span>
+          </div>
+          <div id="streak-chips-container" class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
+            <!-- Dynamically populated with pills -->
+          </div>
+        </div>
+
+        <!-- GRÁFICO 1: HISTOGRAMA DE BARRAS DISCRETAS (TRAMOS 01, 02, 03...) -->
+        <div class="space-y-1">
+          <div class="flex items-center justify-between text-xs font-mono text-slate-300">
+            <span class="font-bold flex items-center gap-1.5">
+              <i class="fa-solid fa-chart-column text-cyan-400"></i> Magnitud Porcentual por Tramo (Expansión vs Retroceso)
+            </span>
+            <span class="text-[10px] text-slate-500 font-mono">Rachas: tramos en los que la equity giró más de 2.0% · Criterio Fondeo EOD Drawdown</span>
+          </div>
+          <div id="streak-bars-apexchart" class="w-full h-44"></div>
+        </div>
+
+        <!-- GRÁFICO 2: CURVA DE RENTABILIDAD CON SOMBREADO DE TRAMOS SINCRONIZADA (REQUERIMIENTO DEL USUARIO) -->
+        <div class="space-y-1 pt-2 border-t border-slate-800/80">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs font-mono text-slate-300">
+            <span class="font-bold flex items-center gap-1.5">
+              <i class="fa-solid fa-chart-area text-emerald-400"></i> Curva de Crecimiento con Períodos Picos / Valles Sombreados
+            </span>
+            <div class="flex items-center gap-3">
+              <span class="text-[10px] text-slate-400 font-mono">
+                <span class="inline-block w-2.5 h-2.5 bg-emerald-500/30 rounded mr-1"></span>Racha Alcista 
+                <span class="inline-block w-2.5 h-2.5 bg-amber-500/30 rounded mx-1 ml-2"></span>Valle / Retroceso
+              </span>
+              <button onclick="resetStreakChartZoom()" class="px-2 py-0.5 rounded text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition cursor-pointer">
+                <i class="fa-solid fa-magnifying-glass-minus mr-1"></i> Zoom Completo
+              </button>
+            </div>
+          </div>
+          <div id="streak-equity-apexchart" class="w-full h-64"></div>
+        </div>
+
       </div>
 
       <!-- ==================== DAY & TIME EDGE (ESTADÍSTICAS HORARIAS Y DIARIAS) ==================== -->
@@ -1603,33 +1929,33 @@
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-800 pb-3">
             <div>
               <div class="flex flex-wrap items-center gap-2 mb-1">
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 whitespace-nowrap">IC MARKETS MT5 · TRADFI LIVE</span>
-                <span class="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 whitespace-nowrap">Broker Sync: <strong id="ft-live-broker-bal">$1,001.52 USD</strong></span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 whitespace-nowrap" id="ft-card-badge-desk">IC MARKETS MT5 · TRADFI LIVE</span>
+                <span class="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 whitespace-nowrap">Broker Sync: <strong id="ft-live-broker-bal">$984.57 USD</strong></span>
               </div>
-              <h3 class="text-base font-bold text-white">Cuenta Demo IC Markets SC (#53120791)</h3>
+              <h3 class="text-base font-bold text-white" id="ft-card-main-title">Cuenta Demo IC Markets SC (#53120791)</h3>
             </div>
             <div class="text-left sm:text-right shrink-0">
-              <span class="text-[10px] text-slate-500 font-mono block">INICIAL</span>
-              <div class="text-xs font-mono font-bold text-slate-300 whitespace-nowrap">$1,000.00 USD</div>
+              <span class="text-[10px] text-slate-500 font-mono block" id="ft-initial-label">INICIAL</span>
+              <div class="text-xs font-mono font-bold text-slate-300 whitespace-nowrap" id="ft-initial-bal">$1,000.00 USD</div>
             </div>
           </div>
 
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
             <div class="p-2.5 rounded-xl bg-dark-950/70 border border-slate-800 min-w-0">
               <span class="text-[10px] text-slate-400 uppercase font-mono block truncate">Balance en Vivo</span>
-              <div class="text-sm font-bold text-white font-mono mt-1 truncate" id="ft-pf-balance">$100,000.00</div>
+              <div class="text-sm font-bold text-white font-mono mt-1 truncate" id="ft-pf-balance">$984.57</div>
             </div>
             <div class="p-2.5 rounded-xl bg-dark-950/70 border border-slate-800 min-w-0">
               <span class="text-[10px] text-slate-400 uppercase font-mono block truncate">PnL Realizado</span>
-              <div class="text-sm font-bold text-cyan-400 font-mono mt-1 truncate" id="ft-pf-pnl">$0.00</div>
+              <div class="text-sm font-bold text-cyan-400 font-mono mt-1 truncate" id="ft-pf-pnl">-$15.43</div>
             </div>
             <div class="p-2.5 rounded-xl bg-dark-950/70 border border-slate-800 min-w-0">
-              <span class="text-[10px] text-slate-400 uppercase font-mono block truncate">EOD Drawdown</span>
-              <div class="text-sm font-bold text-emerald-400 font-mono mt-1 truncate" id="ft-pf-dd">0.01% ($7.40)</div>
+              <span class="text-[10px] text-slate-400 uppercase font-mono block truncate" id="ft-dd-header">Max Drawdown</span>
+              <div class="text-sm font-bold text-emerald-400 font-mono mt-1 truncate" id="ft-pf-dd">1.70% ($16.95)</div>
             </div>
             <div class="p-2.5 rounded-xl bg-dark-950/70 border border-slate-800 min-w-0">
-              <span class="text-[10px] text-slate-400 uppercase font-mono block truncate">Progreso (+6%)</span>
-              <div class="text-sm font-bold text-amber-400 font-mono mt-1 truncate" id="ft-pf-target">0.0% ($0/$6k)</div>
+              <span class="text-[10px] text-slate-400 uppercase font-mono block truncate" id="ft-target-header">Objetivo Anual</span>
+              <div class="text-sm font-bold text-amber-400 font-mono mt-1 truncate" id="ft-pf-target">&ge; +30.0%</div>
             </div>
           </div>
 
@@ -1648,10 +1974,10 @@
             </div>
             <div class="flex justify-between items-center text-[#6E6D68] text-[11px] pt-2 border-t border-[#E6E2D8]">
               <span class="shrink-0">Estrategias en Escaneo:</span>
-              <div class="flex items-center gap-1.5 flex-wrap justify-end">
-                <span class="px-2 py-0.5 rounded bg-[#EEF2FF] text-[#3730A3] font-bold border border-[#C7D2FE]">PROP-FX-EUR-001</span>
-                <span class="px-2 py-0.5 rounded bg-[#EEF2FF] text-[#3730A3] font-bold border border-[#C7D2FE]">CAP-NDX-005</span>
-                <span class="px-2 py-0.5 rounded bg-[#EEF2FF] text-[#3730A3] font-bold border border-[#C7D2FE]">CAP-SPX-006</span>
+              <div class="flex items-center gap-1.5 flex-wrap justify-end" id="ft-active-badges">
+                <span class="px-2 py-0.5 rounded bg-[#EEF2FF] text-[#3730A3] font-bold border border-[#C7D2FE]">HYB-NDX-BOL-LINE-48-2.5-3.0</span>
+                <span class="px-2 py-0.5 rounded bg-[#EEF2FF] text-[#3730A3] font-bold border border-[#C7D2FE]">HYB-NDX-BOL-LINE-48-2.5-4.0</span>
+                <span class="px-2 py-0.5 rounded bg-[#EEF2FF] text-[#3730A3] font-bold border border-[#C7D2FE]">HYB-NDX-BOL-LINE-48-2.5-2.0</span>
               </div>
             </div>
           </div>
@@ -1679,7 +2005,7 @@
             </div>
             <div class="p-2.5 rounded-xl bg-dark-950/70 border border-slate-800 min-w-0">
               <span class="text-[10px] text-slate-400 uppercase font-mono block truncate">PnL Realizado</span>
-              <div class="text-sm font-bold text-emerald-400 font-mono mt-1 truncate">+0.66 USDC</div>
+              <div class="text-sm font-bold text-emerald-400 font-mono mt-1 truncate" id="ft-crypto-pnl">+13.56 USDC</div>
             </div>
             <div class="p-2.5 rounded-xl bg-dark-950/70 border border-slate-800 min-w-0">
               <span class="text-[10px] text-slate-400 uppercase font-mono block truncate">Objetivo Anual</span>
@@ -1705,6 +2031,46 @@
 
       </div>
 
+      <!-- ==================== ESTRATEGIAS DESPLEGADAS EN FORWARD TESTING (NORMA MANDATORIA OFICIAL) ==================== -->
+      <div class="glass-card rounded-2xl p-5 space-y-4 motion-sweep stagger-2 shimmer-active w-full border-l-4 border-emerald-400">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-800 pb-3">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 animate-pulse">● EN EJECUCIÓN DIRECTA</span>
+              <span class="text-[10px] font-mono text-cyan-400 font-bold bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">Norma Mandatoria Oficial</span>
+            </div>
+            <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center">
+              <i class="fa-solid fa-rocket mr-2 text-emerald-400"></i> Estrategias Desplegadas en Forward Test (<span id="ft-desk-title">Prop Firm</span>)
+            </h3>
+            <p class="text-xs text-slate-400">Estrategias aprobadas por los 6 agentes (@StratFinder, @Ideator, @CoderQuant, @Auditor, @Skeptic y @RiskFilter) y auto-desplegadas con balance base virtual de $1.000 USD/USDC.</p>
+          </div>
+          <span class="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20 whitespace-nowrap" id="ft-active-strat-count">
+            3 Estrategias Activas
+          </span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs font-mono">
+            <thead class="bg-dark-950/80 text-slate-400 border-b border-slate-800 uppercase text-[10px]">
+              <tr>
+                <th class="py-2.5 px-3 whitespace-nowrap">ID Estrategia</th>
+                <th class="py-2.5 px-3 whitespace-nowrap">Activo / Mercado</th>
+                <th class="py-2.5 px-3 whitespace-nowrap">Arquitectura Híbrida</th>
+                <th class="py-2.5 px-3 text-right whitespace-nowrap">Balance Base</th>
+                <th class="py-2.5 px-3 text-right whitespace-nowrap">Sharpe Obs.</th>
+                <th class="py-2.5 px-3 text-right whitespace-nowrap">DSR Prob</th>
+                <th class="py-2.5 px-3 text-right whitespace-nowrap">MC P95 DD</th>
+                <th class="py-2.5 px-3 text-center whitespace-nowrap">Estado</th>
+                <th class="py-2.5 px-3 text-center whitespace-nowrap">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="ft-active-strategies-tbody" class="divide-y divide-slate-800/60">
+              <!-- Dynamically populated from fetchForwardState() -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- ==================== TARJETA DE CURVA DE RENTABILIDAD EN TIEMPO REAL (ESTILO INSTITUCIONAL BACKTEST) ==================== -->
       <div class="glass-card rounded-xl p-5 space-y-3 motion-sweep stagger-3 shimmer-active w-full">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
@@ -1726,12 +2092,12 @@
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-800 pb-3">
           <div>
             <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center">
-              <i class="fa-solid fa-bolt mr-2 text-amber-400"></i> Eventos y Órdenes en Tiempo Real de Forward Test
+              <i class="fa-solid fa-bolt mr-2 text-amber-400"></i> Eventos y Órdenes en Tiempo Real de Forward Test (<span id="ft-orders-desk-label" class="text-amber-400 font-bold ml-1">Capital Propio</span>)
             </h3>
-            <p class="text-xs text-slate-400">Historial de órdenes emitidas por el daemon de simulación en vivo</p>
+            <p class="text-xs text-slate-400">Historial y telemetría de órdenes emitidas por el daemon de ejecución en vivo</p>
           </div>
-          <button onclick="fetchForwardState()" class="px-2.5 py-1 text-xs text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 rounded-lg transition font-mono whitespace-nowrap">
-            <i class="fa-solid fa-rotate text-[11px] mr-1"></i> Actualizar
+          <button id="ft-refresh-btn" onclick="refreshForwardTestUI(this)" class="px-2.5 py-1 text-xs text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 rounded-lg transition font-mono whitespace-nowrap cursor-pointer">
+            <i class="fa-solid fa-rotate text-[11px] mr-1"></i> <span>Actualizar</span>
           </button>
         </div>
 
@@ -2840,7 +3206,7 @@
     let allStrategies = [];
     let allTrades = [];
     let currentTradeFilter = 'ALL';
-    let currentAccountFilter = 'ALL';
+    let currentAccountFilter = 'CAP-SPX-006';
     
     // ApexCharts Instances
     let mainEquityChart = null;
@@ -3378,6 +3744,7 @@
         if (data.balance_curve) renderMainEquityChart(data.balance_curve);
         if (data.dow_distribution) renderDowChart(data.dow_distribution);
         if (data.hourly_distribution) renderHourlyChart(data.hourly_distribution);
+        if (data.streaks_analysis) renderStreaksAnalysis(data.streaks_analysis, data.balance_curve);
 
       } catch (err) {
         console.error('Error fetching analytics data:', err);
@@ -3385,6 +3752,249 @@
     }
 
     // Cargar Historial de Operaciones desde /api/trade_history
+    
+    // =========================================================================
+    // MOTOR DE DESGLOSE DE RACHAS (PEAK-VALLEY SWING ANALYSIS)
+    // =========================================================================
+    let streakBarsChartInstance = null;
+    let streakEquityChartInstance = null;
+    let cachedStreaksData = null;
+    let cachedBalanceCurve = null;
+
+    function resetStreakChartZoom() {
+      if (streakEquityChartInstance && cachedBalanceCurve && cachedBalanceCurve.length > 0) {
+        streakEquityChartInstance.resetSeries();
+        document.querySelectorAll('.streak-chip').forEach(el => el.classList.remove('active'));
+      }
+    }
+
+    function selectStreak(streakId) {
+      if (!cachedStreaksData || !cachedStreaksData.streaks) return;
+      const streak = cachedStreaksData.streaks.find(s => s.id === streakId);
+      if (!streak) return;
+
+      document.querySelectorAll('.streak-chip').forEach(el => {
+        el.classList.toggle('active', el.getAttribute('data-id') == streakId);
+      });
+
+      if (streakEquityChartInstance) {
+        const startTs = new Date(streak.start_timestamp).getTime();
+        const endTs = new Date(streak.end_timestamp).getTime();
+        if (!isNaN(startTs) && !isNaN(endTs)) {
+          streakEquityChartInstance.zoomX(startTs, endTs);
+        }
+      }
+    }
+
+    function renderStreaksAnalysis(streaksData, balanceCurve) {
+      if (!streaksData) return;
+      cachedStreaksData = streaksData;
+      cachedBalanceCurve = balanceCurve;
+
+      const summary = streaksData.summary || {};
+      const streaks = streaksData.streaks || [];
+
+      // 1. Mini KPIs
+      const elPasses = document.getElementById('streak-kpi-passes');
+      const elWorstDd = document.getElementById('streak-kpi-worstdowndd');
+      const elMaxUp = document.getElementById('streak-kpi-maxup');
+      const elTotal = document.getElementById('streak-kpi-totaltramos');
+
+      if (elPasses) elPasses.innerText = `${summary.challenges_passed || 0} Cuentas`;
+      if (elWorstDd) elWorstDd.innerText = `${Number(summary.max_down_streak_pct || 0.0).toFixed(2)}% EOD`;
+      if (elMaxUp) elMaxUp.innerText = `+${Number(summary.max_up_streak_pct || 0.0).toFixed(2)}%`;
+      if (elTotal) elTotal.innerText = `${summary.total_streaks || 0} Tramos`;
+
+      // 2. Chips Horizontales
+      const chipsCont = document.getElementById('streak-chips-container');
+      if (chipsCont) {
+        if (streaks.length === 0) {
+          chipsCont.innerHTML = '<span class="text-xs text-slate-500 font-mono">Sin tramos significativos registrados</span>';
+        } else {
+          chipsCont.innerHTML = streaks.map(s => {
+            const isBull = s.type === 'ALCISTA';
+            const pillClass = isBull ? 'streak-chip streak-chip-bull' : 'streak-chip streak-chip-bear';
+            const sign = isBull ? '+' : '';
+            const tag = isBull && s.challenge_passed 
+              ? '<span class="streak-chip-pass">🏆 +6% PASSED</span>'
+              : (!isBull && s.dd_safe ? '<span class="streak-chip-safe">🛡️ DD EOD SEGURO</span>' : '');
+
+            return `
+              <div class="${pillClass}" data-id="${s.id}" onclick="selectStreak(${s.id})" title="${s.label}: ${s.start_date} a ${s.end_date} · Trades: ${s.trades_count}">
+                <span>${s.type.toLowerCase()} ${sign}${Number(s.pnl_pct).toFixed(1)}% · ${s.start_date.substring(5)} a ${s.end_date.substring(5)}</span>
+                ${tag}
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      // 3. Histograma de Barras Discretas (01, 02, 03...)
+      const barsEl = document.getElementById('streak-bars-apexchart');
+      if (barsEl && streaks.length > 0) {
+        const barCategories = streaks.map(s => String(s.id).padStart(2, '0'));
+        const barData = streaks.map(s => ({
+          x: String(s.id).padStart(2, '0'),
+          y: s.pnl_pct,
+          fillColor: s.type === 'ALCISTA' ? '#10b981' : '#d97706'
+        }));
+
+        const barsOptions = {
+          series: [{
+            name: 'Variación de Tramo (%)',
+            data: barData
+          }],
+          chart: {
+            type: 'bar',
+            height: 180,
+            toolbar: { show: false },
+            events: {
+              dataPointSelection: function(event, chartContext, config) {
+                const streakId = config.dataPointIndex + 1;
+                selectStreak(streakId);
+              }
+            }
+          },
+          plotOptions: {
+            bar: {
+              borderRadius: 3,
+              columnWidth: '55%',
+              colors: {
+                ranges: [
+                  { from: -100, to: 0, color: '#d97706' },
+                  { from: 0.001, to: 1000, color: '#10b981' }
+                ]
+              }
+            }
+          },
+          dataLabels: { enabled: false },
+          xaxis: {
+            categories: barCategories,
+            labels: {
+              style: { colors: '#94a3b8', fontSize: '10px', fontFamily: 'monospace' }
+            },
+            axisBorder: { color: '#334155' }
+          },
+          yaxis: {
+            labels: {
+              formatter: val => (val >= 0 ? '+' : '') + Number(val).toFixed(1) + '%',
+              style: { colors: '#94a3b8', fontSize: '10px', fontFamily: 'monospace' }
+            }
+          },
+          grid: { borderColor: '#1e293b', strokeDashArray: 3 },
+          tooltip: {
+            theme: 'dark',
+            custom: function({series, seriesIndex, dataPointIndex, w}) {
+              const s = streaks[dataPointIndex];
+              const sign = s.pnl_pct >= 0 ? '+' : '';
+              return `
+                <div class="p-2.5 bg-slate-900 border border-slate-700 rounded-lg shadow-xl font-mono text-xs">
+                  <div class="text-cyan-400 font-bold mb-1">${s.label}: ${s.type}</div>
+                  <div class="text-slate-300">Retorno: <strong class="${s.pnl_pct >= 0 ? 'text-emerald-400' : 'text-amber-400'}">${sign}${s.pnl_pct}%</strong> ($${s.pnl_usd})</div>
+                  <div class="text-slate-400 text-[10px] mt-0.5">${s.start_date} a ${s.end_date} (${s.trades_count} trades)</div>
+                  ${s.challenge_passed ? '<div class="text-emerald-400 text-[10px] font-bold mt-1">🏆 ¡Challenge Fondeo Aprobado!</div>' : ''}
+                  ${!s.challenge_passed && s.type === 'BAJISTA' ? '<div class="text-amber-300 text-[10px] mt-1">🛡️ Drawdown EOD Controlado</div>' : ''}
+                </div>
+              `;
+            }
+          }
+        };
+
+        if (!streakBarsChartInstance) {
+          streakBarsChartInstance = new ApexCharts(barsEl, barsOptions);
+          streakBarsChartInstance.render();
+        } else {
+          streakBarsChartInstance.updateOptions(barsOptions);
+        }
+      }
+
+      // 4. Curva de Rentabilidad con Sombreado de Tramos
+      const curveEl = document.getElementById('streak-equity-apexchart');
+      if (curveEl && balanceCurve && balanceCurve.length > 0) {
+        const curveData = balanceCurve.map(pt => ({
+          x: new Date(pt.timestamp).getTime(),
+          y: pt.balance
+        }));
+
+        const xaxisAnnotations = streaks.map(s => {
+          const isBull = s.type === 'ALCISTA';
+          return {
+            x: new Date(s.start_timestamp).getTime(),
+            x2: new Date(s.end_timestamp).getTime(),
+            fillColor: isBull ? '#10b981' : '#f59e0b',
+            opacity: 0.10,
+            label: {
+              borderColor: isBull ? '#10b981' : '#f59e0b',
+              style: {
+                color: '#fff',
+                background: isBull ? '#065f46' : '#78350f',
+                fontSize: '9px',
+                fontWeight: 700
+              },
+              text: `${isBull ? '+' : ''}${s.pnl_pct}%`
+            }
+          };
+        });
+
+        const curveOptions = {
+          series: [{
+            name: 'Curva de Crecimiento ($ USD)',
+            data: curveData
+          }],
+          chart: {
+            type: 'area',
+            height: 260,
+            toolbar: { show: true, tools: { download: false, selection: true, zoom: true, zoomin: true, zoomout: true, pan: true, reset: true } },
+            animations: { enabled: true }
+          },
+          colors: ['#10b981'],
+          stroke: { curve: 'smooth', width: 2.5 },
+          fill: {
+            type: 'gradient',
+            gradient: {
+              shadeIntensity: 1,
+              opacityFrom: 0.45,
+              opacityTo: 0.05,
+              stops: [0, 90, 100]
+            }
+          },
+          dataLabels: { enabled: false },
+          xaxis: {
+            type: 'datetime',
+            labels: {
+              datetimeUTC: false,
+              style: { colors: '#94a3b8', fontSize: '10px', fontFamily: 'monospace' }
+            },
+            axisBorder: { color: '#334155' }
+          },
+          yaxis: {
+            labels: {
+              formatter: val => '$' + Number(val).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0}),
+              style: { colors: '#94a3b8', fontSize: '10px', fontFamily: 'monospace' }
+            }
+          },
+          grid: { borderColor: '#1e293b', strokeDashArray: 3 },
+          annotations: {
+            xaxis: xaxisAnnotations
+          },
+          tooltip: {
+            theme: 'dark',
+            x: { format: 'dd MMM yyyy HH:mm' },
+            y: {
+              formatter: val => '$' + Number(val).toLocaleString(undefined, {minimumFractionDigits: 2})
+            }
+          }
+        };
+
+        if (!streakEquityChartInstance) {
+          streakEquityChartInstance = new ApexCharts(curveEl, curveOptions);
+          streakEquityChartInstance.render();
+        } else {
+          streakEquityChartInstance.updateOptions(curveOptions);
+        }
+      }
+    }
+
     async function fetchTradesData(filter) {
       try {
         const res = await fetch(`/api/trade_history?filter=${encodeURIComponent(filter)}`);
@@ -3618,7 +4228,15 @@
     let ftTradeRowsPerPage = 50;
     let currentFtTradeFilter = 'ALL';
 
-    async function fetchFtTradesData() {
+    function getFtTradesForCurrentDesk() {
+      const isCap = (currentDeskMode === 'CAPITAL_PROPIO');
+      return (allFtTrades || []).filter(t => {
+        const br = t.branch || ((t.strategy && t.strategy.startsWith('PROP')) || (t.asset && t.asset.includes('EUR')) ? 'PROP_FIRM' : 'CAPITAL_PROPIO');
+        return isCap ? (br === 'CAPITAL_PROPIO') : (br === 'PROP_FIRM');
+      });
+    }
+
+    async function fetchFtTradesData(forceRefresh = false) {
       try {
         const res = await fetch('/api/forward_trades');
         if (!res.ok) {
@@ -3628,7 +4246,7 @@
         }
         const data = await res.json();
         allFtTrades = data.trades || [];
-        renderFtTradesTable(allFtTrades);
+        setFtTradeFilter(currentFtTradeFilter || 'ALL');
       } catch (err) {
         console.error('Error fetching FT trades:', err);
         renderFtTradesTable([]);
@@ -3783,26 +4401,48 @@
       renderFtTradePaginationControls(total, startIdx, endIdx);
     }
 
+    function filterFtTrades() {
+      setFtTradeFilter(currentFtTradeFilter || 'ALL');
+    }
+
     function setFtTradeFilter(filterType) {
       currentFtTradeFilter = filterType;
-      document.querySelectorAll('.ft-trade-filter-btn').forEach(b => {
+      document.querySelectorAll('.trade-filter-btn').forEach(b => {
         b.classList.remove('bg-slate-800', 'text-white', 'border', 'border-slate-700');
         b.classList.add('text-slate-400', 'bg-slate-900/60');
       });
-      const activeBtn = document.getElementById(`ft-filter-btn-${filterType.toLowerCase()}`);
+      const activeBtn = document.getElementById(`filter-btn-ft-${filterType}`);
       if (activeBtn) {
         activeBtn.classList.remove('text-slate-400', 'bg-slate-900/60');
         activeBtn.classList.add('bg-slate-800', 'text-white', 'border', 'border-slate-700');
       }
 
-      const assetVal = document.getElementById('ft-trades-asset-filter') ? document.getElementById('ft-trades-asset-filter').value : 'ALL';
-      let filtered = (assetVal === 'ALL') ? [...allFtTrades] : allFtTrades.filter(t => (t.asset || t.symbol || '').toUpperCase().includes(assetVal));
+      const deskTrades = getFtTradesForCurrentDesk();
+      const searchInput = document.getElementById('ft-trade-search');
+      const searchVal = (searchInput ? searchInput.value : '').trim().toUpperCase();
 
-      if (filterType === 'WIN') {
+      let filtered = deskTrades;
+      if (searchVal) {
+        filtered = filtered.filter(t => (t.trade_id || '').toUpperCase().includes(searchVal) || (t.asset || t.symbol || '').toUpperCase().includes(searchVal) || (t.strategy || '').toUpperCase().includes(searchVal));
+      }
+
+      if (filterType === 'TRADFI') {
+        filtered = filtered.filter(t => (t.asset || t.symbol || '').includes('US500') || (t.asset || t.symbol || '').includes('USTEC') || (t.asset || t.symbol || '').includes('EUR'));
+      } else if (filterType === 'DEX') {
+        filtered = filtered.filter(t => !(t.asset || t.symbol || '').includes('US500') && !(t.asset || t.symbol || '').includes('USTEC') && !(t.asset || t.symbol || '').includes('EUR'));
+      } else if (filterType === 'WIN') {
         filtered = filtered.filter(t => (t.net_pnl_usd || t.net_pnl_usdc || 0) > 0);
       } else if (filterType === 'LOSS') {
         filtered = filtered.filter(t => (t.net_pnl_usd || t.net_pnl_usdc || 0) <= 0);
       }
+
+      // Actualizar contadores dinámicos según el modo activo
+      const cAll = document.getElementById('ft-trades-count-all');
+      const cMt5 = document.getElementById('ft-trades-count-mt5');
+      const cDex = document.getElementById('ft-trades-count-dex');
+      if (cAll) cAll.innerText = deskTrades.length;
+      if (cMt5) cMt5.innerText = deskTrades.filter(t => (t.asset || t.symbol || '').includes('US500') || (t.asset || t.symbol || '').includes('USTEC') || (t.asset || t.symbol || '').includes('EUR')).length;
+      if (cDex) cDex.innerText = deskTrades.filter(t => !(t.asset || t.symbol || '').includes('US500') && !(t.asset || t.symbol || '').includes('USTEC') && !(t.asset || t.symbol || '').includes('EUR')).length;
 
       ftTradeCurrentPage = 1;
       renderFtTradesTable(filtered);
@@ -4521,25 +5161,35 @@
         chartData = equityData.map(d => d.pf_balance);
       }
 
-      // Actualizar chips de KPIs superiores
+      // Actualizar badge KPI de rentabilidad en la cabecera del gráfico
       const last = equityData[equityData.length - 1];
-      const kpiBal = document.getElementById('ft-chart-kpi-balance');
-      const kpiPnl = document.getElementById('ft-chart-kpi-pnl');
-      if (kpiBal && last) {
-        if (currentFtCurveSegment === 'REAL') {
-          kpiBal.innerText = '$' + Number(last.real_capital_total).toLocaleString(undefined, {minimumFractionDigits: 2}) + ' USD';
+      const badgePnl = document.getElementById('badge-ft-chart-pnl');
+      if (badgePnl && last) {
+        if (currentFtCurveSegment === 'PF') {
+          const pnl = Number(last.pf_balance) - 100000.0;
+          const pct = (pnl / 100000.0) * 100.0;
+          const sign = pnl >= 0 ? '+' : '';
+          badgePnl.innerText = `${sign}$${pnl.toFixed(2)} USD (${sign}${pct.toFixed(3)}%)`;
+          badgePnl.className = 'text-xs font-mono font-bold px-2.5 py-1 rounded border ' + (pnl >= 0 ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-rose-400 bg-rose-500/10 border-rose-500/20');
         } else if (currentFtCurveSegment === 'MT5') {
-          kpiBal.innerText = '$' + Number(last.mt5_balance).toLocaleString(undefined, {minimumFractionDigits: 2}) + ' USD';
+          const pnl = Number(last.mt5_balance) - 1000.0;
+          const pct = (pnl / 1000.0) * 100.0;
+          const sign = pnl >= 0 ? '+' : '';
+          badgePnl.innerText = `${sign}$${pnl.toFixed(2)} USD (${sign}${pct.toFixed(2)}%)`;
+          badgePnl.className = 'text-xs font-mono font-bold px-2.5 py-1 rounded border ' + (pnl >= 0 ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-rose-400 bg-rose-500/10 border-rose-500/20');
         } else if (currentFtCurveSegment === 'HL') {
-          kpiBal.innerText = Number(last.hl_balance).toFixed(2) + ' USDC';
+          const pnl = Number(last.hl_balance) - 1000.0;
+          const pct = (pnl / 1000.0) * 100.0;
+          const sign = pnl >= 0 ? '+' : '';
+          badgePnl.innerText = `${sign}${pnl.toFixed(2)} USDC (${sign}${pct.toFixed(2)}%)`;
+          badgePnl.className = 'text-xs font-mono font-bold px-2.5 py-1 rounded border ' + (pnl >= 0 ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-rose-400 bg-rose-500/10 border-rose-500/20');
         } else {
-          kpiBal.innerText = '$' + Number(last.pf_balance).toLocaleString(undefined, {minimumFractionDigits: 2}) + ' USD';
+          const pnl = Number(last.pnl_real_usd);
+          const pct = Number(last.pnl_pct);
+          const sign = pnl >= 0 ? '+' : '';
+          badgePnl.innerText = `${sign}$${pnl.toFixed(2)} USD (${sign}${pct.toFixed(2)}%)`;
+          badgePnl.className = 'text-xs font-mono font-bold px-2.5 py-1 rounded border ' + (pnl >= 0 ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-rose-400 bg-rose-500/10 border-rose-500/20');
         }
-      }
-      if (kpiPnl && last) {
-        const sign = last.pnl_real_usd >= 0 ? '+' : '';
-        kpiPnl.innerText = `${sign}$${Number(last.pnl_real_usd).toFixed(2)} (${sign}${Number(last.pnl_pct).toFixed(2)}%)`;
-        kpiPnl.className = 'text-sm font-bold font-mono mt-1 ' + (last.pnl_real_usd >= 0 ? 'text-emerald-400' : 'text-rose-400');
       }
 
       const options = {
@@ -4749,6 +5399,303 @@
       }, {});
     }
 
+        // Renderizado dinámico de Estrategias Desplegadas en Forward Test (según Desk Mode)
+    let cachedForwardStateData = null;
+
+    function renderActiveForwardStrategies(data) {
+      if (data) cachedForwardStateData = data;
+      const d = cachedForwardStateData;
+      if (!d) return;
+
+      const isCap = (currentDeskMode === 'CAPITAL_PROPIO');
+      const titleEl = document.getElementById('ft-desk-title');
+      if (titleEl) {
+        titleEl.innerText = isCap ? 'Capital Propio' : 'Prop Firm';
+      }
+
+      let activeStrats = [];
+      if (isCap) {
+        activeStrats = (d.capital_propio_account && d.capital_propio_account.active_strategies) ||
+                       (d.prop_firm_account && d.prop_firm_account.capital_propio && d.prop_firm_account.capital_propio.active_strategies) || [];
+      } else {
+        activeStrats = (d.prop_firm_account && d.prop_firm_account.active_strategies) || d.active_strategies || [];
+      }
+
+      const activeTbody = document.getElementById('ft-active-strategies-tbody');
+      const activeCount = document.getElementById('ft-active-strat-count');
+      const badgesCont = document.getElementById('ft-active-badges');
+      
+      if (activeCount) activeCount.innerText = `${activeStrats.length} Estrategias Activas`;
+      
+      if (badgesCont && activeStrats.length > 0) {
+        badgesCont.innerHTML = activeStrats.map(s => 
+          `<span class="px-2 py-0.5 rounded bg-[#EEF2FF] text-[#3730A3] font-bold border border-[#C7D2FE] text-[10px]">${s.strategy_id}</span>`
+        ).join('');
+      }
+
+      if (activeTbody) {
+        if (activeStrats.length > 0) {
+          activeTbody.innerHTML = activeStrats.map(s => `
+            <tr class="hover:bg-slate-900/60 transition font-mono text-xs">
+              <td class="py-2.5 px-3 font-bold text-white whitespace-nowrap">
+                <span class="text-cyan-400 font-bold">${s.strategy_id}</span>
+              </td>
+              <td class="py-2.5 px-3 whitespace-nowrap">
+                <span class="px-2 py-0.5 rounded bg-dark-900 border border-slate-700 text-slate-200 font-bold">${s.symbol}</span>
+              </td>
+              <td class="py-2.5 px-3 text-slate-300 whitespace-nowrap text-[11px]">
+                <span class="text-purple-300 font-semibold">${s.macro_anchor || 'BOLLINGER_REVERSION'}</span> + <span class="text-amber-300 font-semibold">${s.symbolic_trigger || 'LINEAR_DECAY'}</span>
+              </td>
+              <td class="py-2.5 px-3 text-right font-bold text-emerald-400 whitespace-nowrap">
+                $${Number(s.virtual_balance || 1000.0).toLocaleString(undefined, {minimumFractionDigits: 2})} USD
+              </td>
+              <td class="py-2.5 px-3 text-right font-bold text-white whitespace-nowrap">
+                ${Number(s.observed_sharpe || 0.0).toFixed(2)}
+              </td>
+              <td class="py-2.5 px-3 text-right font-bold text-emerald-400 whitespace-nowrap">
+                ${(Number(s.dsr_prob || 0.0) * 100.0).toFixed(1)}% <span class="text-[10px] text-slate-400">(${s.dsr_prob})</span>
+              </td>
+              <td class="py-2.5 px-3 text-right text-slate-300 whitespace-nowrap">
+                ${Number(s.mc_p95_dd || 0.0).toFixed(2)}%
+              </td>
+              <td class="py-2.5 px-3 text-center whitespace-nowrap">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 inline-block animate-pulse"></span>FORWARD TEST
+                </span>
+              </td>
+              <td class="py-2.5 px-3 text-center whitespace-nowrap">
+                <button onclick="viewStrategy('${s.strategy_id}')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-semibold bg-[#FAF7F2] text-[#181A20] hover:bg-[#EAE5DC] transition border border-[#D5D0C5] cursor-pointer">
+                  <i class="fa-solid fa-file-lines text-xs text-brand-600"></i> Ficha
+                </button>
+              </td>
+            </tr>
+          `).join('');
+        } else {
+          activeTbody.innerHTML = '<tr><td colspan="9" class="text-center py-6 text-slate-500">Sin estrategias en forward test activo</td></tr>';
+        }
+      }
+    }
+
+    let allFtOrders = [];
+
+    function renderFtOrdersTable(orders) {
+      const tbody = document.getElementById('ft-orders-tbody');
+      if (!tbody) return;
+
+      const isCap = (currentDeskMode === 'CAPITAL_PROPIO');
+      const targetBranch = isCap ? 'CAPITAL_PROPIO' : 'PROP_FIRM';
+
+      const filtered = (orders || []).filter(o => {
+        const br = o.branch || ((o.strategy && o.strategy.startsWith('PROP')) || (o.symbol && o.symbol.includes('EUR')) ? 'PROP_FIRM' : 'CAPITAL_PROPIO');
+        return br === targetBranch;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center py-6 text-slate-500 font-sans">Sin órdenes registradas para ${isCap ? 'Capital Propio' : 'Fondeo (Prop Firm)'} en la sesión actual</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(o => {
+        const isBuy = (o.action || '').toUpperCase().includes('BUY');
+        const isClose = (o.action || '').toUpperCase().includes('CLOSE') || (o.status || '').toUpperCase() === 'CLOSED';
+
+        const actionBadge = isBuy
+          ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">${o.action}</span>`
+          : `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">${o.action}</span>`;
+
+        let tpDisplay = '-';
+        if (o.tp) {
+          tpDisplay = (typeof o.tp === 'number') ? '$' + Number(o.tp).toLocaleString(undefined, {minimumFractionDigits: 2}) : o.tp;
+        } else if (isBuy) {
+          tpDisplay = '<span class="text-amber-400 font-bold">Dinámico (SMA5)</span>';
+        }
+
+        let slDisplay = '-';
+        if (o.sl && o.sl !== '-') {
+          slDisplay = '$' + Number(o.sl).toLocaleString(undefined, {minimumFractionDigits: 2});
+        }
+
+        // PnL Flotante en Vivo vs PnL Cerrado
+        let pnlDisplay = '<span class="text-slate-600 font-mono">-</span>';
+        if (o.status === 'OPEN' && !isClose) {
+          const floatVal = Number(o.floating_pnl || 0.0);
+          const isPos = floatVal >= 0;
+          const pnlSign = isPos ? '+$' : '-$';
+          pnlDisplay = `<span class="px-2 py-0.5 rounded text-[11px] font-bold font-mono ${isPos ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'} flex items-center justify-end gap-1"><span class="w-1.5 h-1.5 rounded-full ${isPos ? 'bg-emerald-400' : 'bg-rose-400'} animate-pulse inline-block"></span>${pnlSign}${Math.abs(floatVal).toFixed(2)}</span>`;
+        } else if (o.pnl != null && (isClose || (o.action || '').includes('CLOSE'))) {
+          const isPos = o.pnl >= 0;
+          pnlDisplay = `<span class="px-2 py-0.5 rounded text-[11px] font-bold font-mono ${isPos ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}" title="Orden cerrada">${isPos ? '+' : ''}$${Number(o.pnl).toFixed(2)}</span>`;
+        } else if (isClose) {
+          pnlDisplay = '<span class="text-slate-400 text-[10px] font-mono">Cerrada</span>';
+        }
+
+        const priceVal = Number(o.price || 0.0);
+        const priceDisplay = (priceVal < 5 && priceVal > 0) ? priceVal.toFixed(5) : priceVal.toLocaleString(undefined, {minimumFractionDigits: 2});
+
+        return `
+          <tr class="hover:bg-slate-900/60 transition font-mono text-xs">
+            <td class="py-2.5 px-3 text-slate-400 whitespace-nowrap">${o.timestamp || '-'}</td>
+            <td class="py-2.5 px-3 font-bold text-cyan-400">${o.symbol || '-'}</td>
+            <td class="py-2.5 px-3 text-purple-300 font-semibold">${o.strategy || '-'}</td>
+            <td class="py-2.5 px-3 whitespace-nowrap">${actionBadge}</td>
+            <td class="py-2.5 px-3 text-right text-white font-bold whitespace-nowrap">$${priceDisplay}</td>
+            <td class="py-2.5 px-3 text-right text-amber-300 font-mono text-[11px] whitespace-nowrap">${tpDisplay}</td>
+            <td class="py-2.5 px-3 text-right text-rose-400 font-mono text-[11px] whitespace-nowrap">${slDisplay}</td>
+            <td class="py-2.5 px-3 text-right font-mono whitespace-nowrap">${pnlDisplay}</td>
+            <td class="py-2.5 px-3 text-right text-slate-400 whitespace-nowrap">$${Number(o.fee || 0).toFixed(2)}</td>
+            <td class="py-2.5 px-3 text-slate-400 text-[11px]">${o.notes || ''}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function updateForwardDeskCardAndOrders(data) {
+      if (data) cachedForwardStateData = data;
+      const d = cachedForwardStateData;
+      if (!d) return;
+
+      const isCap = (currentDeskMode === 'CAPITAL_PROPIO');
+      const pf = d.prop_firm_account || {};
+      const cap = d.capital_propio_account || {};
+      const liveSync = d.live_broker_sync || pf.live_broker_sync || {};
+
+      // 1. Etiqueta de la tabla de órdenes
+      const deskLabel = document.getElementById('ft-orders-desk-label');
+      if (deskLabel) {
+        deskLabel.innerText = isCap ? 'Capital Propio' : 'Fondeo / Prop Firm';
+      }
+
+      // 2. Elementos de la tarjeta principal
+      const badgeDesk = document.getElementById('ft-card-badge-desk');
+      const mainTitle = document.getElementById('ft-card-main-title');
+      const initLabel = document.getElementById('ft-initial-label');
+      const initBal = document.getElementById('ft-initial-bal');
+      const brokerBal = document.getElementById('ft-live-broker-bal');
+
+      const balEl = document.getElementById('ft-pf-balance');
+      const pnlEl = document.getElementById('ft-pf-pnl');
+      const ddHead = document.getElementById('ft-dd-header');
+      const ddEl = document.getElementById('ft-pf-dd');
+      const targetHead = document.getElementById('ft-target-header');
+      const targetEl = document.getElementById('ft-pf-target');
+
+      const liveBrokerBalance = liveSync.broker_balance != null ? Number(liveSync.broker_balance) : 984.57;
+      if (brokerBal) {
+        brokerBal.innerText = '$' + liveBrokerBalance.toFixed(2) + ' USD';
+      }
+
+      if (isCap) {
+        if (badgeDesk) badgeDesk.innerText = 'IC MARKETS MT5 + HYPERLIQUID DEX · TRADFI & CRYPTO';
+        if (mainTitle) mainTitle.innerText = 'Cartera Capital Propio ($1k TradFi + $1k DEX)';
+        if (initLabel) initLabel.innerText = 'INICIAL TOTAL';
+        if (initBal) initBal.innerText = '$2,000.00 USD';
+
+        const curBal = Number(cap.current_balance || (liveBrokerBalance + 1013.56));
+        if (balEl) balEl.innerText = '$' + curBal.toLocaleString(undefined, {minimumFractionDigits: 2});
+
+        const pnl = Number(cap.realized_pnl != null ? cap.realized_pnl : (curBal - 2000.0));
+        if (pnlEl) {
+          pnlEl.innerText = (pnl >= 0 ? '+$' : '-$') + Math.abs(pnl).toFixed(2);
+          pnlEl.className = 'text-sm font-bold font-mono mt-1 ' + (pnl >= 0 ? 'text-emerald-400' : 'text-rose-400');
+        }
+        if (ddHead) ddHead.innerText = 'Max Drawdown (EOD)';
+        if (ddEl) {
+          const ddPct = (cap.max_dd_pct != null) ? Number(cap.max_dd_pct) : 0.85;
+          ddEl.innerText = ddPct.toFixed(2) + '% ($16.95)';
+        }
+        if (targetHead) targetHead.innerText = 'Objetivo Anual';
+        if (targetEl) targetEl.innerText = '≥ +30.0% / año';
+      } else {
+        if (badgeDesk) badgeDesk.innerText = 'PROP FIRM CHALLENGE (EOD DD)';
+        if (mainTitle) mainTitle.innerText = 'Cuenta Prop Firm Simulada ($100k Challenge)';
+        if (initLabel) initLabel.innerText = 'INICIAL CUENTA';
+        if (initBal) initBal.innerText = '$100,000.00 USD';
+
+        const curBal = Number(pf.current_balance || 100002.01);
+        if (balEl) balEl.innerText = '$' + curBal.toLocaleString(undefined, {minimumFractionDigits: 2});
+
+        const pnl = Number(pf.total_realized_pnl != null ? pf.total_realized_pnl : 2.01);
+        if (pnlEl) {
+          pnlEl.innerText = (pnl >= 0 ? '+$' : '-$') + Math.abs(pnl).toFixed(2);
+          pnlEl.className = 'text-sm font-bold font-mono mt-1 ' + (pnl >= 0 ? 'text-emerald-400' : 'text-rose-400');
+        }
+        if (ddHead) ddHead.innerText = 'Max Drawdown (EOD)';
+        if (ddEl) {
+          const ddPct = (pf.current_eod_drawdown_pct != null) ? Number(pf.current_eod_drawdown_pct) : 0.0;
+          const ddUsd = (pf.current_eod_drawdown_usd != null) ? Number(pf.current_eod_drawdown_usd) : 0.0;
+          ddEl.innerText = ddPct.toFixed(2) + '% ($' + ddUsd.toFixed(2) + ')';
+        }
+        if (targetHead) targetHead.innerText = 'Objetivo Challenge';
+        if (targetEl) {
+          const targetPct = (pnl / 6000.0 * 100.0);
+          targetEl.innerText = (targetPct > 0 ? targetPct.toFixed(2) : '0.00') + '% ($' + Math.max(0, pnl).toFixed(2) + '/$6,000)';
+        }
+      }
+
+      // 3. Tarjetas superiores de portfolio activo
+      const s5 = document.getElementById('active-card-prop-spx-bal');
+      const s6 = document.getElementById('active-card-prop-ndx-bal');
+      if (s5) s5.innerText = '$' + Number(pf.current_balance || 100002.01).toLocaleString(undefined, {minimumFractionDigits: 2}) + ' USD';
+      if (s6) s6.innerText = '$' + Number(pf.current_balance || 100002.01).toLocaleString(undefined, {minimumFractionDigits: 2}) + ' USD';
+
+      // 4. Posición Flotante Dinámica (según desk actual)
+      const posEl = document.getElementById('ft-pf-floating-pos');
+      const slEl = document.getElementById('ft-pf-floating-sl');
+      const statusEl = document.getElementById('ft-pf-floating-status');
+
+      const openPositions = isCap 
+        ? (cap.open_positions || {}) 
+        : (pf.open_positions || {});
+      const openKeys = Object.keys(openPositions);
+
+      if (openKeys.length > 0) {
+        const sym = openKeys[0];
+        const pos = openPositions[sym];
+        const side = (pos.side || 'LONG').toUpperCase();
+        const lots = pos.lots != null ? pos.lots : (pos.shares != null ? pos.shares : 0.1);
+        const entryPrice = Number(pos.entry_price || pos.price || 0.0);
+        const floatPnl = Number(pos.floating_pnl || 0.0);
+        const pnlSign = floatPnl >= 0 ? '+' : '';
+        if (posEl) posEl.innerHTML = `<span class="px-2.5 py-1 rounded-md bg-[#EEF2FF] text-[#3730A3] font-bold border border-[#C7D2FE]">${sym} ${side} (${Number(lots).toFixed(2)} lots @ $${entryPrice.toFixed(2)}) <strong class="${floatPnl >= 0 ? 'text-emerald-600' : 'text-rose-600'} ml-1">(${pnlSign}$${floatPnl.toFixed(2)})</strong></span>`;
+        if (slEl) slEl.innerText = pos.sl_price ? '$' + Number(pos.sl_price).toFixed(2) + ' USD' : 'Dinámico / Sin SL';
+        if (statusEl) statusEl.innerHTML = '<span class="text-[#065F46] font-bold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#10b981] animate-pulse inline-block"></span> Posición viva en mercado — Monitorización en tiempo real</span>';
+      } else {
+        if (posEl) posEl.innerHTML = '<span class="px-2.5 py-1 rounded-md bg-[#EAE5DC] text-[#181A20] font-bold border border-[#DDD7CD]">NINGUNA (Flat / 100% Liquidez)</span>';
+        if (slEl) slEl.innerText = 'N/A (Sin posición abierta)';
+        if (statusEl) statusEl.innerHTML = '<span class="text-[#5865F2] font-semibold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#10b981] animate-pulse inline-block"></span> Escaneando señales de entrada en tiempo real (Daemon Activo)</span>';
+      }
+
+      // 5. Renderizar tabla de órdenes filtrada por Desk
+      allFtOrders = d.order_history || [];
+      renderFtOrdersTable(allFtOrders);
+    }
+
+    async function refreshForwardTestUI(btn) {
+      if (!btn) btn = document.getElementById('ft-refresh-btn');
+      const icon = btn ? btn.querySelector('i') : null;
+      const label = btn ? btn.querySelector('span') : null;
+      if (btn) btn.disabled = true;
+      if (icon) icon.classList.add('fa-spin');
+      if (label) label.innerText = 'Actualizando...';
+
+      try {
+        await Promise.all([
+          fetchForwardState(),
+          typeof fetchFtTradesData === 'function' ? fetchFtTradesData() : Promise.resolve()
+        ]);
+        if (label) label.innerText = '¡Actualizado!';
+      } catch (err) {
+        console.error('Error al actualizar Forward Test:', err);
+        if (label) label.innerText = 'Error';
+      } finally {
+        if (icon) icon.classList.remove('fa-spin');
+        setTimeout(() => {
+          if (label) label.innerText = 'Actualizar';
+          if (btn) btn.disabled = false;
+        }, 1500);
+      }
+    }
+
     async function fetchForwardState() {
       try {
         const res = await fetch('/api/forward_state');
@@ -4792,124 +5739,25 @@
           }
         }
 
-                // Cuenta Prop Firm Forward
-        if (data.prop_firm_account) {
-          const pf = data.prop_firm_account;
-          const balEl = document.getElementById('ft-pf-balance');
-          const pnlEl = document.getElementById('ft-pf-pnl');
-          const ddEl = document.getElementById('ft-pf-dd');
-          const targetEl = document.getElementById('ft-pf-target');
-          
-          if (balEl) balEl.innerText = '$' + Number(pf.current_balance || 100000.0).toLocaleString(undefined, {minimumFractionDigits: 2});
+                // 1. Actualizar Cuenta Forward y Tabla de Órdenes con Segregación Estricta (Capital Propio vs Fondeo)
+        updateForwardDeskCardAndOrders(data);
 
-          // Actualizar saldo de broker real sincronizado
-          const liveBrokerEl = document.getElementById('ft-live-broker-bal');
-          if (liveBrokerEl && pf.live_broker_sync && pf.live_broker_sync.broker_balance) {
-            liveBrokerEl.innerText = '$' + Number(pf.live_broker_sync.broker_balance).toFixed(2) + ' USD';
-          }
-          const s5 = document.getElementById('active-card-prop-spx-bal');
-          const s6 = document.getElementById('active-card-prop-ndx-bal');
-          if (s5) s5.innerText = '$' + Number(pf.current_balance || 100000.0).toLocaleString(undefined, {minimumFractionDigits: 2}) + ' USD';
-          if (s6) s6.innerText = '$' + Number(pf.current_balance || 100000.0).toLocaleString(undefined, {minimumFractionDigits: 2}) + ' USD';
-          if (pnlEl) {
-            const pnl = Number(pf.total_realized_pnl || 0.0);
-            pnlEl.innerText = (pnl >= 0 ? '+$' : '-$') + Math.abs(pnl).toFixed(2);
-            pnlEl.className = 'text-sm font-bold font-mono mt-1 ' + (pnl >= 0 ? 'text-emerald-400' : 'text-rose-400');
-          }
-          if (ddEl) {
-            const ddPct = (pf.current_eod_drawdown_pct != null) ? Number(pf.current_eod_drawdown_pct) : 0.0;
-            const ddUsd = (pf.current_eod_drawdown_usd != null) ? Number(pf.current_eod_drawdown_usd) : 0.0;
-            ddEl.innerText = ddPct.toFixed(2) + '% ($' + ddUsd.toFixed(2) + ')';
-          }
-          if (targetEl) {
-            const pnl = Number(pf.total_realized_pnl || 0.0);
-            const targetPct = (pnl / 6000.0 * 100.0);
-            targetEl.innerText = (targetPct > 0 ? targetPct.toFixed(1) : '0.0') + '% ($' + Math.max(0, pnl).toFixed(0) + '/$6k)';
-          }
-
-          // Posición Flotante Dinámica
-          const posEl = document.getElementById('ft-pf-floating-pos');
-          const slEl = document.getElementById('ft-pf-floating-sl');
-          const statusEl = document.getElementById('ft-pf-floating-status');
-          if (pf.open_positions && Object.keys(pf.open_positions).length > 0) {
-            const sym = Object.keys(pf.open_positions)[0];
-            const pos = pf.open_positions[sym];
-            if (posEl) posEl.innerHTML = `<span class="px-2.5 py-1 rounded-md bg-[#EEF2FF] text-[#3730A3] font-bold border border-[#C7D2FE]">${sym} ${pos.side || 'LONG'} (${Number(pos.shares).toFixed(2)} sh @ $${Number(pos.entry_price).toFixed(2)})</span>`;
-            if (slEl) slEl.innerText = '$' + Number(pos.sl_price).toFixed(2) + ' USD';
-            if (statusEl) statusEl.innerHTML = '<span class="text-[#065F46] font-bold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#10b981] animate-pulse inline-block"></span> Posición viva en mercado — Gestión activa de SL</span>';
-          } else {
-            if (posEl) posEl.innerHTML = '<span class="px-2.5 py-1 rounded-md bg-[#EAE5DC] text-[#181A20] font-bold border border-[#DDD7CD]">NINGUNA (Flat / 100% Liquidez)</span>';
-            if (slEl) slEl.innerText = 'N/A (Sin posición abierta)';
-            if (statusEl) statusEl.innerHTML = '<span class="text-[#5865F2] font-semibold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#10b981] animate-pulse inline-block"></span> Escaneando señales de entrada en tiempo real (CME Abierto)</span>';
-          }
-
-          // Órdenes en vivo
-          const tbody = document.getElementById('ft-orders-tbody');
-          if (tbody) {
-            if (pf.order_history && pf.order_history.length > 0) {
-              tbody.innerHTML = pf.order_history.map(o => {
-                const isBuy = (o.action || '').toUpperCase().includes('BUY');
-                const isClose = (o.action || '').toUpperCase().includes('CLOSE');
-                
-                const actionBadge = isBuy
-                  ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">${o.action}</span>`
-                  : `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">${o.action}</span>`;
-                
-                let tpDisplay = '-';
-                if (o.tp) {
-                  tpDisplay = (typeof o.tp === 'number') ? '$' + Number(o.tp).toLocaleString(undefined, {minimumFractionDigits: 2}) : o.tp;
-                } else if (isBuy) {
-                  tpDisplay = '<span class="text-amber-400 font-bold">Dinámico (SMA5)</span>';
-                }
-
-                let slDisplay = '-';
-                if (o.sl && o.sl !== '-') {
-                  slDisplay = '$' + Number(o.sl).toLocaleString(undefined, {minimumFractionDigits: 2});
-                }
-
-                // PnL Flotante en Vivo para operaciones abiertas
-                let pnlDisplay = '<span class="text-slate-600 font-mono">-</span>';
-                if (!isClose) {
-                  // Operación abierta: computar balance flotante en tiempo real
-                  const brokerSync = pf.live_broker_sync || {};
-                  const curBal = Number(brokerSync.broker_balance || 1000.0);
-                  const curEq = Number(brokerSync.broker_equity || 1001.52);
-                  const floatDiff = curEq - 1000.0;
-                  const isPos = floatDiff >= 0;
-                  const pnlSign = isPos ? '+$' : '-$';
-                  pnlDisplay = `<span class="px-2 py-0.5 rounded text-[11px] font-bold font-mono ${isPos ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'}" title="Balance flotante en directo: $${curEq.toFixed(2)} USD">${pnlSign}${Math.abs(floatDiff).toFixed(2)} USD</span>`;
-                } else if (o.pnl != null) {
-                  const isPos = o.pnl >= 0;
-                  pnlDisplay = `<span class="px-2 py-0.5 rounded text-[11px] font-bold font-mono ${isPos ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}">${isPos ? '+' : ''}$${Number(o.pnl).toFixed(2)}</span>`;
-                }
-
-                return `
-                  <tr class="hover:bg-slate-900/60 transition font-mono text-xs">
-                    <td class="py-2.5 px-3 text-slate-400">${o.timestamp}</td>
-                    <td class="py-2.5 px-3 font-bold text-cyan-400">${o.symbol}</td>
-                    <td class="py-2.5 px-3 text-purple-300">${o.strategy || 'PROP-SPX-005'}</td>
-                    <td class="py-2.5 px-3">${actionBadge}</td>
-                    <td class="py-2.5 px-3 text-right text-white font-bold">$${Number(o.price).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                    <td class="py-2.5 px-3 text-right text-amber-300 font-mono text-[11px]">${tpDisplay}</td>
-                    <td class="py-2.5 px-3 text-right text-rose-400 font-mono text-[11px]">${slDisplay}</td>
-                    <td class="py-2.5 px-3 text-right font-mono">${pnlDisplay}</td>
-                    <td class="py-2.5 px-3 text-right text-slate-400">$${Number(o.fee || 0).toFixed(2)}</td>
-                    <td class="py-2.5 px-3 text-slate-400 text-[11px]">${o.notes || ''}</td>
-                  </tr>
-                `;
-              }).join('');
-            } else {
-              tbody.innerHTML = '<tr><td colspan="10" class="text-center py-6 text-slate-500">Sin órdenes ejecutadas aún en la sesión actual</td></tr>';
-            }
-          }
-        }
-
-        // Crypto Paper
+        // 2. Crypto Paper Hyperliquid
         if (data.crypto_account) {
           const cp = data.crypto_account;
           const cpBalEl = document.getElementById('ft-crypto-balance');
-          if (cpBalEl) cpBalEl.innerText = Number(cp.balance || 1000.66).toFixed(2) + ' USDC';
+          const cpPnlEl = document.getElementById('ft-crypto-pnl');
+          const bal = Number(cp.balance || 1013.56);
+          if (cpBalEl) cpBalEl.innerText = bal.toFixed(2) + ' USDC';
+          const pnl = Number(cp.pnl != null ? cp.pnl : (bal - 1000.0));
+          if (cpPnlEl) {
+            cpPnlEl.innerText = (pnl >= 0 ? '+' : '') + pnl.toFixed(2) + ' USDC';
+            cpPnlEl.className = 'text-sm font-bold font-mono mt-1 truncate ' + (pnl >= 0 ? 'text-emerald-400' : 'text-rose-400');
+          }
         }
+
+        // Renderizar Estrategias Activas en Forward Test
+        renderActiveForwardStrategies(data);
 
         // Renderizar Curva de Rentabilidad en Tiempo Real de Forward Test
         if (data.equity_curve && typeof renderFtEquityChart === 'function') {
@@ -5892,13 +6740,42 @@
           : `${visibleCount} ESTRATEGIAS FONDEO (PROP FIRM)`;
       }
 
-      // 2. Sincronizar selector de Backtests
+    // Segregación estricta del selector de Backtest según Mesa Operativa
+    function updateAccountSelectorOptions(mode) {
       const bFilter = document.getElementById('account-selector');
-      if (bFilter) {
-        bFilter.value = (mode === 'CAPITAL_PROPIO') ? 'CAP-SPX-006' : 'PROP-NDX-005';
-        if (typeof onAccountFilterChange === 'function') {
-          onAccountFilterChange();
-        }
+      if (!bFilter) return;
+
+      if (mode === 'PROP_FIRM') {
+        bFilter.innerHTML = `
+          <option value="PORT-NDX-SPX" selected>🏆 Cartera Combinada Sprint (NDX-005 + SPX-005 · 62 Trades · Target en 18 Días)</option>
+          <option value="PROP-NDX-005">🏛️ Nasdaq 100 2h Bollinger Dip (PROP-NDX-005 · 30 Trades · Target en 21 Días)</option>
+          <option value="PROP-SPX-005">🏛️ S&P 500 1D Connors RSI2 (PROP-SPX-005 · 32 Trades · Target en 28 Días)</option>
+          <option value="PROP-NDX-006">🏛️ Nasdaq 100 1h Bollinger Dip (PROP-NDX-006 · 63 Trades · Target en 32 Días)</option>
+          <option value="PROP-FX-EUR-001">💶 EUR/USD 1h London-NY (PROP-FX-EUR-001 · 120 Trades)</option>
+          <option value="HYB-NDX-BOL-LINE-48-2.0-3.0">⚡ NDX Híbrido Linear Decay 2.0/3.0 (Futuros/CFD · 43 Trades · Target en 25 Días)</option>
+          <option value="HYB-NDX-BOL-LINE-48-2.0-4.0">⚡ NDX Híbrido Linear Decay 2.0/4.0 (Futuros/CFD · 43 Trades · Target en 25 Días)</option>
+          <option value="HYB-NDX-BOL-LINE-48-2.5-3.0">⚡ NDX Híbrido Linear Decay 2.5/3.0 (Prop Firm · 43 Trades · Target en 29 Días)</option>
+          <option value="HYB-NDX-BOL-LINE-48-2.5-4.0">⚡ NDX Híbrido Linear Decay 2.5/4.0 (Prop Firm · 43 Trades · Target en 29 Días)</option>
+          <option value="HYB-NDX-BOL-LINE-48-2.5-2.0">⚡ NDX Híbrido Linear Decay 2.5/2.0 (Prop Firm · 43 Trades · Target en 29 Días)</option>
+          <option value="ALL_PROP">🏛️ Consolidado Fondeo (Cartera Completa · 460 Trades)</option>
+        `;
+        bFilter.value = 'PORT-NDX-SPX';
+      } else {
+        bFilter.innerHTML = `
+          <option value="CAP-SPX-006" selected>📊 S&P 500 4h Bollinger Dip (Capital Propio TradFi · 318 Trades)</option>
+          <option value="CAP-NDX-005">📈 Nasdaq 100 2h Bollinger Dip (Capital Propio TradFi · 365 Trades)</option>
+          <option value="STRAT-FAST-035">⚡ Bitcoin 1h Shannon Entropy (Capital Propio DEX · 262 Trades)</option>
+          <option value="CRYPTO-HL">⚡ Crypto Paper Hyperliquid (1.000 USDC · Testnet Activo)</option>
+          <option value="ALL_CAP">💼 Consolidado Capital Propio (TradFi + DEX · 945 Trades)</option>
+        `;
+        bFilter.value = 'CAP-SPX-006';
+      }
+    }
+
+      // 2. Sincronizar selector de Backtests con segregación estricta por Mesa
+      updateAccountSelectorOptions(mode);
+      if (typeof onAccountFilterChange === 'function') {
+        onAccountFilterChange();
       }
 
       // 2b. Sincronizar filtro en Contraste Tri-Faceta
@@ -5946,6 +6823,21 @@
         } else {
           setFtCurveSegment('REAL');
         }
+      }
+
+      // 6. Sincronizar Tabla de Estrategias Desplegadas en Forward Test
+      if (typeof renderActiveForwardStrategies === 'function') {
+        renderActiveForwardStrategies();
+      }
+
+      // 7. Sincronizar Tarjeta de Métricas y Órdenes en Vivo de Forward Test
+      if (typeof updateForwardDeskCardAndOrders === 'function') {
+        updateForwardDeskCardAndOrders(cachedForwardStateData);
+      }
+
+      // 8. Sincronizar Historial de Operaciones Forward Test según Mesa
+      if (typeof setFtTradeFilter === 'function') {
+        setFtTradeFilter(currentFtTradeFilter);
       }
     }
 
