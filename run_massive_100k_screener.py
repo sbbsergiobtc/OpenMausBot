@@ -156,6 +156,24 @@ def run_threshold_vectorized_sweep(df: pd.DataFrame, desk_mode: str, num_evals: 
     has_dt = 'dt' in df.columns
     if has_dt:
         dt_values = df['dt'].values
+        try:
+            t0_dt = pd.to_datetime(dt_values[0])
+            t1_dt = pd.to_datetime(dt_values[-1])
+            n_years = max((t1_dt - t0_dt).total_seconds() / (365.25 * 86400.0), 0.1)
+        except Exception:
+            n_years = 1.0
+    else:
+        if "15m" in tf_name: n_years = max(n_bars / (4 * 24 * 365.25), 0.1)
+        elif "1h" in tf_name: n_years = max(n_bars / (24 * 365.25), 0.1)
+        elif "2h" in tf_name: n_years = max(n_bars / (12 * 365.25), 0.1)
+        elif "4h" in tf_name: n_years = max(n_bars / (6 * 365.25), 0.1)
+        else: n_years = max(n_bars / (84 * 252), 0.1)
+        
+    bnh_return_pct = ((c[-1] - c[0]) / max(c[0], 1e-6)) * 100.0
+    if c[-1] > 0 and c[0] > 0 and n_years > 0:
+        bnh_cagr_pct = (((c[-1] / c[0]) ** (1.0 / n_years)) - 1.0) * 100.0
+    else:
+        bnh_cagr_pct = 0.0
     
     for i in range(num_evals):
         fp = fast_periods[i]
@@ -168,7 +186,13 @@ def run_threshold_vectorized_sweep(df: pd.DataFrame, desk_mode: str, num_evals: 
         sample_rets = log_rets[w:]
         
         sig = np.sign(sample_rets)
-        trade_rets = sig * sample_rets - fee_pct
+        
+        # Sizing dinámico institucional: 1.0% de riesgo por trade según distancia de SL en Capital Propio
+        if desk_mode == "CAPITAL_PROPIO":
+            pos_size = np.clip(0.01 / max(sl, 0.005), 0.2, 4.0)
+            trade_rets = (sig * sample_rets - fee_pct) * pos_size
+        else:
+            trade_rets = sig * sample_rets - fee_pct
         
         cum_pnl = np.cumsum(trade_rets)
         peak = np.maximum.accumulate(cum_pnl)
@@ -212,6 +236,22 @@ def run_threshold_vectorized_sweep(df: pd.DataFrame, desk_mode: str, num_evals: 
         if total_pnl <= 0:
             continue
             
+        # FILTROS MANDATORIOS CAPITAL PROPIO: CAGR >= 30.0% y Superar Buy & Hold
+        ann_cagr = 0.0
+        if desk_mode == "CAPITAL_PROPIO":
+            if total_pnl > -100.0 and n_years > 0:
+                ann_cagr = (((1.0 + total_pnl / 100.0) ** (1.0 / n_years)) - 1.0) * 100.0
+            else:
+                ann_cagr = -100.0
+                
+            # Regla Mandatoria 1: CAGR >= 30.0% anual neta
+            if ann_cagr < 30.0:
+                continue
+                
+            # Regla Mandatoria 2: Superar Buy & Hold del activo
+            if ann_cagr <= bnh_cagr_pct or total_pnl <= bnh_return_pct:
+                continue
+            
         win_trades = np.sum(trade_rets > 0)
         tot_trades = len(trade_rets)
         if tot_trades < 30:
@@ -249,6 +289,8 @@ def run_threshold_vectorized_sweep(df: pd.DataFrame, desk_mode: str, num_evals: 
             "profit_factor": round(float(pf), 2),
             "win_rate": round(float(win_rate), 1),
             "total_pnl_pct": round(float(total_pnl), 2),
+            "cagr_pct": round(float(ann_cagr), 2) if desk_mode == "CAPITAL_PROPIO" else None,
+            "bnh_cagr_pct": round(float(bnh_cagr_pct), 2) if desk_mode == "CAPITAL_PROPIO" else None,
             "sharpe": round(float(ann_sharpe), 2),
             "score": round(float(score), 3),
             "days_to_target": round(float(days_to_target), 1) if is_prop else None,
@@ -465,13 +507,15 @@ report_content = f"""# INFORME OFICIAL: BÚSQUEDA Y AUDITORÍA MASIVA DE 100.000
 ---
 
 ## 2. Estrategias Aprobadas y Auto-Desplegadas en Forward Test
-| ID Estrategia | Mesa | Activo | Timeframe | ROI Neto (%) | Profit Factor | Max DD (%) | DSR Prob | MC P95 DD (%) | Time-to-Target | Estado Despliegue |
-| :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| ID Estrategia | Mesa | Activo | Timeframe | ROI Total (%) | CAGR Anual (%) | BnH Anual (%) | Profit Factor | Max DD (%) | DSR Prob | MC P95 DD (%) | Time-to-Target / Alpha | Estado Despliegue |
+| :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
 """
 
 for a in stage4_approved:
     tt_str = f"{a.get('sprint_tier', 'N/A')} ({a.get('days_to_target', 'N/A')}d)" if a.get('days_to_target') is not None else "Multi-Año"
-    report_content += f"| **{a['candidate_id']}** | {a['desk_mode']} | {a['asset']} | {a['tf']} | **{a.get('total_pnl_pct', 0.0):+.2f}%** | {a['profit_factor']} | {a['max_dd']}% | {a['dsr_prob']} | {a['mc_p95_dd']}% | {tt_str} | ✅ Auto-Desplegada ($1.000) |\n"
+    cagr_str = f"**{a['cagr_pct']:+.2f}%**" if a.get('cagr_pct') is not None else "N/A (Sprint)"
+    bnh_str = f"{a['bnh_cagr_pct']:+.2f}%" if a.get('bnh_cagr_pct') is not None else "N/A"
+    report_content += f"| **{a['candidate_id']}** | {a['desk_mode']} | {a['asset']} | {a['tf']} | **{a.get('total_pnl_pct', 0.0):+.2f}%** | {cagr_str} | {bnh_str} | {a['profit_factor']} | {a['max_dd']}% | {a['dsr_prob']} | {a['mc_p95_dd']}% | {tt_str} | ✅ Auto-Desplegada ($1.000) |\n"
 
 report_content += """
 ---

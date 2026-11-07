@@ -57,13 +57,31 @@ def generate_report(target_date_str=None):
                 continue
             if in_table and line.startswith("|") and not line.startswith("| :---"):
                 parts = [p.strip() for p in line.split("|")[1:-1]]
-                if len(parts) >= 8:
+                if len(parts) >= 11:
                     evaluated_strategies.append({
                         "id": parts[0],
                         "desk": parts[1],
                         "asset": parts[2],
                         "tf": parts[3],
-                        "roi": parts[4] if "%" in parts[4] else f"+{parts[4]}%",
+                        "roi_total": parts[4],
+                        "cagr": parts[5],
+                        "bnh": parts[6],
+                        "pf": parts[7],
+                        "max_dd": parts[8],
+                        "dsr": parts[9],
+                        "mc_p95": parts[10],
+                        "tier": parts[11] if len(parts) > 11 else "N/A",
+                        "status": "APROBADA & DESPLEGADA"
+                    })
+                elif len(parts) >= 8:
+                    evaluated_strategies.append({
+                        "id": parts[0],
+                        "desk": parts[1],
+                        "asset": parts[2],
+                        "tf": parts[3],
+                        "roi_total": parts[4],
+                        "cagr": "N/A",
+                        "bnh": "N/A",
                         "pf": parts[5],
                         "max_dd": parts[6],
                         "dsr": parts[7],
@@ -188,12 +206,15 @@ def generate_report(target_date_str=None):
     lines.append(f"* **Total Estrategias / Combinaciones Exploradas:** 100.000 combinaciones vectorizadas + heurísticas de enjambre.")
     lines.append(f"* **Familias Ortogonales de Alpha Aprobadas:** **{len([s for s in evaluated_strategies if 'APROBADA' in s['status']])}**")
     lines.append("")
-    lines.append("### Tabla Detallada de Estrategias Certificadas (con ROI Neto)")
-    lines.append("| ID Estrategia | Track / Mesa | Activo | Timeframe | ROI Neto (%) | Profit Factor | Max DD (%) | DSR Prob | MC P95 DD | Time-to-Target | Estado |")
-    lines.append("| :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |")
+    lines.append("### Tabla Detallada de Estrategias Certificadas (con ROI Total y CAGR Anual)")
+    lines.append("| ID Estrategia | Track / Mesa | Activo | Timeframe | ROI Total (%) | CAGR Anual (%) | BnH Anual (%) | Profit Factor | Max DD (%) | DSR Prob | MC P95 DD | Time-to-Target / Alpha | Estado |")
+    lines.append("| :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |")
     
     for s in evaluated_strategies:
-        lines.append(f"| **{s['id']}** | {s['desk']} | {s['asset']} | {s['tf']} | **{s['roi']}** | {s['pf']} | {s['max_dd']} | {s['dsr']} | {s['mc_p95']} | {s['tier']} | ✅ {s['status']} |")
+        roi_tot = s.get('roi_total', s.get('roi', 'N/A'))
+        cagr_val = s.get('cagr', 'N/A')
+        bnh_val = s.get('bnh', 'N/A')
+        lines.append(f"| **{s['id']}** | {s['desk']} | {s['asset']} | {s['tf']} | **{roi_tot}** | {cagr_val} | {bnh_val} | {s['pf']} | {s['max_dd']} | {s['dsr']} | {s['mc_p95']} | {s['tier']} | ✅ {s['status']} |")
     
     if not evaluated_strategies:
         lines.append("| *Sin registros de screener en la fecha consultada* | - | - | - | - | - | - | - | - | - | - |")
