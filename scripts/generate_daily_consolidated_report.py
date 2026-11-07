@@ -286,7 +286,9 @@ def generate_report(target_date_str=None):
     
     top_approved = [s for s in evaluated_strategies if 'APROBADA' in s['status']][:6]
     for ta in top_approved:
-        summary_msg += f"  • `{ta['id']}` ({ta['asset']} · {ta['desk']}): ROI Neto: *{ta['roi']}* | PF: {ta['pf']} | DD: {ta['max_dd']}\n"
+        r_val = ta.get('roi_total', ta.get('roi', 'N/A'))
+        cagr_val = ta.get('cagr', 'N/A')
+        summary_msg += f"  • `{ta['id']}` ({ta['asset']} · {ta['desk']}): ROI Total: *{r_val}* | CAGR: *{cagr_val}* | PF: {ta['pf']} | DD: {ta['max_dd']}\n"
         
     summary_msg += (
         f"\n📈 *2. Resultados en Forward Test ($1.000 virtual c/u)*\n"
