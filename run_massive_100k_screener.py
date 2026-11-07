@@ -285,15 +285,21 @@ for s in tradfi_symbols:
         print(f"    - {s}: {len(cands)} superan los umbrales")
 
 # PARTE B: CUENTAS FONDEADAS (50.000 combinaciones en US100 y US500 RTH 5m)
-evals_per_asset_prop = 25000
+# Segmentado en: 25.000 FUTUROS CME + 25.000 CFDs
 print("\n>>> Evaluando 50.000 combinaciones para FONDEO (ÚNICAMENTE US500 y US100 en RTH 5m)...")
 
 for sym in ["NDX", "SPX"]:
     df = get_tradfi_data(sym, "5m", rth_sprint=True)
     if df is not None:
-        cands = run_threshold_vectorized_sweep(df, "PROP_FIRM", evals_per_asset_prop, sym, "5m RTH 60D")
-        stage1_candidates.extend(cands)
-        print(f"    - {sym}: {len(cands)} superan los umbrales")
+        # B.1: Futuros CME Globex (Target 6.0% | Max EOD DD 3.0%)
+        cands_fut = run_threshold_vectorized_sweep(df, "PROP_FIRM_FUTURES", 12500, sym, "5m RTH 60D")
+        stage1_candidates.extend(cands_fut)
+        print(f"    - {sym} [FUTUROS CME]: {len(cands_fut)} superan los umbrales")
+        
+        # B.2: CFDs / Forex (Target 8.0% | Max DD 8.0%)
+        cands_cfd = run_threshold_vectorized_sweep(df, "PROP_FIRM_CFD", 12500, sym, "5m RTH 60D")
+        stage1_candidates.extend(cands_cfd)
+        print(f"    - {sym} [CFDs / FOREX]: {len(cands_cfd)} superan los umbrales")
 
 elapsed_s1 = time.time() - t0
 print(f"\n[FIN ETAPA 1] Supervivientes totales N1: {len(stage1_candidates)} en {elapsed_s1:.2f} segundos.")
@@ -351,7 +357,12 @@ for idx, c in enumerate(stage2_candidates, start=1):
     asset = c["asset"]
     sr = c["sharpe"]
     pnls = np.array(c.get("sample_pnls", [0.002] * 100))
-    limit_dd = 20.0 if mode == "CAPITAL_PROPIO" else 3.50
+    if mode == "CAPITAL_PROPIO":
+        limit_dd = 20.0
+    elif "FUTURES" in mode:
+        limit_dd = 3.00
+    else:
+        limit_dd = 8.00
     
     # DSR formal
     try:
