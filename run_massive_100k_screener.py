@@ -131,10 +131,27 @@ def run_threshold_vectorized_sweep(df: pd.DataFrame, desk_mode: str, num_evals: 
     sl_pcts = np.random.uniform(0.008, 0.035, size=num_evals) if desk_mode == "CAPITAL_PROPIO" else np.random.uniform(0.002, 0.008, size=num_evals)
     tp_mults = np.random.uniform(1.2, 3.5, size=num_evals)
     
-    max_allowed_dd = 20.0 if desk_mode == "CAPITAL_PROPIO" else 3.50
-    min_pf = 1.30 if desk_mode == "CAPITAL_PROPIO" else 1.40
-    min_sharpe = 1.30 if desk_mode == "CAPITAL_PROPIO" else 1.50
-    target_profit_challenge = 0.08 # +8.0% target para fase de fondeo
+    is_prop = desk_mode.startswith("PROP_FIRM")
+    is_cfd = "CFD" in desk_mode
+    is_futures = is_prop and not is_cfd
+    
+    if desk_mode == "CAPITAL_PROPIO":
+        max_allowed_dd = 20.0
+        min_pf = 1.30
+        min_sharpe = 1.30
+        target_profit_challenge = None
+    elif is_futures:
+        # Futuros CME (Globex: NDX, SPX): Target 6.0% | Max EOD DD 3.0% (Universal Maestro) / 3.5% (100k)
+        max_allowed_dd = 3.00
+        min_pf = 1.40
+        min_sharpe = 1.50
+        target_profit_challenge = 0.06
+    else:
+        # CFDs / Forex (FTMO, IC Markets Prop): Target 8.0% - 10.0% | Max DD 8.0%
+        max_allowed_dd = 8.00
+        min_pf = 1.35
+        min_sharpe = 1.40
+        target_profit_challenge = 0.08
     
     has_dt = 'dt' in df.columns
     if has_dt:
@@ -165,16 +182,16 @@ def run_threshold_vectorized_sweep(df: pd.DataFrame, desk_mode: str, num_evals: 
         days_to_target = 0.0
         sprint_tier = "N/A"
         
-        # FILTRO MANDATORIO PROP FIRM: Alcanzar objetivo (+8%) en < 30 días naturales
-        if desk_mode == "PROP_FIRM":
+        # FILTRO MANDATORIO PROP FIRM: Alcanzar objetivo en < 30 días naturales
+        if is_prop and target_profit_challenge is not None:
             hit_target = np.where(cum_pnl >= target_profit_challenge)[0]
             if len(hit_target) == 0:
                 continue # No alcanza el objetivo de la fase en el histórico
             first_hit_bar = hit_target[0]
             
-            # Verificar que el DD antes de tocar el target no violó el 3.50%
+            # Verificar que el DD antes de tocar el target no violó el límite permitido
             pre_target_dd = np.max(peak[:first_hit_bar+1] - cum_pnl[:first_hit_bar+1]) * 100.0
-            if pre_target_dd > 3.50:
+            if pre_target_dd > max_allowed_dd:
                 continue # Cuenta suspendida por drawdown antes de lograr el objetivo
                 
             if has_dt and (w + first_hit_bar) < len(dt_values):
@@ -213,7 +230,7 @@ def run_threshold_vectorized_sweep(df: pd.DataFrame, desk_mode: str, num_evals: 
             continue
             
         score = (pf * 0.4) + (ann_sharpe * 0.4) - (max_dd * 0.05)
-        if desk_mode == "PROP_FIRM":
+        if is_prop:
             # Bonus de velocidad: máxima prioridad si completa el reto en menos de 15 días
             if days_to_target < 15.0:
                 score += 0.50
@@ -234,7 +251,7 @@ def run_threshold_vectorized_sweep(df: pd.DataFrame, desk_mode: str, num_evals: 
             "total_pnl_pct": round(float(total_pnl), 2),
             "sharpe": round(float(ann_sharpe), 2),
             "score": round(float(score), 3),
-            "days_to_target": round(float(days_to_target), 1) if desk_mode == "PROP_FIRM" else None,
+            "days_to_target": round(float(days_to_target), 1) if is_prop else None,
             "sprint_tier": sprint_tier,
             "cum_curve": cum_pnl[:200].tolist(),
             "sample_pnls": trade_rets[:150].tolist()
