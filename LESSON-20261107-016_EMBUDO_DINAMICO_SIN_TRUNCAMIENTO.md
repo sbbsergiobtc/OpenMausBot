@@ -37,6 +37,7 @@ Queda abolida cualquier cuota o límite artificial. El flujo de cribado se rige 
     MaxDD ≤ 20.0%, Profit Factor ≥ 1.30, Sharpe ≥ 1.30, Trades ≥ 30.
   • Cuentas Fondeadas (ÚNICAMENTE US500 y US100 · 5m RTH 60D Sprint):
     MaxDD ≤ 3.50%, Profit Factor ≥ 1.40, Sharpe ≥ 1.50, Trades ≥ 30.
+    Filtro Temporal Mandatorio (Time-to-Target): Cumplimiento de objetivo (+8% a +10%) en < 30 días naturales (Prioridad Oro: < 15 días naturales).
   ──> Supervivientes N1 (Variable: ej. 200 a 600 estrategias)
                  │
                  ▼
