@@ -19,6 +19,7 @@ import os
 import sys
 import json
 import time
+import argparse
 from pathlib import Path
 from typing import Dict, Any, List, Tuple
 import numpy as np
@@ -32,8 +33,14 @@ from jev.metrics import calculate_deflated_sharpe_ratio, run_monte_carlo_bootstr
 from jev.screener import JevScreener
 from jev.auto_deployer import auto_deploy_strategy
 
+parser = argparse.ArgumentParser(description="Motor de Búsqueda y Screener Masivo de 100.000 Estrategias por Ciclo (300.000/día)")
+parser.add_argument("--cycle", type=str, default="MANUAL", help="Ciclo de ejecución: 0800, 1400, 2000 o MANUAL")
+args, _ = parser.parse_known_args()
+CYCLE_TAG = args.cycle.upper()
+TODAY_TAG = time.strftime("%Y%m%d", time.gmtime())
+
 print("=" * 80)
-print("INICIANDO SCREENER MASIVO 100.000 ESTRATEGIAS: EMBUDO DINÁMICO POR UMBRALES")
+print(f"INICIANDO SCREENER MASIVO 100.000 ESTRATEGIAS/CICLO [CICLO: {CYCLE_TAG} · META: 300.000/DÍA]")
 print("Norma Mandatoria: Cero Truncamiento Estático (LESSON-20261107-016)")
 print("Timestamp:", time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()))
 print("=" * 80)
@@ -488,21 +495,30 @@ for a in stage4_approved:
 
 print(f"[FIN ETAPA 5] Desplegadas con éxito en Forward Test: {deployed_count} de {len(stage4_approved)}")
 
-# 7. Informe Oficial
+# 7. Informe Oficial & Sincronización con Orquestador de Régimen A/B
 # ------------------------------------------------------------------------------
-report_path = BASE_DIR / "reports/SCREENER_100K_20261107.md"
-report_content = f"""# INFORME OFICIAL: BÚSQUEDA Y AUDITORÍA MASIVA DE 100.000 ESTRATEGIAS
+try:
+    from jev.regime_orchestrator import run_parallel_orchestrator_evaluation
+    orch_state = run_parallel_orchestrator_evaluation(BASE_DIR)
+    print(f"[ORQUESTADOR A/B] Sincronizado tras ciclo {CYCLE_TAG}: {orch_state['summary']['active_in_orchestrator']}/{orch_state['summary']['total_strategies']} activas.")
+except Exception as e:
+    print(f"[WARN] No se pudo sincronizar el Orquestador A/B: {e}")
+
+report_path = BASE_DIR / f"reports/SCREENER_100K_{TODAY_TAG}.md"
+report_cycle_path = BASE_DIR / f"reports/SCREENER_100K_{TODAY_TAG}_{CYCLE_TAG}.md"
+report_content = f"""# INFORME OFICIAL: BÚSQUEDA Y AUDITORÍA MASIVA DE 100.000 ESTRATEGIAS POR CICLO
 **Fecha:** {time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime())}
+**Ciclo Ejecutado:** `{CYCLE_TAG}` (3 Ciclos/Día · 100.000/Ciclo = **300.000 Combinaciones/Día**)
 **Arquitectura:** Embudo Dinámico por Umbrales Objetivos (LESSON-20261107-016)
 **Norma Mandatoria:** CERO TRUNCAMIENTO ESTÁTICO (Sin límite fijo de 24)
 
 ---
 
-## 1. Métrica de Conversión del Embudo por Etapas
+## 1. Métrica de Conversión del Embudo por Etapas (Ciclo `{CYCLE_TAG}`)
 * **Etapa 1 (100.000 Combinaciones en Paralelo):** {len(stage1_candidates)} superaron los umbrales mínimos de rentabilidad y drawdown.
 * **Etapa 2 (Clustering de Correlación NumPy rho <= 0.80):** {len(stage2_candidates)} familias de alpha ortogonales independientes.
 * **Etapa 3 & 4 (DSR N=100k + Monte Carlo 1.000 runs + @Skeptic):** {len(stage4_approved)} estrategias aprobadas unánimemente ({len(stage4_rejected)} eliminadas por estrés).
-* **Etapa 5 (Auto-Despliegue en Forward Test):** **{deployed_count} estrategias auto-desplegadas** con balance virtual de $1.000.
+* **Etapa 5 (Auto-Despliegue en Forward Test):** **{deployed_count} estrategias auto-desplegadas** con balance virtual de $1.000 en Libro A (Individual) y Libro B (Orquestado).
 
 ---
 
@@ -525,5 +541,8 @@ report_content += """
 with open(report_path, "w", encoding="utf-8") as f:
     f.write(report_content)
 
-print(f"\n[OK] Informe oficial guardado en: {report_path}")
+with open(report_cycle_path, "w", encoding="utf-8") as f:
+    f.write(report_content)
+
+print(f"\n[OK] Informe oficial guardado en: {report_path} y {report_cycle_path}")
 print("=" * 80)
