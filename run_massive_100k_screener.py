@@ -465,12 +465,13 @@ report_content = f"""# INFORME OFICIAL: BÚSQUEDA Y AUDITORÍA MASIVA DE 100.000
 ---
 
 ## 2. Estrategias Aprobadas y Auto-Desplegadas en Forward Test
-| ID Estrategia | Mesa | Activo | Timeframe | Profit Factor | Max DD (%) | DSR Prob | MC P95 DD (%) | Estado Despliegue |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| ID Estrategia | Mesa | Activo | Timeframe | ROI Neto (%) | Profit Factor | Max DD (%) | DSR Prob | MC P95 DD (%) | Time-to-Target | Estado Despliegue |
+| :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
 """
 
 for a in stage4_approved:
-    report_content += f"| **{a['candidate_id']}** | {a['desk_mode']} | {a['asset']} | {a['tf']} | {a['profit_factor']} | {a['max_dd']}% | {a['dsr_prob']} | {a['mc_p95_dd']}% | ✅ Auto-Desplegada ($1.000) |\n"
+    tt_str = f"{a.get('sprint_tier', 'N/A')} ({a.get('days_to_target', 'N/A')}d)" if a.get('days_to_target') is not None else "Multi-Año"
+    report_content += f"| **{a['candidate_id']}** | {a['desk_mode']} | {a['asset']} | {a['tf']} | **{a.get('total_pnl_pct', 0.0):+.2f}%** | {a['profit_factor']} | {a['max_dd']}% | {a['dsr_prob']} | {a['mc_p95_dd']}% | {tt_str} | ✅ Auto-Desplegada ($1.000) |\n"
 
 report_content += """
 ---
