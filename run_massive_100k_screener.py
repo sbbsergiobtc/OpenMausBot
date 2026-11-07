@@ -271,14 +271,18 @@ evals_per_asset_cap = 50000 // 6
 print(">>> Evaluando 50.000 combinaciones para CAPITAL PROPIO (US500, US100, EURUSD, BTC, ETH, SOL)...")
 
 for s in crypto_symbols:
-    df = get_crypto_data(s, "15m") or get_crypto_data(s, "1h")
+    df = get_crypto_data(s, "15m")
+    if df is None:
+        df = get_crypto_data(s, "1h")
     if df is not None:
         cands = run_threshold_vectorized_sweep(df, "CAPITAL_PROPIO", evals_per_asset_cap, s.upper(), "15m/1h")
         stage1_candidates.extend(cands)
         print(f"    - {s.upper()}: {len(cands)} superan los umbrales")
 
 for s in tradfi_symbols:
-    df = get_tradfi_data(s, "1h") or get_tradfi_data(s, "2h")
+    df = get_tradfi_data(s, "1h")
+    if df is None:
+        df = get_tradfi_data(s, "2h")
     if df is not None:
         cands = run_threshold_vectorized_sweep(df, "CAPITAL_PROPIO", evals_per_asset_cap, s, "1h/4h")
         stage1_candidates.extend(cands)
