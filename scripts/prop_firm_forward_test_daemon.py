@@ -413,8 +413,15 @@ def run_cycle():
         pos_container = state['capital_propio']['open_positions'] if branch == 'CAPITAL_PROPIO' else state['prop_firm']['open_positions']
         pos = pos_container.get(sym)
 
-        # A) Cierre de Posicion
-        if pos is not None and sig == 'EXIT':
+        # A) Cierre de Posicion: por señal cuantitativa o por REGLA OBLIGATORIA MACRO (cerrar 5 min antes de noticias)
+        is_news_exit = False
+        if pos is not None and check_news_blackout is not None:
+            is_blackout, blackout_reason, ev_data = check_news_blackout(sym)
+            if is_blackout:
+                is_news_exit = True
+                print(f"  [CIERRE PREVENTIVO NOTICIAS MACRO] Posicion abierta en {sym} ({strat_id}) DEBE CERRARSE 5 MIN ANTES: {blackout_reason}")
+
+        if pos is not None and (sig == 'EXIT' or is_news_exit):
             ticket = pos.get('live_ticket')
             if ticket and mt5.is_healthy():
                 print(f"  [MT5] Cerrando en broker posicion viva Ticket {ticket} ({broker_sym})...")

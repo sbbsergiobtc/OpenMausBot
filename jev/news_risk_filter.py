@@ -24,6 +24,9 @@ RULES_FILE = BASE_DIR / "config/risk_rules.yaml"
 CALENDAR_CACHE = BASE_DIR / "data/economic_calendar.json"
 
 # Mapeo de Activo a Monedas de Impacto Macro
+# Divisas autorizadas para el Filtro de Riesgo Macro (Sergio Directiva: solo EUR, USD, GBP)
+ALLOWED_CURRENCIES = {'EUR', 'USD', 'GBP'}
+
 ASSET_CURRENCY_MAP = {
     'US500': ['USD'],
     'USTEC': ['USD'],
@@ -31,6 +34,8 @@ ASSET_CURRENCY_MAP = {
     'NDX': ['USD'],
     'EURUSD': ['USD', 'EUR'],
     'EUR_USD': ['USD', 'EUR'],
+    'GBPUSD': ['USD', 'GBP'],
+    'GBP_USD': ['USD', 'GBP'],
     'BTC': ['USD'],
     'BTCUSDT': ['USD'],
     'ETH': ['USD'],
@@ -199,7 +204,7 @@ def check_news_blackout(symbol: str, target_time_utc: Optional[datetime] = None)
 
 
 def get_macro_risk_status() -> Dict[str, Any]:
-    """Devuelve un resumen de estado de riesgo macro para el Dashboard y Telemetría."""
+    """Devuelve un resumen de estado de riesgo macro para el Dashboard y Telemetría (Filtrado estricto a EUR, USD, GBP)."""
     policy = load_news_policy()
     events = fetch_and_cache_economic_calendar()
     now = datetime.now(timezone.utc)
@@ -208,6 +213,10 @@ def get_macro_risk_status() -> Dict[str, Any]:
     active_blackout = None
 
     for ev in events:
+        country = str(ev.get('country', '')).strip().upper()
+        # Directiva Sergio: mostrar solo eventos de EUR, USD, GBP
+        if country not in ALLOWED_CURRENCIES:
+            continue
         if not is_high_impact_event(ev):
             continue
         ev_dt = parse_event_datetime(ev.get('date', ''))
@@ -217,16 +226,21 @@ def get_macro_risk_status() -> Dict[str, Any]:
         diff_min = (ev_dt - now).total_seconds() / 60.0
         if -30.0 <= diff_min <= 1440.0:
             item = {
+                'currency': country,
+                'country': country,
                 'title': ev.get('title'),
-                'country': ev.get('country'),
                 'impact': ev.get('impact', 'High'),
                 'datetime_utc': ev_dt.isoformat(),
                 'minutes_away': round(diff_min, 1),
-                'in_blackout': (-5.0 <= diff_min <= 5.0)
+                'in_blackout': (-5.0 <= diff_min <= 5.0),
+                'url': 'https://www.forexfactory.com/calendar'
             }
             upcoming_high_impact.append(item)
             if item['in_blackout'] and active_blackout is None:
                 active_blackout = item
+
+    # Ordenar eventos cronológicamente
+    upcoming_high_impact.sort(key=lambda x: x['minutes_away'])
 
     return {
         'policy_enabled': not policy.get('allow_news_trading', False),

@@ -504,7 +504,26 @@
       border-color: #3C45A5;
     }
 
-  </style>
+  
+    /* Filtros de Notificaciones en Popover (Fix texto blanco sobre oscuro) */
+    .notif-filter-btn {
+      color: var(--text-secondary) !important;
+      background-color: transparent !important;
+    }
+    .notif-filter-btn:hover {
+      background-color: #F2F2F7 !important;
+      color: var(--text-primary) !important;
+    }
+    .notif-filter-btn.active,
+    #notif-filter-ALL.active,
+    #notif-filter-GUARDIAN.active,
+    #notif-filter-Q_LEARNING.active,
+    #notif-filter-PROP_FIRM.active {
+      background-color: #1D1D1F !important;
+      color: #FFFFFF !important;
+      font-weight: 700 !important;
+    }
+</style>
 
   <!-- TradingView Official Advanced Charts Script -->
   <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
@@ -649,10 +668,10 @@
 
               <!-- Filtros por Segmento / Categoría -->
               <div class="flex items-center gap-1.5 px-3 py-2 border-b border-[#F2F2F7] bg-[#FFFFFF] overflow-x-auto">
-                <button onclick="filterNotifications('ALL')" id="notif-filter-ALL" class="px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-[#1D1D1F] text-white transition">Todas</button>
-                <button onclick="filterNotifications('GUARDIAN')" id="notif-filter-GUARDIAN" class="px-2 py-0.5 rounded-lg text-[10px] font-mono font-medium text-[#6E6E73] hover:bg-[#F2F2F7] transition">Guardián</button>
-                <button onclick="filterNotifications('Q_LEARNING')" id="notif-filter-Q_LEARNING" class="px-2 py-0.5 rounded-lg text-[10px] font-mono font-medium text-[#6E6E73] hover:bg-[#F2F2F7] transition">Q-Learning</button>
-                <button onclick="filterNotifications('PROP_FIRM')" id="notif-filter-PROP_FIRM" class="px-2 py-0.5 rounded-lg text-[10px] font-mono font-medium text-[#6E6E73] hover:bg-[#F2F2F7] transition">40% Clamps</button>
+                <button onclick="filterNotifications('ALL')" id="notif-filter-ALL" class="px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold notif-filter-btn active" style="color: #FFFFFF !important; background-color: #1D1D1F !important;">Todas</button>
+                <button onclick="filterNotifications('GUARDIAN')" id="notif-filter-GUARDIAN" class="px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-medium notif-filter-btn">Guardián</button>
+                <button onclick="filterNotifications('Q_LEARNING')" id="notif-filter-Q_LEARNING" class="px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-medium notif-filter-btn">Q-Learning</button>
+                <button onclick="filterNotifications('PROP_FIRM')" id="notif-filter-PROP_FIRM" class="px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-medium notif-filter-btn">40% Clamps</button>
               </div>
 
               <!-- Lista scrolleable de alertas -->
@@ -684,8 +703,8 @@
               <h1 class="text-xl sm:text-2xl font-bold text-[#1D1D1F] tracking-tight" id="cockpit-header-title">Monitoreo Unificado · Capital Propio</h1>
               <p class="text-xs text-[#6E6E73]" id="cockpit-header-desc">Supervisión consolidada de capital propio en Forward Test: 25 estrategias ($25,000 inicial) en MT5 Demo y Hyperliquid DEX.</p>
             </div>
-            <!-- Acciones de Intervención Operativa & Gestor de Cuentas -->
-            <div class="flex items-center gap-2.5 flex-wrap">
+            <!-- Acciones de Intervención Operativa & Gestor de Cuentas (Alineados a la derecha) -->
+            <div class="flex items-center justify-end gap-2.5 flex-wrap sm:ml-auto w-full sm:w-auto shrink-0">
               <button onclick="toggleAccountsManagerModal()" class="btn-secondary whitespace-nowrap cursor-pointer text-xs flex items-center gap-1.5" title="Gestionar Cuentas Conectadas y Fases de Fondeo">
                 <i class="fa-solid fa-building-columns text-[#3C45A5]"></i> Cuentas & Fases
               </button>
@@ -700,98 +719,86 @@
             
             <!-- KPI 1: Balance Total en Forward Test -->
             <div class="p-4 sm:p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
-              <div>
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">Balance Total FT</span>
+              <div class="flex items-center justify-between mb-2.5">
+                <div class="flex items-center gap-2 min-w-0">
                   <div class="h-6 w-6 rounded-lg bg-[#EEF2FF] flex items-center justify-center text-[#3C45A5] shrink-0">
                     <i class="fa-solid fa-wallet text-[11px]"></i>
                   </div>
+                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">Balance Total FT</span>
                 </div>
-                <div class="text-lg sm:text-2xl font-bold font-mono text-[#1D1D1F] tracking-tight" id="cockpit-kpi-total-balance">$24,998.09</div>
+                <span id="cockpit-kpi-total-subtext" class="badge-brand-indigo font-mono text-[10px] py-0.5 px-1.5 shrink-0">25 Cuentas x $1k</span>
               </div>
-              <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-end text-[11px]">
-                <span id="cockpit-kpi-total-subtext" class="badge-brand-indigo font-mono text-[10px] py-0.5 px-1.5">25 Cuentas x $1k</span>
-              </div>
+              <div class="text-lg sm:text-2xl font-bold font-mono text-[#1D1D1F] tracking-tight" id="cockpit-kpi-total-balance">$24,998.09</div>
             </div>
 
             <!-- KPI 2: PnL Realizado Total -->
             <div class="p-4 sm:p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
-              <div>
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">PnL Realizado</span>
+              <div class="flex items-center justify-between mb-2.5">
+                <div class="flex items-center gap-2 min-w-0">
                   <div class="h-6 w-6 rounded-lg bg-[#F2F2F7] flex items-center justify-center text-[#1D1D1F] shrink-0">
                     <i class="fa-solid fa-scale-balanced text-[11px]"></i>
                   </div>
+                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">PnL Realizado</span>
                 </div>
-                <div class="text-lg sm:text-2xl font-bold font-mono text-[#D70015] tracking-tight" id="cockpit-kpi-realized-pnl">-$1.91</div>
+                <span id="cockpit-kpi-realized-badge" class="badge-warning-risk font-mono text-[10px] py-0.5 px-1.5 shrink-0">-0.10%</span>
               </div>
-              <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-end text-[11px]">
-                <span id="cockpit-kpi-realized-badge" class="badge-warning-risk font-mono text-[10px] py-0.5 px-1.5">-0.10%</span>
-              </div>
+              <div class="text-lg sm:text-2xl font-bold font-mono text-[#D70015] tracking-tight" id="cockpit-kpi-realized-pnl">-$1.91</div>
             </div>
 
             <!-- KPI 3: PnL Flotante Total -->
             <div class="p-4 sm:p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
-              <div>
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">PnL Flotante</span>
+              <div class="flex items-center justify-between mb-2.5">
+                <div class="flex items-center gap-2 min-w-0">
                   <div class="h-6 w-6 rounded-lg bg-[#FEF2F2] flex items-center justify-center text-[#D70015] shrink-0">
                     <i class="fa-solid fa-chart-line text-[11px]"></i>
                   </div>
+                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">PnL Flotante</span>
                 </div>
-                <div class="text-lg sm:text-2xl font-bold font-mono text-[#D70015] tracking-tight" id="cockpit-kpi-floating-pnl">-$4.58</div>
+                <span id="cockpit-kpi-floating-badge" class="badge-neutral-soft font-mono text-[10px] py-0.5 px-1.5 shrink-0">-0.23%</span>
               </div>
-              <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-end text-[11px]">
-                <span id="cockpit-kpi-floating-badge" class="badge-neutral-soft font-mono text-[10px] py-0.5 px-1.5">-0.23%</span>
-              </div>
+              <div class="text-lg sm:text-2xl font-bold font-mono text-[#D70015] tracking-tight" id="cockpit-kpi-floating-pnl">-$4.58</div>
             </div>
 
             <!-- KPI 4: Drawdown Cartera -->
             <div class="p-4 sm:p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
-              <div>
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">Drawdown Cartera</span>
+              <div class="flex items-center justify-between mb-2.5">
+                <div class="flex items-center gap-2 min-w-0">
                   <div class="h-6 w-6 rounded-lg bg-[#FEF2F2] flex items-center justify-center text-[#D70015] shrink-0">
                     <i class="fa-solid fa-arrow-trend-down text-[11px]"></i>
                   </div>
+                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">Drawdown Cartera</span>
                 </div>
-                <div class="text-lg sm:text-2xl font-bold font-mono text-[#D70015] tracking-tight" id="cockpit-kpi-drawdown">-0.23%</div>
+                <span class="text-[#D70015] font-mono font-semibold text-[11px] shrink-0" id="cockpit-kpi-drawdown-limit">-5.00%</span>
               </div>
-              <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-end text-[11px]">
-                <span class="text-[#D70015] font-mono font-semibold text-[11px]" id="cockpit-kpi-drawdown-limit">-5.00%</span>
-              </div>
+              <div class="text-lg sm:text-2xl font-bold font-mono text-[#D70015] tracking-tight" id="cockpit-kpi-drawdown">-0.23%</div>
             </div>
 
-            <!-- KPI 5: Margen Utilizado -->
+            <!-- KPI 5: Riesgo Flotante (SL) [Intercambiado con Margen Utilizado] -->
             <div class="p-4 sm:p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
-              <div>
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">Margen Utilizado</span>
-                  <div class="h-6 w-6 rounded-lg bg-[#ECFDF5] flex items-center justify-center text-[#065F46] shrink-0">
-                    <i class="fa-solid fa-gauge text-[11px]"></i>
-                  </div>
-                </div>
-                <div class="text-lg sm:text-2xl font-bold font-mono text-[#1D1D1F] tracking-tight" id="cockpit-kpi-margin-used">0.85%</div>
-              </div>
-              <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-end text-[11px]">
-                <span id="cockpit-kpi-margin-badge" class="badge-success-live font-mono text-[10px] py-0.5 px-1.5">Seguro</span>
-              </div>
-            </div>
-
-            <!-- KPI 6: Riesgo Flotante al SL (Suma de posiciones abiertas) -->
-            <div class="p-4 sm:p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
-              <div>
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">Riesgo Flotante (SL)</span>
+              <div class="flex items-center justify-between mb-2.5">
+                <div class="flex items-center gap-2 min-w-0">
                   <div class="h-6 w-6 rounded-lg bg-[#FEF2F2] flex items-center justify-center text-[#D70015] shrink-0">
                     <i class="fa-solid fa-crosshairs text-[11px]"></i>
                   </div>
+                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">Riesgo Flotante (SL)</span>
                 </div>
-                <div class="text-lg sm:text-2xl font-bold font-mono text-[#D70015] tracking-tight" id="cockpit-kpi-open-risk">$0.00</div>
+                <span id="cockpit-kpi-open-risk-badge" class="badge-warning-risk font-mono text-[10px] py-0.5 px-1.5 shrink-0">0.00%</span>
               </div>
-              <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-end text-[11px]">
-                <span id="cockpit-kpi-open-risk-badge" class="badge-warning-risk font-mono text-[10px] py-0.5 px-1.5">0.00%</span>
+              <div class="text-lg sm:text-2xl font-bold font-mono text-[#D70015] tracking-tight" id="cockpit-kpi-open-risk">$0.00</div>
+            </div>
+
+            <!-- KPI 6: Margen Utilizado [Intercambiado con Riesgo Flotante] -->
+            <div class="p-4 sm:p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
+              <div class="flex items-center justify-between mb-2.5">
+                <div class="flex items-center gap-2 min-w-0">
+                  <div class="h-6 w-6 rounded-lg bg-[#ECFDF5] flex items-center justify-center text-[#065F46] shrink-0">
+                    <i class="fa-solid fa-gauge text-[11px]"></i>
+                  </div>
+                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">Margen Utilizado</span>
+                </div>
+                <span id="cockpit-kpi-margin-badge" class="badge-success-live font-mono text-[10px] py-0.5 px-1.5 shrink-0">Seguro</span>
               </div>
+              <div class="text-lg sm:text-2xl font-bold font-mono text-[#1D1D1F] tracking-tight" id="cockpit-kpi-margin-used">0.85%</div>
             </div>
 
           </div>
@@ -986,30 +993,38 @@
 
           <!-- ==================== BANNER INTEGRADO: FILTRO DE NOTICIAS MACRO (±5 MIN) ==================== -->
           <div id="cockpit-news-risk-banner" class="p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs space-y-3.5">
-            <div class="flex items-start sm:items-center gap-3.5">
-              <div class="h-10 w-10 rounded-xl bg-[#EEF2FF] border border-[#E0E7FF] flex items-center justify-center text-[#3C45A5] shrink-0 mt-0.5 sm:mt-0">
-                <i class="fa-solid fa-newspaper text-base"></i>
-              </div>
-              <div class="space-y-0.5 flex-1">
-                <div class="flex items-center gap-2 flex-wrap">
-                  <span class="text-xs font-bold text-[#1D1D1F]">Filtro de Riesgo Macro (Forex Factory)</span>
-                  <span id="cockpit-news-state-badge" class="badge-success-live font-mono text-[10px]">● OPERATIVA PERMITIDA</span>
+            <div class="flex items-start sm:items-center justify-between gap-3.5">
+              <div class="flex items-start sm:items-center gap-3.5 flex-1 min-w-0">
+                <div class="h-10 w-10 rounded-xl bg-[#EEF2FF] border border-[#E0E7FF] flex items-center justify-center text-[#3C45A5] shrink-0 mt-0.5 sm:mt-0">
+                  <i class="fa-solid fa-newspaper text-base"></i>
                 </div>
-                <p class="text-xs text-[#6E6E73]">
-                  Protección institucional estricta: Se prohíbe abrir órdenes y se rechaza ejecución <strong class="text-[#1D1D1F]">5 min antes y 5 min después</strong> de eventos macro High Impact (USD / EUR).
-                </p>
+                <div class="space-y-0.5 min-w-0 flex-1">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-[#1D1D1F]">Filtro de Riesgo Macro (Forex Factory)</span>
+                    <span id="cockpit-news-state-dot" class="inline-block w-2.5 h-2.5 rounded-full bg-[#107C41] shadow-[0_0_8px_rgba(16,124,65,0.6)]" title="Operativa permitida"></span>
+                  </div>
+                  <p class="text-xs text-[#6E6E73]">
+                    IMPORTANTE: Se prohíbe tener órdenes abiertas, abrir órdenes nuevas y se rechaza ejecución 5 minutos antes y después de eventos macroecómicos de alto impacto.
+                  </p>
+                </div>
               </div>
+              <a href="https://www.forexfactory.com/calendar" target="_blank" rel="noopener noreferrer" class="btn-secondary text-[11px] py-1 px-2.5 flex items-center gap-1.5 shrink-0 cursor-pointer text-[#3C45A5] font-mono hover:text-[#2D3380]" title="Abrir Calendario Económico Forex Factory">
+                <span>Forex Factory</span>
+                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+              </a>
             </div>
 
-            <!-- Fila individual inferior para Próximo Evento -->
-            <div class="pt-3 border-t border-[#F2F2F7] flex items-center justify-between flex-wrap gap-2 text-xs font-mono">
-              <div class="flex items-center gap-2">
-                <span class="text-[11px] text-[#86868B] uppercase tracking-wider font-semibold">Próximo Evento High Impact:</span>
-                <span id="cockpit-news-next-event" class="font-bold text-[#1D1D1F] bg-[#FAFAFC] px-2.5 py-1 rounded-lg border border-[#E5E5EA]">Sin eventos inmediatos (&gt;6h)</span>
-              </div>
-              <div class="flex items-center gap-1.5 text-[11px] text-[#6E6E73]">
-                <i class="fa-solid fa-clock text-[#3C45A5]"></i>
-                <span>Forex Factory</span>
+            <!-- Fila individual de eventos en el orden requerido: DIVISA, Nombre (con url), hora España, cuenta atrás -->
+            <div id="cockpit-macro-events-container" class="space-y-2 pt-3 border-t border-[#F2F2F7]">
+              <div class="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-[#FAFAFC] border border-[#E5E5EA] text-xs">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <span class="px-2 py-0.5 rounded-md font-mono font-bold text-[11px] bg-[#EEF2FF] text-[#3C45A5] border border-[#E0E7FF] shrink-0">USD</span>
+                  <a href="https://www.forexfactory.com/calendar" target="_blank" rel="noopener noreferrer" class="font-semibold text-[#1D1D1F] hover:text-[#3C45A5] hover:underline transition truncate" id="cockpit-macro-first-title">Cargando eventos de Forex Factory...</a>
+                </div>
+                <div class="flex items-center gap-3 shrink-0">
+                  <span class="font-mono text-xs text-[#6E6E73] flex items-center gap-1.5" id="cockpit-macro-first-time"><i class="fa-regular fa-clock text-[#86868B]"></i>--:--</span>
+                  <span class="badge-neutral-soft font-mono text-[10px] px-2 py-0.5 rounded-md" id="cockpit-macro-first-countdown">--</span>
+                </div>
               </div>
             </div>
           </div>
@@ -5503,44 +5518,98 @@
         const res = await fetch('/api/macro_news_risk');
         if (!res.ok) return;
         const data = await res.json();
-        const badge = document.getElementById('cockpit-news-state-badge');
-        const headerBadge = document.getElementById('cockpit-news-badge');
-        const nextEv = document.getElementById('cockpit-news-next-event');
+        
+        // 1. Puntito verde o rojo de estado operativo
+        const dot = document.getElementById('cockpit-news-state-dot');
+        if (dot) {
+          if (data.active_blackout) {
+            dot.className = 'inline-block w-2.5 h-2.5 rounded-full bg-[#D70015] shadow-[0_0_8px_rgba(215,0,21,0.8)] animate-pulse';
+            dot.title = 'Blackout Activo: Operativa Prohibida';
+          } else {
+            dot.className = 'inline-block w-2.5 h-2.5 rounded-full bg-[#107C41] shadow-[0_0_8px_rgba(16,124,65,0.6)]';
+            dot.title = 'Operativa Permitida';
+          }
+        }
 
-        if (data.active_blackout) {
-          const ev = data.active_blackout;
-          if (badge) {
-            badge.innerText = `● BLOQUEADO: ${ev.currency || ev.country} ${ev.event || ev.title}`;
-            badge.className = 'badge-danger-risk font-mono text-[10px] animate-pulse';
-          }
-          if (headerBadge) {
-            headerBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1 text-[#D70015]"></i>BLACKOUT NOTICIA ACTIVO`;
-            headerBadge.className = 'badge-danger-risk font-mono animate-pulse';
-          }
-          if (nextEv) {
-            nextEv.innerText = `En ventana ±5 min (${ev.event || ev.title})`;
-            nextEv.className = 'font-bold text-[#D70015]';
-          }
-        } else {
-          if (badge) {
-            badge.innerText = '● OPERATIVA PERMITIDA';
-            badge.className = 'badge-success-live font-mono text-[10px]';
-          }
-          if (headerBadge) {
-            headerBadge.innerHTML = `<i class="fa-solid fa-newspaper mr-1 text-[#3C45A5]"></i>FILTRO NOTICIAS: ±5 MIN`;
-            headerBadge.className = 'badge-neutral-soft font-mono';
-          }
-          if (nextEv && data.upcoming_events && data.upcoming_events.length > 0) {
-            const next = data.upcoming_events[0];
-            const mins = Math.round(next.minutes_away);
-            let timeStr = `${mins} min`;
-            if (mins > 60) {
-              const h = Math.floor(mins / 60);
-              const m = mins % 60;
-              timeStr = `${h}h ${m}m`;
-            }
-            nextEv.innerText = `${next.country || next.currency} ${next.title || next.event} (en ${timeStr})`;
-            nextEv.className = 'font-bold text-[#1D1D1F]';
+        // 2. Renderizado de eventos en una fila: DIVISA, Nombre (con URL), Hora España, Cuenta Atrás
+        const container = document.getElementById('cockpit-macro-events-container');
+        if (container) {
+          const rawEvents = data.upcoming_events || [];
+          // Filtrado estricto adicional a EUR, USD, GBP por si acaso
+          const events = rawEvents.filter(ev => {
+            const c = (ev.currency || ev.country || '').toUpperCase();
+            return ['EUR', 'USD', 'GBP'].includes(c);
+          });
+
+          if (events.length === 0) {
+            container.innerHTML = `
+              <div class="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-[#FAFAFC] border border-[#E5E5EA] text-xs">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <span class="px-2 py-0.5 rounded-md font-mono font-bold text-[11px] bg-[#F2F2F7] text-[#6E6E73] border border-[#E5E5EA] shrink-0">ALL</span>
+                  <span class="text-[#6E6E73] italic">Sin eventos de alto impacto para EUR, USD o GBP en las próximas 24 horas.</span>
+                </div>
+                <div class="flex items-center gap-3 shrink-0">
+                  <span class="badge-neutral-soft font-mono text-[10px] px-2 py-0.5 rounded-md">&gt;24h limpio</span>
+                </div>
+              </div>`;
+          } else {
+            // Renderizar hasta 3 eventos próximos en filas individuales
+            container.innerHTML = events.slice(0, 3).map(ev => {
+              const cur = (ev.currency || ev.country || 'USD').toUpperCase();
+              const title = ev.title || ev.event || 'Evento Macroeconómico';
+              const evUrl = ev.url || 'https://www.forexfactory.com/calendar';
+              
+              // Hora local de España
+              let timeSpainStr = '--:--';
+              if (ev.datetime_utc) {
+                try {
+                  const evDate = new Date(ev.datetime_utc);
+                  timeSpainStr = evDate.toLocaleTimeString('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit' }) + ' CET';
+                } catch (e) {
+                  timeSpainStr = '--:--';
+                }
+              }
+
+              // Cuenta atrás dinámica en badge
+              const mins = Math.round(ev.minutes_away);
+              let badgeClass = 'badge-neutral-soft';
+              let countdownText = '';
+              if (ev.in_blackout) {
+                badgeClass = 'badge-danger-risk animate-pulse';
+                countdownText = '● BLACKOUT ACTIVO';
+              } else if (mins <= 0) {
+                badgeClass = 'badge-warning-risk';
+                countdownText = 'En curso';
+              } else if (mins <= 60) {
+                badgeClass = 'badge-warning-risk';
+                countdownText = `en ${mins}m`;
+              } else {
+                const h = Math.floor(mins / 60);
+                const m = mins % 60;
+                countdownText = `en ${h}h ${m}m`;
+              }
+
+              // Color del badge según divisa
+              let curBadgeColor = 'bg-[#EEF2FF] text-[#3C45A5] border-[#E0E7FF]';
+              if (cur === 'EUR') curBadgeColor = 'bg-[#ECFDF5] text-[#065F46] border-[#A7F3D0]';
+              if (cur === 'GBP') curBadgeColor = 'bg-[#FEF3C7] text-[#92400E] border-[#FDE68A]';
+
+              return `
+                <div class="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-[#FAFAFC] border border-[#E5E5EA] text-xs hover:border-[#D1D1D6] transition">
+                  <div class="flex items-center gap-2.5 min-w-0">
+                    <!-- 1. DIVISA -->
+                    <span class="px-2 py-0.5 rounded-md font-mono font-bold text-[11px] border shrink-0 ${curBadgeColor}">${cur}</span>
+                    <!-- 2. Nombre del evento (con enlace URL a Forex Factory al pulsar) -->
+                    <a href="${evUrl}" target="_blank" rel="noopener noreferrer" class="font-semibold text-[#1D1D1F] hover:text-[#3C45A5] hover:underline transition truncate" title="Abrir en Forex Factory">${title}</a>
+                  </div>
+                  <div class="flex items-center gap-3 shrink-0">
+                    <!-- 3. Hora (hora local de España) -->
+                    <span class="font-mono text-xs text-[#6E6E73] flex items-center gap-1.5"><i class="fa-regular fa-clock text-[#86868B]"></i>${timeSpainStr}</span>
+                    <!-- 4. Cuenta atrás en badge dinámico -->
+                    <span class="${badgeClass} font-mono text-[10px] px-2 py-0.5 rounded-md font-bold">${countdownText}</span>
+                  </div>
+                </div>`;
+            }).join('');
           }
         }
       } catch (err) {
@@ -7808,9 +7877,13 @@
         const btn = document.getElementById('notif-filter-' + cat);
         if (btn) {
           if (cat === category) {
-            btn.className = 'px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-[#1D1D1F] text-white transition';
+            btn.className = 'px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold notif-filter-btn active';
+            btn.style.setProperty('color', '#FFFFFF', 'important');
+            btn.style.setProperty('background-color', '#1D1D1F', 'important');
           } else {
-            btn.className = 'px-2 py-0.5 rounded-lg text-[10px] font-mono font-medium text-[#6E6E73] hover:bg-[#F2F2F7] transition';
+            btn.className = 'px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-medium notif-filter-btn';
+            btn.style.removeProperty('color');
+            btn.style.removeProperty('background-color');
           }
         }
       });
