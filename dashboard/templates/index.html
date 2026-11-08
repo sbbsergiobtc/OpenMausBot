@@ -703,10 +703,10 @@
               <h1 class="text-xl sm:text-2xl font-bold text-[#1D1D1F] tracking-tight" id="cockpit-header-title">Monitoreo Unificado · Capital Propio</h1>
               <p class="text-xs text-[#6E6E73]" id="cockpit-header-desc">Supervisión consolidada de capital propio en Forward Test: 25 estrategias ($25,000 inicial) en MT5 Demo y Hyperliquid DEX.</p>
             </div>
-            <!-- Acciones de Intervención Operativa & Gestor de Cuentas (Alineados a la derecha) -->
-            <div class="flex items-center justify-end gap-2.5 flex-wrap sm:ml-auto w-full sm:w-auto shrink-0">
+            <!-- Acciones de Intervención Operativa & Gestor de Cuentas (Alineados a la derecha en dos filas) -->
+            <div class="flex flex-col items-end gap-2 shrink-0 sm:ml-auto" style="display: flex !important; flex-direction: column !important; align-items: flex-end !important;">
               <button onclick="toggleAccountsManagerModal()" class="btn-secondary whitespace-nowrap cursor-pointer text-xs flex items-center gap-1.5" title="Gestionar Cuentas Conectadas y Fases de Fondeo">
-                <i class="fa-solid fa-building-columns text-[#3C45A5]"></i> Cuentas & Fases
+                <i class="fa-solid fa-building-columns text-[#1D1D1F]"></i> Cuentas & Fases
               </button>
               <button onclick="triggerEmergencyKillSwitch()" id="btn-kill-switch" class="px-4 py-2 rounded-lg bg-[#D70015] hover:bg-[#B50012] text-white text-xs font-bold font-mono flex items-center gap-2 transition shadow-xs cursor-pointer whitespace-nowrap" title="Desconexión preventiva y pausa de todos los bots">
                 <i class="fa-solid fa-hand text-white"></i> PAUSA PREVENTIVA
@@ -5507,8 +5507,8 @@
           }
         }
 
-        // 2. Renderizado de noticias de alto impacto de la semana actual en el orden estricto:
-        // (icono calendario) tres primeras letras del nombre del dia de la semana dia (dd/mm), DIVISA, Nombre (con url), hora España (utc convertido), cuenta atrás con badge
+        // 2. Renderizado de noticias de alto impacto (Carpetas Rojas y Bank Holidays) de la semana actual
+        // Orden estricto: (icono calendario) dia semana (dd/mm), DIVISA (USD verde, EUR rojo, GBP azul), Nombre (con url), hora España, cuenta atrás con badge (mismo ancho)
         const container = document.getElementById('cockpit-macro-events-container');
         if (container) {
           const rawEvents = data.upcoming_events || [];
@@ -5522,7 +5522,7 @@
               <div class="flex items-center justify-between gap-3 p-3 rounded-xl bg-[#FAFAFC] border border-[#E5E5EA] text-xs">
                 <div class="flex items-center gap-2 min-w-0">
                   <i class="fa-regular fa-calendar-check text-[#107C41] text-sm"></i>
-                  <span class="text-[#6E6E73]">Sin noticias de alto impacto para EUR, USD o GBP en la semana actual.</span>
+                  <span class="text-[#6E6E73]">Sin noticias de alto impacto (carpetas rojas / festivos) para EUR, USD o GBP en la semana actual.</span>
                 </div>
                 <span class="badge-neutral-soft font-mono text-[10px] px-2 py-0.5 rounded-md">Semana limpia</span>
               </div>`;
@@ -5531,7 +5531,8 @@
               const cur = (ev.currency || ev.country || 'USD').toUpperCase();
               const title = ev.title || ev.event || 'Evento Macroeconómico';
               const evUrl = ev.url || 'https://www.forexfactory.com/calendar';
-              
+              const isHoliday = (ev.impact === 'Holiday') || title.toLowerCase().includes('holiday');
+
               // Conversión de fecha y hora UTC a hora local de España
               let dateFormatted = '--- --/--';
               let timeSpainStr = '--:--';
@@ -5544,7 +5545,12 @@
                   const day = evDate.toLocaleDateString('es-ES', { timeZone: 'Europe/Madrid', day: '2-digit' });
                   const month = evDate.toLocaleDateString('es-ES', { timeZone: 'Europe/Madrid', month: '2-digit' });
                   dateFormatted = `${capWeekday} ${day}/${month}`;
-                  timeSpainStr = evDate.toLocaleTimeString('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit' });
+                  
+                  if (isHoliday) {
+                    timeSpainStr = 'Todo el día';
+                  } else {
+                    timeSpainStr = evDate.toLocaleTimeString('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit' });
+                  }
                 } catch (e) {
                   dateFormatted = '--- --/--';
                   timeSpainStr = '--:--';
@@ -5558,6 +5564,9 @@
               if (ev.in_blackout) {
                 badgeClass = 'badge-danger-risk animate-pulse';
                 countdownText = '● BLACKOUT';
+              } else if (isHoliday) {
+                badgeClass = 'badge-brand-indigo';
+                countdownText = 'Festivo';
               } else if (mins < 0) {
                 badgeClass = 'badge-neutral-soft';
                 countdownText = 'Finalizado';
@@ -5574,35 +5583,39 @@
                 countdownText = `en ${dCount}d ${h}h`;
               }
 
-              let curBadgeColor = 'bg-[#EEF2FF] text-[#3C45A5] border-[#E0E7FF]';
-              if (cur === 'EUR') curBadgeColor = 'bg-[#ECFDF5] text-[#065F46] border-[#A7F3D0]';
-              if (cur === 'GBP') curBadgeColor = 'bg-[#FEF3C7] text-[#92400E] border-[#FDE68A]';
+              // Directiva Sergio Colores: USD verde, EUR rojo, GBP azul
+              let curBadgeColor = 'bg-[#ECFDF5] text-[#065F46] border-[#A7F3D0]'; // USD Verde por defecto
+              if (cur === 'EUR') {
+                curBadgeColor = 'bg-[#FEF2F2] text-[#D70015] border-[#FECACA]'; // EUR Rojo
+              } else if (cur === 'GBP') {
+                curBadgeColor = 'bg-[#EEF2FF] text-[#3C45A5] border-[#E0E7FF]'; // GBP Azul
+              }
 
               return `
                 <div class="flex items-center justify-between gap-3 p-2 rounded-xl bg-[#FAFAFC] border border-[#E5E5EA] text-xs hover:border-[#D1D1D6] transition">
                   <div class="flex items-center gap-2.5 min-w-0 flex-1">
                     <!-- 1. (icono de calendario) tres primeras letras del nombre del dia de la semana dia (dd/mm) -->
-                    <span class="flex items-center gap-1.5 font-mono text-xs text-[#1D1D1F] font-semibold shrink-0 min-w-[95px]">
+                    <span class="flex items-center gap-1.5 font-mono text-xs text-[#1D1D1F] font-semibold shrink-0 w-[95px] min-w-[95px]">
                       <i class="fa-regular fa-calendar text-[#86868B] text-[11px]"></i>
                       ${dateFormatted}
                     </span>
-                    <!-- 2. DIVISA -->
-                    <span class="px-2 py-0.5 rounded-md font-mono font-bold text-[11px] border shrink-0 ${curBadgeColor}">
+                    <!-- 2. DIVISA (USD verde, EUR rojo, GBP azul) -->
+                    <span class="w-12 min-w-[48px] text-center px-1.5 py-0.5 rounded-md font-mono font-bold text-[11px] border shrink-0 ${curBadgeColor}">
                       ${cur}
                     </span>
-                    <!-- 3. Nombre del evento (con enlace url a forex factory al pulsar) -->
+                    <!-- 3. Nombre del evento (con enlace url a forex factory el pulsar) -->
                     <a href="${evUrl}" target="_blank" rel="noopener noreferrer" class="font-semibold text-[#1D1D1F] hover:text-[#3C45A5] hover:underline transition truncate min-w-0" title="Abrir en Forex Factory">
                       ${title}
                     </a>
                   </div>
-                  <div class="flex items-center gap-3 shrink-0">
-                    <!-- 4. hora (hora local de españa teniendo en cuenta formato utc) -->
-                    <span class="font-mono text-xs text-[#6E6E73] flex items-center gap-1 shrink-0 min-w-[65px]">
-                      <i class="fa-regular fa-clock text-[#86868B]"></i>
-                      ${timeSpainStr}
+                  <div class="flex items-center gap-2.5 shrink-0">
+                    <!-- 4. hora (hora local de españa teniendo en cuenta formato utc) - MISMO ANCHO EXACTO (w-28 min-w-[112px]) -->
+                    <span class="w-28 min-w-[112px] font-mono text-xs text-[#6E6E73] flex items-center justify-center gap-1.5 shrink-0 bg-[#F2F2F7] px-2 py-1 rounded-md text-center">
+                      <i class="${isHoliday ? 'fa-solid fa-umbrella-beach' : 'fa-regular fa-clock'} text-[#86868B] text-[10px]"></i>
+                      <span>${timeSpainStr}</span>
                     </span>
-                    <!-- 5. cuenta atras con badge -->
-                    <span class="${badgeClass} font-mono text-[10px] px-2 py-0.5 rounded-md font-bold shrink-0 min-w-[75px] text-center">
+                    <!-- 5. cuenta atras con badge - MISMO ANCHO EXACTO (w-28 min-w-[112px]) -->
+                    <span class="w-28 min-w-[112px] ${badgeClass} font-mono text-[10px] px-2 py-1 rounded-md font-bold shrink-0 flex items-center justify-center text-center">
                       ${countdownText}
                     </span>
                   </div>

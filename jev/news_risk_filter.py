@@ -139,15 +139,19 @@ def parse_event_datetime(date_str: str) -> Optional[datetime]:
 
 
 def is_high_impact_event(event: Dict[str, Any]) -> bool:
-    """Verifica si el evento es catalogado como High Impact o contiene palabras clave críticas."""
-    if event.get('impact') == 'High':
-        return True
-    title = str(event.get('title', '')).upper()
-    for kw in HIGH_IMPACT_KEYWORDS:
-        if kw in title:
-            return True
-    return False
+    """
+    Directiva Forex Factory de Sergio:
+    Solo son de alto impacto las noticias con CARPETA ROJA (impact == 'High')
+    y los días festivos / Bank Holidays (impact == 'Holiday' o 'bank holiday' en título).
+    """
+    impact = str(event.get('impact', '')).strip()
+    title = str(event.get('title', '')).strip().lower()
 
+    if impact == 'High':
+        return True
+    if impact == 'Holiday' or 'bank holiday' in title or 'holiday' in title:
+        return True
+    return False
 
 def check_news_blackout(symbol: str, target_time_utc: Optional[datetime] = None) -> Tuple[bool, Optional[str], Optional[Dict[str, Any]]]:
     """
