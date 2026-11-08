@@ -54,12 +54,16 @@ try:
         query_q_learning_lot_multiplier,
         check_intrasemanal_drift_trigger,
         train_and_save_dual_q_policies,
+        record_online_trade_experience,
+        record_libro_c_telemetry,
     )
 except Exception as e:
     apply_prop_firm_consistency_tp_clamp = None
     query_q_learning_lot_multiplier = None
     check_intrasemanal_drift_trigger = None
     train_and_save_dual_q_policies = None
+    record_online_trade_experience = None
+    record_libro_c_telemetry = None
     print(f"[WARN] Double Q-Learning Orchestrator no inicializado: {e}")
 
 STATE_FILE = '/root/AlgrokQuant/data/paper_trades/prop_firm_forward_test_state.json'
@@ -329,8 +333,17 @@ def run_cycle():
             drift_info = check_intrasemanal_drift_trigger(state, state.get('market_regimes', {}))
             state['q_learning_drift_status'] = drift_info
             if drift_info.get('drift_triggered'):
+                state['last_drift_retrain_time'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
                 print(f"  [Q-LEARNING DRIFT TRIGGER] {drift_info.get('reason')} -> Re-entrenando políticas 80/20 + Polyak...")
-                train_and_save_dual_q_policies(trigger_reason="INTRASEMANAL_DRIFT_TRIGGER")
+                retrain_res = train_and_save_dual_q_policies(trigger_reason="INTRASEMANAL_DRIFT_TRIGGER")
+                if dispatch_telegram_message is not None:
+                    dispatch_telegram_message(
+                        "AlphaReporter",
+                        f"⚠️ <b>RE-ENTRENAMIENTO Q-LEARNING POR DERIVA (DRIFT TRIGGER)</b>\n\n"
+                        f"• <b>Causa:</b> {drift_info.get('reason')}\n"
+                        f"• <b>Amortiguación:</b> Polyak τ = 0.25 (80% Estructural / 20% Memoria Reciente)\n"
+                        f"• <b>Políticas Actualizadas:</b> PROP_FIRM & CAPITAL_PROPIO"
+                    )
         except Exception as de:
             print(f"  [WARN] Error en check_intrasemanal_drift_trigger: {de}")
 
@@ -370,8 +383,77 @@ def run_cycle():
                 print(f"  [MT5] Cerrando en broker posicion viva Ticket {ticket} ({broker_sym})...")
                 mt5.close_position(ticket=ticket)
 
+            # Cálculo de PnL Realizado y R-Múltiplo para Replay Memory
+            exit_p = price - (cfg['spread_pts'] / 2.0)
+            entry_p = float(pos.get('entry_price', price))
+            lots = float(pos.get('dynamic_lots', 0.01))
+            risk_usd = float(pos.get('risk_usd', 10.0))
+            sl_price = float(pos.get('sl_price', entry_p - atr * 1.5))
+            sl_dist = max(1e-6, abs(entry_p - sl_price))
+
+            pnl_pts = (exit_p - entry_p)
+            r_mult = pnl_pts / sl_dist
+            realized_pnl = r_mult * risk_usd
+            clamped = bool(pos.get('consistency_clamped', False))
+            q_meta = pos.get('q_decision', {})
+
+            closed_rec = {
+                'strategy_id': strat_id,
+                'symbol': sym,
+                'branch': branch,
+                'entry_time': pos.get('entry_time'),
+                'exit_time': now_str,
+                'entry_price': entry_p,
+                'exit_price': exit_p,
+                'lots': lots,
+                'risk_usd': round(risk_usd, 2),
+                'pnl_usd': round(realized_pnl, 2),
+                'r_multiple': round(r_mult, 2),
+                'consistency_clamped': clamped,
+                'q_decision': q_meta
+            }
+
+            b_key = 'capital_propio' if branch == 'CAPITAL_PROPIO' else 'prop_firm'
+            state[b_key].setdefault('closed_trades', []).append(closed_rec)
+
+            # Inyectar experiencia en el Buffer Online de Aprendizaje por Refuerzo
+            if record_online_trade_experience is not None:
+                record_online_trade_experience(
+                    desk_mode=branch,
+                    regime_id_10=int(q_meta.get('regime_id_10', 6)),
+                    archetype_or_anchor=strat_id,
+                    guardian_traffic_light=str(q_meta.get('guardian_state', 'GREEN')),
+                    action_multiplier=float(q_meta.get('q_lot_multiplier', 1.0)),
+                    pnl_usd=realized_pnl,
+                    r_multiple=r_mult,
+                    consistency_clamped=clamped,
+                    symbol=sym,
+                    strategy_id=strat_id,
+                )
+
+            # Telemetría en Vivo de Libro C
+            if record_libro_c_telemetry is not None:
+                record_libro_c_telemetry(
+                    event_type="TRADE_CLOSED",
+                    desk_mode=branch,
+                    symbol=sym,
+                    strategy_id=strat_id,
+                    regime_id_10=int(q_meta.get('regime_id_10', 6)),
+                    archetype_or_anchor=strat_id,
+                    guardian_traffic_light=str(q_meta.get('guardian_state', 'GREEN')),
+                    action_multiplier=float(q_meta.get('q_lot_multiplier', 1.0)),
+                    q_value=float(q_meta.get('q_value', 0.0)),
+                    details={
+                        'entry_price': entry_p,
+                        'exit_price': exit_p,
+                        'pnl_usd': round(realized_pnl, 2),
+                        'r_multiple': round(r_mult, 2),
+                        'consistency_clamped': clamped
+                    }
+                )
+
             del pos_container[sym]
-            print(f"  >>> CERRADA POSICION EN {sym} ({strat_id}) <<<")
+            print(f"  >>> CERRADA POSICION EN {sym} ({strat_id}) | Realized PnL: ${realized_pnl:+.2f} ({r_mult:+.2f}R) <<<")
 
         # B) Apertura de Posicion con INTERES COMPUESTO + DOUBLE Q-LEARNING (10 ESTADOS) + TOPE 40% CONSISTENCIA
         elif pos is None and sig == 'BUY':
@@ -382,6 +464,7 @@ def run_cycle():
             guard_light = guardian_light_by_id.get(strat_id, 'GREEN')
             guard_lot_mult = float(guardian_mult_by_id.get(strat_id, 1.0))
 
+            q_dec = {}
             if query_q_learning_lot_multiplier is not None:
                 q_dec = query_q_learning_lot_multiplier(branch, regime_id_10, strat_id, guard_light)
                 q_mult = float(q_dec.get('q_lot_multiplier', reg_info.get('lot_multiplier', 1.0)))
@@ -392,6 +475,19 @@ def run_cycle():
 
             if effective_mult <= 0.0:
                 print(f"  [BLOQUEO Q-LEARNING/GUARDIAN] {sym} ({strat_id}) bloqueado: SubRegimen={sub_regime_10} (effective_mult={effective_mult}x, guard={guard_light})")
+                if record_libro_c_telemetry is not None:
+                    record_libro_c_telemetry(
+                        event_type="TRADE_BLOCKED_BY_Q",
+                        desk_mode=branch,
+                        symbol=sym,
+                        strategy_id=strat_id,
+                        regime_id_10=regime_id_10,
+                        archetype_or_anchor=strat_id,
+                        guardian_traffic_light=guard_light,
+                        action_multiplier=0.0,
+                        q_value=float(q_dec.get('q_value', 0.0)),
+                        details={'reason': f"Whipsaw Evitado en {sub_regime_10}", 'guard': guard_light}
+                    )
                 continue
 
             entry_p = price + (cfg['spread_pts'] / 2.0)
@@ -401,6 +497,7 @@ def run_cycle():
 
             # En Prop Firm: Aplicar Regla del 40% de Consistencia (Early TP Clamp si 1.25x o 1.00x supera el tope)
             consistency_note = "N/A_CAP_PROPIO"
+            is_early_clamped = False
             if branch == 'PROP_FIRM' and apply_prop_firm_consistency_tp_clamp is not None:
                 today_realized_pct = float(state.get('prop_firm', {}).get('today_realized_profit_pct', 0.0))
                 clamp_res = apply_prop_firm_consistency_tp_clamp(
@@ -415,11 +512,38 @@ def run_cycle():
                 )
                 if clamp_res.get('blocked_by_consistency'):
                     print(f"  [BLOQUEO CONSISTENCIA 40%] {sym} ({strat_id}): {clamp_res.get('reason')}")
+                    if record_libro_c_telemetry is not None:
+                        record_libro_c_telemetry(
+                            event_type="TRADE_BLOCKED_BY_CONSISTENCY_40",
+                            desk_mode=branch,
+                            symbol=sym,
+                            strategy_id=strat_id,
+                            regime_id_10=regime_id_10,
+                            archetype_or_anchor=strat_id,
+                            guardian_traffic_light=guard_light,
+                            action_multiplier=effective_mult,
+                            q_value=float(q_dec.get('q_value', 0.0)),
+                            details={'reason': clamp_res.get('reason')}
+                        )
                     continue
                 tp_price = float(clamp_res.get('clamped_tp_price', tp_price))
                 consistency_note = clamp_res.get('reason', 'OK_40PCT')
-                if clamp_res.get('early_tp_clamped'):
+                is_early_clamped = bool(clamp_res.get('early_tp_clamped', False))
+                if is_early_clamped:
                     print(f"  [EARLY TP CLAMP 40%] {sym} ({strat_id}): {consistency_note}")
+                    if record_libro_c_telemetry is not None:
+                        record_libro_c_telemetry(
+                            event_type="EARLY_TP_CLAMPED",
+                            desk_mode=branch,
+                            symbol=sym,
+                            strategy_id=strat_id,
+                            regime_id_10=regime_id_10,
+                            archetype_or_anchor=strat_id,
+                            guardian_traffic_light=guard_light,
+                            action_multiplier=effective_mult,
+                            q_value=float(q_dec.get('q_value', 0.0)),
+                            details={'reason': consistency_note, 'clamped_tp': tp_price}
+                        )
 
             effective_balance = current_live_balance * effective_mult
             dynamic_lots = calculate_dynamic_lots(sym, effective_balance, entry_p, sl_price)
@@ -449,7 +573,9 @@ def run_cycle():
                 'sl_price': sl_price,
                 'tp_price': tp_price,
                 'entry_time': now_str,
-                'live_ticket': ticket
+                'live_ticket': ticket,
+                'consistency_clamped': is_early_clamped,
+                'q_decision': q_dec
             }
             state['order_history'].append({
                 'timestamp': now_str,
@@ -461,9 +587,32 @@ def run_cycle():
                 'price': entry_p,
                 'sl': sl_price,
                 'live_ticket': ticket,
-                'notes': f"Sizing Dinamico {cfg['risk_pct']*100:.1f}% sobre ${current_live_balance:,.2f}"
+                'notes': f"Sizing Q-Learning {effective_mult:.2f}x sobre ${current_live_balance:,.2f} ({sub_regime_10})"
             })
             print(f"  >>> NUEVA POSICION {branch}: {sym} {dynamic_lots} lotes | SL={sl_price:.4f} | Ticket={ticket} <<<")
+
+            if record_libro_c_telemetry is not None:
+                record_libro_c_telemetry(
+                    event_type="TRADE_OPENED",
+                    desk_mode=branch,
+                    symbol=sym,
+                    strategy_id=strat_id,
+                    regime_id_10=regime_id_10,
+                    archetype_or_anchor=strat_id,
+                    guardian_traffic_light=guard_light,
+                    action_multiplier=effective_mult,
+                    q_value=float(q_dec.get('q_value', 0.0)),
+                    details={
+                        'sub_regime_10': sub_regime_10,
+                        'lots': dynamic_lots,
+                        'risk_usd': round(risk_usd, 2),
+                        'entry_price': entry_p,
+                        'sl_price': sl_price,
+                        'tp_price': tp_price,
+                        'consistency_clamped': is_early_clamped,
+                        'consistency_note': consistency_note
+                    }
+                )
 
     state['last_eval_timestamp'] = now_str
     save_state(state)

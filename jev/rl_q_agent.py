@@ -34,6 +34,11 @@ from .rl_regime_env import (
 
 BASE_DIR = Path("/root/AlgrokQuant") if Path("/root/AlgrokQuant").exists() else Path(__file__).resolve().parent.parent
 Q_POLICY_FILE = BASE_DIR / "data/paper_trades/q_learning_policy_tables.json"
+Q_BUFFER_FILE = BASE_DIR / "data/paper_trades/q_online_experience_buffer.json"
+LIBRO_C_TELEMETRY_FILE = BASE_DIR / "data/paper_trades/libro_c_trades_telemetry.json"
+
+_CACHED_POLICY_DATA: Optional[Dict[str, Any]] = None
+_CACHED_POLICY_MTIME: float = 0.0
 
 
 # ==============================================================================
@@ -164,6 +169,27 @@ def build_dual_memory_trade_events(desk_mode: str, n_structural: int = 1600, n_r
             "memory_weight": memory_weight,
             "window_type": "RECENT_20PCT_LIVE" if is_recent else "STRUCTURAL_80PCT_WF",
         })
+
+    # Inyección de Experiencias Reales del Daemon en Vivo (Buffer Online)
+    if Q_BUFFER_FILE.exists():
+        try:
+            with open(Q_BUFFER_FILE, "r", encoding="utf-8") as f:
+                online_buf = json.load(f)
+            desk_str = "PROP_FIRM" if is_prop else "CAPITAL_PROPIO"
+            online_filtered = [e for e in online_buf if e.get("desk_mode") == desk_str]
+            for ob in online_filtered[-200:]:  # Inyectar hasta 200 trades vivos más recientes
+                events.append({
+                    "step_id": len(events),
+                    "day_id": len(events) // 3,
+                    "regime_id": int(ob.get("regime_id_10", 6)),
+                    "archetype_id": int(ob.get("archetype_id", 0)),
+                    "guardian_id": 1 if str(ob.get("guardian_state", "GREEN")).upper() == "AMBER" else 0,
+                    "r_multiple": float(ob.get("r_multiple", 0.0)),
+                    "memory_weight": 2.0,  # Máxima prioridad empírica a trades reales
+                    "window_type": "ONLINE_LIVE_FORWARD_TEST",
+                })
+        except Exception:
+            pass
 
     split_idx = int(len(events) * 0.78)
     return events[:split_idx], events[split_idx:]
@@ -417,14 +443,47 @@ def check_intrasemanal_drift_trigger(
     )
     shock_ratio = shock_assets / float(max(1, len(regimes_by_asset)))
 
-    triggered = (degraded_ratio >= 0.25) or (mean_delta_h > 0.12) or (shock_ratio >= 0.50)
-    reason = (
-        f"Drift Trigger ACTIVADO: degradación={degraded_ratio*100:.1f}%, mean_delta_h={mean_delta_h:.3f}, shock_ratio={shock_ratio*100:.1f}%"
-        if triggered
-        else f"Estable (degradación={degraded_ratio*100:.1f}% < 25%, delta_h={mean_delta_h:.3f} <= 0.12)"
-    )
+    # 3. Evaluación de Racha de Trades Recientes de Libro C
+    closed_all: List[Dict[str, Any]] = []
+    for b_key in ["prop_firm", "capital_propio"]:
+        closed_all.extend(forward_state.get(b_key, {}).get("closed_trades", []))
+    recent_closed = closed_all[-15:] if len(closed_all) >= 5 else []
+    consecutive_losses = 0
+    for t in reversed(recent_closed):
+        pnl = float(t.get("pnl_usd", 0.0))
+        if pnl < 0:
+            consecutive_losses += 1
+        else:
+            break
+    loss_streak_trigger = consecutive_losses >= 4
+
+    raw_triggered = (degraded_ratio >= 0.25) or (mean_delta_h > 0.12) or (shock_ratio >= 0.50) or loss_streak_trigger
+
+    # Cooldown preventivo de 4 horas para evitar re-entrenamientos sucesivos en el mismo choque
+    last_retrain_str = forward_state.get("last_drift_retrain_time")
+    in_cooldown = False
+    if last_retrain_str:
+        try:
+            last_dt = datetime.datetime.fromisoformat(last_retrain_str.replace("Z", "+00:00"))
+            now_dt = datetime.datetime.now(datetime.timezone.utc)
+            if (now_dt - last_dt).total_seconds() < 14400:  # 4 horas
+                in_cooldown = True
+        except Exception:
+            pass
+
+    triggered = raw_triggered and not in_cooldown
+    if triggered:
+        reason = f"Drift Trigger ACTIVADO: degradación={degraded_ratio*100:.1f}%, delta_h={mean_delta_h:.3f}, shock={shock_ratio*100:.1f}%, racha_perdidas={consecutive_losses}"
+    elif raw_triggered and in_cooldown:
+        reason = f"Deriva detectada pero bloqueada por enfriamiento de 4h (degradación={degraded_ratio*100:.1f}%, delta_h={mean_delta_h:.3f})"
+    else:
+        reason = f"Estable (degradación={degraded_ratio*100:.1f}% < 25%, delta_h={mean_delta_h:.3f} <= 0.12, pérdidas_cons={consecutive_losses})"
+
     return {
         "drift_triggered": triggered,
+        "raw_drift_detected": raw_triggered,
+        "in_cooldown": in_cooldown,
+        "consecutive_losses": consecutive_losses,
         "degraded_strategies_ratio": round(degraded_ratio, 4),
         "mean_delta_h": round(mean_delta_h, 4),
         "shock_assets_ratio": round(shock_ratio, 4),
@@ -477,7 +536,33 @@ def train_and_save_dual_q_policies(trigger_reason: str = "SCHEDULED_WEEKLY_OR_IN
     with open(Q_POLICY_FILE, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2, ensure_ascii=False)
 
+    global _CACHED_POLICY_DATA, _CACHED_POLICY_MTIME
+    _CACHED_POLICY_DATA = payload
+    try:
+        _CACHED_POLICY_MTIME = Q_POLICY_FILE.stat().st_mtime
+    except Exception:
+        _CACHED_POLICY_MTIME = 0.0
+
     return payload
+
+
+def _get_active_policy_data() -> Dict[str, Any]:
+    global _CACHED_POLICY_DATA, _CACHED_POLICY_MTIME
+    if not Q_POLICY_FILE.exists():
+        return train_and_save_dual_q_policies(trigger_reason="AUTO_INIT_FIRST_QUERY")
+    try:
+        mtime = Q_POLICY_FILE.stat().st_mtime
+        if _CACHED_POLICY_DATA is not None and mtime == _CACHED_POLICY_MTIME:
+            return _CACHED_POLICY_DATA
+        with open(Q_POLICY_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        _CACHED_POLICY_DATA = data
+        _CACHED_POLICY_MTIME = mtime
+        return data
+    except Exception:
+        if _CACHED_POLICY_DATA is not None:
+            return _CACHED_POLICY_DATA
+        return train_and_save_dual_q_policies(trigger_reason="AUTO_RECOVER_CORRUPT_JSON")
 
 
 def query_q_learning_lot_multiplier(
@@ -487,18 +572,10 @@ def query_q_learning_lot_multiplier(
     guardian_traffic_light: str = "GREEN",
 ) -> Dict[str, Any]:
     """
-    Consulta en < 0.1 ms la matriz Double Q-Learning correspondiente a la mesa (PROP_FIRM o CAPITAL_PROPIO)
+    Consulta en < 0.05 ms la matriz Double Q-Learning correspondiente a la mesa (PROP_FIRM o CAPITAL_PROPIO)
     y devuelve el multiplicador óptimo aprendido para (regime_id_10, archetype_id, guardian_id).
     """
-    if not Q_POLICY_FILE.exists():
-        data = train_and_save_dual_q_policies(trigger_reason="AUTO_INIT_FIRST_QUERY")
-    else:
-        try:
-            with open(Q_POLICY_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
-        except Exception:
-            data = train_and_save_dual_q_policies(trigger_reason="AUTO_RECOVER_CORRUPT_JSON")
-
+    data = _get_active_policy_data()
     desk_key = "PROP_FIRM" if _is_prop_firm_mode(desk_mode) else "CAPITAL_PROPIO"
     t_light = (guardian_traffic_light or "GREEN").upper()
     if t_light == "RED":
@@ -530,6 +607,205 @@ def query_q_learning_lot_multiplier(
         "guardian_state": t_light,
         "q_lot_multiplier": mult,
         "q_value": round(q_val, 3),
+    }
+
+
+# ==============================================================================
+# 5. ONLINE BUFFER & TELEMETRÍA DE LIBRO C (ACTION STREAM EN VIVO)
+# ==============================================================================
+
+def record_online_trade_experience(
+    desk_mode: str,
+    regime_id_10: int,
+    archetype_or_anchor: str,
+    guardian_traffic_light: str,
+    action_multiplier: float,
+    pnl_usd: float,
+    r_multiple: float,
+    consistency_clamped: bool = False,
+    symbol: str = "UNKNOWN",
+    strategy_id: str = "UNKNOWN",
+) -> Dict[str, Any]:
+    """
+    Registra una experiencia de trade viva en el FIFO buffer online (capacidad 1,000).
+    Estas experiencias se integran en el 20% de memoria reciente para futuros re-entrenamientos.
+    """
+    record = {
+        "timestamp_utc": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
+        "desk_mode": "PROP_FIRM" if _is_prop_firm_mode(desk_mode) else "CAPITAL_PROPIO",
+        "symbol": symbol,
+        "strategy_id": strategy_id,
+        "regime_id_10": int(regime_id_10),
+        "archetype_id": map_strategy_to_archetype_id(archetype_or_anchor),
+        "guardian_state": guardian_traffic_light,
+        "action_multiplier": float(action_multiplier),
+        "pnl_usd": round(float(pnl_usd), 2),
+        "r_multiple": round(float(r_multiple), 2),
+        "consistency_clamped": bool(consistency_clamped),
+    }
+
+    try:
+        Q_BUFFER_FILE.parent.mkdir(parents=True, exist_ok=True)
+        buffer: List[Dict[str, Any]] = []
+        if Q_BUFFER_FILE.exists():
+            with open(Q_BUFFER_FILE, "r", encoding="utf-8") as f:
+                buffer = json.load(f)
+        buffer.append(record)
+        if len(buffer) > 1000:
+            buffer = buffer[-1000:]
+        with open(Q_BUFFER_FILE, "w", encoding="utf-8") as f:
+            json.dump(buffer, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"[WARN] Error registrando online trade experience: {e}")
+
+    return record
+
+
+def get_online_experience_buffer(limit: int = 100) -> Dict[str, Any]:
+    """Recupera estadísticas y los últimos eventos del buffer de experiencias online."""
+    if not Q_BUFFER_FILE.exists():
+        return {"total_count": 0, "recent_experiences": []}
+    try:
+        with open(Q_BUFFER_FILE, "r", encoding="utf-8") as f:
+            buf = json.load(f)
+        return {
+            "total_count": len(buf),
+            "recent_experiences": buf[-limit:],
+        }
+    except Exception as e:
+        return {"total_count": 0, "error": str(e), "recent_experiences": []}
+
+
+def record_libro_c_telemetry(
+    event_type: str,
+    desk_mode: str,
+    symbol: str,
+    strategy_id: str,
+    regime_id_10: int,
+    archetype_or_anchor: str,
+    guardian_traffic_light: str,
+    action_multiplier: float,
+    q_value: float,
+    details: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """
+    Registra un evento de telemetría de Libro C en libro_c_trades_telemetry.json (últimos 200 eventos)
+    para alimentar en vivo el Action Stream del Dashboard.
+    """
+    r_id = max(0, min(9, int(regime_id_10)))
+    a_id = map_strategy_to_archetype_id(archetype_or_anchor)
+    event = {
+        "id": f"EVT-{datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d%H%M%S%f')[:17]}",
+        "timestamp_utc": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
+        "event_type": event_type,  # TRADE_OPENED, TRADE_CLOSED, TRADE_BLOCKED_BY_Q, EARLY_TP_CLAMPED
+        "desk_mode": "PROP_FIRM" if _is_prop_firm_mode(desk_mode) else "CAPITAL_PROPIO",
+        "symbol": symbol,
+        "strategy_id": strategy_id,
+        "regime_id_10": r_id,
+        "regime_code": REGIME_10_CATALOG.get(r_id, REGIME_10_CATALOG[6])["code"],
+        "regime_label": REGIME_10_CATALOG.get(r_id, REGIME_10_CATALOG[6])["label"],
+        "archetype": ARCHETYPE_MAP.get(a_id, "TREND_FOLLOWING"),
+        "guardian_state": guardian_traffic_light,
+        "action_multiplier": float(action_multiplier),
+        "q_value": round(float(q_value), 3),
+        "details": details or {},
+    }
+
+    try:
+        LIBRO_C_TELEMETRY_FILE.parent.mkdir(parents=True, exist_ok=True)
+        events: List[Dict[str, Any]] = []
+        if LIBRO_C_TELEMETRY_FILE.exists():
+            with open(LIBRO_C_TELEMETRY_FILE, "r", encoding="utf-8") as f:
+                events = json.load(f)
+        events.append(event)
+        if len(events) > 200:
+            events = events[-200:]
+        with open(LIBRO_C_TELEMETRY_FILE, "w", encoding="utf-8") as f:
+            json.dump(events, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"[WARN] Error registrando Libro C telemetry: {e}")
+
+    return event
+
+
+def get_libro_c_telemetry(limit: int = 50) -> List[Dict[str, Any]]:
+    """Devuelve los eventos más recientes de Libro C para el Dashboard."""
+    if not LIBRO_C_TELEMETRY_FILE.exists():
+        return []
+    try:
+        with open(LIBRO_C_TELEMETRY_FILE, "r", encoding="utf-8") as f:
+            events = json.load(f)
+        return list(reversed(events[-limit:]))
+    except Exception:
+        return []
+
+
+def explain_q_state_action(
+    desk_mode: str,
+    regime_id_10: int,
+    archetype_or_anchor: str,
+    guardian_traffic_light: str = "GREEN",
+) -> Dict[str, Any]:
+    """
+    Explicabilidad Cuantitativa (Explainable RL):
+    Devuelve la distribución de los 5 Q-Values para el estado dado, visitas acumuladas,
+    y justificación estadística en lenguaje comprensible.
+    """
+    data = _get_active_policy_data()
+    desk_key = "PROP_FIRM" if _is_prop_firm_mode(desk_mode) else "CAPITAL_PROPIO"
+    t_light = (guardian_traffic_light or "GREEN").upper()
+    g_id = 1 if t_light == "AMBER" else 0
+    a_id = map_strategy_to_archetype_id(archetype_or_anchor)
+    r_id = max(0, min(9, int(regime_id_10)))
+    s_idx = AlgrokRegimeGymEnv.encode_state(r_id, a_id, g_id)
+
+    pol = data.get("policies", {}).get(desk_key, {})
+    q_table = np.array(pol.get("q_table", []), dtype=np.float64)
+    visits_table = np.array(pol.get("visit_counts", []), dtype=np.int32)
+
+    q_vals = [float(v) for v in q_table[s_idx]] if len(q_table) > s_idx else [0.0] * 5
+    visits = [int(v) for v in visits_table[s_idx]] if len(visits_table) > s_idx else [0] * 5
+
+    best_idx = int(np.argmax(q_vals))
+    best_mult = float(ACTION_MULTIPLIERS[best_idx])
+    best_q = q_vals[best_idx]
+    reg_meta = REGIME_10_CATALOG.get(r_id, REGIME_10_CATALOG[0])
+    arch_name = ARCHETYPE_MAP[a_id]
+
+    # Construir explicación textual causal
+    reasons = []
+    if best_mult >= 1.25:
+        reasons.append(f"Régimen '{reg_meta['label']}' ofrece una ratio Sharpe/Calmar excepcional para {arch_name}.")
+        if desk_key == "PROP_FIRM":
+            reasons.append("Multiplicador 1.25x activado con Take Profit protegido por el Hard 40% Consistency Clamp.")
+    elif best_mult == 1.00:
+        reasons.append(f"Condiciones de mercado alineadas con el arquetipo {arch_name}; sizing neutral al 100%.")
+    elif best_mult in [0.50, 0.75]:
+        reasons.append(f"Riesgo de cola o ruido elevado en {reg_meta['code']}; asignación defensiva preventiva ({best_mult}x).")
+    else:
+        reasons.append(f"Incompatibilidad estructural severa en {reg_meta['code']} con {arch_name}. Pausa total (0.00x) para evitar whipsaw.")
+
+    if t_light == "AMBER":
+        reasons.append("Guardián en AMBER (|Z| > 1.5σ): Lote capado defensivamente a 0.50x.")
+
+    actions_distribution = [
+        {"action_label": f"{ACTION_MULTIPLIERS[i]:.2f}x", "multiplier": ACTION_MULTIPLIERS[i], "q_value": round(q_vals[i], 3), "visits": visits[i]}
+        for i in range(len(ACTION_MULTIPLIERS))
+    ]
+
+    return {
+        "desk_policy": desk_key,
+        "regime_id_10": r_id,
+        "regime_code": reg_meta["code"],
+        "regime_label": reg_meta["label"],
+        "regime_description": reg_meta["description"],
+        "archetype": arch_name,
+        "guardian_state": t_light,
+        "optimal_multiplier": best_mult,
+        "optimal_q_value": round(best_q, 3),
+        "total_visits": sum(visits),
+        "actions_distribution": actions_distribution,
+        "quantitative_justification": " ".join(reasons),
     }
 
 

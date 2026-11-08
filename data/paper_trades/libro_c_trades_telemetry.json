@@ -1,0 +1,20 @@
+[
+  {
+    "id": "EVT-20261108123127009",
+    "timestamp_utc": "2026-11-08 12:31:27 UTC",
+    "event_type": "TRADE_OPENED",
+    "desk_mode": "PROP_FIRM",
+    "symbol": "BTC",
+    "strategy_id": "STRAT-001",
+    "regime_id_10": 0,
+    "regime_code": "S0_STRONG_CLEAN_BULL",
+    "regime_label": "Tendencia Alcista Fuerte Limpia",
+    "archetype": "TREND_FOLLOWING",
+    "guardian_state": "GREEN",
+    "action_multiplier": 1.25,
+    "q_value": 0.918,
+    "details": {
+      "test": true
+    }
+  }
+]

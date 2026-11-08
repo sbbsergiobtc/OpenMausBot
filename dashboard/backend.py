@@ -176,6 +176,76 @@ def get_q_learning_matrix():
         return {"error": str(e)}
 
 
+@app.get("/api/libro_c_telemetry")
+def get_libro_c_telemetry_endpoint(limit: int = 50):
+    try:
+        from jev.rl_q_agent import get_libro_c_telemetry, get_online_experience_buffer
+        return {
+            "events": get_libro_c_telemetry(limit=limit),
+            "buffer_stats": get_online_experience_buffer(limit=10)
+        }
+    except Exception as e:
+        return {"error": str(e), "events": []}
+
+
+@app.get("/api/q_explain")
+def get_q_explain(desk_mode: str = "PROP_FIRM", regime_id: int = 0, archetype: str = "TREND_FOLLOWING", guardian: str = "GREEN"):
+    try:
+        from jev.rl_q_agent import explain_q_state_action
+        return explain_q_state_action(desk_mode=desk_mode, regime_id_10=regime_id, archetype_or_anchor=archetype, guardian_traffic_light=guardian)
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.get("/api/simulate_q_action")
+def simulate_q_action(
+    desk_mode: str = "PROP_FIRM",
+    adx: float = 30.0,
+    ker: float = 0.45,
+    h_norm: float = 0.65,
+    hurst: float = 0.62,
+    atr_pctile: float = 40.0,
+    is_bull: bool = True,
+    guardian: str = "GREEN"
+):
+    try:
+        from jev.rl_q_agent import query_q_learning_lot_multiplier
+        from jev.rl_regime_env import REGIME_10_CATALOG
+
+        if adx >= 25.0 and h_norm <= 0.78 and atr_pctile <= 80.0:
+            regime_id = 0 if is_bull else 1
+        elif atr_pctile >= 90.0 and h_norm >= 0.88 and ker <= 0.20:
+            regime_id = 8
+        elif atr_pctile >= 75.0 and adx >= 25.0:
+            regime_id = 6 if is_bull else 7
+        elif ker <= 0.25 and adx < 18.0:
+            regime_id = 4
+        elif h_norm >= 0.85 and 0.40 <= hurst <= 0.55:
+            regime_id = 5
+        elif adx < 15.0 and atr_pctile <= 25.0:
+            regime_id = 9
+        else:
+            regime_id = 0 if is_bull else 1
+
+        reg_meta = REGIME_10_CATALOG.get(regime_id, REGIME_10_CATALOG[0])
+        archetypes = ["TREND_FOLLOWING", "MEAN_REVERSION", "VOLATILITY_BREAKOUT"]
+        actions = {}
+        for a in archetypes:
+            q_res = query_q_learning_lot_multiplier(desk_mode, regime_id, a, guardian)
+            actions[a] = q_res
+
+        return {
+            "classified_regime_id": regime_id,
+            "regime_code": reg_meta["code"],
+            "regime_label": reg_meta["label"],
+            "regime_description": reg_meta["description"],
+            "actions": actions,
+            "clamp_40pct_active": (desk_mode == "PROP_FIRM" and any(act.get("q_lot_multiplier") == 1.25 for act in actions.values()))
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+
 def parse_markdown_metadata(content: str) -> dict:
     meta = {}
     

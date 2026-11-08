@@ -2472,6 +2472,73 @@
           </div>
         </div>
 
+        <!-- Top HUD de 6 Subyacentes con Sizing Q en Vivo -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="overline-text text-[#3C45A5]">COBERTURA ACTIVA DE SUBYACENTES · SIZING Q-LEARNING EN VIVO</span>
+            <span class="text-[11px] font-mono text-[#6E6E73]" id="ql-hud-status-badge">Conexión Daemon: Activa</span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3" id="ql-live-assets-hud">
+            <!-- Populado dinámicamente por renderLiveAssetsHUD() -->
+          </div>
+        </div>
+
+        <!-- Simulador What-If Interactivo de Decisiones Q -->
+        <div class="p-4 rounded-xl bg-[#FAFAFC] border border-[#E5E5EA] space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#E5E5EA] pb-2">
+            <div>
+              <span class="overline-text text-[#3C45A5]">SIMULADOR DE DECISIÓN "WHAT-IF" · INFERENCIA EN TIEMPO REAL</span>
+              <h4 class="text-xs font-bold text-[#181A20]">Calculador Interactivo de Régimen Causal y Asignación de Lote Q</h4>
+            </div>
+            <span class="badge-neutral-soft font-mono text-[10px]">Test en Sandbox sin impacto en vivo</span>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs font-mono">
+            <div>
+              <label class="block text-[10px] text-[#6E6E73] mb-1">ADX (Tendencia): <strong id="sim-val-adx" class="text-[#181A20]">28.0</strong></label>
+              <input type="range" id="sim-input-adx" min="10" max="60" value="28" step="1" oninput="runQSimulation()" class="w-full accent-[#3C45A5]">
+            </div>
+            <div>
+              <label class="block text-[10px] text-[#6E6E73] mb-1">KER Kaufman: <strong id="sim-val-ker" class="text-[#181A20]">0.42</strong></label>
+              <input type="range" id="sim-input-ker" min="0.05" max="0.80" value="0.42" step="0.01" oninput="runQSimulation()" class="w-full accent-[#3C45A5]">
+            </div>
+            <div>
+              <label class="block text-[10px] text-[#6E6E73] mb-1">Entropía H_norm: <strong id="sim-val-hnorm" class="text-[#181A20]">0.68</strong></label>
+              <input type="range" id="sim-input-hnorm" min="0.40" max="0.95" value="0.68" step="0.01" oninput="runQSimulation()" class="w-full accent-[#3C45A5]">
+            </div>
+            <div>
+              <label class="block text-[10px] text-[#6E6E73] mb-1">Hurst Exponent: <strong id="sim-val-hurst" class="text-[#181A20]">0.62</strong></label>
+              <input type="range" id="sim-input-hurst" min="0.30" max="0.80" value="0.62" step="0.01" oninput="runQSimulation()" class="w-full accent-[#3C45A5]">
+            </div>
+            <div>
+              <label class="block text-[10px] text-[#6E6E73] mb-1">ATR Percentil: <strong id="sim-val-atr" class="text-[#181A20]">45%</strong></label>
+              <input type="range" id="sim-input-atr" min="10" max="95" value="45" step="5" oninput="runQSimulation()" class="w-full accent-[#3C45A5]">
+            </div>
+          </div>
+
+          <!-- Resultado del Simulador -->
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 pt-2 border-t border-[#E5E5EA] items-center" id="sim-results-container">
+            <!-- Populado dinámicamente por runQSimulation() -->
+          </div>
+        </div>
+
+        <!-- Action Stream de Libro C (Telemetría en Vivo) -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="overline-text text-[#3C45A5]">ACTION STREAM EN VIVO · TELEMETRÍA DE LIBRO C</span>
+              <span class="badge-success-live font-mono text-[10px]" id="ql-telemetry-badge">● 0 Eventos</span>
+            </div>
+            <button onclick="fetchLibroCTelemetry()" class="text-xs text-[#3C45A5] hover:underline font-mono">
+              <i class="fa-solid fa-arrows-rotate text-[10px]"></i> Actualizar Stream
+            </button>
+          </div>
+          <div class="max-h-52 overflow-y-auto rounded-xl border border-[#E5E5EA] bg-[#FAFAFC] p-2 space-y-1.5 font-mono text-xs" id="ql-telemetry-stream">
+            <div class="text-center py-4 text-[#86868B]">Iniciando telemetría de Libro C...</div>
+          </div>
+        </div>
+
+
         <!-- Footer Informativo de Arquitectura de Aprendizaje -->
         <div class="flex flex-wrap items-center justify-between text-[11px] font-mono text-[#6E6E73] bg-[#FAFAFC] p-3 rounded-xl border border-[#E5E5EA] gap-2">
           <div class="flex items-center gap-2">
@@ -8229,6 +8296,9 @@
         const data = await res.json();
         cachedQLearningData = data;
         renderQLearningUI(data);
+        if (typeof fetchLibroCTelemetry === 'function') fetchLibroCTelemetry();
+        if (typeof renderLiveAssetsHUD === 'function' && typeof cachedOrchestratorData !== 'undefined') renderLiveAssetsHUD(cachedOrchestratorData, data);
+        if (typeof runQSimulation === 'function') runQSimulation();
       } catch (e) {
         console.error('Error fetching Q-Learning Matrix:', e);
       } finally {
@@ -8327,8 +8397,8 @@
           const regMeta = catalog[String(r.regime_id)] || {};
           const arch = r.archetypes || {};
           
-          const formatActionCell = (cellData) => {
-            if (!cellData) return '<td class="py-2.5 px-3 text-center text-slate-400">--</td>';
+          const formatActionCellContent = (cellData) => {
+            if (!cellData) return '<div class="py-2 text-center text-slate-400">--</div>';
             const mult = Number(cellData.multiplier || 0);
             const qVal = Number(cellData.q_value || 0).toFixed(3);
             const visits = cellData.visits || 0;
@@ -8351,7 +8421,7 @@
             }
             
             return `
-              <td class="py-2.5 px-3 text-center whitespace-nowrap">
+              <div class="py-1 px-2 text-center whitespace-nowrap">
                 <span class="inline-block px-2 py-0.5 rounded text-xs border ${badgeClass}">
                   ${cellData.action_label || (mult.toFixed(2) + 'x')}
                 </span>
@@ -8359,7 +8429,7 @@
                 <div class="text-[10px] text-[#6E6E73] mt-0.5">
                   <span>Q: ${qVal}</span> · <span class="text-[#86868B]">${visits} v</span>
                 </div>
-              </td>
+              </div>
             `;
           };
 
@@ -8372,16 +8442,262 @@
               <td class="py-2.5 px-3 text-[11px] text-[#6E6E73] font-mono">
                 ${regMeta.description || regMeta.macro_regime || 'Detección Numba JIT'}
               </td>
-              ${formatActionCell(arch['TREND_FOLLOWING'])}
-              ${formatActionCell(arch['MEAN_REVERSION'])}
-              ${formatActionCell(arch['VOLATILITY_BREAKOUT'])}
+              <td class="cursor-pointer hover:bg-slate-100/60 transition" onclick="openQExplainModal(${r.regime_id}, 'TREND_FOLLOWING')" title="Click para ver explicabilidad Q-Learning">
+                ${formatActionCellContent(arch['TREND_FOLLOWING'])}
+              </td>
+              <td class="cursor-pointer hover:bg-slate-100/60 transition" onclick="openQExplainModal(${r.regime_id}, 'MEAN_REVERSION')" title="Click para ver explicabilidad Q-Learning">
+                ${formatActionCellContent(arch['MEAN_REVERSION'])}
+              </td>
+              <td class="cursor-pointer hover:bg-slate-100/60 transition" onclick="openQExplainModal(${r.regime_id}, 'VOLATILITY_BREAKOUT')" title="Click para ver explicabilidad Q-Learning">
+                ${formatActionCellContent(arch['VOLATILITY_BREAKOUT'])}
+              </td>
             </tr>
           `;
         }).join('');
       }
     }
 
+  
+    // =========================================================================
+    // FASE 3: EXPLAINABILITY, WHAT-IF SIMULATOR & ACTION STREAM TELEMETRY
+    // =========================================================================
+
+    async function fetchLibroCTelemetry() {
+      try {
+        const res = await fetch('/api/libro_c_telemetry?limit=30');
+        if (!res.ok) return;
+        const data = await res.json();
+        renderLibroCTelemetryUI(data);
+      } catch (e) {
+        console.error('Error fetching Libro C telemetry:', e);
+      }
+    }
+
+    function renderLibroCTelemetryUI(data) {
+      const container = document.getElementById('ql-telemetry-stream');
+      const badge = document.getElementById('ql-telemetry-badge');
+      if (!container) return;
+      const events = data.events || [];
+      if (badge) badge.innerText = `● ${events.length} Eventos`;
+
+      if (events.length === 0) {
+        container.innerHTML = '<div class="text-center py-4 text-[#86868B]">Sin eventos recientes de Libro C. Monitor en espera...</div>';
+        return;
+      }
+
+      container.innerHTML = events.map(ev => {
+        let evColor = 'text-slate-700 bg-slate-50 border-slate-200';
+        let icon = 'fa-circle-info text-blue-500';
+        if (ev.event_type === 'TRADE_OPENED') {
+          evColor = 'text-emerald-800 bg-emerald-50/70 border-emerald-200';
+          icon = 'fa-arrow-trend-up text-emerald-600';
+        } else if (ev.event_type === 'TRADE_CLOSED') {
+          const pnl = Number(ev.details?.pnl_usd || 0);
+          evColor = pnl >= 0 ? 'text-emerald-800 bg-emerald-50/70 border-emerald-200' : 'text-rose-800 bg-rose-50/70 border-rose-200';
+          icon = pnl >= 0 ? 'fa-circle-check text-emerald-600' : 'fa-circle-xmark text-rose-600';
+        } else if (ev.event_type === 'TRADE_BLOCKED_BY_Q') {
+          evColor = 'text-amber-800 bg-amber-50/70 border-amber-200';
+          icon = 'fa-hand text-amber-600';
+        } else if (ev.event_type === 'EARLY_TP_CLAMPED' || ev.event_type === 'TRADE_BLOCKED_BY_CONSISTENCY_40') {
+          evColor = 'text-purple-800 bg-purple-50/70 border-purple-200';
+          icon = 'fa-shield text-purple-600';
+        }
+
+        const timeShort = (ev.timestamp_utc || '').split(' ')[1] || ev.timestamp_utc;
+        const detailsStr = Object.entries(ev.details || {}).map(([k, v]) => `${k}=${v}`).join(' · ');
+
+        return `
+          <div class="p-2 rounded-lg border ${evColor} flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px]">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid ${icon}"></i>
+              <strong class="font-bold text-[#181A20]">${ev.symbol}</strong>
+              <span class="px-1.5 py-0.2 rounded bg-white/80 border text-[10px] font-semibold">${ev.event_type}</span>
+              <span class="text-[#6E6E73]">${ev.regime_code} · ${ev.action_multiplier}x</span>
+            </div>
+            <div class="flex items-center gap-2 text-[#6E6E73] text-[10px]">
+              <span class="truncate max-w-xs" title="${detailsStr}">${detailsStr}</span>
+              <span class="font-bold text-[#181A20] shrink-0">${timeShort}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function openQExplainModal(regimeId, archetype) {
+      const modal = document.getElementById('q-explain-modal');
+      const body = document.getElementById('modal-q-body');
+      const title = document.getElementById('modal-q-title');
+      if (!modal || !body) return;
+      modal.classList.remove('hidden');
+
+      if (title) title.innerText = `Explicabilidad Q: Régimen S${regimeId} × ${archetype}`;
+      body.innerHTML = '<div class="text-center py-6 text-slate-400"><i class="fa-solid fa-spinner fa-spin"></i> Evaluando matriz Q...</div>';
+
+      try {
+        const desk = currentQLPolicyDesk || 'PROP_FIRM';
+        const guard = currentQLGuardian || 'GREEN';
+        const res = await fetch(`/api/q_explain?desk_mode=${desk}&regime_id=${regimeId}&archetype=${archetype}&guardian=${guard}`);
+        if (!res.ok) throw new Error('API Error');
+        const d = await res.json();
+
+        const distBars = (d.actions_distribution || []).map(act => {
+          const isOptimal = (act.multiplier === d.optimal_multiplier);
+          const barColor = isOptimal ? 'bg-[#3C45A5]' : 'bg-slate-300';
+          const maxQ = Math.max(...d.actions_distribution.map(a => Math.abs(a.q_value || 0)), 1.0);
+          const pct = Math.min(100, Math.max(10, Math.round((Math.max(0, act.q_value) / maxQ) * 100)));
+
+          return `
+            <div class="space-y-1 text-xs font-mono">
+              <div class="flex justify-between items-center text-[11px]">
+                <span class="${isOptimal ? 'font-bold text-[#3C45A5]' : 'text-slate-600'}">${act.action_label} ${isOptimal ? '★ Óptima' : ''}</span>
+                <span class="text-slate-500">Q: ${act.q_value} (${act.visits} visitas)</span>
+              </div>
+              <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                <div class="${barColor} h-2 rounded-full transition-all" style="width: ${pct}%"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        body.innerHTML = `
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1 font-mono text-xs">
+            <div class="font-bold text-slate-800">${d.regime_code} · ${d.regime_label}</div>
+            <div class="text-[11px] text-slate-500">${d.regime_description}</div>
+            <div class="flex items-center gap-2 pt-1 text-[11px]">
+              <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">Acción: ${d.optimal_multiplier}x</span>
+              <span class="text-slate-500">Visitas acumuladas: ${d.total_visits}</span>
+            </div>
+          </div>
+
+          <div class="space-y-2 pt-1">
+            <div class="overline-text">DISTRIBUCIÓN DE Q-VALUES (QA, QB)</div>
+            <div class="space-y-2">
+              ${distBars}
+            </div>
+          </div>
+
+          <div class="p-3 rounded-xl bg-[#F8F9FE] border border-[#3C45A5]/20 space-y-1">
+            <div class="overline-text text-[#3C45A5]">JUSTIFICACIÓN CUANTITATIVA CAUSAL</div>
+            <p class="text-xs text-slate-700 leading-relaxed">${d.quantitative_justification}</p>
+          </div>
+        `;
+      } catch (err) {
+        body.innerHTML = `<div class="p-3 text-xs text-rose-600 bg-rose-50 rounded-lg">Error cargando explicabilidad: ${err.message}</div>`;
+      }
+    }
+
+    function closeQExplainModal() {
+      const modal = document.getElementById('q-explain-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function runQSimulation() {
+      const adx = parseFloat(document.getElementById('sim-input-adx')?.value || 28);
+      const ker = parseFloat(document.getElementById('sim-input-ker')?.value || 0.42);
+      const hnorm = parseFloat(document.getElementById('sim-input-hnorm')?.value || 0.68);
+      const hurst = parseFloat(document.getElementById('sim-input-hurst')?.value || 0.62);
+      const atr = parseFloat(document.getElementById('sim-input-atr')?.value || 45);
+
+      document.getElementById('sim-val-adx').innerText = adx.toFixed(1);
+      document.getElementById('sim-val-ker').innerText = ker.toFixed(2);
+      document.getElementById('sim-val-hnorm').innerText = hnorm.toFixed(2);
+      document.getElementById('sim-val-hurst').innerText = hurst.toFixed(2);
+      document.getElementById('sim-val-atr').innerText = `${atr.toFixed(0)}%`;
+
+      const desk = currentQLPolicyDesk || 'PROP_FIRM';
+      const guard = currentQLGuardian || 'GREEN';
+
+      try {
+        const res = await fetch(`/api/simulate_q_action?desk_mode=${desk}&adx=${adx}&ker=${ker}&h_norm=${hnorm}&hurst=${hurst}&atr_pctile=${atr}&guardian=${guard}`);
+        if (!res.ok) return;
+        const d = await res.json();
+        const container = document.getElementById('sim-results-container');
+        if (!container) return;
+
+        const acts = d.actions || {};
+        const tfAct = acts['TREND_FOLLOWING']?.q_lot_multiplier ?? 1.0;
+        const mrAct = acts['MEAN_REVERSION']?.q_lot_multiplier ?? 1.0;
+        const boAct = acts['VOLATILITY_BREAKOUT']?.q_lot_multiplier ?? 1.0;
+
+        container.innerHTML = `
+          <div class="bg-white p-2.5 rounded-lg border border-[#E5E5EA]">
+            <span class="text-[10px] text-[#6E6E73] block">Régimen Clasificado:</span>
+            <strong class="text-xs text-[#3C45A5] font-mono">${d.regime_code}</strong>
+            <span class="text-[10px] text-[#6E6E73] block truncate">${d.regime_label}</span>
+          </div>
+          <div class="bg-white p-2.5 rounded-lg border border-[#E5E5EA] text-center">
+            <span class="text-[10px] text-[#6E6E73] block">Trend Following:</span>
+            <strong class="text-sm font-mono ${tfAct >= 1.0 ? 'text-[#065F46]' : (tfAct > 0 ? 'text-[#B45309]' : 'text-[#D70015]')}">${tfAct.toFixed(2)}x</strong>
+          </div>
+          <div class="bg-white p-2.5 rounded-lg border border-[#E5E5EA] text-center">
+            <span class="text-[10px] text-[#6E6E73] block">Mean Reversion:</span>
+            <strong class="text-sm font-mono ${mrAct >= 1.0 ? 'text-[#065F46]' : (mrAct > 0 ? 'text-[#B45309]' : 'text-[#D70015]')}">${mrAct.toFixed(2)}x</strong>
+          </div>
+          <div class="bg-white p-2.5 rounded-lg border border-[#E5E5EA] text-center">
+            <span class="text-[10px] text-[#6E6E73] block">Volatility Breakout:</span>
+            <strong class="text-sm font-mono ${boAct >= 1.0 ? 'text-[#065F46]' : (boAct > 0 ? 'text-[#B45309]' : 'text-[#D70015]')}">${boAct.toFixed(2)}x</strong>
+          </div>
+        `;
+      } catch (e) {
+        console.error('Error running Q simulation:', e);
+      }
+    }
+
+    function renderLiveAssetsHUD(orchData, qData) {
+      const container = document.getElementById('ql-live-assets-hud');
+      if (!container || !orchData || !orchData.regimes_by_asset) return;
+
+      const assets = Object.values(orchData.regimes_by_asset);
+      const desk = currentQLPolicyDesk || 'PROP_FIRM';
+
+      container.innerHTML = assets.map(a => {
+        const rId = a.regime_id_10 ?? 6;
+        const rCode = a.sub_regime_10 || `S${rId}`;
+        const mult = (rId === 0 || rId === 1) ? 1.25 : ((rId === 8 || rId === 9) ? 0.0 : (a.lot_multiplier || 1.0));
+        const isClamp = (desk === 'PROP_FIRM' && mult >= 1.25);
+
+        let colorCls = 'border-slate-200 bg-white text-slate-800';
+        if (mult >= 1.25) colorCls = 'border-purple-200 bg-purple-50 text-purple-900';
+        else if (mult >= 1.0) colorCls = 'border-emerald-200 bg-emerald-50 text-emerald-900';
+        else if (mult > 0) colorCls = 'border-amber-200 bg-amber-50 text-amber-900';
+        else colorCls = 'border-rose-200 bg-rose-50 text-rose-900';
+
+        return `
+          <div class="p-2.5 rounded-xl border ${colorCls} space-y-1 font-mono">
+            <div class="flex items-center justify-between text-xs">
+              <strong class="font-bold text-[#181A20]">${a.asset}</strong>
+              <span class="px-1.5 py-0.2 rounded text-[10px] font-bold ${mult >= 1.0 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'}">${mult.toFixed(2)}x</span>
+            </div>
+            <div class="text-[10px] text-[#6E6E73] truncate" title="${rCode}">${rCode}</div>
+            ${isClamp ? '<div class="text-[9px] text-purple-700 font-bold uppercase">40% Clamp OK</div>' : '<div class="text-[9px] text-slate-400">Neutral Sizing</div>'}
+          </div>
+        `;
+      }).join('');
+    }
+
   </script>
+
+
+  <!-- Modal de Explicabilidad Q-Learning (Explainable RL) -->
+  <div id="q-explain-modal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-5 space-y-4 shadow-xl border border-[#E5E5EA] transform transition-all">
+      <div class="flex items-center justify-between border-b border-[#E5E5EA] pb-3">
+        <div>
+          <span class="badge-brand-indigo font-mono text-[10px]">EXPLAINABLE REINFORCEMENT LEARNING</span>
+          <h3 class="text-sm font-bold text-[#181A20] mt-0.5" id="modal-q-title">Explicación de Decisión Q</h3>
+        </div>
+        <button onclick="closeQExplainModal()" class="text-slate-400 hover:text-slate-600 text-sm">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="space-y-3" id="modal-q-body">
+        <div class="text-center py-6 text-slate-400"><i class="fa-solid fa-spinner fa-spin"></i> Cargando explicabilidad...</div>
+      </div>
+      <div class="text-right pt-2 border-t border-[#E5E5EA]">
+        <button onclick="closeQExplainModal()" class="cta-primary-btn font-mono text-xs px-4 py-1.5">Entendido</button>
+      </div>
+    </div>
+  </div>
 
 </body>
 </html>
