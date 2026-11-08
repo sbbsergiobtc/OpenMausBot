@@ -10,8 +10,15 @@ Capa 3: Gatillos No Lineales Simbólicos (ts_rank, ts_corr, ts_delta, OFI, ΔHis
 
 import numpy as np
 import pandas as pd
-from numba import njit
 from typing import Dict, Any, Tuple
+
+try:
+    from numba import njit
+except ImportError:
+    def njit(*args, **kwargs):
+        def decorator(func):
+            return func
+        return decorator
 
 from .symbolic_engine import (
     ts_delay,
@@ -26,7 +33,11 @@ from .symbolic_engine import (
     calc_atr_fast,
     calc_diff_hist_norm,
     calc_order_flow_imbalance_proxy,
-    calc_shannon_entropy_fast
+    calc_shannon_entropy_fast,
+    calc_adx_fast,
+    calc_atr_ratio_fast,
+    calc_fvg_imbalance_fast,
+    classify_7_regimes_fast
 )
 
 
@@ -119,6 +130,59 @@ def calc_rolling_vwap(close: np.ndarray, volume: np.ndarray, period: int = 48) -
     return vwap
 
 
+@njit(fastmath=True)
+def calc_supertrend_fast(
+    high: np.ndarray,
+    low: np.ndarray,
+    close: np.ndarray,
+    period: int = 10,
+    multiplier: float = 3.0
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Supertrend ATR acelerado en Numba JIT (Tier S de Seguimiento Tendencial).
+    Retorna (supertrend_line, trend_dir) donde trend_dir es +1 (Alcista) o -1 (Bajista).
+    """
+    n = len(close)
+    atr = calc_atr_fast(high, low, close, period)
+    st = np.empty(n, dtype=np.float64)
+    direction = np.ones(n, dtype=np.int32)
+
+    final_up = np.empty(n, dtype=np.float64)
+    final_dn = np.empty(n, dtype=np.float64)
+
+    hl2_0 = 0.5 * (high[0] + low[0])
+    final_up[0] = hl2_0 + multiplier * atr[0]
+    final_dn[0] = hl2_0 - multiplier * atr[0]
+    st[0] = final_dn[0]
+
+    for i in range(1, n):
+        hl2 = 0.5 * (high[i] + low[i])
+        basic_up = hl2 + multiplier * atr[i]
+        basic_dn = hl2 - multiplier * atr[i]
+
+        if basic_up < final_up[i - 1] or close[i - 1] > final_up[i - 1]:
+            final_up[i] = basic_up
+        else:
+            final_up[i] = final_up[i - 1]
+
+        if basic_dn > final_dn[i - 1] or close[i - 1] < final_dn[i - 1]:
+            final_dn[i] = basic_dn
+        else:
+            final_dn[i] = final_dn[i - 1]
+
+        prev_dir = direction[i - 1]
+        if prev_dir == -1 and close[i] > final_up[i - 1]:
+            direction[i] = 1
+        elif prev_dir == 1 and close[i] < final_dn[i - 1]:
+            direction[i] = -1
+        else:
+            direction[i] = prev_dir
+
+        st[i] = final_dn[i] if direction[i] == 1 else final_up[i]
+
+    return st, direction
+
+
 # ==============================================================================
 # FÁBRICA COMBINATORIA DE SEÑALES HÍBRIDAS
 # ==============================================================================
@@ -126,9 +190,9 @@ def calc_rolling_vwap(close: np.ndarray, volume: np.ndarray, period: int = 48) -
 class HybridSignalFactory:
     """
     Genera matrices de señales booleanas para VectorBT combinando:
-    1. Anclas Lineales: VWAP, Bollinger, Donchian, Trend EMA.
-    2. Entropía de Shannon (filtro de no-caos).
-    3. Gatillos No Lineales Simbólicos.
+    1. Anclas Lineales: VWAP, Bollinger, Donchian, Trend EMA, Supertrend.
+    2. Puerta de Régimen: Entropía de Shannon + Clasificador de 7 Regímenes Canónicos (ADX/ATR Ratio).
+    3. Gatillos No Lineales Simbólicos (incluyendo FVG Imbalance y Z-Score Extreme sin look-ahead).
     """
 
     def __init__(
@@ -160,6 +224,17 @@ class HybridSignalFactory:
         self.diff_hist_norm = calc_diff_hist_norm(self.close, self.high, self.low, 12, 26, 9, 14)
         self.ema_200 = calc_ema_fast(self.close, 200)
 
+        # Primitivas de Puerta de Régimen e Ineficiencia (Techain/StratOS Tier S)
+        self.adx_14, self.plus_di_14, self.minus_di_14 = calc_adx_fast(self.high, self.low, self.close, 14)
+        self.atr_ratio = calc_atr_ratio_fast(self.high, self.low, self.close, 14, 100)
+        self.regime_7 = classify_7_regimes_fast(
+            self.close, self.ema_200, self.h_norm,
+            self.adx_14, self.plus_di_14, self.minus_di_14, self.atr_ratio
+        )
+        self.bull_fvg, self.bear_fvg = calc_fvg_imbalance_fast(
+            self.high, self.low, self.close, self.atr_14, 0.40
+        )
+
         # Filtro de Sesión Operativa RTH (14:00 a 20:00 UTC)
         if timestamps is not None:
             if hasattr(timestamps, "hour"):
@@ -183,13 +258,25 @@ class HybridSignalFactory:
         symbolic_trigger: str = "VOL_CORR_ABSORPTION",
         param1: int = 20,
         param2: float = 2.0,
-        trigger_threshold: float = 0.80
+        trigger_threshold: float = 0.80,
+        regime_gate: str = "ANY"
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Genera máscaras booleanas (entries_long, entries_short).
+        Soporta separación estricta Signal vs. Regime Gate (Entropía + 7 Regímenes ADX/ATR).
         """
-        # 1. Filtro de Régimen de Entropía
-        regime_mask = (self.h_norm <= entropy_max) & ~np.isnan(self.h_norm)
+        # 1. Filtro de Régimen (Entropía de Shannon + Puerta Canónica de 7 Regímenes)
+        regime_mask = (self.h_norm <= entropy_max) & ~np.isnan(self.h_norm) & (self.regime_7 != 6)
+
+        if regime_gate == "TREND_ONLY":
+            # Requiere ADX(14) >= 25 (Regímenes 0: Strong Bull, 1: Strong Bear o 5: Volatility Expansion)
+            regime_mask = regime_mask & ((self.adx_14 >= 25.0) | (self.regime_7 == 5))
+        elif regime_gate == "MEAN_REV_ONLY":
+            # Requiere ADX(14) < 22 y volatilidad acotada (Régimen 3: Ranging Mean Reversion)
+            regime_mask = regime_mask & (self.adx_14 < 22.0) & (self.atr_ratio <= 1.35)
+        elif regime_gate == "SQUEEZE_BREAKOUT":
+            # Compresión previa seguida de expansión (Regímenes 4 o 5)
+            regime_mask = regime_mask & ((self.regime_7 == 4) | (self.regime_7 == 5) | (self.adx_14 >= 22.0))
 
         # 2. Capa Macroeconómica Lineal
         long_macro = np.zeros(self.n, dtype=np.bool_)
@@ -221,6 +308,12 @@ class HybridSignalFactory:
             long_macro = (self.close > ema_trend) & (dist_atr <= param2)
             short_macro = (self.close < ema_trend) & (dist_atr >= -param2)
 
+        elif macro_anchor == "SUPERTREND_FOLLOW":
+            st_line, st_dir = calc_supertrend_fast(self.high, self.low, self.close, period=max(5, int(param1)), multiplier=float(param2))
+            # Confirmación con puerta ADX >= 20 para evitar whipsaws en lateral
+            long_macro = (st_dir == 1) & (self.close > st_line) & (self.adx_14 >= 20.0)
+            short_macro = (st_dir == -1) & (self.close < st_line) & (self.adx_14 >= 20.0)
+
         # 3. Capa Simbólica No Lineal (Gatillo de Microestructura)
         long_trigger = np.zeros(self.n, dtype=np.bool_)
         short_trigger = np.zeros(self.n, dtype=np.bool_)
@@ -250,6 +343,18 @@ class HybridSignalFactory:
             rnk = ts_rank(decay_dp, 20)
             long_trigger = (rnk <= (1.0 - trigger_threshold))  # Agotamiento de caída
             short_trigger = (rnk >= trigger_threshold)         # Agotamiento de subida
+
+        elif symbolic_trigger == "FVG_IMBALANCE":
+            # Ineficiencia de 3 velas cerradas confirmada con volumen relativo > trigger_threshold
+            long_trigger = self.bull_fvg & (self.rvol_20 >= max(0.8, trigger_threshold))
+            short_trigger = self.bear_fvg & (self.rvol_20 >= max(0.8, trigger_threshold))
+
+        elif symbolic_trigger == "ZSCORE_EXTREME":
+            # Reversión estadística pura por Z-Score (|Z| >= trigger_threshold * 2.5)
+            z_p = ts_zscore(self.close, 20)
+            z_thresh = max(1.5, trigger_threshold * 2.5)
+            long_trigger = (z_p <= -z_thresh)
+            short_trigger = (z_p >= z_thresh)
 
         # 4. Señal Final Compuesta (Intersección Booleana)
         entries_long = long_macro & long_trigger & regime_mask

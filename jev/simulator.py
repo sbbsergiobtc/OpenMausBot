@@ -14,7 +14,14 @@ from typing import Tuple, List, Dict, Any, Optional
 
 import numpy as np
 import pandas as pd
-from numba import njit
+
+try:
+    from numba import njit
+except ImportError:
+    def njit(*args, **kwargs):
+        def decorator(func):
+            return func
+        return decorator
 
 from .hybrid_signals import HybridSignalFactory, calc_atr_fast
 
@@ -325,7 +332,8 @@ def extract_candidate_trade_pnls(
         symbolic_trigger=candidate["symbolic_trigger"],
         param1=candidate["param1"],
         param2=candidate["param2"],
-        trigger_threshold=candidate["trigger_threshold"]
+        trigger_threshold=candidate["trigger_threshold"],
+        regime_gate=candidate.get("regime_gate", "ANY")
     )
 
     friction = 0.0006 if any(k in candidate["asset"].upper() for k in ["NDX", "SPX"]) else 0.0014
@@ -449,3 +457,263 @@ def extract_candidate_trade_pnls(
                 bars_held = 0
 
     return np.array(trade_pnls, dtype=np.float64)
+
+
+def extract_candidate_trade_diagnostics(
+    candidate: dict,
+    df: pd.DataFrame,
+    risk_per_trade_pct: Optional[float] = None
+) -> Dict[str, Any]:
+    """
+    Reconstruye las métricas microestructurales trade a trade del candidato:
+    1. Vectores MAE (Maximum Adverse Excursion) y MFE (Maximum Favorable Excursion) en unidades de ATR.
+    2. Calibración estadística óptima de salidas (Techain/StratOS):
+       - SL sugerido = P95(MAE de trades ganadores)
+       - TP sugerido = P75(MFE de trades ganadores)
+    3. Cálculo de Drawdown END OF DAY (EOD) estricto (Regla Suprema de Fondeo: sin Trailing intradía),
+       evaluando el High-Water Mark exclusivamente al cierre contable de cada día natural.
+    """
+    close = np.ascontiguousarray(df["close"].values, dtype=np.float64)
+    high = np.ascontiguousarray(df["high"].values, dtype=np.float64)
+    low = np.ascontiguousarray(df["low"].values, dtype=np.float64)
+    open_p = np.ascontiguousarray(df["open"].values, dtype=np.float64)
+    volume = np.ascontiguousarray(df["volume"].values, dtype=np.float64)
+    atr = calc_atr_fast(high, low, close, 14)
+
+    timestamps = df["time"] if "time" in df.columns else None
+    if timestamps is not None:
+        dt_series = pd.to_datetime(timestamps, utc=True)
+        day_ids = (dt_series.values.astype("datetime64[D]").astype(np.int64))
+    else:
+        # Fallback: cada 24 barras = 1 día contable EOD
+        day_ids = (np.arange(len(close)) // 24).astype(np.int64)
+
+    is_equity_index = any(k in candidate["asset"].upper() for k in ["NDX", "SPX", "US500", "USTEC", "NASDAQ"])
+
+    factory = HybridSignalFactory(
+        open_p, high, low, close, volume,
+        timestamps=timestamps,
+        rth_only=is_equity_index,
+        long_only=is_equity_index
+    )
+    l_mask, s_mask = factory.generate_signal(
+        macro_anchor=candidate["macro_anchor"],
+        entropy_max=candidate["entropy_max"],
+        symbolic_trigger=candidate["symbolic_trigger"],
+        param1=candidate["param1"],
+        param2=candidate["param2"],
+        trigger_threshold=candidate["trigger_threshold"],
+        regime_gate=candidate.get("regime_gate", "ANY")
+    )
+
+    friction = 0.0006 if any(k in candidate["asset"].upper() for k in ["NDX", "SPX", "US500", "USTEC"]) else 0.0014
+    sl_m = float(candidate["sl_atr_mult"])
+    tp_m = float(candidate["tp_atr_mult"])
+    max_h = 48
+
+    if risk_per_trade_pct is None:
+        desk_mode = str(candidate.get("desk_mode", "CAPITAL_PROPIO")).upper()
+        risk_pct = 0.005 if "PROP" in desk_mode else 0.01
+    else:
+        risk_pct = float(risk_per_trade_pct)
+
+    n = len(close)
+    in_pos = 0
+    entry_px = 0.0
+    entry_atr = 1.0
+    sl_px = 0.0
+    tp_px = 0.0
+    bars_held = 0
+    pos_units = 0.0
+    highest_p = 0.0
+    lowest_p = 0.0
+
+    trade_pnls: List[float] = []
+    trade_mae_atr: List[float] = []
+    trade_mfe_atr: List[float] = []
+    winner_mae_atr: List[float] = []
+    winner_mfe_atr: List[float] = []
+
+    running_eq = 1000.0
+    continuous_peak_eq = 1000.0
+    continuous_max_dd_pct = 0.0
+
+    # Contabilidad estricta END OF DAY (EOD) para Fondeo (Regla Suprema AGENTS.md)
+    eod_peak_balance = 1000.0
+    eod_max_dd_pct = 0.0
+    eod_daily_max_loss_pct = 0.0
+    prev_eod_balance = 1000.0
+
+    for i in range(1, n):
+        cur_atr = atr[i] if not np.isnan(atr[i]) and atr[i] > 0 else close[i] * 0.01
+
+        if in_pos == 1:
+            bars_held += 1
+            if high[i] > highest_p:
+                highest_p = high[i]
+            if low[i] < lowest_p:
+                lowest_p = low[i]
+
+            gain = highest_p - entry_px
+            if gain >= 1.0 * cur_atr:
+                be = entry_px + 0.1 * cur_atr
+                if sl_px < be:
+                    sl_px = be
+            if gain >= 1.2 * cur_atr:
+                trail = highest_p - 0.8 * cur_atr
+                if trail > sl_px:
+                    sl_px = trail
+
+            exit_trade = False
+            exit_px = 0.0
+            if low[i] <= sl_px:
+                exit_px = sl_px
+                exit_trade = True
+            elif high[i] >= tp_px:
+                exit_px = tp_px
+                exit_trade = True
+            elif bars_held >= max_h:
+                exit_px = close[i]
+                exit_trade = True
+
+            if exit_trade:
+                gross_pnl = (exit_px - entry_px) * pos_units
+                notional = entry_px * pos_units
+                comm = notional * friction
+                pnl = gross_pnl - comm
+                running_eq += pnl
+                trade_pnls.append(pnl)
+
+                mae_val = max(0.0, (entry_px - lowest_p) / max(1e-9, entry_atr))
+                mfe_val = max(0.0, (highest_p - entry_px) / max(1e-9, entry_atr))
+                trade_mae_atr.append(mae_val)
+                trade_mfe_atr.append(mfe_val)
+                if pnl > 0:
+                    winner_mae_atr.append(mae_val)
+                    winner_mfe_atr.append(mfe_val)
+
+                in_pos = 0
+                pos_units = 0.0
+
+        elif in_pos == -1:
+            bars_held += 1
+            if low[i] < lowest_p:
+                lowest_p = low[i]
+            if high[i] > highest_p:
+                highest_p = high[i]
+
+            drop = entry_px - lowest_p
+            if drop >= 1.0 * cur_atr:
+                be = entry_px - 0.1 * cur_atr
+                if sl_px > be:
+                    sl_px = be
+            if drop >= 1.2 * cur_atr:
+                trail = lowest_p + 0.8 * cur_atr
+                if trail < sl_px:
+                    sl_px = trail
+
+            exit_trade = False
+            exit_px = 0.0
+            if high[i] >= sl_px:
+                exit_px = sl_px
+                exit_trade = True
+            elif low[i] <= tp_px:
+                exit_px = tp_px
+                exit_trade = True
+            elif bars_held >= max_h:
+                exit_px = close[i]
+                exit_trade = True
+
+            if exit_trade:
+                gross_pnl = (entry_px - exit_px) * pos_units
+                notional = entry_px * pos_units
+                comm = notional * friction
+                pnl = gross_pnl - comm
+                running_eq += pnl
+                trade_pnls.append(pnl)
+
+                mae_val = max(0.0, (highest_p - entry_px) / max(1e-9, entry_atr))
+                mfe_val = max(0.0, (entry_px - lowest_p) / max(1e-9, entry_atr))
+                trade_mae_atr.append(mae_val)
+                trade_mfe_atr.append(mfe_val)
+                if pnl > 0:
+                    winner_mae_atr.append(mae_val)
+                    winner_mfe_atr.append(mfe_val)
+
+                in_pos = 0
+                pos_units = 0.0
+
+        if in_pos == 0:
+            if l_mask[i]:
+                in_pos = 1
+                entry_px = close[i]
+                entry_atr = cur_atr
+                sl_dist = max(1e-6, sl_m * cur_atr)
+                sl_px = entry_px - sl_dist
+                tp_px = entry_px + tp_m * cur_atr
+                risk_cash = running_eq * risk_pct
+                pos_units = risk_cash / sl_dist
+                highest_p = high[i]
+                lowest_p = low[i]
+                bars_held = 0
+            elif s_mask[i]:
+                in_pos = -1
+                entry_px = close[i]
+                entry_atr = cur_atr
+                sl_dist = max(1e-6, sl_m * cur_atr)
+                sl_px = entry_px + sl_dist
+                tp_px = entry_px - tp_m * cur_atr
+                risk_cash = running_eq * risk_pct
+                pos_units = risk_cash / sl_dist
+                highest_p = high[i]
+                lowest_p = low[i]
+                bars_held = 0
+
+        # Drawdown continuo sobre trades cerrados (Capital Propio)
+        if running_eq > continuous_peak_eq:
+            continuous_peak_eq = running_eq
+        c_dd = (continuous_peak_eq - running_eq) / continuous_peak_eq * 100.0
+        if c_dd > continuous_max_dd_pct:
+            continuous_max_dd_pct = c_dd
+
+        # Contabilidad EOD estricta al cambio de día (Regla Suprema Fondeo)
+        if day_ids[i] != day_ids[i - 1] or i == n - 1:
+            eod_balance = running_eq
+            if prev_eod_balance > 0:
+                daily_loss_pct = max(0.0, (prev_eod_balance - eod_balance) / prev_eod_balance * 100.0)
+                if daily_loss_pct > eod_daily_max_loss_pct:
+                    eod_daily_max_loss_pct = daily_loss_pct
+            if eod_balance > eod_peak_balance:
+                eod_peak_balance = eod_balance
+            eod_dd = (eod_peak_balance - eod_balance) / eod_peak_balance * 100.0
+            if eod_dd > eod_max_dd_pct:
+                eod_max_dd_pct = eod_dd
+            prev_eod_balance = eod_balance
+
+    pnls_arr = np.array(trade_pnls, dtype=np.float64)
+    wins_arr = pnls_arr[pnls_arr > 0]
+    loss_arr = pnls_arr[pnls_arr < 0]
+
+    win_rate_pct = float(len(wins_arr) / len(pnls_arr) * 100.0) if len(pnls_arr) > 0 else 0.0
+    avg_win = float(np.mean(wins_arr)) if len(wins_arr) > 0 else 0.0
+    avg_loss = float(np.mean(np.abs(loss_arr))) if len(loss_arr) > 0 else 0.0
+    rr_ratio = (avg_win / avg_loss) if avg_loss > 1e-9 else 0.0
+
+    opt_sl_atr = float(np.percentile(winner_mae_atr, 95)) if len(winner_mae_atr) >= 5 else sl_m
+    opt_tp_atr = float(np.percentile(winner_mfe_atr, 75)) if len(winner_mfe_atr) >= 5 else tp_m
+
+    return {
+        "trade_pnls": pnls_arr,
+        "trade_mae_atr": np.array(trade_mae_atr, dtype=np.float64),
+        "trade_mfe_atr": np.array(trade_mfe_atr, dtype=np.float64),
+        "winners_mae_p95_atr": round(opt_sl_atr, 2),
+        "winners_mfe_p75_atr": round(opt_tp_atr, 2),
+        "eod_max_dd_pct": round(float(eod_max_dd_pct), 2),
+        "eod_daily_max_loss_pct": round(float(eod_daily_max_loss_pct), 2),
+        "continuous_max_dd_pct": round(float(continuous_max_dd_pct), 2),
+        "win_rate_pct": round(win_rate_pct, 2),
+        "avg_win_usd": round(avg_win, 2),
+        "avg_loss_usd": round(avg_loss, 2),
+        "reward_risk_ratio": round(rr_ratio, 2)
+    }
+

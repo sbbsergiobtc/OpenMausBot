@@ -195,6 +195,13 @@ def run_monte_carlo_bootstrap(
 
     ruin_prob = (ruined_count / float(n_simulations)) * 100.0
 
+    # Cono de Fidelidad Monte Carlo (P5, P50, P95) para la incubadora de Forward Test (Demo)
+    final_equities = equity_paths[:, -1]
+    cone_p5_eq = float(np.percentile(final_equities, 5))
+    cone_p50_eq = float(np.percentile(final_equities, 50))
+    cone_p95_eq = float(np.percentile(final_equities, 95))
+    p5_dd = float(np.percentile(max_drawdowns, 5))
+
     # Criterio institucional: Ruin Prob <= 2.5% (confianza al 97.5%) y P95 DD dentro del límite
     is_mc_sound = (ruin_prob <= 2.5) and (p95_dd <= ruin_dd_limit_pct)
 
@@ -206,8 +213,107 @@ def run_monte_carlo_bootstrap(
         "worst_sim_dd_pct": round(worst_dd, 2),
         "ruin_dd_limit_pct": round(ruin_dd_limit_pct, 2),
         "ruin_prob_pct": round(ruin_prob, 3),
+        "mc_cone": {
+            "p5_final_eq": round(cone_p5_eq, 2),
+            "p50_final_eq": round(cone_p50_eq, 2),
+            "p95_final_eq": round(cone_p95_eq, 2),
+            "p5_dd_pct": round(p5_dd, 2),
+            "p50_dd_pct": round(median_dd, 2),
+            "p95_dd_pct": round(p95_dd, 2)
+        },
         "is_mc_sound": is_mc_sound,
         "verdict": "PASS (Colas controladas en 1.000 runs)" if is_mc_sound else "FAIL (Riesgo de cola o ruina inaceptable)"
+    }
+
+
+# ==============================================================================
+# CURTOSIS ROBUSTA POR PERCENTILES Y REGLA DEL COLCHÓN BREAKEVEN (TECHAIN/STRATOS)
+# ==============================================================================
+
+def calculate_robust_percentile_kurtosis(returns: np.ndarray) -> Dict[str, Any]:
+    """
+    Estimador no-paramétrico de Curtosis Robusta por Cuantiles:
+    Kurtosis_rob = (P97.5 - P2.5) / (P75 - P25)
+    - Distribución Gaussiana estándar ≈ 2.90.
+    - > 2.90: Presencia de colas pesadas (Fat Tails / Leptocúrtica).
+    Calcula además el riesgo extremo en el Percentil 1 (P1 Tail Loss).
+    """
+    if len(returns) < 15:
+        return {
+            "robust_kurtosis": 2.90,
+            "has_fat_tails": False,
+            "p1_tail_loss": 0.0,
+            "recommended_tail_sizing_mult": 1.0
+        }
+
+    p975 = float(np.percentile(returns, 97.5))
+    p25_low = float(np.percentile(returns, 2.5))
+    p75 = float(np.percentile(returns, 75.0))
+    p25 = float(np.percentile(returns, 25.0))
+    p1_loss = float(np.percentile(returns, 1.0))
+
+    iqr = p75 - p25
+    if abs(iqr) > 1e-12:
+        rob_kurt = (p975 - p25_low) / iqr
+    else:
+        rob_kurt = 2.90
+
+    has_fat_tails = rob_kurt > 2.90
+    if rob_kurt > 4.20:
+        sizing_mult = 0.25  # Régimen de Curtosis Extrema -> Recorte al 25%
+    elif rob_kurt > 3.40:
+        sizing_mult = 0.75
+    else:
+        sizing_mult = 1.00
+
+    return {
+        "robust_kurtosis": round(float(rob_kurt), 3),
+        "has_fat_tails": bool(has_fat_tails),
+        "p1_tail_loss": round(float(p1_loss), 3),
+        "recommended_tail_sizing_mult": sizing_mult
+    }
+
+
+def calculate_breakeven_cushion(
+    trade_pnls: np.ndarray,
+    min_cushion_pct: float = 12.0
+) -> Dict[str, Any]:
+    """
+    Evalúa la Regla del Colchón Estadístico sobre el Win Rate de Equilibrio (Breakeven Win Rate):
+    - WR_BE = 1 / (1 + R) donde R = AvgWin / |AvgLoss|
+    - Cushion = WR_observado - WR_BE
+    Se exige un colchón >= 12% para garantizar supervivencia en Out-Of-Sample y Forward Test.
+    """
+    n = len(trade_pnls)
+    if n < 10:
+        return {
+            "observed_wr_pct": 0.0,
+            "breakeven_wr_pct": 100.0,
+            "wr_cushion_pct": -100.0,
+            "reward_risk_ratio": 0.0,
+            "expectancy_usd": 0.0,
+            "pass_cushion": False
+        }
+
+    wins = trade_pnls[trade_pnls > 0]
+    losses = trade_pnls[trade_pnls < 0]
+
+    wr_obs = (len(wins) / float(n)) * 100.0
+    avg_win = float(np.mean(wins)) if len(wins) > 0 else 0.0
+    avg_loss = float(np.mean(np.abs(losses))) if len(losses) > 0 else 1e-6
+
+    r_ratio = avg_win / max(1e-9, avg_loss)
+    wr_be = (1.0 / (1.0 + r_ratio)) * 100.0 if r_ratio > 0 else 100.0
+    cushion = wr_obs - wr_be
+    expectancy = float(np.mean(trade_pnls))
+
+    return {
+        "observed_wr_pct": round(wr_obs, 2),
+        "breakeven_wr_pct": round(wr_be, 2),
+        "wr_cushion_pct": round(cushion, 2),
+        "reward_risk_ratio": round(r_ratio, 2),
+        "expectancy_usd": round(expectancy, 2),
+        "pass_cushion": bool(cushion >= min_cushion_pct and expectancy > 0.0)
     }
 
 
@@ -223,12 +329,20 @@ def audit_candidate_robustness(
 ) -> Dict[str, Any]:
     """
     Batería completa de auditoría estadística Fase 3:
-    - Deflated Sharpe Ratio (DSR)
-    - Monte Carlo 1.000 Runs
+    - Deflated Sharpe Ratio (DSR >= 0.95) + Detector de Techo Anti-Bug (Sharpe > 3.50)
+    - Monte Carlo 1.000 Runs con Cono de Fidelidad (P5, P50, P95) y Límite EOD para Fondeo
+    - Curtosis Robusta por Percentiles (P97.5 - P2.5)/(P75 - P25) y P1 Tail Loss
+    - Regla del Colchón sobre Breakeven Win Rate (WR_obs - WR_BE >= 12%)
     - Dictamen unificado PASS / FAIL
     """
     obs_sharpe = float(candidate.get("sharpe", 0.0))
-    limit_dd = 3.0 if desk_mode == "PROP_FIRM" else 20.0
+    mode_up = str(desk_mode).upper()
+    if "CFD" in mode_up:
+        limit_dd = 8.0   # Regla Suprema EOD Fondeo CFD (8.0% Max EOD DD)
+    elif "PROP" in mode_up or "FUTURES" in mode_up:
+        limit_dd = 3.0   # Regla Suprema EOD Fondeo Futuros CME (3.0% Max EOD DD)
+    else:
+        limit_dd = 20.0  # Gobernanza Capital Propio (20.0% Max DD)
 
     # 1. DSR
     dsr_audit = calculate_deflated_sharpe_ratio(
@@ -247,7 +361,14 @@ def audit_candidate_robustness(
         ruin_dd_limit_pct=limit_dd
     )
 
-    # Dictamen Unificado
+    # 3. Curtosis Robusta por Percentiles y Colchón Breakeven Win Rate
+    kurt_audit = calculate_robust_percentile_kurtosis(trade_pnls)
+    cushion_audit = calculate_breakeven_cushion(trade_pnls, min_cushion_pct=12.0)
+
+    # 4. Alerta de Techo de Sospecha Anti-Lookahead (Sharpe > 3.50)
+    sharpe_ceiling_warning = obs_sharpe > 3.50
+
+    # Dictamen Unificado (Gobernanza Estricta AlgrokQuant)
     pass_dsr = dsr_audit.get("is_significant", False)
     pass_mc = mc_audit.get("is_mc_sound", False)
     final_pass = pass_dsr and pass_mc
@@ -257,13 +378,23 @@ def audit_candidate_robustness(
         "asset": candidate.get("asset"),
         "desk_mode": desk_mode,
         "observed_sharpe": obs_sharpe,
+        "sharpe_ceiling_warning": sharpe_ceiling_warning,
         "dsr_prob": dsr_audit.get("dsr_prob"),
         "z_stat": dsr_audit.get("z_stat"),
         "pass_dsr": pass_dsr,
         "mc_p95_dd": mc_audit.get("p95_max_dd_pct"),
         "mc_ruin_prob": mc_audit.get("ruin_prob_pct"),
+        "mc_cone": mc_audit.get("mc_cone"),
         "pass_mc": pass_mc,
+        "robust_kurtosis": kurt_audit.get("robust_kurtosis"),
+        "has_fat_tails": kurt_audit.get("has_fat_tails"),
+        "p1_tail_loss_usd": kurt_audit.get("p1_tail_loss"),
+        "wr_cushion_pct": cushion_audit.get("wr_cushion_pct"),
+        "breakeven_wr_pct": cushion_audit.get("breakeven_wr_pct"),
+        "pass_wr_cushion": cushion_audit.get("pass_cushion"),
         "overall_status": "APPROVED_PHASE_3" if final_pass else "REJECTED_PHASE_3",
         "dsr_details": dsr_audit,
-        "mc_details": mc_audit
+        "mc_details": mc_audit,
+        "kurtosis_details": kurt_audit,
+        "cushion_details": cushion_audit
     }

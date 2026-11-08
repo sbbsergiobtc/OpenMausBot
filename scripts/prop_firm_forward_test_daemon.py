@@ -41,6 +41,27 @@ except Exception as e:
     run_parallel_orchestrator_evaluation = None
     print(f"[WARN] RegimeOrchestrator no inicializado: {e}")
 
+try:
+    from jev.auto_deployer import evaluate_forward_test_incubation_guardian, dispatch_telegram_message
+except Exception as e:
+    evaluate_forward_test_incubation_guardian = None
+    dispatch_telegram_message = None
+    print(f"[WARN] IncubationGuardian no inicializado: {e}")
+
+try:
+    from jev.rl_regime_env import apply_prop_firm_consistency_tp_clamp
+    from jev.rl_q_agent import (
+        query_q_learning_lot_multiplier,
+        check_intrasemanal_drift_trigger,
+        train_and_save_dual_q_policies,
+    )
+except Exception as e:
+    apply_prop_firm_consistency_tp_clamp = None
+    query_q_learning_lot_multiplier = None
+    check_intrasemanal_drift_trigger = None
+    train_and_save_dual_q_policies = None
+    print(f"[WARN] Double Q-Learning Orchestrator no inicializado: {e}")
+
 STATE_FILE = '/root/AlgrokQuant/data/paper_trades/prop_firm_forward_test_state.json'
 JOURNAL_FILE = '/root/AlgrokQuant/library/journal/PROP_FIRM_SPRINT_JOURNAL.md'
 
@@ -255,6 +276,64 @@ def run_cycle():
     # 1. Sincronizar Balance Vivo con IC Markets MT5
     current_live_balance = sync_broker_state(state)
 
+    # 1b. Actualizar Orquestador Paralelo A/B (10 Sub-estados y multiplicadores de lotaje 1.25x..0.00x)
+    if run_parallel_orchestrator_evaluation is not None:
+        try:
+            orch_res = run_parallel_orchestrator_evaluation()
+            summary_obj = orch_res.get('summary', orch_res.get('ab_portfolio_summary', {}))
+            val_add = summary_obj.get('orchestrator_value_add', {})
+            state['regime_orchestrator_summary'] = summary_obj
+            state['market_regimes'] = orch_res.get('regimes_by_asset', {})
+            extra_roi = val_add.get('extra_roi_pct', summary_obj.get('orchestrator_alpha_roi_pct', 0.0))
+            whipsaws = val_add.get('whipsaws_filtered', summary_obj.get('total_whipsaws_avoided', 0))
+            print(f"  [ORQUESTADOR PARALELO A/B] Alfa Neto: +{extra_roi}% | Whipsaws Evitados: {whipsaws}")
+        except Exception as e:
+            print(f"  [WARN] Error ejecutando Orquestador Paralelo A/B: {e}")
+
+    # 1c. Evaluar Guardián de Incubación Forward Test (Cono Monte Carlo P05/P50/P95 + Semáforo GREEN/AMBER/RED)
+    guardian_mult_by_id = {}
+    guardian_light_by_id = {}
+    if evaluate_forward_test_incubation_guardian is not None:
+        for branch_key in ['prop_firm', 'capital_propio']:
+            branch_obj = state.get(branch_key, {})
+            active_strats = branch_obj.get('active_strategies', [])
+            closed_all = branch_obj.get('closed_trades', [])
+            for strat in active_strats:
+                try:
+                    sid = strat.get('strategy_id', 'UNKNOWN')
+                    prev_ready = bool(strat.get('incubation_guardian', {}).get('ready_for_real_account', False))
+                    strat_pnls = strat.get('live_trade_pnls') or [
+                        float(t.get('pnl_usd') or t.get('pnl') or 0.0)
+                        for t in closed_all
+                        if isinstance(t, dict) and t.get('strategy_id') == sid
+                    ]
+                    curr_dd = float(strat.get('current_dd_pct') or branch_obj.get('current_eod_dd_pct') or 0.0)
+                    g_res = evaluate_forward_test_incubation_guardian(strat, strat_pnls, curr_dd)
+                    strat['incubation_guardian'] = g_res
+                    guardian_mult_by_id[sid] = float(g_res.get('lot_sizing_multiplier', 1.0))
+                    guardian_light_by_id[sid] = str(g_res.get('traffic_light', 'GREEN'))
+                    if g_res.get('ready_for_real_account') and not prev_ready and dispatch_telegram_message is not None:
+                        dispatch_telegram_message(
+                            "AlphaReporter",
+                            f"🟢 <b>ESTRATEGIA LISTA PARA CUENTA REAL</b>\n\n"
+                            f"• <b>ID:</b> <code>{sid}</code> ({strat.get('asset', '')} {strat.get('timeframe', '')})\n"
+                            f"• <b>Estado Guardián:</b> {g_res.get('traffic_light')} (Trades OOS: {g_res.get('trades_evaluated')})\n"
+                            f"• <b>Diagnóstico:</b> {g_res.get('verdict')}"
+                        )
+                except Exception as ge:
+                    print(f"  [WARN] Error evaluando IncubationGuardian para {strat.get('strategy_id')}: {ge}")
+
+    # 1d. Gatillo Intra-Semanal por Deriva (Drift Trigger) para Recalibración Double Q-Learning
+    if check_intrasemanal_drift_trigger is not None and train_and_save_dual_q_policies is not None:
+        try:
+            drift_info = check_intrasemanal_drift_trigger(state, state.get('market_regimes', {}))
+            state['q_learning_drift_status'] = drift_info
+            if drift_info.get('drift_triggered'):
+                print(f"  [Q-LEARNING DRIFT TRIGGER] {drift_info.get('reason')} -> Re-entrenando políticas 80/20 + Polyak...")
+                train_and_save_dual_q_policies(trigger_reason="INTRASEMANAL_DRIFT_TRIGGER")
+        except Exception as de:
+            print(f"  [WARN] Error en check_intrasemanal_drift_trigger: {de}")
+
     evaluators = {
         'US500':  (evaluate_spx_4h, '1h', '730d'),
         'USTEC':  (evaluate_ndx_2h, '1h', '730d'),
@@ -294,17 +373,59 @@ def run_cycle():
             del pos_container[sym]
             print(f"  >>> CERRADA POSICION EN {sym} ({strat_id}) <<<")
 
-        # B) Apertura de Posicion con INTERES COMPUESTO DINAMICO
+        # B) Apertura de Posicion con INTERES COMPUESTO + DOUBLE Q-LEARNING (10 ESTADOS) + TOPE 40% CONSISTENCIA
         elif pos is None and sig == 'BUY':
+            regime_asset_map = {'US500': 'SPX', 'USTEC': 'NDX', 'EURUSD': 'EUR_USD'}
+            reg_info = state.get('market_regimes', {}).get(regime_asset_map.get(sym, sym), {})
+            regime_id_10 = int(reg_info.get('regime_id_10', 6))
+            sub_regime_10 = reg_info.get('sub_regime_10', 'S6_CLEAN_MEAN_REVERSION')
+            guard_light = guardian_light_by_id.get(strat_id, 'GREEN')
+            guard_lot_mult = float(guardian_mult_by_id.get(strat_id, 1.0))
+
+            if query_q_learning_lot_multiplier is not None:
+                q_dec = query_q_learning_lot_multiplier(branch, regime_id_10, strat_id, guard_light)
+                q_mult = float(q_dec.get('q_lot_multiplier', reg_info.get('lot_multiplier', 1.0)))
+                effective_mult = round(min(q_mult, guard_lot_mult if guard_light != 'GREEN' else 1.25), 4)
+            else:
+                regime_lot_mult = float(reg_info.get('lot_multiplier', 1.0))
+                effective_mult = round(regime_lot_mult * guard_lot_mult, 4)
+
+            if effective_mult <= 0.0:
+                print(f"  [BLOQUEO Q-LEARNING/GUARDIAN] {sym} ({strat_id}) bloqueado: SubRegimen={sub_regime_10} (effective_mult={effective_mult}x, guard={guard_light})")
+                continue
+
             entry_p = price + (cfg['spread_pts'] / 2.0)
             sl_dist = atr * 1.5
             sl_price = entry_p - sl_dist
             tp_price = entry_p + (atr * 2.5)
 
-            dynamic_lots = calculate_dynamic_lots(sym, current_live_balance, entry_p, sl_price)
-            risk_usd = current_live_balance * cfg['risk_pct']
+            # En Prop Firm: Aplicar Regla del 40% de Consistencia (Early TP Clamp si 1.25x o 1.00x supera el tope)
+            consistency_note = "N/A_CAP_PROPIO"
+            if branch == 'PROP_FIRM' and apply_prop_firm_consistency_tp_clamp is not None:
+                today_realized_pct = float(state.get('prop_firm', {}).get('today_realized_profit_pct', 0.0))
+                clamp_res = apply_prop_firm_consistency_tp_clamp(
+                    entry_price=entry_p,
+                    sl_price=sl_price,
+                    tp_price=tp_price,
+                    direction=1,
+                    lot_multiplier=effective_mult,
+                    base_risk_pct=cfg['risk_pct'] * 100.0,
+                    target_challenge_pct=6.00,
+                    today_realized_profit_pct=today_realized_pct,
+                )
+                if clamp_res.get('blocked_by_consistency'):
+                    print(f"  [BLOQUEO CONSISTENCIA 40%] {sym} ({strat_id}): {clamp_res.get('reason')}")
+                    continue
+                tp_price = float(clamp_res.get('clamped_tp_price', tp_price))
+                consistency_note = clamp_res.get('reason', 'OK_40PCT')
+                if clamp_res.get('early_tp_clamped'):
+                    print(f"  [EARLY TP CLAMP 40%] {sym} ({strat_id}): {consistency_note}")
 
-            print(f"  [COMPUESTO %] Balance: ${current_live_balance:,.2f} | Riesgo: {cfg['risk_pct']*100:.1f}% (${risk_usd:.2f}) -> {dynamic_lots} lotes en {broker_sym}")
+            effective_balance = current_live_balance * effective_mult
+            dynamic_lots = calculate_dynamic_lots(sym, effective_balance, entry_p, sl_price)
+            risk_usd = effective_balance * cfg['risk_pct']
+
+            print(f"  [Q-LEARNING %] Balance: ${current_live_balance:,.2f} | Régimen ({sub_regime_10}): {effective_mult:.2f}x | Riesgo: ${risk_usd:.2f} -> {dynamic_lots} lotes en {broker_sym} | TP={tp_price:.4f}")
 
             ticket = None
             if mt5.is_healthy():
@@ -346,14 +467,6 @@ def run_cycle():
 
     state['last_eval_timestamp'] = now_str
     save_state(state)
-    if run_parallel_orchestrator_evaluation is not None:
-        try:
-            orch_res = run_parallel_orchestrator_evaluation()
-            state['regime_orchestrator_summary'] = orch_res.get('ab_portfolio_summary', {})
-            state['market_regimes'] = orch_res.get('regimes_by_asset', {})
-            print(f"  [ORQUESTADOR PARALELO A/B] Alfa Neto: +{orch_res['ab_portfolio_summary']['orchestrator_alpha_roi_pct']}% | Whipsaws Evitados: {orch_res['ab_portfolio_summary']['total_whipsaws_avoided']}")
-        except Exception as e:
-            print(f"  [WARN] Error ejecutando Orquestador Paralelo A/B: {e}")
     update_obsidian_journal(state, market_snapshot)
     return state
 
@@ -377,7 +490,7 @@ def update_obsidian_journal(state: dict, market_snapshot: dict):
 
     table_text = "\n".join(rows) if rows else "*Sin posiciones abiertas en este momento. Sistema en monitorizacion activa.*"
 
-    content = f"""---
+    content = rf"""---
 title: "Bitacora Oficial · Capital Propio & Fondeo TradFi (Interes Compuesto MT5)"
 date: "{today}"
 last_evaluation: "{state.get('last_eval_timestamp')}"

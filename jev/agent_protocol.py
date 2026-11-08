@@ -113,15 +113,51 @@ def run_skeptic_destructive_stress(
         close, high, low, atr, l_mask, s_mask, sl_m, tp_m, 48, base_friction * 2.0, risk_pct, 1.2, 0.8
     )
 
+    # Test 4: Test de Sensibilidad Paramétrica / Meseta de Estabilidad (±10% y ±20% en hiperparámetros)
+    # Exige que al menos el 70% de las configuraciones vecinas mantengan expectativa positiva (anti-pico aislado)
+    perturbations = [
+        (max(3, int(round(candidate["param1"] * 0.80))), float(candidate["param2"]), float(candidate["trigger_threshold"])),
+        (max(3, int(round(candidate["param1"] * 0.90))), float(candidate["param2"]), float(candidate["trigger_threshold"])),
+        (max(3, int(round(candidate["param1"] * 1.10))), float(candidate["param2"]), float(candidate["trigger_threshold"])),
+        (max(3, int(round(candidate["param1"] * 1.20))), float(candidate["param2"]), float(candidate["trigger_threshold"])),
+        (int(candidate["param1"]), round(float(candidate["param2"]) * 0.90, 3), float(candidate["trigger_threshold"])),
+        (int(candidate["param1"]), round(float(candidate["param2"]) * 1.10, 3), float(candidate["trigger_threshold"])),
+    ]
+    surviving_neighbors = 0
+    neighbor_sharpes = []
+    for p1_v, p2_v, th_v in perturbations:
+        l_v, s_v = factory.generate_signal(
+            macro_anchor=candidate["macro_anchor"],
+            entropy_max=candidate["entropy_max"],
+            symbolic_trigger=candidate["symbolic_trigger"],
+            param1=p1_v,
+            param2=p2_v,
+            trigger_threshold=th_v,
+            regime_gate=candidate.get("regime_gate", "ANY")
+        )
+        t_v, pnl_v, _, sr_v, _ = simulate_signals_numba(
+            close, high, low, atr, l_v, s_v, sl_m, tp_m, 48, base_friction, risk_pct, 1.2, 0.8
+        )
+        neighbor_sharpes.append(float(sr_v))
+        if pnl_v > 0.0 and t_v >= 5:
+            surviving_neighbors += 1
+
+    plateau_survival_pct = (surviving_neighbors / float(len(perturbations))) * 100.0
+    pass_plateau = plateau_survival_pct >= 70.0
+
     # Criterios de Aprobación de @Skeptic:
-    # 1. PnL positivo tras 1 barra de retardo.
-    # 2. Sharpe con latencia >= 1.0.
-    # 3. PnL positivo con comisiones 1.5x.
+    # 1. PnL positivo tras 1 barra de retardo y Sharpe con latencia >= 1.0.
+    # 2. PnL positivo con comisiones 1.5x.
+    # 3. Supervivencia en Meseta Paramétrica (±10%/±20%) >= 70.0%.
     pass_latency = (pnl_del > 0.0) and (sr_del >= 1.0)
     pass_friction = (pnl_f15 > 0.0)
-    skeptic_pass = pass_latency and pass_friction
+    skeptic_pass = pass_latency and pass_friction and pass_plateau
 
-    verdict_desc = "PASS (Resiste latencia y fricción severa)" if skeptic_pass else "FAIL (Colapsa ante retardo o comisiones 1.5x)"
+    verdict_desc = (
+        "PASS (Resiste latencia, fricción 1.5x y meseta paramétrica >= 70%)"
+        if skeptic_pass
+        else "FAIL (Colapsa ante retardo, comisiones 1.5x o pico aislado de sobreajuste)"
+    )
 
     return {
         "candidate_id": candidate.get("candidate_id"),
@@ -139,6 +175,13 @@ def run_skeptic_destructive_stress(
         "friction_20x": {
             "pnl": round(float(pnl_f20), 2),
             "sharpe": round(float(sr_f20), 2)
+        },
+        "parametric_plateau": {
+            "neighbors_tested": len(perturbations),
+            "neighbors_survived": surviving_neighbors,
+            "survival_pct": round(plateau_survival_pct, 1),
+            "mean_neighbor_sharpe": round(float(np.mean(neighbor_sharpes)), 2),
+            "passed": pass_plateau
         },
         "skeptic_pass": skeptic_pass,
         "verdict": verdict_desc

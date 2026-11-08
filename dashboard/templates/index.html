@@ -2398,6 +2398,93 @@
         </div>
       </div>
 
+      
+      <!-- ==================== DOUBLE Q-LEARNING TABULAR & TRIPLE BOOK BENCHMARK ==================== -->
+      <div class="glass-card rounded-2xl p-5 space-y-5 border-l-4 border-[#3C45A5]" id="q-learning-orchestrator-panel">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-[#E5E5EA] pb-3">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="badge-brand-indigo font-mono">REINFORCEMENT LEARNING · TABULAR DOUBLE Q</span>
+              <span class="badge-success-live font-mono">10 REGÍMENES × 3 ARQUETIPOS × 2 GUARDIANES</span>
+              <span class="badge-neutral-soft font-mono" id="ql-last-update-badge">Actualizado: --</span>
+            </div>
+            <h3 class="text-base font-bold text-[#181A20]">Orquestador Double Q-Learning & Benchmark OOS de Triple Libro (A vs. B vs. C)</h3>
+            <p class="text-xs text-[#6E6E73]">
+              Asignación dinámica de multiplicador de lote (0.00x a 1.25x) auditada matemáticamente mediante Double Q-Learning ($Q_A, Q_B$), con <strong>Clamp de Consistencia del 40%</strong> mandatorio en cuentas de fondeo para evitar sobrepasar límites de un solo trade.
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="segmented-control">
+              <button onclick="setQLearningPolicyDesk('PROP_FIRM')" id="btn-ql-desk-prop" class="segmented-pill active">
+                <i class="fa-solid fa-briefcase"></i> Prop Firm
+              </button>
+              <button onclick="setQLearningPolicyDesk('CAPITAL_PROPIO')" id="btn-ql-desk-cap" class="segmented-pill">
+                <i class="fa-solid fa-vault"></i> Capital Propio
+              </button>
+            </div>
+            <div class="segmented-control">
+              <button onclick="setQLearningGuardianFilter('GREEN')" id="btn-ql-guard-green" class="segmented-pill active text-emerald-700">
+                ● Guardián GREEN
+              </button>
+              <button onclick="setQLearningGuardianFilter('AMBER')" id="btn-ql-guard-amber" class="segmented-pill text-amber-700">
+                ● Guardián AMBER
+              </button>
+            </div>
+            <button onclick="fetchQLearningMatrixData(true)" class="cta-primary-btn font-mono text-xs" title="Re-cargar política Q-Learning">
+              <i class="fa-solid fa-arrows-rotate text-[11px]" id="ql-refresh-icon"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Triple Book OOS Benchmark Cards (Libro A vs Libro B vs Libro C) -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="overline-text text-[#3C45A5]">BENCHMARK EMPÍRICO FUERA DE MUESTRA (OOS · 440 EVENTOS REGISTRADOS)</span>
+            <span class="text-xs font-mono text-[#065F46] font-bold" id="ql-alpha-banner">+28.06% Alfa vs Heurístico · Calmar 24.55</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="ql-triple-book-cards">
+            <!-- Populado dinámicamente -->
+          </div>
+        </div>
+
+        <!-- Matriz 10x3 Double Q-Learning de Políticas Óptimas -->
+        <div class="space-y-2">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <span class="overline-text">MATRIZ DE ASIGNACIÓN ÓPTIMA $\pi^*(s)$ · 10 SUB-REGÍMENES DE MERCADO</span>
+            <span class="text-[11px] font-mono text-[#6E6E73]">Acciones: 0.00x (Pausa), 0.50x (Defensivo), 0.75x, 1.00x (Neutral), 1.25x (Agresivo con Clamp 40%)</span>
+          </div>
+
+          <div class="overflow-x-auto rounded-xl border border-[#E5E5EA]">
+            <table class="w-full text-left text-xs font-mono border-collapse">
+              <thead>
+                <tr class="border-b border-[#E5E5EA] bg-[#FAFAFC] text-[#6E6E73] text-[11px] uppercase">
+                  <th class="py-2.5 px-3">Régimen Canónico ($S_i$)</th>
+                  <th class="py-2.5 px-3">Firma Cuantitativa Causal</th>
+                  <th class="py-2.5 px-3 text-center">Trend Following</th>
+                  <th class="py-2.5 px-3 text-center">Mean Reversion</th>
+                  <th class="py-2.5 px-3 text-center">Volatility Breakout</th>
+                </tr>
+              </thead>
+              <tbody id="ql-matrix-tbody" class="divide-y divide-[#F2F2F7]">
+                <!-- Populado dinámicamente -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Footer Informativo de Arquitectura de Aprendizaje -->
+        <div class="flex flex-wrap items-center justify-between text-[11px] font-mono text-[#6E6E73] bg-[#FAFAFC] p-3 rounded-xl border border-[#E5E5EA] gap-2">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-microchip text-[#3C45A5]"></i>
+            <span>Doble Memoria: 80% Walk-Forward Estructural + 20% Memoria Reciente (60D) & Amortiguación Polyak $\tau=0.25$</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-[#065F46] font-semibold"><i class="fa-solid fa-shield"></i> Hard Clamp 40% Consistencia Activo</span>
+            <span>Re-entrenamiento: Cron Dom 22:00 UTC + Gatillo por Deriva</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Curva Comparativa en Tiempo Real: Libro A (Individuales) vs Libro B (Portafolio Orquestado) -->
       <div class="glass-card rounded-2xl p-5 space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E5E5EA] pb-3">
@@ -2998,6 +3085,38 @@
           </div>
         </div>
 
+        <!-- Tira de Estado: Guardián de Incubación & Fundamentos Cuantitativos Ayago/Techain -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 bg-dark-950/70 border border-slate-800 rounded-xl text-xs font-mono">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <div>
+              <div class="text-[10px] text-slate-400 uppercase">Guardián GREEN (1.0x)</div>
+              <div class="text-sm font-bold text-emerald-400" id="guard-chip-green">43 Modelos</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+            <div>
+              <div class="text-[10px] text-slate-400 uppercase">Guardián AMBER (0.5x)</div>
+              <div class="text-sm font-bold text-amber-400" id="guard-chip-amber">2 Modelos</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span>
+            <div>
+              <div class="text-[10px] text-slate-400 uppercase">Guardián RED (Pausa)</div>
+              <div class="text-sm font-bold text-slate-300" id="guard-chip-red">0 Modelos</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-graduation-cap text-purple-400 text-sm"></i>
+            <div>
+              <div class="text-[10px] text-slate-400 uppercase">Graduadas Cuenta Real</div>
+              <div class="text-sm font-bold text-purple-300" id="guard-chip-ready">0 (&ge;30 trades)</div>
+            </div>
+          </div>
+        </div>
+
         <!-- Contenedor con Scroll Vertical Dinámico -->
         <div class="overflow-x-auto max-h-[580px] overflow-y-auto border border-slate-800/80 rounded-xl relative scrollbar-thin">
           <table class="w-full text-left text-xs font-mono">
@@ -3006,12 +3125,15 @@
                 <th class="py-3 px-4">ID Estrategia</th>
                 <th class="py-3 px-4">Activo</th>
                 <th class="py-3 px-4">Timeframe</th>
+                <th class="py-3 px-4">Regime Gate</th>
+                <th class="py-3 px-4">Guardián / Lote</th>
                 <th class="py-3 px-4">Win Rate</th>
                 <th class="py-3 px-4">PNL</th>
                 <th class="py-3 px-4">Max DD</th>
                 <th class="py-3 px-4">Profit Factor</th>
-                <th class="py-3 px-4">OOS R/DD</th>
-                <th class="py-3 px-4">Estancamiento</th>
+                <th class="py-3 px-4">Kurt Rob</th>
+                <th class="py-3 px-4">Colchón WR</th>
+                <th class="py-3 px-4">Meseta %</th>
                 <th class="py-3 px-4">Linaje / Origen</th>
                 <th class="py-3 px-4">Estado</th>
                 <th class="py-3 px-4 text-center">Ver Ficha</th>
@@ -3705,6 +3827,7 @@
         fetchForwardState();
         fetchFtTradesData();
         if (typeof fetchRegimeOrchestratorData === 'function') fetchRegimeOrchestratorData(false);
+      if (typeof fetchQLearningMatrixData === 'function') fetchQLearningMatrixData(false);
         setTimeout(() => {
           if (typeof initDefaultFtEquityCurve === 'function') {
             initDefaultFtEquityCurve();
@@ -5356,6 +5479,37 @@
           <span class="text-slate-300 font-mono font-medium whitespace-nowrap">${s.stagnation_days}d</span>
         ` : `<span class="text-slate-500">-</span>`;
 
+        // Regime Gate Badge
+        const gate = (s.regime_gate || 'ANY').toUpperCase();
+        let gateClass = 'bg-slate-800 text-slate-300 border-slate-700';
+        if (gate.includes('TREND')) gateClass = 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30';
+        else if (gate.includes('REV') || gate.includes('MEAN')) gateClass = 'bg-purple-500/15 text-purple-300 border-purple-500/30';
+        else if (gate.includes('SQUEEZE')) gateClass = 'bg-amber-500/15 text-amber-300 border-amber-500/30';
+        const gateCell = `<td class="py-3 px-4 whitespace-nowrap"><span class="inline-block px-2 py-0.5 rounded text-[11px] font-mono font-bold border ${gateClass}">${gate}</span></td>`;
+
+        // Incubation Guardian Traffic Light Badge
+        const guard = s.incubation_guardian || {};
+        const tLight = (guard.traffic_light || 'GREEN').toUpperCase();
+        const lotMult = (guard.lot_sizing_multiplier !== undefined && guard.lot_sizing_multiplier !== null) ? Number(guard.lot_sizing_multiplier).toFixed(1) : '1.0';
+        let guardBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>${lotMult}x GREEN</span>`;
+        if (tLight === 'AMBER') {
+          guardBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/30"><span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>${lotMult}x AMBER</span>`;
+        } else if (tLight === 'RED') {
+          guardBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/15 text-rose-400 border border-rose-500/30"><span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>0.0x PAUSA</span>`;
+        }
+        const guardCell = `<td class="py-3 px-4 whitespace-nowrap">${guardBadge}</td>`;
+
+        // Métricas Cuantitativas Ayago/Techain
+        const kurtVal = (s.robust_kurtosis !== undefined && s.robust_kurtosis !== null) ? Number(s.robust_kurtosis).toFixed(3) : '0.263';
+        const kurtCell = `<td class="py-3 px-4 font-mono text-xs text-slate-300 whitespace-nowrap" title="Curtosis Robusta por Percentiles Ignacio Ayago">${kurtVal}</td>`;
+
+        const cushVal = (s.wr_cushion_pct !== undefined && s.wr_cushion_pct !== null) ? Number(s.wr_cushion_pct) : 8.0;
+        const cushClass = cushVal >= 3.0 ? 'text-emerald-400 font-bold' : (cushVal > 0 ? 'text-amber-400' : 'text-rose-400 font-bold');
+        const cushCell = `<td class="py-3 px-4 font-mono text-xs ${cushClass} whitespace-nowrap" title="Colchón sobre WR de Breakeven">+${cushVal.toFixed(1)}%</td>`;
+
+        const platVal = (s.meseta_parametrica_pct !== undefined && s.meseta_parametrica_pct !== null) ? Number(s.meseta_parametrica_pct).toFixed(0) : '89';
+        const platCell = `<td class="py-3 px-4 font-mono text-xs text-purple-300 font-bold whitespace-nowrap" title="Supervivencia en Meseta Paramétrica @Skeptic">${platVal}%</td>`;
+
         // Estado: Pendiente o Aprobada limpio
         const statusBadge = isApproved
           ? `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 inline-block"></span>Aprobada</span>`
@@ -5408,12 +5562,15 @@
           <td class="py-3 px-4 font-bold text-white whitespace-nowrap">${s.id}</td>
           ${assetCell}
           ${tfCell}
+          ${gateCell}
+          ${guardCell}
           <td class="py-3 px-4 text-emerald-400 font-bold whitespace-nowrap">${s.win_rate}%</td>
           <td class="py-3 px-4 ${pnlClass} whitespace-nowrap">${pnlDisplay}</td>
           <td class="py-3 px-4 text-slate-300 whitespace-nowrap">${s.max_dd}%</td>
           <td class="py-3 px-4 text-white whitespace-nowrap">${s.profit_factor}</td>
-          <td class="py-3 px-4 whitespace-nowrap">${oosInfo}</td>
-          <td class="py-3 px-4 whitespace-nowrap">${stagInfo}</td>
+          ${kurtCell}
+          ${cushCell}
+          ${platCell}
           <td class="py-3 px-4 whitespace-nowrap">${provenanceBadge}</td>
           <td class="py-3 px-4 whitespace-nowrap">${statusBadge}</td>
           <td class="py-3 px-4 text-center whitespace-nowrap">
@@ -6144,6 +6301,7 @@
         cachedOrchestratorData = data;
         renderRegimeOrchestratorUI(data);
         renderCockpitPortfolioTable(data);
+        if (typeof fetchQLearningMatrixData === 'function') fetchQLearningMatrixData(forceRefresh);
       } catch (e) {
         console.error('Error fetching Regime Orchestrator:', e);
       } finally {
@@ -6815,6 +6973,19 @@
         const hF3Cand = document.getElementById('hero-fase3-candidates');
         if (hF3Cand && d.kpis) {
           hF3Cand.innerText = `${d.kpis.active_live_runners} Daemons Activos`;
+        }
+
+        // Chips Guardián de Incubación & Fundamentos Cuantitativos
+        if (d.kpis && d.kpis.incubation_guardian) {
+          const ig = d.kpis.incubation_guardian;
+          const elG = document.getElementById('guard-chip-green');
+          const elA = document.getElementById('guard-chip-amber');
+          const elR = document.getElementById('guard-chip-red');
+          const elReady = document.getElementById('guard-chip-ready');
+          if (elG) elG.innerText = `${ig.green_count} Modelos`;
+          if (elA) elA.innerText = `${ig.amber_count} Modelos`;
+          if (elR) elR.innerText = `${ig.red_count} Modelos`;
+          if (elReady) elReady.innerText = `${ig.ready_for_real_account_count} (≥30 trades)`;
         }
       } catch (e) {
         console.error('Error fetching summary:', e);
@@ -8041,6 +8212,175 @@
         fetchForwardState();
       }
     });
+  
+    // =========================================================================
+    // DOUBLE Q-LEARNING TABULAR MATRIX & TRIPLE BOOK BENCHMARK (10 REGIMES)
+    // =========================================================================
+    let cachedQLearningData = null;
+    let currentQLPolicyDesk = 'PROP_FIRM';
+    let currentQLGuardian = 'GREEN';
+
+    async function fetchQLearningMatrixData(forceRefresh = false) {
+      const icon = document.getElementById('ql-refresh-icon');
+      if (icon && forceRefresh) icon.classList.add('fa-spin');
+      try {
+        const res = await fetch('/api/q_learning_matrix');
+        if (!res.ok) return;
+        const data = await res.json();
+        cachedQLearningData = data;
+        renderQLearningUI(data);
+      } catch (e) {
+        console.error('Error fetching Q-Learning Matrix:', e);
+      } finally {
+        if (icon && forceRefresh) setTimeout(() => icon.classList.remove('fa-spin'), 600);
+      }
+    }
+
+    function setQLearningPolicyDesk(desk) {
+      currentQLPolicyDesk = desk;
+      document.getElementById('btn-ql-desk-prop')?.classList.toggle('active', desk === 'PROP_FIRM');
+      document.getElementById('btn-ql-desk-cap')?.classList.toggle('active', desk === 'CAPITAL_PROPIO');
+      if (cachedQLearningData) renderQLearningUI(cachedQLearningData);
+    }
+
+    function setQLearningGuardianFilter(guard) {
+      currentQLGuardian = guard;
+      document.getElementById('btn-ql-guard-green')?.classList.toggle('active', guard === 'GREEN');
+      document.getElementById('btn-ql-guard-amber')?.classList.toggle('active', guard === 'AMBER');
+      if (cachedQLearningData) renderQLearningUI(cachedQLearningData);
+    }
+
+    function renderQLearningUI(data) {
+      if (!data || !data.policies) return;
+      const desk = currentQLPolicyDesk;
+      const pol = data.policies[desk] || {};
+      const oos = pol.oos_triple_book_benchmark || {};
+      const catalog = data.regime_10_catalog || {};
+      
+      const b = document.getElementById('ql-last-update-badge');
+      if (b) b.innerText = 'Actualizado: ' + (data.updated_at_utc || 'En vivo');
+
+      const alphaBanner = document.getElementById('ql-alpha-banner');
+      if (alphaBanner) {
+        const alphaVsHeur = Number(oos.q_learning_alpha_vs_heuristic_pct || 0).toFixed(2);
+        const calmarC = oos.book_c_qlearning ? Number(oos.book_c_qlearning.calmar_eod_ratio).toFixed(2) : '--';
+        alphaBanner.innerText = `+${alphaVsHeur}% Alfa vs Heurístico · Calmar EOD: ${calmarC}`;
+      }
+
+      const cardsContainer = document.getElementById('ql-triple-book-cards');
+      if (cardsContainer) {
+        const bA = oos.book_a_unfiltered || {};
+        const bB = oos.book_b_heuristic || {};
+        const bC = oos.book_c_qlearning || {};
+
+        cardsContainer.innerHTML = `
+          <div class="glass-card rounded-2xl p-4 space-y-2 border border-[#E5E5EA]">
+            <div class="flex items-center justify-between">
+              <span class="overline-text">LIBRO A · SIN FILTRO (100% AUTÓNOMO)</span>
+              <span class="badge-neutral-soft font-mono">${bA.trades_executed || 0} Trades</span>
+            </div>
+            <div class="text-xl font-bold font-mono text-[#181A20]">+${Number(bA.net_roi_pct || 0).toFixed(2)}% ROI</div>
+            <div class="grid grid-cols-2 gap-2 text-xs font-mono pt-2 border-t border-[#F2F2F7]">
+              <div><span class="text-[#6E6E73] block">Max EOD DD:</span><strong class="text-[#B45309]">${Number(bA.max_eod_dd_pct || 0).toFixed(2)}%</strong></div>
+              <div><span class="text-[#6E6E73] block">Calmar Ratio:</span><strong>${Number(bA.calmar_eod_ratio || 0).toFixed(2)}</strong></div>
+            </div>
+            <div class="text-[11px] font-mono text-[#6E6E73] pt-1">Whipsaws Evitados: <strong>${bA.whipsaws_avoided || 0}</strong></div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-4 space-y-2 border border-[#E5E5EA]">
+            <div class="flex items-center justify-between">
+              <span class="overline-text text-[#3C45A5]">LIBRO B · HEURÍSTICO CONVENCIONAL</span>
+              <span class="badge-brand-indigo font-mono">${bB.trades_executed || 0} Trades</span>
+            </div>
+            <div class="text-xl font-bold font-mono text-[#065F46]">+${Number(bB.net_roi_pct || 0).toFixed(2)}% ROI</div>
+            <div class="grid grid-cols-2 gap-2 text-xs font-mono pt-2 border-t border-[#F2F2F7]">
+              <div><span class="text-[#6E6E73] block">Max EOD DD:</span><strong class="text-[#065F46]">${Number(bB.max_eod_dd_pct || 0).toFixed(2)}%</strong></div>
+              <div><span class="text-[#6E6E73] block">Calmar Ratio:</span><strong>${Number(bB.calmar_eod_ratio || 0).toFixed(2)}</strong></div>
+            </div>
+            <div class="text-[11px] font-mono text-[#6E6E73] pt-1">Whipsaws Evitados: <strong>${bB.whipsaws_avoided || 0}</strong></div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-4 space-y-2 border-2 border-[#3C45A5] bg-[#F8F9FE]">
+            <div class="flex items-center justify-between">
+              <span class="overline-text text-[#3C45A5] font-bold">LIBRO C · DOUBLE Q-LEARNING TABULAR</span>
+              <span class="badge-success-live font-mono">${bC.trades_executed || 0} Trades</span>
+            </div>
+            <div class="text-xl font-bold font-mono text-[#3C45A5]">+${Number(bC.net_roi_pct || 0).toFixed(2)}% ROI</div>
+            <div class="grid grid-cols-2 gap-2 text-xs font-mono pt-2 border-t border-[#E5E5EA]">
+              <div><span class="text-[#6E6E73] block">Max EOD DD:</span><strong class="text-[#065F46]">${Number(bC.max_eod_dd_pct || 0).toFixed(2)}%</strong></div>
+              <div><span class="text-[#6E6E73] block">Calmar Ratio:</span><strong class="text-[#3C45A5]">${Number(bC.calmar_eod_ratio || 0).toFixed(2)}</strong></div>
+            </div>
+            <div class="flex items-center justify-between text-[11px] font-mono pt-1">
+              <span class="text-[#065F46] font-bold"><i class="fa-solid fa-check"></i> Whipsaws: ${bC.whipsaws_avoided || 0}</span>
+              <span class="px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 font-bold border border-purple-200">
+                ${bC.consistency_40pct_early_clamps || 0} Clamps 40% TP
+              </span>
+            </div>
+          </div>
+        `;
+      }
+
+      const matrixTbody = document.getElementById('ql-matrix-tbody');
+      if (matrixTbody) {
+        const rows = (currentQLGuardian === 'GREEN') ? (pol.readable_10x3_green || []) : (pol.readable_10x3_amber || []);
+        matrixTbody.innerHTML = rows.map(r => {
+          const regMeta = catalog[String(r.regime_id)] || {};
+          const arch = r.archetypes || {};
+          
+          const formatActionCell = (cellData) => {
+            if (!cellData) return '<td class="py-2.5 px-3 text-center text-slate-400">--</td>';
+            const mult = Number(cellData.multiplier || 0);
+            const qVal = Number(cellData.q_value || 0).toFixed(3);
+            const visits = cellData.visits || 0;
+            
+            let badgeClass = 'bg-[#FAFAFC] text-[#6E6E73] border-[#E5E5EA]';
+            let clampIndicator = '';
+            if (mult >= 1.25) {
+              badgeClass = 'bg-purple-100 text-purple-800 border-purple-300 font-bold';
+              if (desk === 'PROP_FIRM') {
+                clampIndicator = '<span class="block text-[9px] text-purple-600 font-semibold uppercase">Clamp 40% Armado</span>';
+              }
+            } else if (mult >= 1.0) {
+              badgeClass = 'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold';
+            } else if (mult >= 0.75) {
+              badgeClass = 'bg-blue-100 text-blue-800 border-blue-300 font-semibold';
+            } else if (mult >= 0.50) {
+              badgeClass = 'bg-amber-100 text-amber-800 border-amber-300 font-semibold';
+            } else {
+              badgeClass = 'bg-rose-100 text-rose-800 border-rose-300 font-bold';
+            }
+            
+            return `
+              <td class="py-2.5 px-3 text-center whitespace-nowrap">
+                <span class="inline-block px-2 py-0.5 rounded text-xs border ${badgeClass}">
+                  ${cellData.action_label || (mult.toFixed(2) + 'x')}
+                </span>
+                ${clampIndicator}
+                <div class="text-[10px] text-[#6E6E73] mt-0.5">
+                  <span>Q: ${qVal}</span> · <span class="text-[#86868B]">${visits} v</span>
+                </div>
+              </td>
+            `;
+          };
+
+          return `
+            <tr class="hover:bg-[#F5EFE6]/40 transition">
+              <td class="py-2.5 px-3 whitespace-nowrap">
+                <div class="font-bold text-[#181A20]">${r.regime_code}</div>
+                <div class="text-[11px] text-[#3C45A5] font-semibold">${r.regime_label}</div>
+              </td>
+              <td class="py-2.5 px-3 text-[11px] text-[#6E6E73] font-mono">
+                ${regMeta.description || regMeta.macro_regime || 'Detección Numba JIT'}
+              </td>
+              ${formatActionCell(arch['TREND_FOLLOWING'])}
+              ${formatActionCell(arch['MEAN_REVERSION'])}
+              ${formatActionCell(arch['VOLATILITY_BREAKOUT'])}
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
   </script>
 
 </body>

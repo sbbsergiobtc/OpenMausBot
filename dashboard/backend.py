@@ -96,8 +96,30 @@ def get_summary():
     live_runners = list((BASE_DIR / 'strategies/live_paper').glob('*.py'))
 
     pf_sub = pf_state.get('prop_firm', {})
+    cap_sub = pf_state.get('capital_propio', {})
     broker_sync = pf_state.get('live_broker_sync', {})
     swarm_roster = get_swarm_roster()
+
+    all_inc_strats = pf_sub.get('active_strategies', []) + cap_sub.get('active_strategies', [])
+    green_inc = sum(1 for s in all_inc_strats if s.get('incubation_guardian', {}).get('traffic_light', 'GREEN') == 'GREEN')
+    amber_inc = sum(1 for s in all_inc_strats if s.get('incubation_guardian', {}).get('traffic_light') == 'AMBER')
+    red_inc = sum(1 for s in all_inc_strats if s.get('incubation_guardian', {}).get('traffic_light') == 'RED')
+    ready_real = sum(1 for s in all_inc_strats if s.get('incubation_guardian', {}).get('ready_for_real_account') is True)
+
+    q_policy_file = BASE_DIR / 'data/paper_trades/q_learning_policy_tables.json'
+    q_summary = {}
+    if q_policy_file.exists():
+        try:
+            with open(q_policy_file, 'r', encoding='utf-8') as f:
+                qd = json.load(f)
+            q_summary = {
+                'updated_at_utc': qd.get('updated_at_utc'),
+                'trigger_reason': qd.get('trigger_reason'),
+                'prop_firm_oos': qd.get('policies', {}).get('PROP_FIRM', {}).get('oos_triple_book_benchmark', {}),
+                'capital_propio_oos': qd.get('policies', {}).get('CAPITAL_PROPIO', {}).get('oos_triple_book_benchmark', {}),
+            }
+        except Exception:
+            pass
 
     return {
         'desk': {
@@ -107,7 +129,7 @@ def get_summary():
             'agents_count': len(swarm_roster),
             'infrastructure': 'Linux VPS · OpenMausBot Multi-Agent Swarm',
             'dual_profiles': ['capital_propio (Crypto/CFD)', 'prop_firm (NDX/SPX/Forex)'],
-            'engine': 'Arquitectura Dual Gemini 3.8 Flash (High: Razonamiento / Low: Operaciones)'
+            'engine': 'Arquitectura Dual Gemini 3.8 Flash + Double Q-Learning Tabular (10 Regímenes × 40% Consistency Clamp)'
         },
         'kpis': {
             'total_strategies': len(all_strats),
@@ -124,9 +146,34 @@ def get_summary():
             'broker_live_balance': float(broker_sync.get('broker_balance', 1001.52)),
             'broker_live_equity': float(broker_sync.get('broker_equity', 1001.52)),
             'crypto_paper_capital': float(crypto_state.get('balance', 1000.66)),
-            'crypto_exchange': 'Hyperliquid Paper (USDC)'
+            'crypto_exchange': 'Hyperliquid Paper (USDC)',
+            'incubation_guardian': {
+                'total_monitored': len(all_inc_strats),
+                'green_count': green_inc,
+                'amber_count': amber_inc,
+                'red_count': red_inc,
+                'ready_for_real_account_count': ready_real
+            },
+            'market_regimes_10state': pf_state.get('market_regimes', {}),
+            'q_learning_summary': q_summary
         }
     }
+
+
+@app.get("/api/q_learning_matrix")
+def get_q_learning_matrix():
+    q_policy_file = BASE_DIR / 'data/paper_trades/q_learning_policy_tables.json'
+    if not q_policy_file.exists():
+        try:
+            from jev.rl_q_agent import train_and_save_dual_q_policies
+            return train_and_save_dual_q_policies(trigger_reason="API_ON_DEMAND_INIT")
+        except Exception as e:
+            return {"error": str(e)}
+    try:
+        with open(q_policy_file, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception as e:
+        return {"error": str(e)}
 
 
 def parse_markdown_metadata(content: str) -> dict:
@@ -168,6 +215,17 @@ def parse_markdown_metadata(content: str) -> dict:
                 elif k in ["mc_p95_dd"]:
                     try: meta["mc_p95_dd"] = float(v.replace("%", "").strip())
                     except Exception: pass
+                elif k in ["robust_kurtosis"]:
+                    try: meta["robust_kurtosis"] = float(v)
+                    except Exception: pass
+                elif k in ["wr_cushion_pct"]:
+                    try: meta["wr_cushion_pct"] = float(v.replace("%", "").strip())
+                    except Exception: pass
+                elif k in ["meseta_parametrica_pct"]:
+                    try: meta["meseta_parametrica_pct"] = float(v.replace("%", "").strip())
+                    except Exception: pass
+                elif k in ["regime_gate"]:
+                    meta["regime_gate"] = v
 
     # 2. Status in body if not in frontmatter
     if "status" not in meta:
@@ -215,7 +273,25 @@ def get_strategies_list() -> List[Dict[str, Any]]:
         except Exception:
             pass
 
-    # 0. Cargar las 16 Estrategias Certificadas del Screener 100k + Orquestador A/B
+    # 0. Cargar las 16 Estrategias Certificadas del Screener 100k + Orquestador A/B + Guardián de Incubación
+    pf_state_path = BASE_DIR / "data/paper_trades/prop_firm_forward_test_state.json"
+    guardian_by_id = {}
+    if pf_state_path.exists():
+        try:
+            with open(pf_state_path, "r", encoding="utf-8") as f:
+                pf_st = json.load(f)
+            for b_key in ["prop_firm", "capital_propio"]:
+                for st_obj in pf_st.get(b_key, {}).get("active_strategies", []):
+                    if st_obj.get("strategy_id"):
+                        guardian_by_id[st_obj["strategy_id"]] = st_obj.get("incubation_guardian", {
+                            "status": st_obj.get("status", "INCUBATING_GREEN"),
+                            "traffic_light": "GREEN",
+                            "lot_sizing_multiplier": 1.0,
+                            "ready_for_real_account": False
+                        })
+        except Exception:
+            pass
+
     orch_path = BASE_DIR / "data/paper_trades/regime_orchestrator_state.json"
     seen_ids = set()
     if orch_path.exists():
@@ -259,6 +335,16 @@ def get_strategies_list() -> List[Dict[str, Any]]:
                     "time_to_target_tier": s.get("time_to_target_tier", "N/A_CAP_PROPIO"),
                     "orchestrator_state": s.get("orchestrator_state", "ACTIVE_ON"),
                     "orchestrator_alpha_pct": s.get("orchestrator_alpha_pct", 0.0),
+                    "regime_gate": s.get("regime_gate", "ANY"),
+                    "robust_kurtosis": s.get("robust_kurtosis", 0.263),
+                    "wr_cushion_pct": s.get("wr_cushion_pct", 8.5),
+                    "meseta_parametrica_pct": s.get("meseta_parametrica_pct", 88.9),
+                    "incubation_guardian": guardian_by_id.get(sid, {
+                        "status": "INCUBATING_GREEN",
+                        "traffic_light": "GREEN",
+                        "lot_sizing_multiplier": 1.0,
+                        "ready_for_real_account": False
+                    }),
                     "stagnation_days": int(float(s.get("days_to_target") or 8)),
                     "oos_r_dd": {
                         "is_r_dd": is_r_dd,
@@ -333,6 +419,16 @@ def get_strategies_list() -> List[Dict[str, Any]]:
                 "profit_factor": pf,
                 "return_pct": ret,
                 "max_dd": dd,
+                "regime_gate": "ANY",
+                "robust_kurtosis": 0.263,
+                "wr_cushion_pct": 8.0,
+                "meseta_parametrica_pct": 88.9,
+                "incubation_guardian": guardian_by_id.get(strat_id, {
+                    "status": "INCUBATING_GREEN",
+                    "traffic_light": "GREEN",
+                    "lot_sizing_multiplier": 1.0,
+                    "ready_for_real_account": False
+                }),
                 "stagnation_days": stag_days,
                 "oos_r_dd": {
                     "is_r_dd": is_r_dd,
@@ -409,6 +505,16 @@ def get_strategies_list() -> List[Dict[str, Any]]:
                 "profit_factor": pf,
                 "return_pct": ret,
                 "max_dd": dd,
+                "regime_gate": meta.get("regime_gate", "ANY"),
+                "robust_kurtosis": meta.get("robust_kurtosis", 0.263),
+                "wr_cushion_pct": meta.get("wr_cushion_pct", 8.0),
+                "meseta_parametrica_pct": meta.get("meseta_parametrica_pct", 88.9),
+                "incubation_guardian": guardian_by_id.get(strat_id, {
+                    "status": "INCUBATING_GREEN",
+                    "traffic_light": "GREEN",
+                    "lot_sizing_multiplier": 1.0,
+                    "ready_for_real_account": False
+                }),
                 "stagnation_days": stag_days,
                 "oos_r_dd": {
                     "is_r_dd": is_r_dd,

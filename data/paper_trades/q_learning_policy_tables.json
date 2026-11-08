@@ -1,0 +1,2881 @@
+{
+  "updated_at_utc": "2026-11-08 02:19:57 UTC",
+  "trigger_reason": "CLI_MANUAL_TRAINING",
+  "architecture": {
+    "algorithm": "Double Q-Learning Tabular (QA, QB)",
+    "state_space": "60 estados (10 Regímenes S0..S9 × 3 Arquetipos × 2 Estados Guardián)",
+    "action_space": [
+      0.0,
+      0.5,
+      0.75,
+      1.0,
+      1.25
+    ],
+    "dual_memory_split": "80% Walk-Forward Estructural / 20% Reciente 60D + Forward Vivo",
+    "polyak_soft_update_tau": 0.25,
+    "prop_firm_40pct_consistency_clamp": true,
+    "retraining_schedule": "Domingos 22:00 UTC + Gatillo Intra-Semanal por Deriva (Drift Trigger)"
+  },
+  "regime_10_catalog": {
+    "0": {
+      "id": 0,
+      "code": "S0_STRONG_CLEAN_BULL",
+      "macro_regime": "TRENDING_BULLISH",
+      "label": "Tendencia Alcista Fuerte Limpia",
+      "favored_archetype": "TREND_FOLLOWING",
+      "heuristic_mult": 1.25,
+      "description": "ADX >= 25, +DI > -DI, Close >= EMA50 > EMA200, H_norm <= 0.78, Kurt_rob <= 3.20"
+    },
+    "1": {
+      "id": 1,
+      "code": "S1_MODERATE_BULL_TREND",
+      "macro_regime": "TRENDING_BULLISH",
+      "label": "Tendencia Alcista Moderada",
+      "favored_archetype": "TREND_FOLLOWING",
+      "heuristic_mult": 1.0,
+      "description": "20 <= ADX < 25 o Hurst >= 0.55, +DI >= -DI, Close >= EMA200"
+    },
+    "2": {
+      "id": 2,
+      "code": "S2_BULL_VOLATILITY_CLIMAX",
+      "macro_regime": "TRENDING_BULLISH",
+      "label": "Clímax / Sobreextensión Alcista",
+      "favored_archetype": "MEAN_REVERSION",
+      "heuristic_mult": 0.5,
+      "description": "+DI > -DI, Close > EMA50, pero ATR_Ratio > 1.50 o Kurt_rob > 3.20"
+    },
+    "3": {
+      "id": 3,
+      "code": "S3_STRONG_CLEAN_BEAR",
+      "macro_regime": "TRENDING_BEARISH",
+      "label": "Tendencia Bajista Ordenada",
+      "favored_archetype": "TREND_FOLLOWING",
+      "heuristic_mult": 1.0,
+      "description": "ADX >= 25, -DI > +DI, Close <= EMA50 < EMA200, H_norm <= 0.78, Kurt_rob <= 3.20"
+    },
+    "4": {
+      "id": 4,
+      "code": "S4_MODERATE_BEAR_TREND",
+      "macro_regime": "TRENDING_BEARISH",
+      "label": "Tendencia Bajista Moderada",
+      "favored_archetype": "TREND_FOLLOWING",
+      "heuristic_mult": 0.75,
+      "description": "20 <= ADX < 25, -DI > +DI, Close < EMA200, ATR_Ratio <= 1.50"
+    },
+    "5": {
+      "id": 5,
+      "code": "S5_BEAR_PANIC_CAPITULATION",
+      "macro_regime": "TRENDING_BEARISH",
+      "label": "Capitulación / Pánico Bajista",
+      "favored_archetype": "MEAN_REVERSION",
+      "heuristic_mult": 0.5,
+      "description": "-DI > +DI, Close < EMA50, ATR_Ratio > 1.50 (cascada con rebote en V)"
+    },
+    "6": {
+      "id": 6,
+      "code": "S6_CLEAN_MEAN_REVERSION",
+      "macro_regime": "RANGING_LATERAL",
+      "label": "Rango Estacionario Limpio",
+      "favored_archetype": "MEAN_REVERSION",
+      "heuristic_mult": 1.0,
+      "description": "ADX < 18.5, Hurst < 0.49, 0.75 <= ATR_Ratio <= 1.25, Kurt_rob <= 3.20"
+    },
+    "7": {
+      "id": 7,
+      "code": "S7_COMPRESSION_SQUEEZE",
+      "macro_regime": "RANGING_LATERAL",
+      "label": "Compresión / Squeeze Volatilidad",
+      "favored_archetype": "VOLATILITY_BREAKOUT",
+      "heuristic_mult": 0.75,
+      "description": "ADX < 20, ATR_Ratio < 0.75, H_norm <= 0.82 (acumulación pre-ruptura)"
+    },
+    "8": {
+      "id": 8,
+      "code": "S8_CHOPPY_FAT_TAILS_RANGE",
+      "macro_regime": "RANGING_LATERAL",
+      "label": "Rango Sucio / Colas Pesadas",
+      "favored_archetype": "MEAN_REVERSION",
+      "heuristic_mult": 0.25,
+      "description": "ADX < 21, Kurt_rob > 3.20 o 1.25 < ATR_Ratio <= 1.60 (zona de whipsaws)"
+    },
+    "9": {
+      "id": 9,
+      "code": "S9_HIGH_ENTROPY_BLACKOUT",
+      "macro_regime": "HIGH_ENTROPY_CHAOS",
+      "label": "Caos / Ruido Blanco (Blackout)",
+      "favored_archetype": "NONE",
+      "heuristic_mult": 0.0,
+      "description": "H_norm > 0.84 o Delta_H > 0.12 o ATR_Ratio > 2.20 -> Bloqueo 0.00x"
+    }
+  },
+  "policies": {
+    "PROP_FIRM": {
+      "desk_mode": "PROP_FIRM",
+      "algorithm": "Tabular Double Q-Learning + Dual-Memory (80/20) + Polyak Soft-Update",
+      "polyak_tau": 0.25,
+      "passed_oos_validation_gate": true,
+      "q_table": [
+        [
+          -0.0583,
+          0.3929,
+          0.5592,
+          0.7506,
+          0.9176
+        ],
+        [
+          -0.0463,
+          0.4952,
+          0.7136,
+          -0.6057,
+          -1.4125
+        ],
+        [
+          -0.0267,
+          -0.0893,
+          -0.1713,
+          -0.2464,
+          -0.3736
+        ],
+        [
+          -0.0008,
+          0.1958,
+          0.2446,
+          -1.2564,
+          -2.2181
+        ],
+        [
+          -0.0574,
+          0.3968,
+          0.5892,
+          0.7601,
+          0.9443
+        ],
+        [
+          -0.0066,
+          0.216,
+          0.3008,
+          -1.2437,
+          -2.265
+        ],
+        [
+          -0.0495,
+          0.2509,
+          0.3601,
+          0.4536,
+          0.5593
+        ],
+        [
+          0.0843,
+          0.1119,
+          0.0024,
+          -1.7153,
+          -2.851
+        ],
+        [
+          -0.0426,
+          0.0749,
+          0.0658,
+          0.0929,
+          0.0597
+        ],
+        [
+          -0.0123,
+          -0.1423,
+          -0.2602,
+          -1.8896,
+          -3.0432
+        ],
+        [
+          -0.0519,
+          0.3449,
+          0.4938,
+          0.6298,
+          0.7427
+        ],
+        [
+          -0.0398,
+          0.1877,
+          0.2661,
+          -1.1675,
+          -2.1197
+        ],
+        [
+          -0.015,
+          -0.2411,
+          -0.3861,
+          -0.561,
+          -0.7486
+        ],
+        [
+          0.1919,
+          -0.223,
+          -0.4805,
+          -2.3691,
+          -3.6748
+        ],
+        [
+          -0.0579,
+          0.3459,
+          0.5127,
+          0.6472,
+          0.8261
+        ],
+        [
+          -0.051,
+          0.2943,
+          0.4364,
+          -1.0299,
+          -1.8489
+        ],
+        [
+          -0.0252,
+          -0.1217,
+          -0.2176,
+          -0.3126,
+          -0.4419
+        ],
+        [
+          0.6371,
+          0.2264,
+          -0.095,
+          -2.3367,
+          -3.6728
+        ],
+        [
+          -0.0514,
+          0.2569,
+          0.3714,
+          0.487,
+          0.572
+        ],
+        [
+          0.0374,
+          -0.0155,
+          -0.1535,
+          -1.8606,
+          -3.0153
+        ],
+        [
+          -0.0384,
+          0.0381,
+          0.0176,
+          0.0184,
+          -0.0339
+        ],
+        [
+          -0.0394,
+          0.3593,
+          0.511,
+          -0.8448,
+          -1.6956
+        ],
+        [
+          -0.0469,
+          0.1796,
+          0.2607,
+          0.3344,
+          0.388
+        ],
+        [
+          -0.0006,
+          0.4606,
+          0.5909,
+          -0.8375,
+          -1.7189
+        ],
+        [
+          -0.0356,
+          0.0022,
+          0.0063,
+          -0.0635,
+          -0.1365
+        ],
+        [
+          -0.0011,
+          -0.0799,
+          -0.1567,
+          -1.7565,
+          -2.9089
+        ],
+        [
+          -0.0162,
+          -0.2106,
+          -0.3562,
+          -0.553,
+          -0.726
+        ],
+        [
+          0.2869,
+          0.2071,
+          0.0949,
+          -1.7398,
+          -2.8728
+        ],
+        [
+          -0.027,
+          -0.0783,
+          -0.1467,
+          -0.2336,
+          -0.3363
+        ],
+        [
+          -0.0008,
+          0.1718,
+          0.2133,
+          -1.312,
+          -2.2667
+        ],
+        [
+          -0.0193,
+          -0.1902,
+          -0.3127,
+          -0.4581,
+          -0.619
+        ],
+        [
+          -0.0017,
+          -0.1109,
+          -0.2111,
+          -1.8355,
+          -2.9601
+        ],
+        [
+          -0.0272,
+          -0.0752,
+          -0.1349,
+          -0.2135,
+          -0.3514
+        ],
+        [
+          0.0034,
+          -0.2525,
+          -0.4303,
+          -2.1372,
+          -3.3491
+        ],
+        [
+          -0.0317,
+          -0.0218,
+          -0.0429,
+          -0.1106,
+          -0.1694
+        ],
+        [
+          -0.0286,
+          0.2302,
+          0.3029,
+          -1.1117,
+          -2.035
+        ],
+        [
+          -0.0288,
+          -0.0967,
+          -0.1803,
+          -0.2807,
+          -0.3781
+        ],
+        [
+          -0.0127,
+          -0.2014,
+          -0.3321,
+          -1.9909,
+          -3.1892
+        ],
+        [
+          -0.0466,
+          0.2396,
+          0.3177,
+          0.4208,
+          0.504
+        ],
+        [
+          0.0853,
+          0.3219,
+          0.4306,
+          -1.3373,
+          -2.4113
+        ],
+        [
+          -0.0249,
+          -0.1362,
+          -0.237,
+          -0.3531,
+          -0.4995
+        ],
+        [
+          0.0012,
+          -0.2508,
+          -0.4006,
+          -2.1232,
+          -3.3321
+        ],
+        [
+          -0.0366,
+          0.0124,
+          -0.0223,
+          -0.0521,
+          -0.1095
+        ],
+        [
+          0.0347,
+          -0.1586,
+          -0.3107,
+          -2.0087,
+          -3.2077
+        ],
+        [
+          -0.0265,
+          -0.1229,
+          -0.2168,
+          -0.3141,
+          -0.444
+        ],
+        [
+          0.5915,
+          0.2116,
+          -0.0949,
+          -2.3367,
+          -3.6728
+        ],
+        [
+          -0.0594,
+          0.4098,
+          0.5997,
+          0.7995,
+          0.9539
+        ],
+        [
+          0.0342,
+          0.0986,
+          0.1387,
+          -1.5419,
+          -2.677
+        ],
+        [
+          -0.0269,
+          -0.1145,
+          -0.1899,
+          -0.3071,
+          -0.425
+        ],
+        [
+          0.0006,
+          -0.2661,
+          -0.4363,
+          -2.1664,
+          -3.3927
+        ],
+        [
+          -0.0368,
+          0.0285,
+          0.0193,
+          -0.0437,
+          -0.0088
+        ],
+        [
+          -0.0474,
+          0.1768,
+          0.2443,
+          -1.1963,
+          -2.1631
+        ],
+        [
+          -0.0267,
+          -0.1312,
+          -0.228,
+          -0.3266,
+          -0.4366
+        ],
+        [
+          0.0453,
+          0.0906,
+          0.0687,
+          -1.5612,
+          -2.6207
+        ],
+        [
+          0.9742,
+          -0.1326,
+          -0.2223,
+          -0.3759,
+          -0.4713
+        ],
+        [
+          1.5992,
+          -1.4389,
+          -2.7836,
+          -4.5634,
+          -6.3191
+        ],
+        [
+          0.9768,
+          -0.1479,
+          -0.2583,
+          -0.4304,
+          -0.5552
+        ],
+        [
+          0.9911,
+          -0.1752,
+          -0.3448,
+          -0.4881,
+          -0.7151
+        ],
+        [
+          0.9828,
+          -0.2048,
+          -0.3475,
+          -0.5177,
+          -0.7004
+        ],
+        [
+          1.0103,
+          -0.2985,
+          -0.4862,
+          -0.738,
+          -0.9916
+        ]
+      ],
+      "visit_counts": [
+        [
+          1134,
+          1134,
+          1134,
+          1134,
+          1134
+        ],
+        [
+          90,
+          90,
+          90,
+          90,
+          90
+        ],
+        [
+          1260,
+          1260,
+          1260,
+          1260,
+          1260
+        ],
+        [
+          90,
+          90,
+          90,
+          90,
+          90
+        ],
+        [
+          1026,
+          1026,
+          1026,
+          1026,
+          1026
+        ],
+        [
+          72,
+          72,
+          72,
+          72,
+          72
+        ],
+        [
+          990,
+          990,
+          990,
+          990,
+          990
+        ],
+        [
+          54,
+          54,
+          54,
+          54,
+          54
+        ],
+        [
+          1386,
+          1386,
+          1386,
+          1386,
+          1386
+        ],
+        [
+          144,
+          144,
+          144,
+          144,
+          144
+        ],
+        [
+          1224,
+          1224,
+          1224,
+          1224,
+          1224
+        ],
+        [
+          162,
+          162,
+          162,
+          162,
+          162
+        ],
+        [
+          684,
+          684,
+          684,
+          684,
+          684
+        ],
+        [
+          54,
+          54,
+          54,
+          54,
+          54
+        ],
+        [
+          540,
+          540,
+          540,
+          540,
+          540
+        ],
+        [
+          162,
+          162,
+          162,
+          162,
+          162
+        ],
+        [
+          540,
+          540,
+          540,
+          540,
+          540
+        ],
+        [
+          18,
+          18,
+          18,
+          18,
+          18
+        ],
+        [
+          738,
+          738,
+          738,
+          738,
+          738
+        ],
+        [
+          72,
+          72,
+          72,
+          72,
+          72
+        ],
+        [
+          666,
+          666,
+          666,
+          666,
+          666
+        ],
+        [
+          108,
+          108,
+          108,
+          108,
+          108
+        ],
+        [
+          756,
+          756,
+          756,
+          756,
+          756
+        ],
+        [
+          72,
+          72,
+          72,
+          72,
+          72
+        ],
+        [
+          1080,
+          1080,
+          1080,
+          1080,
+          1080
+        ],
+        [
+          108,
+          108,
+          108,
+          108,
+          108
+        ],
+        [
+          846,
+          846,
+          846,
+          846,
+          846
+        ],
+        [
+          36,
+          36,
+          36,
+          36,
+          36
+        ],
+        [
+          738,
+          738,
+          738,
+          738,
+          738
+        ],
+        [
+          90,
+          90,
+          90,
+          90,
+          90
+        ],
+        [
+          432,
+          432,
+          432,
+          432,
+          432
+        ],
+        [
+          108,
+          108,
+          108,
+          108,
+          108
+        ],
+        [
+          378,
+          378,
+          378,
+          378,
+          378
+        ],
+        [
+          126,
+          126,
+          126,
+          126,
+          126
+        ],
+        [
+          468,
+          468,
+          468,
+          468,
+          468
+        ],
+        [
+          108,
+          108,
+          108,
+          108,
+          108
+        ],
+        [
+          1260,
+          1260,
+          1260,
+          1260,
+          1260
+        ],
+        [
+          162,
+          162,
+          162,
+          162,
+          162
+        ],
+        [
+          1476,
+          1476,
+          1476,
+          1476,
+          1476
+        ],
+        [
+          36,
+          36,
+          36,
+          36,
+          36
+        ],
+        [
+          1746,
+          1746,
+          1746,
+          1746,
+          1746
+        ],
+        [
+          126,
+          126,
+          126,
+          126,
+          126
+        ],
+        [
+          1008,
+          1008,
+          1008,
+          1008,
+          1008
+        ],
+        [
+          90,
+          90,
+          90,
+          90,
+          90
+        ],
+        [
+          918,
+          918,
+          918,
+          918,
+          918
+        ],
+        [
+          18,
+          18,
+          18,
+          18,
+          18
+        ],
+        [
+          1134,
+          1134,
+          1134,
+          1134,
+          1134
+        ],
+        [
+          54,
+          54,
+          54,
+          54,
+          54
+        ],
+        [
+          522,
+          522,
+          522,
+          522,
+          522
+        ],
+        [
+          126,
+          126,
+          126,
+          126,
+          126
+        ],
+        [
+          558,
+          558,
+          558,
+          558,
+          558
+        ],
+        [
+          180,
+          180,
+          180,
+          180,
+          180
+        ],
+        [
+          504,
+          504,
+          504,
+          504,
+          504
+        ],
+        [
+          72,
+          72,
+          72,
+          72,
+          72
+        ],
+        [
+          360,
+          360,
+          360,
+          360,
+          360
+        ],
+        [
+          18,
+          18,
+          18,
+          18,
+          18
+        ],
+        [
+          558,
+          558,
+          558,
+          558,
+          558
+        ],
+        [
+          126,
+          126,
+          126,
+          126,
+          126
+        ],
+        [
+          360,
+          360,
+          360,
+          360,
+          360
+        ],
+        [
+          108,
+          108,
+          108,
+          108,
+          108
+        ]
+      ],
+      "readable_10x3_green": [
+        {
+          "regime_id": 0,
+          "regime_code": "S0_STRONG_CLEAN_BULL",
+          "regime_label": "Tendencia Alcista Fuerte Limpia",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 1.25,
+              "action_label": "1.25x",
+              "q_value": 0.918,
+              "visits": 5670
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.027,
+              "visits": 6300
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 1.25,
+              "action_label": "1.25x",
+              "q_value": 0.944,
+              "visits": 5130
+            }
+          }
+        },
+        {
+          "regime_id": 1,
+          "regime_code": "S1_MODERATE_BULL_TREND",
+          "regime_label": "Tendencia Alcista Moderada",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 1.25,
+              "action_label": "1.25x",
+              "q_value": 0.559,
+              "visits": 4950
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 1.0,
+              "action_label": "1.00x",
+              "q_value": 0.093,
+              "visits": 6930
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 1.25,
+              "action_label": "1.25x",
+              "q_value": 0.743,
+              "visits": 6120
+            }
+          }
+        },
+        {
+          "regime_id": 2,
+          "regime_code": "S2_BULL_VOLATILITY_CLIMAX",
+          "regime_label": "Clímax / Sobreextensión Alcista",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.015,
+              "visits": 3420
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 1.25,
+              "action_label": "1.25x",
+              "q_value": 0.826,
+              "visits": 2700
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.025,
+              "visits": 2700
+            }
+          }
+        },
+        {
+          "regime_id": 3,
+          "regime_code": "S3_STRONG_CLEAN_BEAR",
+          "regime_label": "Tendencia Bajista Ordenada",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 1.25,
+              "action_label": "1.25x",
+              "q_value": 0.572,
+              "visits": 3690
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.5,
+              "action_label": "0.50x",
+              "q_value": 0.038,
+              "visits": 3330
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 1.25,
+              "action_label": "1.25x",
+              "q_value": 0.388,
+              "visits": 3780
+            }
+          }
+        },
+        {
+          "regime_id": 4,
+          "regime_code": "S4_MODERATE_BEAR_TREND",
+          "regime_label": "Tendencia Bajista Moderada",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.75,
+              "action_label": "0.75x",
+              "q_value": 0.006,
+              "visits": 5400
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.016,
+              "visits": 4230
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.027,
+              "visits": 3690
+            }
+          }
+        },
+        {
+          "regime_id": 5,
+          "regime_code": "S5_BEAR_PANIC_CAPITULATION",
+          "regime_label": "Capitulación / Pánico Bajista",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.019,
+              "visits": 2160
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.027,
+              "visits": 1890
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.5,
+              "action_label": "0.50x",
+              "q_value": -0.022,
+              "visits": 2340
+            }
+          }
+        },
+        {
+          "regime_id": 6,
+          "regime_code": "S6_CLEAN_MEAN_REVERSION",
+          "regime_label": "Rango Estacionario Limpio",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.029,
+              "visits": 6300
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 1.25,
+              "action_label": "1.25x",
+              "q_value": 0.504,
+              "visits": 7380
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.025,
+              "visits": 8730
+            }
+          }
+        },
+        {
+          "regime_id": 7,
+          "regime_code": "S7_COMPRESSION_SQUEEZE",
+          "regime_label": "Compresión / Squeeze Volatilidad",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.5,
+              "action_label": "0.50x",
+              "q_value": 0.012,
+              "visits": 5040
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.026,
+              "visits": 4590
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 1.25,
+              "action_label": "1.25x",
+              "q_value": 0.954,
+              "visits": 5670
+            }
+          }
+        },
+        {
+          "regime_id": 8,
+          "regime_code": "S8_CHOPPY_FAT_TAILS_RANGE",
+          "regime_label": "Rango Sucio / Colas Pesadas",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.027,
+              "visits": 2610
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.5,
+              "action_label": "0.50x",
+              "q_value": 0.028,
+              "visits": 2790
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.027,
+              "visits": 2520
+            }
+          }
+        },
+        {
+          "regime_id": 9,
+          "regime_code": "S9_HIGH_ENTROPY_BLACKOUT",
+          "regime_label": "Caos / Ruido Blanco (Blackout)",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": 0.974,
+              "visits": 1800
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": 0.977,
+              "visits": 2790
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": 0.983,
+              "visits": 1800
+            }
+          }
+        }
+      ],
+      "readable_10x3_amber": [
+        {
+          "regime_id": 0,
+          "regime_code": "S0_STRONG_CLEAN_BULL",
+          "regime_label": "Tendencia Alcista Fuerte Limpia",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.75,
+              "action_label": "0.75x",
+              "q_value": 0.714,
+              "visits": 450
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.75,
+              "action_label": "0.75x",
+              "q_value": 0.245,
+              "visits": 450
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.75,
+              "action_label": "0.75x",
+              "q_value": 0.301,
+              "visits": 360
+            }
+          }
+        },
+        {
+          "regime_id": 1,
+          "regime_code": "S1_MODERATE_BULL_TREND",
+          "regime_label": "Tendencia Alcista Moderada",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.5,
+              "action_label": "0.50x",
+              "q_value": 0.112,
+              "visits": 270
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.012,
+              "visits": 720
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.75,
+              "action_label": "0.75x",
+              "q_value": 0.266,
+              "visits": 810
+            }
+          }
+        },
+        {
+          "regime_id": 2,
+          "regime_code": "S2_BULL_VOLATILITY_CLIMAX",
+          "regime_label": "Clímax / Sobreextensión Alcista",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": 0.192,
+              "visits": 270
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.75,
+              "action_label": "0.75x",
+              "q_value": 0.436,
+              "visits": 810
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": 0.637,
+              "visits": 90
+            }
+          }
+        },
+        {
+          "regime_id": 3,
+          "regime_code": "S3_STRONG_CLEAN_BEAR",
+          "regime_label": "Tendencia Bajista Ordenada",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": 0.037,
+              "visits": 360
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.75,
+              "action_label": "0.75x",
+              "q_value": 0.511,
+              "visits": 540
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.75,
+              "action_label": "0.75x",
+              "q_value": 0.591,
+              "visits": 360
+            }
+          }
+        },
+        {
+          "regime_id": 4,
+          "regime_code": "S4_MODERATE_BEAR_TREND",
+          "regime_label": "Tendencia Bajista Moderada",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.001,
+              "visits": 540
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": 0.287,
+              "visits": 180
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.75,
+              "action_label": "0.75x",
+              "q_value": 0.213,
+              "visits": 450
+            }
+          }
+        },
+        {
+          "regime_id": 5,
+          "regime_code": "S5_BEAR_PANIC_CAPITULATION",
+          "regime_label": "Capitulación / Pánico Bajista",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.002,
+              "visits": 540
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": 0.003,
+              "visits": 630
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.75,
+              "action_label": "0.75x",
+              "q_value": 0.303,
+              "visits": 540
+            }
+          }
+        },
+        {
+          "regime_id": 6,
+          "regime_code": "S6_CLEAN_MEAN_REVERSION",
+          "regime_label": "Rango Estacionario Limpio",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.013,
+              "visits": 810
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.75,
+              "action_label": "0.75x",
+              "q_value": 0.431,
+              "visits": 180
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": 0.001,
+              "visits": 630
+            }
+          }
+        },
+        {
+          "regime_id": 7,
+          "regime_code": "S7_COMPRESSION_SQUEEZE",
+          "regime_label": "Compresión / Squeeze Volatilidad",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": 0.035,
+              "visits": 450
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": 0.592,
+              "visits": 90
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.75,
+              "action_label": "0.75x",
+              "q_value": 0.139,
+              "visits": 270
+            }
+          }
+        },
+        {
+          "regime_id": 8,
+          "regime_code": "S8_CHOPPY_FAT_TAILS_RANGE",
+          "regime_label": "Rango Sucio / Colas Pesadas",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": 0.001,
+              "visits": 630
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.75,
+              "action_label": "0.75x",
+              "q_value": 0.244,
+              "visits": 900
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.5,
+              "action_label": "0.50x",
+              "q_value": 0.091,
+              "visits": 360
+            }
+          }
+        },
+        {
+          "regime_id": 9,
+          "regime_code": "S9_HIGH_ENTROPY_BLACKOUT",
+          "regime_label": "Caos / Ruido Blanco (Blackout)",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": 1.599,
+              "visits": 90
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": 0.991,
+              "visits": 630
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": 1.01,
+              "visits": 540
+            }
+          }
+        }
+      ],
+      "oos_triple_book_benchmark": {
+        "oos_events_evaluated": 440,
+        "book_a_unfiltered": {
+          "net_roi_pct": 85.17,
+          "max_eod_dd_pct": 9.23,
+          "calmar_eod_ratio": 9.23,
+          "trades_executed": 416,
+          "whipsaws_avoided": 16,
+          "consistency_40pct_early_clamps": 31
+        },
+        "book_b_heuristic": {
+          "net_roi_pct": 163.22,
+          "max_eod_dd_pct": 7.68,
+          "calmar_eod_ratio": 21.25,
+          "trades_executed": 297,
+          "whipsaws_avoided": 100,
+          "consistency_40pct_early_clamps": 25
+        },
+        "book_c_qlearning": {
+          "net_roi_pct": 191.28,
+          "max_eod_dd_pct": 7.79,
+          "calmar_eod_ratio": 24.55,
+          "trades_executed": 227,
+          "whipsaws_avoided": 144,
+          "consistency_40pct_early_clamps": 25
+        },
+        "q_learning_alpha_vs_unfiltered_pct": 106.11,
+        "q_learning_alpha_vs_heuristic_pct": 28.06,
+        "eod_dd_saved_vs_unfiltered_pct": 1.44
+      }
+    },
+    "CAPITAL_PROPIO": {
+      "desk_mode": "CAPITAL_PROPIO",
+      "algorithm": "Tabular Double Q-Learning + Dual-Memory (80/20) + Polyak Soft-Update",
+      "polyak_tau": 0.25,
+      "passed_oos_validation_gate": true,
+      "q_table": [
+        [
+          -0.0615,
+          0.5099,
+          0.7646,
+          0.9571,
+          1.1994
+        ],
+        [
+          -0.0145,
+          0.3356,
+          0.4302,
+          -0.9773,
+          -1.9576
+        ],
+        [
+          -0.0485,
+          0.1015,
+          0.1323,
+          0.119,
+          0.049
+        ],
+        [
+          -0.0187,
+          -0.2328,
+          -0.3818,
+          -2.1102,
+          -3.3265
+        ],
+        [
+          -0.0692,
+          0.6509,
+          0.973,
+          1.2811,
+          1.5521
+        ],
+        [
+          -0.0414,
+          0.371,
+          0.5167,
+          -0.8329,
+          -1.7865
+        ],
+        [
+          -0.0568,
+          0.3486,
+          0.4929,
+          0.6102,
+          0.7329
+        ],
+        [
+          -0.0144,
+          -0.0109,
+          -0.0343,
+          -1.6897,
+          -2.8054
+        ],
+        [
+          -0.0522,
+          0.1357,
+          0.1541,
+          0.2199,
+          0.201
+        ],
+        [
+          -0.029,
+          -0.0635,
+          -0.1556,
+          -1.7492,
+          -2.9598
+        ],
+        [
+          -0.077,
+          0.7174,
+          1.0851,
+          1.4267,
+          1.7624
+        ],
+        [
+          0.0795,
+          0.1323,
+          0.0094,
+          -1.5725,
+          -2.7451
+        ],
+        [
+          -0.0362,
+          -0.167,
+          -0.3055,
+          -0.4631,
+          -0.6388
+        ],
+        [
+          -0.0278,
+          -0.2335,
+          -0.3703,
+          -2.0665,
+          -3.295
+        ],
+        [
+          -0.0711,
+          0.6107,
+          0.8801,
+          1.1904,
+          1.4751
+        ],
+        [
+          -0.0571,
+          0.4818,
+          0.6716,
+          -0.6231,
+          -1.4515
+        ],
+        [
+          -0.0376,
+          -0.1064,
+          -0.2063,
+          -0.3284,
+          -0.4819
+        ],
+        [
+          -0.0206,
+          0.0207,
+          0.0063,
+          -1.5936,
+          -2.7048
+        ],
+        [
+          -0.0699,
+          0.5578,
+          0.8329,
+          1.0658,
+          1.2945
+        ],
+        [
+          0.1696,
+          0.521,
+          0.5175,
+          -0.8817,
+          -2.0237
+        ],
+        [
+          -0.0414,
+          -0.029,
+          -0.0657,
+          -0.1591,
+          -0.2082
+        ],
+        [
+          0.2419,
+          0.7454,
+          0.9148,
+          -0.4077,
+          -1.2387
+        ],
+        [
+          -0.0706,
+          0.5992,
+          0.901,
+          1.1458,
+          1.3988
+        ],
+        [
+          0.0501,
+          0.5932,
+          0.6574,
+          -0.6898,
+          -1.5579
+        ],
+        [
+          -0.0643,
+          0.2891,
+          0.4278,
+          0.5277,
+          0.6042
+        ],
+        [
+          0.1007,
+          0.3606,
+          0.389,
+          -1.0195,
+          -2.0195
+        ],
+        [
+          -0.0213,
+          -0.3229,
+          -0.5538,
+          -0.7814,
+          -1.0368
+        ],
+        [
+          1.2,
+          0.82,
+          0.44,
+          -1.44,
+          -2.82
+        ],
+        [
+          -0.0451,
+          0.0156,
+          -0.0023,
+          -0.0568,
+          -0.1304
+        ],
+        [
+          0.3156,
+          -0.192,
+          -0.5833,
+          -2.4734,
+          -3.8905
+        ],
+        [
+          -0.0334,
+          -0.168,
+          -0.2876,
+          -0.4382,
+          -0.6231
+        ],
+        [
+          -0.0405,
+          0.0125,
+          -0.0133,
+          -1.5653,
+          -2.6198
+        ],
+        [
+          -0.0358,
+          -0.0902,
+          -0.1875,
+          -0.2648,
+          -0.4092
+        ],
+        [
+          -0.0444,
+          0.0295,
+          -0.0154,
+          -1.5481,
+          -2.6612
+        ],
+        [
+          -0.0618,
+          0.2763,
+          0.3367,
+          0.4257,
+          0.5218
+        ],
+        [
+          0.0343,
+          0.1725,
+          0.1924,
+          -1.309,
+          -2.328
+        ],
+        [
+          -0.0209,
+          -0.3302,
+          -0.5454,
+          -0.7818,
+          -1.1508
+        ],
+        [
+          -0.0237,
+          0.0277,
+          -0.0242,
+          -1.5697,
+          -2.6219
+        ],
+        [
+          -0.0676,
+          0.6563,
+          0.9009,
+          1.1712,
+          1.4404
+        ],
+        [
+          -0.0214,
+          -0.0879,
+          -0.1512,
+          -1.7755,
+          -2.9768
+        ],
+        [
+          -0.0231,
+          -0.2901,
+          -0.4467,
+          -0.7107,
+          -0.9991
+        ],
+        [
+          0.0254,
+          -0.5525,
+          -0.9033,
+          -2.7894,
+          -4.2222
+        ],
+        [
+          -0.0464,
+          0.032,
+          0.0246,
+          -0.0214,
+          -0.0381
+        ],
+        [
+          -0.0539,
+          0.2611,
+          0.3253,
+          -1.1326,
+          -2.0157
+        ],
+        [
+          -0.0482,
+          -0.0042,
+          -0.0257,
+          -0.0726,
+          -0.1603
+        ],
+        [
+          0.1679,
+          -0.3978,
+          -0.7518,
+          -2.641,
+          -4.0524
+        ],
+        [
+          -0.0717,
+          0.6848,
+          0.9808,
+          1.3275,
+          1.5983
+        ],
+        [
+          -0.0632,
+          0.6529,
+          0.9382,
+          -0.2497,
+          -1.0104
+        ],
+        [
+          -0.0424,
+          -0.0702,
+          -0.1294,
+          -0.2183,
+          -0.3366
+        ],
+        [
+          -0.0068,
+          -0.1514,
+          -0.3167,
+          -1.9074,
+          -3.1331
+        ],
+        [
+          -0.0581,
+          0.195,
+          0.2682,
+          0.3053,
+          0.3763
+        ],
+        [
+          -0.0435,
+          0.0256,
+          0.0075,
+          -1.5397,
+          -2.6212
+        ],
+        [
+          -0.0397,
+          -0.0853,
+          -0.1609,
+          -0.2553,
+          -0.3795
+        ],
+        [
+          0.0039,
+          -0.0261,
+          -0.1085,
+          -1.6818,
+          -2.8336
+        ],
+        [
+          0.9733,
+          -0.2672,
+          -0.4233,
+          -0.6194,
+          -0.8093
+        ],
+        [
+          0.9687,
+          -0.0776,
+          -0.1898,
+          -0.3851,
+          -0.4141
+        ],
+        [
+          0.9888,
+          -0.4374,
+          -0.7058,
+          -1.0273,
+          -1.3682
+        ],
+        [
+          1.1396,
+          -0.5077,
+          -0.985,
+          -1.4326,
+          -1.9746
+        ],
+        [
+          0.9743,
+          -0.2612,
+          -0.4501,
+          -0.6658,
+          -0.878
+        ],
+        [
+          1.0621,
+          -0.6497,
+          -1.0779,
+          -1.5588,
+          -2.0792
+        ]
+      ],
+      "visit_counts": [
+        [
+          990,
+          990,
+          990,
+          990,
+          990
+        ],
+        [
+          72,
+          72,
+          72,
+          72,
+          72
+        ],
+        [
+          1098,
+          1098,
+          1098,
+          1098,
+          1098
+        ],
+        [
+          144,
+          144,
+          144,
+          144,
+          144
+        ],
+        [
+          1080,
+          1080,
+          1080,
+          1080,
+          1080
+        ],
+        [
+          108,
+          108,
+          108,
+          108,
+          108
+        ],
+        [
+          1296,
+          1296,
+          1296,
+          1296,
+          1296
+        ],
+        [
+          108,
+          108,
+          108,
+          108,
+          108
+        ],
+        [
+          1278,
+          1278,
+          1278,
+          1278,
+          1278
+        ],
+        [
+          144,
+          144,
+          144,
+          144,
+          144
+        ],
+        [
+          1332,
+          1332,
+          1332,
+          1332,
+          1332
+        ],
+        [
+          54,
+          54,
+          54,
+          54,
+          54
+        ],
+        [
+          612,
+          612,
+          612,
+          612,
+          612
+        ],
+        [
+          198,
+          198,
+          198,
+          198,
+          198
+        ],
+        [
+          504,
+          504,
+          504,
+          504,
+          504
+        ],
+        [
+          144,
+          144,
+          144,
+          144,
+          144
+        ],
+        [
+          504,
+          504,
+          504,
+          504,
+          504
+        ],
+        [
+          108,
+          108,
+          108,
+          108,
+          108
+        ],
+        [
+          648,
+          648,
+          648,
+          648,
+          648
+        ],
+        [
+          36,
+          36,
+          36,
+          36,
+          36
+        ],
+        [
+          594,
+          594,
+          594,
+          594,
+          594
+        ],
+        [
+          36,
+          36,
+          36,
+          36,
+          36
+        ],
+        [
+          594,
+          594,
+          594,
+          594,
+          594
+        ],
+        [
+          54,
+          54,
+          54,
+          54,
+          54
+        ],
+        [
+          792,
+          792,
+          792,
+          792,
+          792
+        ],
+        [
+          54,
+          54,
+          54,
+          54,
+          54
+        ],
+        [
+          810,
+          810,
+          810,
+          810,
+          810
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          936,
+          936,
+          936,
+          936,
+          936
+        ],
+        [
+          36,
+          36,
+          36,
+          36,
+          36
+        ],
+        [
+          558,
+          558,
+          558,
+          558,
+          558
+        ],
+        [
+          144,
+          144,
+          144,
+          144,
+          144
+        ],
+        [
+          450,
+          450,
+          450,
+          450,
+          450
+        ],
+        [
+          234,
+          234,
+          234,
+          234,
+          234
+        ],
+        [
+          414,
+          414,
+          414,
+          414,
+          414
+        ],
+        [
+          72,
+          72,
+          72,
+          72,
+          72
+        ],
+        [
+          1080,
+          1080,
+          1080,
+          1080,
+          1080
+        ],
+        [
+          108,
+          108,
+          108,
+          108,
+          108
+        ],
+        [
+          1566,
+          1566,
+          1566,
+          1566,
+          1566
+        ],
+        [
+          126,
+          126,
+          126,
+          126,
+          126
+        ],
+        [
+          1548,
+          1548,
+          1548,
+          1548,
+          1548
+        ],
+        [
+          108,
+          108,
+          108,
+          108,
+          108
+        ],
+        [
+          1044,
+          1044,
+          1044,
+          1044,
+          1044
+        ],
+        [
+          162,
+          162,
+          162,
+          162,
+          162
+        ],
+        [
+          882,
+          882,
+          882,
+          882,
+          882
+        ],
+        [
+          54,
+          54,
+          54,
+          54,
+          54
+        ],
+        [
+          1008,
+          1008,
+          1008,
+          1008,
+          1008
+        ],
+        [
+          126,
+          126,
+          126,
+          126,
+          126
+        ],
+        [
+          702,
+          702,
+          702,
+          702,
+          702
+        ],
+        [
+          108,
+          108,
+          108,
+          108,
+          108
+        ],
+        [
+          720,
+          720,
+          720,
+          720,
+          720
+        ],
+        [
+          216,
+          216,
+          216,
+          216,
+          216
+        ],
+        [
+          450,
+          450,
+          450,
+          450,
+          450
+        ],
+        [
+          90,
+          90,
+          90,
+          90,
+          90
+        ],
+        [
+          504,
+          504,
+          504,
+          504,
+          504
+        ],
+        [
+          126,
+          126,
+          126,
+          126,
+          126
+        ],
+        [
+          486,
+          486,
+          486,
+          486,
+          486
+        ],
+        [
+          54,
+          54,
+          54,
+          54,
+          54
+        ],
+        [
+          486,
+          486,
+          486,
+          486,
+          486
+        ],
+        [
+          90,
+          90,
+          90,
+          90,
+          90
+        ]
+      ],
+      "readable_10x3_green": [
+        {
+          "regime_id": 0,
+          "regime_code": "S0_STRONG_CLEAN_BULL",
+          "regime_label": "Tendencia Alcista Fuerte Limpia",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 1.25,
+              "action_label": "1.25x",
+              "q_value": 1.199,
+              "visits": 4950
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.75,
+              "action_label": "0.75x",
+              "q_value": 0.132,
+              "visits": 5490
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 1.25,
+              "action_label": "1.25x",
+              "q_value": 1.552,
+              "visits": 5400
+            }
+          }
+        },
+        {
+          "regime_id": 1,
+          "regime_code": "S1_MODERATE_BULL_TREND",
+          "regime_label": "Tendencia Alcista Moderada",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 1.25,
+              "action_label": "1.25x",
+              "q_value": 0.733,
+              "visits": 6480
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 1.0,
+              "action_label": "1.00x",
+              "q_value": 0.22,
+              "visits": 6390
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 1.25,
+              "action_label": "1.25x",
+              "q_value": 1.762,
+              "visits": 6660
+            }
+          }
+        },
+        {
+          "regime_id": 2,
+          "regime_code": "S2_BULL_VOLATILITY_CLIMAX",
+          "regime_label": "Clímax / Sobreextensión Alcista",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.036,
+              "visits": 3060
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 1.25,
+              "action_label": "1.25x",
+              "q_value": 1.475,
+              "visits": 2520
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.038,
+              "visits": 2520
+            }
+          }
+        },
+        {
+          "regime_id": 3,
+          "regime_code": "S3_STRONG_CLEAN_BEAR",
+          "regime_label": "Tendencia Bajista Ordenada",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 1.25,
+              "action_label": "1.25x",
+              "q_value": 1.295,
+              "visits": 3240
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.5,
+              "action_label": "0.50x",
+              "q_value": -0.029,
+              "visits": 2970
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 1.25,
+              "action_label": "1.25x",
+              "q_value": 1.399,
+              "visits": 2970
+            }
+          }
+        },
+        {
+          "regime_id": 4,
+          "regime_code": "S4_MODERATE_BEAR_TREND",
+          "regime_label": "Tendencia Bajista Moderada",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 1.25,
+              "action_label": "1.25x",
+              "q_value": 0.604,
+              "visits": 3960
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.021,
+              "visits": 4050
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.5,
+              "action_label": "0.50x",
+              "q_value": 0.016,
+              "visits": 4680
+            }
+          }
+        },
+        {
+          "regime_id": 5,
+          "regime_code": "S5_BEAR_PANIC_CAPITULATION",
+          "regime_label": "Capitulación / Pánico Bajista",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.033,
+              "visits": 2790
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.036,
+              "visits": 2250
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 1.25,
+              "action_label": "1.25x",
+              "q_value": 0.522,
+              "visits": 2070
+            }
+          }
+        },
+        {
+          "regime_id": 6,
+          "regime_code": "S6_CLEAN_MEAN_REVERSION",
+          "regime_label": "Rango Estacionario Limpio",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.021,
+              "visits": 5400
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 1.25,
+              "action_label": "1.25x",
+              "q_value": 1.44,
+              "visits": 7830
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.023,
+              "visits": 7740
+            }
+          }
+        },
+        {
+          "regime_id": 7,
+          "regime_code": "S7_COMPRESSION_SQUEEZE",
+          "regime_label": "Compresión / Squeeze Volatilidad",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.5,
+              "action_label": "0.50x",
+              "q_value": 0.032,
+              "visits": 5220
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.5,
+              "action_label": "0.50x",
+              "q_value": -0.004,
+              "visits": 4410
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 1.25,
+              "action_label": "1.25x",
+              "q_value": 1.598,
+              "visits": 5040
+            }
+          }
+        },
+        {
+          "regime_id": 8,
+          "regime_code": "S8_CHOPPY_FAT_TAILS_RANGE",
+          "regime_label": "Rango Sucio / Colas Pesadas",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.042,
+              "visits": 3510
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 1.25,
+              "action_label": "1.25x",
+              "q_value": 0.376,
+              "visits": 3600
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.04,
+              "visits": 2250
+            }
+          }
+        },
+        {
+          "regime_id": 9,
+          "regime_code": "S9_HIGH_ENTROPY_BLACKOUT",
+          "regime_label": "Caos / Ruido Blanco (Blackout)",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": 0.973,
+              "visits": 2520
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": 0.989,
+              "visits": 2430
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": 0.974,
+              "visits": 2430
+            }
+          }
+        }
+      ],
+      "readable_10x3_amber": [
+        {
+          "regime_id": 0,
+          "regime_code": "S0_STRONG_CLEAN_BULL",
+          "regime_label": "Tendencia Alcista Fuerte Limpia",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.75,
+              "action_label": "0.75x",
+              "q_value": 0.43,
+              "visits": 360
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.019,
+              "visits": 720
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.75,
+              "action_label": "0.75x",
+              "q_value": 0.517,
+              "visits": 540
+            }
+          }
+        },
+        {
+          "regime_id": 1,
+          "regime_code": "S1_MODERATE_BULL_TREND",
+          "regime_label": "Tendencia Alcista Moderada",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.5,
+              "action_label": "0.50x",
+              "q_value": -0.011,
+              "visits": 540
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.029,
+              "visits": 720
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.5,
+              "action_label": "0.50x",
+              "q_value": 0.132,
+              "visits": 270
+            }
+          }
+        },
+        {
+          "regime_id": 2,
+          "regime_code": "S2_BULL_VOLATILITY_CLIMAX",
+          "regime_label": "Clímax / Sobreextensión Alcista",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.028,
+              "visits": 990
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.75,
+              "action_label": "0.75x",
+              "q_value": 0.672,
+              "visits": 720
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.5,
+              "action_label": "0.50x",
+              "q_value": 0.021,
+              "visits": 540
+            }
+          }
+        },
+        {
+          "regime_id": 3,
+          "regime_code": "S3_STRONG_CLEAN_BEAR",
+          "regime_label": "Tendencia Bajista Ordenada",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.5,
+              "action_label": "0.50x",
+              "q_value": 0.521,
+              "visits": 180
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.75,
+              "action_label": "0.75x",
+              "q_value": 0.915,
+              "visits": 180
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.75,
+              "action_label": "0.75x",
+              "q_value": 0.657,
+              "visits": 270
+            }
+          }
+        },
+        {
+          "regime_id": 4,
+          "regime_code": "S4_MODERATE_BEAR_TREND",
+          "regime_label": "Tendencia Bajista Moderada",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.75,
+              "action_label": "0.75x",
+              "q_value": 0.389,
+              "visits": 270
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": 1.2,
+              "visits": 0
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": 0.316,
+              "visits": 180
+            }
+          }
+        },
+        {
+          "regime_id": 5,
+          "regime_code": "S5_BEAR_PANIC_CAPITULATION",
+          "regime_label": "Capitulación / Pánico Bajista",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.5,
+              "action_label": "0.50x",
+              "q_value": 0.013,
+              "visits": 720
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.5,
+              "action_label": "0.50x",
+              "q_value": 0.029,
+              "visits": 1170
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.75,
+              "action_label": "0.75x",
+              "q_value": 0.192,
+              "visits": 360
+            }
+          }
+        },
+        {
+          "regime_id": 6,
+          "regime_code": "S6_CLEAN_MEAN_REVERSION",
+          "regime_label": "Rango Estacionario Limpio",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.5,
+              "action_label": "0.50x",
+              "q_value": 0.028,
+              "visits": 540
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.021,
+              "visits": 630
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": 0.025,
+              "visits": 540
+            }
+          }
+        },
+        {
+          "regime_id": 7,
+          "regime_code": "S7_COMPRESSION_SQUEEZE",
+          "regime_label": "Compresión / Squeeze Volatilidad",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.75,
+              "action_label": "0.75x",
+              "q_value": 0.325,
+              "visits": 810
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": 0.168,
+              "visits": 270
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.75,
+              "action_label": "0.75x",
+              "q_value": 0.938,
+              "visits": 630
+            }
+          }
+        },
+        {
+          "regime_id": 8,
+          "regime_code": "S8_CHOPPY_FAT_TAILS_RANGE",
+          "regime_label": "Rango Sucio / Colas Pesadas",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": -0.007,
+              "visits": 540
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.5,
+              "action_label": "0.50x",
+              "q_value": 0.026,
+              "visits": 1080
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": 0.004,
+              "visits": 450
+            }
+          }
+        },
+        {
+          "regime_id": 9,
+          "regime_code": "S9_HIGH_ENTROPY_BLACKOUT",
+          "regime_label": "Caos / Ruido Blanco (Blackout)",
+          "archetypes": {
+            "TREND_FOLLOWING": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": 0.969,
+              "visits": 630
+            },
+            "MEAN_REVERSION": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": 1.14,
+              "visits": 270
+            },
+            "VOLATILITY_BREAKOUT": {
+              "multiplier": 0.0,
+              "action_label": "0.00x",
+              "q_value": 1.062,
+              "visits": 450
+            }
+          }
+        }
+      ],
+      "oos_triple_book_benchmark": {
+        "oos_events_evaluated": 440,
+        "book_a_unfiltered": {
+          "net_roi_pct": 355.71,
+          "max_eod_dd_pct": 8.65,
+          "calmar_eod_ratio": 41.12,
+          "trades_executed": 440,
+          "whipsaws_avoided": 0,
+          "consistency_40pct_early_clamps": 0
+        },
+        "book_b_heuristic": {
+          "net_roi_pct": 675.32,
+          "max_eod_dd_pct": 5.14,
+          "calmar_eod_ratio": 131.39,
+          "trades_executed": 312,
+          "whipsaws_avoided": 88,
+          "consistency_40pct_early_clamps": 0
+        },
+        "book_c_qlearning": {
+          "net_roi_pct": 978.53,
+          "max_eod_dd_pct": 4.88,
+          "calmar_eod_ratio": 200.52,
+          "trades_executed": 300,
+          "whipsaws_avoided": 98,
+          "consistency_40pct_early_clamps": 0
+        },
+        "q_learning_alpha_vs_unfiltered_pct": 622.82,
+        "q_learning_alpha_vs_heuristic_pct": 303.21,
+        "eod_dd_saved_vs_unfiltered_pct": 3.77
+      }
+    }
+  }
+}

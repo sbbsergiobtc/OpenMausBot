@@ -160,28 +160,84 @@ def analyze_asset_regime(df: pd.DataFrame, symbol: str) -> Dict[str, Any]:
     else:
         ema_stack = "MIXED_CONSOLIDATION"
 
-    # Clasificación Determinista del Régimen
-    if h_norm_curr > 0.84 or delta_h > 0.12:
+    # Clasificación Determinista de los 10 Regímenes Canónicos (S0..S9) + Multiplicador Base
+    p975, p25_low, p75, p25 = np.percentile(log_rets[-60:], [97.5, 2.5, 75.0, 25.0]) if len(log_rets) >= 30 else (0.02, -0.02, 0.005, -0.005)
+    iqr = max(1e-9, float(p75 - p25))
+    robust_kurt = float((p975 - p25_low) / iqr)
+
+    # ATR Ratio (ATR14 / ATR100)
+    high_arr = df['high'].values.astype(float) if 'high' in df.columns else close * 1.001
+    low_arr = df['low'].values.astype(float) if 'low' in df.columns else close * 0.999
+    tr_arr = np.maximum(high_arr[1:] - low_arr[1:], np.maximum(np.abs(high_arr[1:] - close[:-1]), np.abs(low_arr[1:] - close[:-1])))
+    atr_14 = float(np.mean(tr_arr[-14:])) if len(tr_arr) >= 14 else float(close[-1] * 0.005)
+    atr_100 = float(np.mean(tr_arr[-100:])) if len(tr_arr) >= 20 else atr_14
+    atr_ratio = atr_14 / max(1e-12, atr_100)
+
+    if h_norm_curr > 0.84 or delta_h > 0.12 or atr_ratio > 2.20:
         regime = "HIGH_ENTROPY_CHAOS"
         regime_label = "Caos / Ruido Blanco"
-        action_summary = "BLACKOUT PREVENTIVO: Cero nuevas aperturas"
-    elif (adx >= 21.0 or hurst >= 0.53 or ker >= 0.32) and plus_di >= minus_di and ema50 >= ema200 * 0.998:
+        regime_id_10 = 9
+        sub_regime_10 = "S9_HIGH_ENTROPY_BLACKOUT"
+        lot_multiplier = 0.00
+        action_summary = "BLACKOUT PREVENTIVO: Cero nuevas aperturas (Lote 0.00x)"
+    elif (adx >= 20.0 or hurst >= 0.53 or ker >= 0.32) and plus_di >= minus_di and last_price >= ema200 * 0.998:
         regime = "TRENDING_BULLISH"
         regime_label = "Tendencia Alcista"
-        action_summary = "Trend-Following Long & Pullback ON · Shorts PAUSED"
-    elif (adx >= 21.0 or hurst >= 0.53 or ker >= 0.32) and minus_di > plus_di and ema50 < ema200 * 1.002:
+        if atr_ratio > 1.50 or robust_kurt > 3.20:
+            regime_id_10 = 2
+            sub_regime_10 = "S2_BULL_VOLATILITY_CLIMAX"
+            lot_multiplier = 0.50
+        elif adx >= 25.0 and last_price >= ema50 and ema50 >= ema200 and h_norm_curr <= 0.78:
+            regime_id_10 = 0
+            sub_regime_10 = "S0_STRONG_CLEAN_BULL"
+            lot_multiplier = 1.25
+        else:
+            regime_id_10 = 1
+            sub_regime_10 = "S1_MODERATE_BULL_TREND"
+            lot_multiplier = 1.00
+        action_summary = f"Trend-Following Long & Pullback ON · Shorts PAUSED (Lote {lot_multiplier:.2f}x)"
+    elif (adx >= 20.0 or hurst >= 0.53 or ker >= 0.32) and minus_di > plus_di and last_price <= ema200 * 1.002:
         regime = "TRENDING_BEARISH"
         regime_label = "Tendencia Bajista"
-        action_summary = "Short Breakdown & Defensa ON · Longs sin cobertura PAUSED"
+        if atr_ratio > 1.50 or robust_kurt > 3.20:
+            regime_id_10 = 5
+            sub_regime_10 = "S5_BEAR_PANIC_CAPITULATION"
+            lot_multiplier = 0.50
+        elif adx >= 25.0 and last_price <= ema50 and ema50 < ema200 and h_norm_curr <= 0.78:
+            regime_id_10 = 3
+            sub_regime_10 = "S3_STRONG_CLEAN_BEAR"
+            lot_multiplier = 1.00
+        else:
+            regime_id_10 = 4
+            sub_regime_10 = "S4_MODERATE_BEAR_TREND"
+            lot_multiplier = 0.75
+        action_summary = f"Short Breakdown & Defensa ON · Longs sin cobertura PAUSED (Lote {lot_multiplier:.2f}x)"
     else:
         regime = "RANGING_LATERAL"
         regime_label = "Rango / Lateral"
-        action_summary = "Mean-Reversion (Bollinger/RSI) ON · Breakouts PAUSED"
+        if atr_ratio < 0.75 and h_norm_curr <= 0.82:
+            regime_id_10 = 7
+            sub_regime_10 = "S7_COMPRESSION_SQUEEZE"
+            lot_multiplier = 0.75
+        elif robust_kurt > 3.20 or atr_ratio > 1.25:
+            regime_id_10 = 8
+            sub_regime_10 = "S8_CHOPPY_FAT_TAILS_RANGE"
+            lot_multiplier = 0.25
+        else:
+            regime_id_10 = 6
+            sub_regime_10 = "S6_CLEAN_MEAN_REVERSION"
+            lot_multiplier = 1.00
+        action_summary = f"Mean-Reversion (Bollinger/RSI) ON · Breakouts PAUSED (Lote {lot_multiplier:.2f}x)"
 
     return {
         "symbol": symbol,
         "regime": regime,
         "regime_label": regime_label,
+        "regime_id_10": regime_id_10,
+        "sub_regime_10": sub_regime_10,
+        "lot_multiplier": lot_multiplier,
+        "atr_ratio": round(atr_ratio, 3),
+        "robust_kurtosis": round(robust_kurt, 2),
         "h_norm": round(h_norm_curr, 4),
         "delta_h": round(delta_h, 4),
         "hurst": round(hurst, 4),
