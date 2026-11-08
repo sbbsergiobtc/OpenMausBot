@@ -607,37 +607,7 @@
         </nav>
       </div>
 
-      <!-- Widget Inferior de Control Secundario -->
-      <div class="mt-8 pt-4 border-t border-[#E6E2D8]">
-        <div class="bg-[#FFFFFF] border border-[#E6E2D8] rounded-[16px] p-4 shadow-sm space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="overline-text">TELEMETRÍA EN VIVO</span>
-            <span class="badge-success-live">CONECTADO</span>
-          </div>
-          
-          <div class="space-y-1.5 text-xs font-mono">
-            <div class="flex justify-between items-center text-[#4A4944]">
-              <span>IC Markets MT5:</span>
-              <span class="font-bold text-[#181A20]" id="tele-mt5-bal">$999.51 USD</span>
-            </div>
-            <div class="flex justify-between items-center text-[#4A4944]">
-              <span>Hyperliquid DEX:</span>
-              <span class="font-bold text-[#181A20]" id="tele-hl-bal">1,000.66 USDC</span>
-            </div>
-            <div class="pt-1.5 border-t border-[#E6E2D8] flex justify-between items-center">
-              <span class="text-[11px] font-semibold text-[#181A20]">Total Consolidado:</span>
-              <span class="text-[14px] font-bold text-[#181A20] tabular-nums" id="tele-total-bal">$2,000.17 USD</span>
-            </div>
-          </div>
-
-          <button onclick="fetchTelemetry(); triggerSyncEffect();" class="cta-primary-btn w-full">
-            <i class="fa-solid fa-arrows-rotate text-[11px]" id="tele-refresh-icon"></i>
-            <span>Sincronizar Telemetría</span>
-          </button>
-        </div>
-      </div>
-
-    </aside>
+      </aside>
 
     <!-- ==================== MAIN CONTENT SURFACE (#FDFDFB, padding 24px) ==================== -->
     <main class="bg-[#FDFDFB] p-4 sm:p-6 lg:p-7 flex flex-col space-y-6 overflow-x-hidden">
@@ -712,12 +682,12 @@
           <div class="p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div class="space-y-1">
               <div class="flex items-center gap-2">
-                <span class="badge-brand-indigo font-mono">COCKPIT GENERAL</span>
-                <span id="cockpit-sync-badge" class="badge-success-live font-mono">● CUENTAS CONECTADAS</span>
+                <span id="cockpit-desk-badge" class="badge-brand-indigo font-mono">CAPITAL PROPIO</span>
+                <span id="cockpit-sync-badge" class="badge-success-live font-mono">● 2 CUENTAS CONECTADAS</span>
                 <span id="cockpit-news-badge" class="badge-neutral-soft font-mono"><i class="fa-solid fa-newspaper mr-1 text-[#3C45A5]"></i>FILTRO NOTICIAS: ±5 MIN</span>
               </div>
-              <h1 class="text-xl sm:text-2xl font-bold text-[#1D1D1F] tracking-tight">Monitoreo Unificado de Cartera</h1>
-              <p class="text-xs text-[#6E6E73]">Supervisión consolidada de capital en Forward Test: IC Markets (MT5 Prop Firm) y Hyperliquid (Crypto DEX).</p>
+              <h1 class="text-xl sm:text-2xl font-bold text-[#1D1D1F] tracking-tight" id="cockpit-header-title">Monitoreo Unificado · Capital Propio</h1>
+              <p class="text-xs text-[#6E6E73]" id="cockpit-header-desc">Supervisión consolidada de capital propio en Forward Test: IC Markets (MT5 $1,000) y Hyperliquid (Crypto DEX 1,000 USDC).</p>
             </div>
             <!-- Acciones de Intervención Operativa & Gestor de Cuentas -->
             <div class="flex items-center gap-2.5 shrink-0 flex-wrap">
@@ -748,8 +718,8 @@
                 <div class="text-lg sm:text-2xl font-bold font-mono text-[#1D1D1F] tracking-tight" id="cockpit-kpi-total-balance">$1,998.09</div>
               </div>
               <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-between text-[11px]">
-                <span class="text-[#86868B] font-medium">Suma Cuentas FT</span>
-                <span class="badge-brand-indigo font-mono text-[10px] py-0.5 px-1.5">MT5 + DEX</span>
+                <span class="text-[#86868B] font-medium" id="cockpit-kpi-total-sublabel">Suma Cuentas FT</span>
+                <span id="cockpit-kpi-total-subtext" class="badge-brand-indigo font-mono text-[10px] py-0.5 px-1.5">MT5 + DEX</span>
               </div>
             </div>
 
@@ -799,8 +769,8 @@
                 <div class="text-lg sm:text-2xl font-bold font-mono text-[#D70015] tracking-tight" id="cockpit-kpi-drawdown">-0.23%</div>
               </div>
               <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-between text-[11px]">
-                <span class="text-[#86868B] font-medium">Límite máx</span>
-                <span class="text-[#D70015] font-mono font-semibold text-[11px]">-5.00%</span>
+                <span class="text-[#86868B] font-medium" id="cockpit-kpi-drawdown-label">Límite máx</span>
+                <span class="text-[#D70015] font-mono font-semibold text-[11px]" id="cockpit-kpi-drawdown-limit">-5.00%</span>
               </div>
             </div>
 
@@ -817,7 +787,7 @@
               </div>
               <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-between text-[11px]">
                 <span class="text-[#86868B] font-medium">Apalancamiento</span>
-                <span class="badge-success-live font-mono text-[10px] py-0.5 px-1.5">Seguro</span>
+                <span id="cockpit-kpi-margin-badge" class="badge-success-live font-mono text-[10px] py-0.5 px-1.5">Seguro</span>
               </div>
             </div>
 
@@ -840,10 +810,10 @@
 
           </div>
 
-          <!-- ==================== CUENTAS ACTIVAS EN TIEMPO REAL (MT5 + HYPERLIQUID) ==================== -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <!-- ==================== CUENTAS ACTIVAS: MODO CAPITAL PROPIO ==================== -->
+          <div id="cockpit-accounts-cap-propio" class="grid grid-cols-1 lg:grid-cols-2 gap-5">
             
-            <!-- TARJETA CUENTA 1: IC MARKETS MT5 DEMO (PROP FIRM FORWARD TEST) -->
+            <!-- TARJETA CUENTA 1: IC MARKETS MT5 DEMO (CAPITAL PROPIO TRADFI) -->
             <div class="p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs space-y-4 hover:border-[#D1D1D6] transition">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -943,6 +913,109 @@
 
           </div>
 
+          <!-- ==================== CUENTAS ACTIVAS: MODO FONDEO (PROP FIRM) ==================== -->
+          <div id="cockpit-accounts-prop-firm" class="grid grid-cols-1 lg:grid-cols-2 gap-5 hidden">
+            
+            <!-- TARJETA CUENTA 1: CHALLENGE $100K EVALUATION (PROP FIRM MAESTRA) -->
+            <div class="p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs space-y-4 hover:border-[#D1D1D6] transition">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="h-10 w-10 rounded-xl bg-[#EEF2FF] border border-[#E0E7FF] flex items-center justify-center text-[#3C45A5]">
+                    <i class="fa-solid fa-trophy text-base"></i>
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs font-bold text-[#1D1D1F]">Prop Firm Challenge · $100k</span>
+                      <span class="badge-success-live font-mono text-[10px]">● EVALUATION (FASE 1)</span>
+                    </div>
+                    <div class="text-[11px] text-[#6E6E73] font-mono">ICMarketsSC / Rithmic CME · Target +10.0%</div>
+                  </div>
+                </div>
+                <button onclick="switchTab('forward')" class="btn-secondary text-[11px] py-1.5 px-3 flex items-center gap-1 cursor-pointer">
+                  <span>Ver Fondeo</span>
+                  <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </button>
+              </div>
+
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 bg-[#FAFAFC] p-3.5 rounded-xl border border-[#E5E5EA] text-xs font-mono">
+                <div>
+                  <span class="text-[10px] text-[#86868B] block uppercase tracking-wider mb-0.5">Balance</span>
+                  <span id="cockpit-pf-balance" class="font-bold text-[#1D1D1F] text-sm">$100,002.01</span>
+                </div>
+                <div>
+                  <span class="text-[10px] text-[#86868B] block uppercase tracking-wider mb-0.5">Equity EOD</span>
+                  <span id="cockpit-pf-equity" class="font-bold text-[#1D1D1F] text-sm">$100,002.01</span>
+                </div>
+                <div>
+                  <span class="text-[10px] text-[#86868B] block uppercase tracking-wider mb-0.5">PnL Realizado</span>
+                  <span id="cockpit-pf-realized" class="font-bold text-[#065F46] text-sm">+$2.01</span>
+                </div>
+                <div>
+                  <span class="text-[10px] text-[#86868B] block uppercase tracking-wider mb-0.5">EOD Drawdown</span>
+                  <span id="cockpit-pf-dd" class="font-bold text-[#065F46] text-sm">0.00%</span>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between text-xs text-[#6E6E73] pt-1">
+                <span class="flex items-center gap-1.5">
+                  <i class="fa-solid fa-shield-halved text-[#3C45A5] text-xs"></i>
+                  <span>Regla 40% Consistencia & EOD DD &le; 3.5%</span>
+                </span>
+                <span class="font-mono text-[11px] text-[#1D1D1F] font-semibold">20 Modelos Incubando</span>
+              </div>
+            </div>
+
+            <!-- TARJETA CUENTA 2: LIBRO VIRTUAL MULTI-ESTRATEGIA (INCUBACIÓN PROP FIRM) -->
+            <div class="p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs space-y-4 hover:border-[#D1D1D6] transition">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="h-10 w-10 rounded-xl bg-[#F2F2F7] border border-[#E5E5EA] flex items-center justify-center text-[#1D1D1F]">
+                    <i class="fa-solid fa-microchip text-base"></i>
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs font-bold text-[#1D1D1F]">Enjambre de Simulación CME / CFD</span>
+                      <span class="badge-brand-indigo font-mono text-[10px]">● VIRTUAL BOOKS</span>
+                    </div>
+                    <div class="text-[11px] text-[#6E6E73] font-mono">Spreads en vivo + Slippage 0.4-1.5 pts</div>
+                  </div>
+                </div>
+                <button onclick="switchTab('orchestrator')" class="btn-secondary text-[11px] py-1.5 px-3 flex items-center gap-1 cursor-pointer">
+                  <span>Orquestador</span>
+                  <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </button>
+              </div>
+
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 bg-[#FAFAFC] p-3.5 rounded-xl border border-[#E5E5EA] text-xs font-mono">
+                <div>
+                  <span class="text-[10px] text-[#86868B] block uppercase tracking-wider mb-0.5">Asignación Base</span>
+                  <span class="font-bold text-[#1D1D1F] text-sm">$1,000 / mod</span>
+                </div>
+                <div>
+                  <span class="text-[10px] text-[#86868B] block uppercase tracking-wider mb-0.5">Riesgo / Trade</span>
+                  <span class="font-bold text-[#1D1D1F] text-sm">1.0% ($10 USD)</span>
+                </div>
+                <div>
+                  <span class="text-[10px] text-[#86868B] block uppercase tracking-wider mb-0.5">Guardián MC</span>
+                  <span class="font-bold text-[#065F46] text-sm">Vigilancia P95</span>
+                </div>
+                <div>
+                  <span class="text-[10px] text-[#86868B] block uppercase tracking-wider mb-0.5">Blackout Macro</span>
+                  <span class="font-bold text-[#065F46] text-sm">&plusmn;5 min Activo</span>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between text-xs text-[#6E6E73] pt-1">
+                <span class="flex items-center gap-1.5">
+                  <i class="fa-solid fa-network-wired text-[#3C45A5] text-xs"></i>
+                  <span>PROP-NDX-005 · PROP-SPX-005 · EURUSD</span>
+                </span>
+                <span class="font-mono text-[11px] text-[#1D1D1F] font-semibold">CME Globex + LMAX</span>
+              </div>
+            </div>
+
+          </div>
+
           <!-- ==================== BANNER INTEGRADO: FILTRO DE NOTICIAS MACRO (±5 MIN) ==================== -->
           <div id="cockpit-news-risk-banner" class="p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div class="flex items-start sm:items-center gap-3.5">
@@ -966,55 +1039,6 @@
               </div>
               <div class="h-7 w-7 rounded-lg bg-[#EBF5FB] flex items-center justify-center text-[#3C45A5]">
                 <i class="fa-solid fa-clock text-xs"></i>
-              </div>
-            </div>
-          </div>
-
-          <!-- ==================== MARCO DE PRESERVACIÓN DE CAPITAL E INFRAESTRUCTURA ==================== -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="rounded-2xl p-5 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs space-y-3">
-              <div class="flex items-center justify-between border-b border-[#F2F2F7] pb-2">
-                <h3 class="text-xs font-bold text-[#1D1D1F] uppercase tracking-wider flex items-center">
-                  <i class="fa-solid fa-shield-halved text-[#D70015] mr-2"></i> Marco de Preservación de Capital
-                </h3>
-                <span class="badge-success-live font-mono">ACTIVO</span>
-              </div>
-              <div class="space-y-2 text-xs font-mono">
-                <div class="flex justify-between p-2.5 rounded-lg bg-[#FAFAFC] border border-[#E5E5EA]">
-                  <span class="text-[#6E6E73]">Prop Firm Challenge ($100k):</span>
-                  <span class="text-[#1D1D1F] font-bold">EOD DD &le; 3.5% | Pérdida Diaria &le; 2.0%</span>
-                </div>
-                <div class="flex justify-between p-2.5 rounded-lg bg-[#FAFAFC] border border-[#E5E5EA]">
-                  <span class="text-[#6E6E73]">Crypto Propio (Hyperliquid):</span>
-                  <span class="text-[#1D1D1F] font-bold">Retorno &ge; 30% Anual | Superar Buy & Hold</span>
-                </div>
-                <div class="flex justify-between p-2.5 rounded-lg bg-[#FAFAFC] border border-[#E5E5EA]">
-                  <span class="text-[#6E6E73]">Fricciones Modeladas:</span>
-                  <span class="text-[#065F46] font-bold">0.4 - 1.5 pts + 0.14% round-trip</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="rounded-2xl p-5 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs space-y-3">
-              <div class="flex items-center justify-between border-b border-[#F2F2F7] pb-2">
-                <h3 class="text-xs font-bold text-[#1D1D1F] uppercase tracking-wider flex items-center">
-                  <i class="fa-solid fa-network-wired text-[#3C45A5] mr-2"></i> Infraestructura de Ejecución
-                </h3>
-                <span class="badge-brand-indigo font-mono">2 CUENTAS SYNC</span>
-              </div>
-              <div class="space-y-2 text-xs font-mono">
-                <div class="flex justify-between p-2.5 rounded-lg bg-[#FAFAFC] border border-[#E5E5EA]">
-                  <span class="text-[#6E6E73]">Daemons Prop Firm:</span>
-                  <span class="text-[#1D1D1F] font-bold">PROP-NDX-005 (2h) & PROP-SPX-005 (1D)</span>
-                </div>
-                <div class="flex justify-between p-2.5 rounded-lg bg-[#FAFAFC] border border-[#E5E5EA]">
-                  <span class="text-[#6E6E73]">Daemons Crypto Paper:</span>
-                  <span class="text-[#1D1D1F] font-bold">STRAT-FAST-035 (BTC 1h)</span>
-                </div>
-                <div class="flex justify-between p-2.5 rounded-lg bg-[#FAFAFC] border border-[#E5E5EA]">
-                  <span class="text-[#6E6E73]">Supervisión:</span>
-                  <span class="text-[#065F46] font-bold">Enjambre OpenMausBot 24/7 (systemd)</span>
-                </div>
               </div>
             </div>
           </div>
@@ -5431,6 +5455,9 @@
         if (hlBal && d.hyperliquid) hlBal.innerText = Number(d.hyperliquid.balance).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 4 }) + ' USDC';
         if (totalBal) totalBal.innerText = '$' + Number(d.total_balance_usd).toFixed(2) + ' USD';
 
+        latestTelemetryData = d;
+        updateCockpitKPIs(currentDeskMode);
+
         // Actualización dinámica de los 6 KPIs independientes del Cockpit General
         const kpiBal = document.getElementById('cockpit-kpi-total-balance');
         if (kpiBal && d.total_balance_usd !== undefined) {
@@ -8640,8 +8667,130 @@
   <!-- ============================================================================== -->
   <script>
     // Conmutador interactivo entre Capital Propio y Fondeo (Prop Firm)
+    
+    let latestTelemetryData = null;
+
+    function updateCockpitKPIs(deskMode) {
+      const mode = deskMode || currentDeskMode || 'CAPITAL_PROPIO';
+      const d = latestTelemetryData;
+      if (!d) return;
+
+      const deskData = (d.desks && d.desks[mode]) ? d.desks[mode] : null;
+
+      // Update Header
+      const headerTitle = document.getElementById('cockpit-header-title');
+      const headerDesc = document.getElementById('cockpit-header-desc');
+      const deskBadge = document.getElementById('cockpit-desk-badge');
+      const syncBadge = document.getElementById('cockpit-sync-badge');
+
+      if (mode === 'CAPITAL_PROPIO') {
+        if (headerTitle) headerTitle.innerText = 'Monitoreo Unificado · Capital Propio';
+        if (headerDesc) headerDesc.innerText = 'Supervisión consolidada de capital propio en Forward Test: IC Markets (MT5 $1,000) y Hyperliquid (Crypto DEX 1,000 USDC).';
+        if (deskBadge) {
+          deskBadge.innerText = 'CAPITAL PROPIO';
+          deskBadge.className = 'badge-brand-indigo font-mono';
+        }
+        if (syncBadge) {
+          syncBadge.innerText = '● 2 CUENTAS SYNC';
+          syncBadge.className = 'badge-success-live font-mono';
+        }
+        // Account sections toggle
+        const capSec = document.getElementById('cockpit-accounts-cap-propio');
+        const propSec = document.getElementById('cockpit-accounts-prop-firm');
+        if (capSec) capSec.classList.remove('hidden');
+        if (propSec) propSec.classList.add('hidden');
+      } else {
+        if (headerTitle) headerTitle.innerText = 'Monitoreo Unificado · Cuentas de Fondeo';
+        if (headerDesc) headerDesc.innerText = 'Supervisión de cuenta evaluativa Prop Firm: Challenge $100,000 USD (Futuros CME Globex & CFDs).';
+        if (deskBadge) {
+          deskBadge.innerText = 'CUENTAS DE FONDEO';
+          deskBadge.className = 'badge-brand-indigo font-mono';
+        }
+        if (syncBadge) {
+          syncBadge.innerText = '● CHALLENGE $100K ACTIVO';
+          syncBadge.className = 'badge-success-live font-mono';
+        }
+        // Account sections toggle
+        const capSec = document.getElementById('cockpit-accounts-cap-propio');
+        const propSec = document.getElementById('cockpit-accounts-prop-firm');
+        if (capSec) capSec.classList.add('hidden');
+        if (propSec) propSec.classList.remove('hidden');
+      }
+
+      // Values from deskData or fallbacks
+      const balVal = deskData ? deskData.total_balance_usd : (mode === 'CAPITAL_PROPIO' ? d.total_balance_usd : 100002.01);
+      const rPnlVal = deskData ? deskData.total_realized_pnl_usd : (mode === 'CAPITAL_PROPIO' ? d.total_realized_pnl_usd : 2.01);
+      const fPnlVal = deskData ? deskData.total_floating_pnl_usd : (mode === 'CAPITAL_PROPIO' ? (Number(d.total_equity_usd) - Number(d.total_balance_usd)) : 0.0);
+      const ddVal = deskData ? deskData.drawdown_pct : 0.0;
+      const marginVal = deskData ? deskData.margin_used_pct : 0.0;
+      const expVal = deskData ? deskData.net_exposure : 'FLAT (0.0%)';
+      const expSub = deskData ? deskData.net_subtext : (mode === 'CAPITAL_PROPIO' ? 'US500 / USTEC' : 'Futuros CME & CFDs');
+      const subBadgeText = deskData ? deskData.sub_badge : (mode === 'CAPITAL_PROPIO' ? 'MT5 + DEX' : 'Challenge $100k');
+      const riskLimitVal = deskData ? deskData.risk_limit_val : (mode === 'CAPITAL_PROPIO' ? '-5.00%' : '-3.50%');
+      const riskLimitLabel = deskData ? deskData.risk_limit_label : (mode === 'CAPITAL_PROPIO' ? 'Límite máx' : 'Límite EOD');
+
+      // 1. Balance Total FT
+      const kpiBal = document.getElementById('cockpit-kpi-total-balance');
+      const kpiSubText = document.getElementById('cockpit-kpi-total-subtext');
+      if (kpiBal) kpiBal.innerText = '$' + Number(balVal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      if (kpiSubText) kpiSubText.innerText = subBadgeText;
+
+      // 2. PnL Realizado Total
+      const kpiRealized = document.getElementById('cockpit-kpi-realized-pnl');
+      const kpiRealizedBadge = document.getElementById('cockpit-kpi-realized-badge');
+      if (kpiRealized) {
+        const rPnl = Number(rPnlVal);
+        kpiRealized.innerText = (rPnl >= 0 ? '+$' : '-$') + Math.abs(rPnl).toFixed(2);
+        kpiRealized.className = `text-lg sm:text-2xl font-bold font-mono tracking-tight ${rPnl >= 0 ? 'text-[#065F46]' : 'text-[#D70015]'}`;
+        if (kpiRealizedBadge) {
+          const totB = Number(balVal) || 100000;
+          const pct = (rPnl / totB) * 100;
+          kpiRealizedBadge.innerText = (pct >= 0 ? '+' : '') + pct.toFixed(pct > 0.01 || pct < -0.01 ? 2 : 3) + '%';
+          kpiRealizedBadge.className = `font-mono text-[10px] py-0.5 px-1.5 ${pct >= 0 ? 'badge-success-live' : 'badge-warning-risk'}`;
+        }
+      }
+
+      // 3. PnL Flotante Total
+      const kpiFloating = document.getElementById('cockpit-kpi-floating-pnl');
+      const kpiFloatingBadge = document.getElementById('cockpit-kpi-floating-badge');
+      if (kpiFloating) {
+        const floatPnl = Number(fPnlVal);
+        kpiFloating.innerText = (floatPnl >= 0 ? '+$' : '-$') + Math.abs(floatPnl).toFixed(2);
+        kpiFloating.className = `text-lg sm:text-2xl font-bold font-mono tracking-tight ${floatPnl >= 0 ? 'text-[#065F46]' : 'text-[#D70015]'}`;
+        if (kpiFloatingBadge) {
+          const totB = Number(balVal) || 100000;
+          const pct = totB > 0 ? (floatPnl / totB) * 100 : 0;
+          kpiFloatingBadge.innerText = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
+          kpiFloatingBadge.className = `font-mono text-[10px] py-0.5 px-1.5 ${pct >= 0 ? 'badge-success-live' : 'badge-warning-risk'}`;
+        }
+      }
+
+      // 4. Drawdown Cartera
+      const kpiDd = document.getElementById('cockpit-kpi-drawdown');
+      const kpiDdLabel = document.getElementById('cockpit-kpi-drawdown-label');
+      const kpiDdLimit = document.getElementById('cockpit-kpi-drawdown-limit');
+      if (kpiDd) {
+        const dVal = Number(ddVal);
+        kpiDd.innerText = (dVal <= 0 ? '' : '-') + Math.abs(dVal).toFixed(2) + '%';
+      }
+      if (kpiDdLabel) kpiDdLabel.innerText = riskLimitLabel;
+      if (kpiDdLimit) kpiDdLimit.innerText = riskLimitVal;
+
+      // 5. Margen Utilizado
+      const kpiMargin = document.getElementById('cockpit-kpi-margin-used');
+      if (kpiMargin) kpiMargin.innerText = Number(marginVal).toFixed(2) + '%';
+
+      // 6. Exposición Neta
+      const kpiExp = document.getElementById('cockpit-kpi-net-exposure');
+      const kpiExpSub = document.getElementById('cockpit-kpi-net-subtext');
+      if (kpiExp) kpiExp.innerText = expVal;
+      if (kpiExpSub) kpiExpSub.innerText = expSub;
+    }
+    window.updateCockpitKPIs = updateCockpitKPIs;
+
     function switchDeskMode(mode) {
       currentDeskMode = mode;
+      updateCockpitKPIs(mode);
       const bCap = document.getElementById('seg-btn-cap-propio');
       const bProp = document.getElementById('seg-btn-prop-firm');
       if (mode === 'CAPITAL_PROPIO') {

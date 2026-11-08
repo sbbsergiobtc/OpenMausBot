@@ -11,6 +11,7 @@ REMOTE_BASE = '/root/AlgrokQuant'
 LOCAL_BASE = r'C:\Users\Sergio\Documents\Antigravity\OpenMausBot'
 
 FILES_TO_UPLOAD = [
+    ('dashboard/backend.py', f'{REMOTE_BASE}/dashboard/backend.py'),
     ('dashboard/templates/index.html', f'{REMOTE_BASE}/dashboard/templates/index.html')
 ]
 
@@ -32,7 +33,7 @@ cmd = """
 systemctl restart algrokquant-dashboard
 sleep 2
 systemctl status algrokquant-dashboard --no-pager -l | head -n 12
-curl -s http://127.0.0.1:8080/ | grep -o 'cockpit-kpi-total-balance' | head -n 2
+curl -s http://127.0.0.1:8080/api/telemetry | grep -o '\"desks\":{[^}]*' | head -n 1
 """
 
 stdin, stdout, stderr = ssh.exec_command(cmd)
@@ -48,8 +49,8 @@ if err:
 # Remote commit on VPS
 git_cmd = """
 cd /root/AlgrokQuant
-git add dashboard/templates/index.html
-git commit -m "feat(cockpit): redesign general cockpit with 6 independent KPIs and remove obsolete cards"
+git add dashboard/backend.py dashboard/templates/index.html
+git commit -m "feat(cockpit): bifocal dynamic desk KPIs (Capital Propio vs Fondeo) and clean bottom-left text"
 git status --short
 """
 stdin, stdout, stderr = ssh.exec_command(git_cmd)
