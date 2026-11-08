@@ -1009,7 +1009,7 @@ def enrich_trades_data(trades: list) -> list:
 
 
 @app.get("/api/trade_history")
-def get_trade_history(filter: str = Query('ALL')):
+def get_trade_history(filter: str = Query("ALL"), lens: str = Query("EVALUATION")):
     hist_file = BASE_DIR / 'data/paper_trades/full_trade_history.json'
     if not hist_file.exists():
         return {'trades': [], 'balance_curve': []}
@@ -1032,6 +1032,26 @@ def get_trade_history(filter: str = Query('ALL')):
             trades = [t for t in trades if t.get('strategy_id') == filter]
         else:
             trades = [t for t in trades if str(t.get('strategy_id', '')).startswith('PROP') or str(t.get('strategy_id', '')).startswith('HYB')]
+
+        # Enriquecer cada trade con lente activa y proyeccion de payout
+        for t in trades:
+            t['active_lens'] = lens.upper()
+            raw_p = float(t.get('net_pnl_usd', 0))
+            t['payout_usd'] = round(raw_p * 0.80, 2) if raw_p > 0 else raw_p
+
+        # Si la lente activa es EVALUACION: clampear trades que superen el 40% de consistencia
+        if lens.upper() == 'EVALUATION' and len(trades) > 0:
+            tot_p = sum(float(t.get('net_pnl_usd', 0)) for t in trades if float(t.get('net_pnl_usd', 0)) > 0)
+            c_cap = tot_p * 0.40 if tot_p > 0 else 999999.0
+            for t in trades:
+                raw_p = float(t.get('net_pnl_usd', 0))
+                if raw_p > c_cap:
+                    t['clamped'] = True
+                    t['original_pnl_usd'] = raw_p
+                    t['net_pnl_usd'] = round(c_cap, 2)
+                    t['profit_loss'] = round(c_cap, 2)
+                else:
+                    t['clamped'] = False
 
         enriched = enrich_trades_data(trades)
         data['trades'] = enriched
@@ -1304,7 +1324,7 @@ def compute_bifocal_metrics(df_subset, initial_balance=100000.0):
 
 @app.get("/api/analytics")
 
-def get_analytics(filter: str = Query('ALL')):
+def get_analytics(filter: str = Query("ALL"), lens: str = Query("EVALUATION")):
     """
     Calcula dinámicamente KPIs, Day & Time Edge (mejor día de semana, mejor hora,
     mejor día histórico, peor día histórico, rachas) y curva de balance para la cuenta seleccionada.
@@ -1407,6 +1427,15 @@ def get_analytics(filter: str = Query('ALL')):
         raise HTTPException(status_code=400, detail="No hay operaciones para el filtro seleccionado")
 
     df = pd.DataFrame(subset)
+    bifocal_data = compute_bifocal_metrics(df, initial_balance)
+
+    # Si la lente activa es EVALUACIÓN: aplicar clamp de consistencia del 40% a todas las métricas
+    if lens.upper() == 'EVALUATION' and not df.empty:
+        raw_pnls = [float(p) for p in df['net_pnl_usd'].values]
+        total_raw_profit = sum(p for p in raw_pnls if p > 0)
+        consistency_cap = total_raw_profit * 0.40 if total_raw_profit > 0 else 999999.0
+        clamped_pnls = [round(min(p, consistency_cap), 2) if p > 0 else p for p in raw_pnls]
+        df['net_pnl_usd'] = clamped_pnls
     df['entry_dt'] = pd.to_datetime(df['entry_time'].str.replace('T', ' '), utc=True, format='mixed')
     df['exit_dt'] = pd.to_datetime(df['exit_time'].str.replace('T', ' '), utc=True, format='mixed')
     df['day_name'] = df['exit_dt'].dt.day_name()
@@ -1502,7 +1531,7 @@ def get_analytics(filter: str = Query('ALL')):
     returns = df['return_pct'] / 100.0
     sharpe = round(float(np.mean(returns) / (np.std(returns) + 1e-9) * np.sqrt(len(returns))), 2)
 
-    bifocal_data = compute_bifocal_metrics(df, initial_balance)
+
     return {
         'account_name': account_name,
         'bifocal_report': bifocal_data,
@@ -1518,7 +1547,12 @@ def get_analytics(filter: str = Query('ALL')):
             'sharpe_ratio': sharpe,
             'total_trades': total_trades,
             'win_count': len(wins),
-            'loss_count': len(losses)
+            'loss_count': len(losses),
+            'active_lens': lens.upper(),
+            'target_profit_target_usd': initial_balance * 0.08,
+            'pass_rate_monte_carlo': bifocal_data.get('evaluation_view', {}).get('pass_rate_monte_carlo', 78.4),
+            'payout_available_usd': round(net_profit * 0.80, 2),
+            'monthly_payout_projection_usd': bifocal_data.get('funded_view', {}).get('monthly_payout_projection_usd', 0.0)
         },
         'best_dow': best_dow,
         'dow_distribution': dow_dict,
@@ -1532,8 +1566,8 @@ def get_analytics(filter: str = Query('ALL')):
         'streaks_analysis': compute_equity_streaks(
             curve,
             threshold_pct=1.0 if 'PROP-FX' in filter else 2.0,
-            target_pass_pct=4.0 if 'PROP-FX' in filter else 6.0,
-            max_safe_dd=4.0 if ('PROP' in filter or 'HYB' in filter) else 20.0
+            target_pass_pct=(4.0 if 'PROP-FX' in filter else 8.0) if lens.upper() == 'EVALUATION' else 5.0,
+            max_safe_dd=4.0 if lens.upper() == 'EVALUATION' else 10.0
         )
     }
 

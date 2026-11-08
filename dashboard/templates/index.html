@@ -1555,14 +1555,14 @@
             <div class="text-[11px] text-[#6E6E73] mt-1 font-mono truncate" id="kpi-trades-count">49W / 13L (62 total)</div>
           </div>
 
-          <!-- Max Drawdown EOD -->
+                    <!-- Max Drawdown EOD -->
           <div class="rounded-xl p-4 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between min-w-0">
             <div class="text-[11px] text-[#6E6E73] flex items-center justify-between font-medium">
-              <span>Max Drawdown</span>
+              <span id="kpi-dd-label">Max Drawdown EOD</span>
               <i class="fa-solid fa-shield-halved text-[#D70015] text-xs"></i>
             </div>
             <div class="text-lg xl:text-xl font-bold font-mono text-[#065F46] mt-1.5 truncate" id="kpi-dd">0.85%</div>
-            <div class="text-[11px] text-[#6E6E73] mt-1 font-mono">Límite Fondeo: 3.50%</div>
+            <div class="text-[11px] text-[#6E6E73] mt-1 font-mono" id="kpi-dd-sub">Límite Fondeo: -4.00%</div>
           </div>
 
           <!-- Sharpe Ratio -->
@@ -1625,11 +1625,11 @@
           <!-- KPIs Resumen de Fondeo -->
           <div class="flex items-center gap-2 flex-wrap">
             <div class="bg-[#FAFAFC] px-3.5 py-2 rounded-xl border border-[#E5E5EA] text-center">
-              <div class="text-[10px] text-[#86868B] uppercase font-mono tracking-wider">Pases Challenge (+6%)</div>
+              <div class="text-[10px] text-[#86868B] uppercase font-mono tracking-wider" id="streak-kpi-passes-label">Pases Challenge (+8%)</div>
               <div class="text-sm font-bold font-mono text-[#065F46]" id="streak-kpi-passes">0 Cuentas</div>
             </div>
             <div class="bg-[#FAFAFC] px-3.5 py-2 rounded-xl border border-[#E5E5EA] text-center">
-              <div class="text-[10px] text-[#86868B] uppercase font-mono tracking-wider">Peor Valle Post-Pico</div>
+              <div class="text-[10px] text-[#86868B] uppercase font-mono tracking-wider" id="streak-kpi-worstdowndd-label">Peor Drawdown EOD</div>
               <div class="text-sm font-bold font-mono text-[#92400E]" id="streak-kpi-worstdowndd">0.00% EOD</div>
             </div>
             <div class="bg-[#FAFAFC] px-3.5 py-2 rounded-xl border border-[#E5E5EA] text-center">
@@ -1824,7 +1824,7 @@
                 <th class="py-2.5 px-3">Estrategia</th>
                 <th class="py-2.5 px-3 text-center">Minigráfico</th>
                 <th class="py-2.5 px-3">Activo</th>
-                <th class="py-2.5 px-3 text-right">Beneficio Neto</th>
+                <th id="th-trades-profit" class="py-2.5 px-3 text-right">Beneficio Neto</th>
                 <th class="py-2.5 px-3 text-right">Balance Acumulado</th>
                 <th class="py-2.5 px-3">Inicio (Fecha/Hora)</th>
                 <th class="py-2.5 px-3">Fin (Fecha/Hora)</th>
@@ -4263,7 +4263,20 @@
           bFunded.className = 'segmented-pill active flex-1 sm:flex-initial';
         }
       }
-      renderBifocalUI();
+
+      // Disparar animación suave de transición en el contenedor
+      const backtestPane = document.getElementById('tab-content-backtests') || document.getElementById('tab-content-dashboard');
+      if (typeof triggerMotionSweep === 'function') {
+        triggerMotionSweep(backtestPane);
+      }
+
+      // Re-consultar analíticas e historial completos con la lente seleccionada
+      if (typeof fetchAnalyticsData === 'function') {
+        fetchAnalyticsData(currentAccountFilter);
+      }
+      if (typeof fetchTradesData === 'function') {
+        fetchTradesData(currentAccountFilter);
+      }
     }
 
     function renderBifocalUI() {
@@ -4348,9 +4361,67 @@
     }
 
     function renderMainEquityChart(curveData) {
+      if (!curveData || curveData.length === 0) return;
       // Formatear eje X en español DD/MM/AAAA (autoajustable por ApexCharts)
       const categories = curveData.map(d => formatSpanishDate(d.timestamp));
       const balances = curveData.map(d => d.balance);
+      const isEval = currentBifocalLens === 'EVALUATION';
+      const initBal = Number(curveData[0].balance) || 100000;
+      const targetVal = initBal * 1.08;
+      const eodDdLimitVal = initBal * 0.96;
+
+      let annotationsConfig = {};
+      if (isEval) {
+        annotationsConfig = {
+          yaxis: [
+            {
+              y: targetVal,
+              borderColor: '#10b981',
+              strokeDashArray: 4,
+              label: {
+                borderColor: '#10b981',
+                style: { color: '#ffffff', background: '#059669', fontSize: '10px', fontWeight: 'bold' },
+                text: `Target Reto Superado (+8% / $${targetVal.toLocaleString('es-ES', {minimumFractionDigits: 0})})`
+              }
+            },
+            {
+              y: eodDdLimitVal,
+              borderColor: '#ef4444',
+              strokeDashArray: 4,
+              label: {
+                borderColor: '#ef4444',
+                style: { color: '#ffffff', background: '#dc2626', fontSize: '10px', fontWeight: 'bold' },
+                text: `Límite EOD Drawdown (-4% / $${eodDdLimitVal.toLocaleString('es-ES', {minimumFractionDigits: 0})})`
+              }
+            }
+          ]
+        };
+      } else {
+        annotationsConfig = {
+          yaxis: [
+            {
+              y: initBal * 1.10,
+              borderColor: '#6366f1',
+              strokeDashArray: 4,
+              label: {
+                borderColor: '#6366f1',
+                style: { color: '#ffffff', background: '#4f46e5', fontSize: '10px', fontWeight: 'bold' },
+                text: `Hito Cosecha Retiro #1 ($${(initBal * 1.10).toLocaleString('es-ES', {minimumFractionDigits: 0})})`
+              }
+            },
+            {
+              y: initBal,
+              borderColor: '#64748b',
+              strokeDashArray: 2,
+              label: {
+                borderColor: '#64748b',
+                style: { color: '#ffffff', background: '#334155', fontSize: '10px', fontWeight: 'bold' },
+                text: `Buffer Capital Base ($${initBal.toLocaleString('es-ES', {minimumFractionDigits: 0})})`
+              }
+            }
+          ]
+        };
+      }
 
       const options = {
         chart: {
@@ -4375,7 +4446,7 @@
         },
         theme: { mode: 'dark' },
         stroke: { curve: 'smooth', width: 2.2 },
-        colors: ['#06b6d4'],
+        colors: isEval ? ['#10b981'] : ['#6366f1'],
         fill: {
           type: 'gradient',
           gradient: {
@@ -4387,7 +4458,7 @@
         },
         dataLabels: { enabled: false },
         series: [{
-          name: 'Balance de la Cuenta ($)',
+          name: isEval ? 'Balance Reto Evaluación ($)' : 'Balance Cartera Fondeada ($)',
           data: balances
         }],
         xaxis: {
@@ -4402,7 +4473,7 @@
         },
         yaxis: {
           labels: {
-            formatter: (val) => '$' + val.toLocaleString('es-ES', {minimumFractionDigits: 0}),
+            formatter: (val) => '$' + Number(val).toLocaleString('es-ES', {minimumFractionDigits: 0}),
             style: { colors: '#94a3b8', fontSize: '11px', fontFamily: 'monospace' }
           }
         },
@@ -4410,18 +4481,7 @@
           borderColor: '#1e293b',
           strokeDashArray: 3
         },
-        annotations: {
-          yaxis: [{
-            y: 106000,
-            borderColor: '#10b981',
-            strokeDashArray: 4,
-            label: {
-              borderColor: '#10b981',
-              style: { color: '#fff', background: '#10b981', fontSize: '10px', fontWeight: 'bold' },
-              text: 'Target Superado (+6% / $106,000)'
-            }
-          }]
-        },
+        annotations: annotationsConfig,
         tooltip: {
           theme: 'dark',
           custom: function({series, seriesIndex, dataPointIndex, w}) {
@@ -4429,15 +4489,46 @@
             const dateStr = formatSpanishDateTime(d.timestamp);
             const val = series[seriesIndex][dataPointIndex];
             const bal = '$' + Number(val).toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' USD';
+            const pnlFromStart = Number(val) - initBal;
+            const sign = pnlFromStart >= 0 ? '+' : '';
+            const pnlStr = sign + '$' + pnlFromStart.toLocaleString('es-ES', {minimumFractionDigits: 2}) + ' USD';
+            
+            let extraHtml = '';
+            if (isEval) {
+              const distToTarget = targetVal - Number(val);
+              const targetStatus = distToTarget <= 0 
+                ? '<span class="text-emerald-400 font-bold">🏆 ¡Reto Superado!</span>'
+                : `<span class="text-slate-300">Faltan: $${distToTarget.toLocaleString('es-ES', {minimumFractionDigits: 2})}</span>`;
+              extraHtml = `
+                <div class="text-[11px] border-t border-slate-700/60 pt-1 mt-1 text-slate-400 flex justify-between gap-2">
+                  <span>Meta Reto (+8%):</span>
+                  ${targetStatus}
+                </div>
+              `;
+            } else {
+              const payoutAvailable = pnlFromStart > 0 ? (pnlFromStart * 0.80).toLocaleString('es-ES', {minimumFractionDigits: 2}) : '0.00';
+              extraHtml = `
+                <div class="text-[11px] border-t border-slate-700/60 pt-1 mt-1 text-slate-400 flex justify-between gap-2">
+                  <span>Payout Retirable (80%):</span>
+                  <span class="text-indigo-300 font-bold font-mono">+$${payoutAvailable} USD</span>
+                </div>
+              `;
+            }
+
             return `
               <div class="p-2.5 bg-slate-900 border border-slate-700 rounded-lg shadow-xl font-mono text-xs">
                 <div class="text-slate-400 text-[11px] flex items-center gap-1.5 mb-1">
                   <i class="fa-regular fa-calendar text-cyan-400"></i> ${dateStr}
                 </div>
                 <div class="text-white font-bold flex items-center justify-between gap-3">
-                  <span class="text-slate-400">Balance Cuenta:</span>
+                  <span class="text-slate-400">Balance:</span>
                   <span class="text-cyan-300 font-mono text-sm">${bal}</span>
                 </div>
+                <div class="text-slate-300 text-[11px] flex items-center justify-between gap-3 mt-0.5">
+                  <span class="text-slate-400">PnL Acumulado:</span>
+                  <span class="${pnlFromStart >= 0 ? 'text-emerald-400' : 'text-rose-400'} font-bold">${pnlStr}</span>
+                </div>
+                ${extraHtml}
               </div>
             `;
           }
@@ -4592,7 +4683,7 @@
     async function fetchAnalyticsData(filter) {
       let data = null;
       try {
-        const res = await fetch(`/api/analytics?filter=${encodeURIComponent(filter)}`);
+        const res = await fetch(`/api/analytics?filter=${encodeURIComponent(filter)}&lens=${encodeURIComponent(currentBifocalLens)}`);
         if (res.ok) {
           data = await res.json();
         }
@@ -4600,62 +4691,15 @@
         console.warn('Backend offline, utilizando modelo cuantitativo por defecto:', err);
       }
 
-      if (!data) {
-        data = {
-          account_name: 'S&P 500 4h Bollinger Dip (Capital Propio TradFi · 318 Trades)',
-          kpis: {
-            final_balance: 110821.03,
-            initial_balance: 100000,
-            net_profit: 10821.03,
-            profit_factor: 3.87,
-            win_rate: 79.0,
-            win_count: 49,
-            loss_count: 13,
-            total_trades: 62,
-            max_drawdown: 0.85,
-            sharpe_ratio: 3.98,
-            return_pct: 10.82
-          },
-          best_dow: { day: 'Martes', pnl: 4120.50 },
-          best_hour: { label: '14:00 - 16:00 UTC', pnl: 3890.20 },
-          best_single_day: { date: '14/11/2025', pnl: 2840.10, day: 'Jueves' },
-          worst_single_day: { date: '03/03/2026', pnl: -620.40, day: 'Lunes' },
-          max_win_streak: 8,
-          max_loss_streak: 2,
-          balance_curve: [
-            { timestamp: '2025-10-25 09:00:00', balance: 100000.00 },
-            { timestamp: '2025-11-15 15:30:00', balance: 102140.50 },
-            { timestamp: '2025-12-10 11:00:00', balance: 101890.20 },
-            { timestamp: '2026-01-08 14:15:00', balance: 104320.00 },
-            { timestamp: '2026-02-12 16:45:00', balance: 106150.80 },
-            { timestamp: '2026-03-20 10:30:00', balance: 105800.00 },
-            { timestamp: '2026-04-18 13:00:00', balance: 108220.40 },
-            { timestamp: '2026-05-25 15:00:00', balance: 107950.00 },
-            { timestamp: '2026-06-30 11:30:00', balance: 109400.60 },
-            { timestamp: '2026-08-14 16:00:00', balance: 108850.10 },
-            { timestamp: '2026-09-22 10:00:00', balance: 110120.00 },
-            { timestamp: '2026-10-25 18:00:00', balance: 110821.03 }
-          ],
-          dow_distribution: { 'Lunes': 1250.00, 'Martes': 4120.50, 'Miércoles': 2340.20, 'Jueves': 2110.33, 'Viernes': 1000.00 },
-          hourly_distribution: { '08-10': 850, '10-12': 1420, '12-14': 980, '14-16': 3890, '16-18': 2450, '18-20': 1231 },
-          streaks_analysis: {
-            target_pct: 6.0,
-            passes_count: 3,
-            avg_target_days: 28.4,
-            worst_drawdown_pct: 0.85,
-            streaks: [
-              { id: 1, type: 'UP', start_timestamp: '2025-10-25', end_timestamp: '2026-01-08', pnl_pct: 4.32, trades: 14, passed_target: false },
-              { id: 2, type: 'DOWN', start_timestamp: '2026-01-08', end_timestamp: '2026-01-20', pnl_pct: -0.42, trades: 3, passed_target: false },
-              { id: 3, type: 'UP', start_timestamp: '2026-01-20', end_timestamp: '2026-04-18', pnl_pct: 6.55, trades: 22, passed_target: true },
-              { id: 4, type: 'DOWN', start_timestamp: '2026-04-18', end_timestamp: '2026-05-02', pnl_pct: -0.38, trades: 2, passed_target: false },
-              { id: 5, type: 'UP', start_timestamp: '2026-05-02', end_timestamp: '2026-10-25', pnl_pct: 7.12, trades: 21, passed_target: true }
-            ]
-          }
-        };
-      }
+      if (!data) return;
 
-      // 1. Actualizar KPIs Principales
+      currentAnalyticsData = data;
+      renderBifocalUI();
+
+      // 1. Actualizar KPIs Principales según la Lente Activa
       const kpis = data.kpis;
+      const isEval = currentBifocalLens === 'EVALUATION';
+
       if (document.getElementById('kpi-balance')) document.getElementById('kpi-balance').innerText = '$' + kpis.final_balance.toLocaleString(undefined, {minimumFractionDigits: 2});
       if (document.getElementById('kpi-init-bal')) document.getElementById('kpi-init-bal').innerText = '$' + kpis.initial_balance.toLocaleString(undefined, {minimumFractionDigits: 0});
       if (document.getElementById('kpi-net-profit')) document.getElementById('kpi-net-profit').innerText = (kpis.net_profit >= 0 ? '+' : '') + '$' + kpis.net_profit.toLocaleString(undefined, {minimumFractionDigits: 2});
@@ -4665,8 +4709,34 @@
       if (document.getElementById('kpi-dd')) document.getElementById('kpi-dd').innerText = kpis.max_drawdown.toFixed(2) + '%';
       if (document.getElementById('kpi-sharpe')) document.getElementById('kpi-sharpe').innerText = kpis.sharpe_ratio;
       if (document.getElementById('kpi-return')) document.getElementById('kpi-return').innerText = (kpis.return_pct >= 0 ? '+' : '') + kpis.return_pct + '%';
-      if (document.getElementById('badge-chart-pnl')) document.getElementById('badge-chart-pnl').innerText = (kpis.net_profit >= 0 ? '+' : '') + '$' + kpis.net_profit.toLocaleString(undefined, {minimumFractionDigits: 2}) + ' USD';
-      if (document.getElementById('chart-subtitle')) document.getElementById('chart-subtitle').innerText = `${data.account_name} · Rentabilidad neta cerrada trade a trade`;
+      
+      const kpiDdLabel = document.getElementById('kpi-dd-label');
+      if (kpiDdLabel) {
+        kpiDdLabel.innerText = isEval ? 'Max Drawdown EOD (Límite: -4.0%)' : 'Max Drawdown Real de Cartera';
+      }
+      const kpiDdSub = document.getElementById('kpi-dd-sub');
+      if (kpiDdSub) {
+        kpiDdSub.innerText = isEval ? `Límite Fondeo: -4.00% (Margen: +${(4.0 - kpis.max_drawdown).toFixed(2)}%)` : 'Drawdown Libre de Cartera';
+      }
+
+      if (document.getElementById('badge-chart-pnl')) {
+        if (isEval) {
+          document.getElementById('badge-chart-pnl').innerText = `${(kpis.net_profit >= 0 ? '+' : '')}$${kpis.net_profit.toLocaleString(undefined, {minimumFractionDigits: 2})} USD · EVAL`;
+          document.getElementById('badge-chart-pnl').className = 'px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 font-mono';
+        } else {
+          const payoutVal = (kpis.net_profit * 0.80).toLocaleString(undefined, {minimumFractionDigits: 0});
+          document.getElementById('badge-chart-pnl').innerText = `+$${payoutVal} RETIRO ESTIMADO (80%)`;
+          document.getElementById('badge-chart-pnl').className = 'px-2 py-0.5 rounded text-[11px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-mono';
+        }
+      }
+
+      if (document.getElementById('chart-subtitle')) {
+        if (isEval) {
+          document.getElementById('chart-subtitle').innerText = `${data.account_name} · [LENTE EVALUACIÓN PROP FIRM] Target Reto +8.0% ($108k), EOD DD -4.0% y Clamp 40%`;
+        } else {
+          document.getElementById('chart-subtitle').innerText = `${data.account_name} · [LENTE FONDEADA & CAPITAL PROPIO] Alpha 100% Libre, Split 80/20 Payouts`;
+        }
+      }
 
       // 2. Day & Time Edge Cards
       if (document.getElementById('stat-best-dow')) document.getElementById('stat-best-dow').innerText = data.best_dow.day;
@@ -4675,10 +4745,10 @@
       if (document.getElementById('stat-best-hour-pnl')) document.getElementById('stat-best-hour-pnl').innerText = '+$' + data.best_hour.pnl.toLocaleString(undefined, {minimumFractionDigits: 2});
       if (document.getElementById('stat-best-day-date')) document.getElementById('stat-best-day-date').innerText = data.best_single_day.date;
       if (document.getElementById('stat-best-day-pnl')) document.getElementById('stat-best-day-pnl').innerText = '+$' + data.best_single_day.pnl.toLocaleString(undefined, {minimumFractionDigits: 2});
-      if (document.getElementById('stat-best-day-sub')) document.getElementById('stat-best-day-sub').innerText = `${data.best_single_day.day} récord`;
+      if (document.getElementById('stat-best-day-sub')) document.getElementById('stat-best-day-sub').innerText = isEval ? `${data.best_single_day.day} récord (Consistencia OK)` : `${data.best_single_day.day} récord (Cosecha Alpha)`;
       if (document.getElementById('stat-worst-day-date')) document.getElementById('stat-worst-day-date').innerText = data.worst_single_day.date;
       if (document.getElementById('stat-worst-day-pnl')) document.getElementById('stat-worst-day-pnl').innerText = '$' + data.worst_single_day.pnl.toLocaleString(undefined, {minimumFractionDigits: 2});
-      if (document.getElementById('stat-worst-day-sub')) document.getElementById('stat-worst-day-sub').innerText = `${data.worst_single_day.day} peor sesión`;
+      if (document.getElementById('stat-worst-day-sub')) document.getElementById('stat-worst-day-sub').innerText = isEval ? 'Bajo límite EOD (-$4,000)' : 'Riesgo diario controlado';
       if (document.getElementById('stat-win-streak')) document.getElementById('stat-win-streak').innerText = data.max_win_streak;
       if (document.getElementById('stat-loss-streak')) document.getElementById('stat-loss-streak').innerText = data.max_loss_streak;
 
@@ -4731,15 +4801,27 @@
 
       const summary = streaksData.summary || {};
       const streaks = streaksData.streaks || [];
+      const isEval = currentBifocalLens === 'EVALUATION';
 
       // 1. Mini KPIs
       const elPasses = document.getElementById('streak-kpi-passes');
+      const elPassesLabel = document.getElementById('streak-kpi-passes-label');
       const elWorstDd = document.getElementById('streak-kpi-worstdowndd');
+      const elWorstDdLabel = document.getElementById('streak-kpi-worstdowndd-label');
       const elMaxUp = document.getElementById('streak-kpi-maxup');
       const elTotal = document.getElementById('streak-kpi-totaltramos');
 
-      if (elPasses) elPasses.innerText = `${summary.challenges_passed || 0} Cuentas`;
-      if (elWorstDd) elWorstDd.innerText = `${Number(summary.max_down_streak_pct || 0.0).toFixed(2)}% EOD`;
+      if (isEval) {
+        if (elPassesLabel) elPassesLabel.innerText = 'Pases Challenge (+8%)';
+        if (elPasses) elPasses.innerText = `${summary.challenges_passed || 0} Fases`;
+        if (elWorstDdLabel) elWorstDdLabel.innerText = 'Peor Drawdown EOD';
+        if (elWorstDd) elWorstDd.innerText = `${Number(summary.max_down_streak_pct || 0.0).toFixed(2)}% EOD`;
+      } else {
+        if (elPassesLabel) elPassesLabel.innerText = 'Ciclos de Payout (+5%)';
+        if (elPasses) elPasses.innerText = `${summary.challenges_passed || 0} Retiros`;
+        if (elWorstDdLabel) elWorstDdLabel.innerText = 'Peor Corrección Libre';
+        if (elWorstDd) elWorstDd.innerText = `${Number(summary.max_down_streak_pct || 0.0).toFixed(2)}% DD`;
+      }
       if (elMaxUp) elMaxUp.innerText = `+${Number(summary.max_up_streak_pct || 0.0).toFixed(2)}%`;
       if (elTotal) elTotal.innerText = `${summary.total_streaks || 0} Tramos`;
 
@@ -4753,9 +4835,16 @@
             const isBull = s.type === 'ALCISTA';
             const pillClass = isBull ? 'streak-chip streak-chip-bull' : 'streak-chip streak-chip-bear';
             const sign = isBull ? '+' : '';
-            const tag = isBull && s.challenge_passed 
-              ? '<span class="streak-chip-pass">🏆 +6% PASSED</span>'
-              : (!isBull && s.dd_safe ? '<span class="streak-chip-safe">🛡️ DD EOD SEGURO</span>' : '');
+            let tag = '';
+            if (isEval) {
+              tag = isBull && s.challenge_passed 
+                ? '<span class="streak-chip-pass">🏆 +8% RETO PASSED</span>'
+                : (!isBull && s.dd_safe ? '<span class="streak-chip-safe">🛡️ DD EOD SEGURO</span>' : '');
+            } else {
+              tag = isBull && s.challenge_passed 
+                ? '<span class="streak-chip-pass" style="background:rgba(99,102,241,0.2);color:#a5b4fc;border:1px solid rgba(99,102,241,0.3)">💎 CICLO PAYOUT</span>'
+                : (!isBull ? '<span class="streak-chip-safe">🛡️ BUFFER PRESERVADO</span>' : '');
+            }
 
             return `
               <div class="${pillClass}" data-id="${s.id}" onclick="selectStreak(${s.id})" title="${s.label}: ${s.start_date} a ${s.end_date} · Trades: ${s.trades_count}">
@@ -4935,7 +5024,7 @@
 
     async function fetchTradesData(filter) {
       try {
-        const res = await fetch(`/api/trade_history?filter=${encodeURIComponent(filter)}`);
+        const res = await fetch(`/api/trade_history?filter=${encodeURIComponent(filter)}&lens=${encodeURIComponent(currentBifocalLens)}`);
         if (res.ok) {
           const data = await res.json();
           allTrades = data.trades || [];
@@ -5025,6 +5114,10 @@
     function renderTradesTable(trades) {
       currentFilteredTrades = trades || allTrades;
       const tbody = document.getElementById('trades-table-body');
+      const thProfit = document.getElementById('th-trades-profit');
+      if (thProfit) {
+        thProfit.innerText = currentBifocalLens === 'EVALUATION' ? 'Beneficio Neto (Consistencia 40%)' : 'Beneficio Neto (80% Payout)';
+      }
       if (!tbody) return;
       tbody.innerHTML = '';
       if (!currentFilteredTrades || currentFilteredTrades.length === 0) {
@@ -5101,9 +5194,18 @@
             ${assetBadgeHtml}
           </td>
           <td class="py-2.5 px-3 text-right font-bold ${isWin ? 'text-emerald-400' : 'text-rose-400'}">
-            <span class="px-2 py-0.5 rounded ${isWin ? 'bg-emerald-500/10' : 'bg-rose-500/10'} font-semibold">
-              ${isWin ? '+' : ''}$${Number(t.net_pnl_usd).toFixed(2)}
-            </span>
+            <div class="flex items-center justify-end gap-1">
+              <span class="px-2 py-0.5 rounded ${isWin ? 'bg-emerald-500/10' : 'bg-rose-500/10'} font-semibold">
+                ${isWin ? '+' : ''}$${Number(t.net_pnl_usd).toFixed(2)}
+              </span>
+              ${currentBifocalLens === 'EVALUATION' ? (
+                t.clamped 
+                  ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30" title="Tope del 40% aplicado: Original $${t.original_pnl_usd}">40% CLAMP</span>`
+                  : (isWin ? `<span class="px-1 py-0.5 rounded text-[8px] font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" title="Consistencia OK individual (<40%)">PASS</span>` : '')
+              ) : (
+                isWin ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-500/15 text-indigo-400 border border-indigo-500/25 font-mono" title="80% Retiro Trader">80% PAYOUT: +$${(Number(t.net_pnl_usd) * 0.8).toFixed(0)}</span>` : ''
+              )}
+            </div>
           </td>
           <td class="py-2.5 px-3 text-right text-cyan-300 font-bold">$${Number(t.running_balance).toLocaleString('es-ES', {minimumFractionDigits: 2})}</td>
           <td class="py-2.5 px-3 text-slate-400">
