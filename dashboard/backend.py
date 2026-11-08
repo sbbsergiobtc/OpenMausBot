@@ -246,6 +246,118 @@ def simulate_q_action(
         return {"error": str(e)}
 
 
+@app.get("/api/notifications")
+def get_notifications():
+    notifications = []
+
+    # 1. Forward state notifications (Incubation Guardian & Drift Trigger)
+    state_file = BASE_DIR / 'data/paper_trades/prop_firm_forward_test_state.json'
+    if state_file.exists():
+        try:
+            with open(state_file, 'r', encoding='utf-8') as f:
+                fstate = json.load(f)
+
+            # Drift status
+            drift = fstate.get('q_learning_drift_status', {})
+            if drift:
+                if drift.get('drift_triggered'):
+                    notifications.append({
+                        "id": "NOTIF-DRIFT-01",
+                        "category": "Q_LEARNING",
+                        "level": "WARNING",
+                        "title": "Drift Trigger Activado",
+                        "message": drift.get('reason', 'Deriva de régimen detectada en el forward test'),
+                        "timestamp": fstate.get('last_drift_retrain_time', 'Reciente'),
+                        "badge": "warning"
+                    })
+                elif drift.get('in_cooldown'):
+                    notifications.append({
+                        "id": "NOTIF-DRIFT-02",
+                        "category": "Q_LEARNING",
+                        "level": "INFO",
+                        "title": "Drift Watchdog en Cooldown (4h)",
+                        "message": "Enfriamiento preventivo activo tras recalibración Polyak",
+                        "timestamp": "En curso",
+                        "badge": "neutral"
+                    })
+
+            # Check incubation guardian counts
+            all_strats = []
+            for b in ['prop_firm', 'capital_propio']:
+                all_strats.extend(fstate.get(b, {}).get('active_strategies', []))
+
+            amber_strats = [s.get('strategy_id', 'STRAT') for s in all_strats if s.get('incubation_guardian', {}).get('traffic_light') == 'AMBER']
+            if amber_strats:
+                notifications.append({
+                    "id": "NOTIF-GUARD-AMBER",
+                    "category": "GUARDIAN",
+                    "level": "WARNING",
+                    "title": f"Guardián: {len(amber_strats)} Modelos en AMBER",
+                    "message": f"Estrategias bajo lote defensivo (0.50x) por desviación |Z| > 1.5σ: {', '.join(amber_strats[:3])}",
+                    "timestamp": fstate.get('last_eval_timestamp', 'Reciente'),
+                    "badge": "warning"
+                })
+
+            green_count = sum(1 for s in all_strats if s.get('incubation_guardian', {}).get('traffic_light') == 'GREEN')
+            notifications.append({
+                "id": "NOTIF-GUARD-GREEN",
+                "category": "GUARDIAN",
+                "level": "SUCCESS",
+                "title": f"Guardián: {green_count} Modelos en GREEN",
+                "message": "Operando dentro del Cono Monte Carlo (P05-P95) con multiplicador 1.0x-1.25x",
+                "timestamp": fstate.get('last_eval_timestamp', 'Reciente'),
+                "badge": "success"
+            })
+        except Exception as e:
+            print(f"Error loading state for notifications: {e}")
+
+    # 2. Libro C Telemetry events (Clamps & Blocked trades)
+    tele_file = BASE_DIR / 'data/paper_trades/libro_c_trades_telemetry.json'
+    if tele_file.exists():
+        try:
+            with open(tele_file, 'r', encoding='utf-8') as f:
+                tele_events = json.load(f)
+
+            for ev in reversed(tele_events[-50:]):
+                if ev.get('event_type') == 'EARLY_TP_CLAMPED':
+                    notifications.append({
+                        "id": f"NOTIF-{ev.get('id', 'CLAMP')}",
+                        "category": "PROP_FIRM",
+                        "level": "INFO",
+                        "title": f"Hard 40% TP Clamp: {ev.get('symbol')}",
+                        "message": f"Take Profit recortado para cumplir regla del 40% ({ev.get('details', {}).get('reason', 'OK')})",
+                        "timestamp": ev.get('timestamp_utc', 'Reciente'),
+                        "badge": "purple"
+                    })
+                    break
+                elif ev.get('event_type') == 'TRADE_BLOCKED_BY_Q':
+                    notifications.append({
+                        "id": f"NOTIF-{ev.get('id', 'BLOCK')}",
+                        "category": "Q_LEARNING",
+                        "level": "NEUTRAL",
+                        "title": f"Whipsaw Evitado: {ev.get('symbol')}",
+                        "message": f"Agente Q asignó 0.00x en {ev.get('regime_code')}",
+                        "timestamp": ev.get('timestamp_utc', 'Reciente'),
+                        "badge": "neutral"
+                    })
+                    break
+        except Exception as e:
+            print(f"Error loading telemetry for notifications: {e}")
+
+    if not notifications:
+        notifications.append({
+            "id": "NOTIF-INIT",
+            "category": "GUARDIAN",
+            "level": "SUCCESS",
+            "title": "Sistema en Vigilancia Activa",
+            "message": "Daemon 24/7 y orquestador Double Q-Learning sincronizados sin alertas críticas",
+            "timestamp": "En tiempo real",
+            "badge": "success"
+        })
+
+    return {"notifications": notifications, "unread_count": len(notifications)}
+
+
 def parse_markdown_metadata(content: str) -> dict:
     meta = {}
     
