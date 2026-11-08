@@ -683,11 +683,11 @@
             <div class="space-y-1">
               <div class="flex items-center gap-2">
                 <span id="cockpit-desk-badge" class="badge-brand-indigo font-mono">CAPITAL PROPIO</span>
-                <span id="cockpit-sync-badge" class="badge-success-live font-mono">● 2 CUENTAS CONECTADAS</span>
+                <span id="cockpit-sync-badge" class="badge-success-live font-mono">● 25 CUENTAS FT</span>
                 <span id="cockpit-news-badge" class="badge-neutral-soft font-mono"><i class="fa-solid fa-newspaper mr-1 text-[#3C45A5]"></i>FILTRO NOTICIAS: ±5 MIN</span>
               </div>
               <h1 class="text-xl sm:text-2xl font-bold text-[#1D1D1F] tracking-tight" id="cockpit-header-title">Monitoreo Unificado · Capital Propio</h1>
-              <p class="text-xs text-[#6E6E73]" id="cockpit-header-desc">Supervisión consolidada de capital propio en Forward Test: IC Markets (MT5 $1,000) y Hyperliquid (Crypto DEX 1,000 USDC).</p>
+              <p class="text-xs text-[#6E6E73]" id="cockpit-header-desc">Supervisión consolidada de capital propio en Forward Test: 25 estrategias ($25,000 inicial) en MT5 Demo y Hyperliquid DEX.</p>
             </div>
             <!-- Acciones de Intervención Operativa & Gestor de Cuentas -->
             <div class="flex items-center gap-2.5 shrink-0 flex-wrap">
@@ -715,10 +715,10 @@
                     <i class="fa-solid fa-wallet text-[11px]"></i>
                   </div>
                 </div>
-                <div class="text-lg sm:text-2xl font-bold font-mono text-[#1D1D1F] tracking-tight" id="cockpit-kpi-total-balance">$1,998.09</div>
+                <div class="text-lg sm:text-2xl font-bold font-mono text-[#1D1D1F] tracking-tight" id="cockpit-kpi-total-balance">$24,998.09</div>
               </div>
               <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-end text-[11px]">
-                <span id="cockpit-kpi-total-subtext" class="badge-brand-indigo font-mono text-[10px] py-0.5 px-1.5">MT5 + DEX</span>
+                <span id="cockpit-kpi-total-subtext" class="badge-brand-indigo font-mono text-[10px] py-0.5 px-1.5">25 Cuentas x $1k</span>
               </div>
             </div>
 
@@ -5452,71 +5452,6 @@
         latestTelemetryData = d;
         updateCockpitKPIs(currentDeskMode);
 
-        // Actualización dinámica de los 6 KPIs independientes del Cockpit General
-        const kpiBal = document.getElementById('cockpit-kpi-total-balance');
-        if (kpiBal && d.total_balance_usd !== undefined) {
-          kpiBal.innerText = '$' + Number(d.total_balance_usd).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
-
-        const kpiRealized = document.getElementById('cockpit-kpi-realized-pnl');
-        const kpiRealizedBadge = document.getElementById('cockpit-kpi-realized-badge');
-        if (kpiRealized && d.total_realized_pnl_usd !== undefined) {
-          const rPnl = Number(d.total_realized_pnl_usd);
-          kpiRealized.innerText = (rPnl >= 0 ? '+$' : '-$') + Math.abs(rPnl).toFixed(2);
-          kpiRealized.className = `text-lg sm:text-2xl font-bold font-mono tracking-tight ${rPnl >= 0 ? 'text-[#065F46]' : 'text-[#D70015]'}`;
-          if (kpiRealizedBadge) {
-            const totB = Number(d.total_balance_usd) || 2000;
-            const pct = (rPnl / totB) * 100;
-            kpiRealizedBadge.innerText = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
-            kpiRealizedBadge.className = `font-mono text-[10px] py-0.5 px-1.5 ${pct >= 0 ? 'badge-success-live' : 'badge-warning-risk'}`;
-          }
-        }
-
-        const kpiFloating = document.getElementById('cockpit-kpi-floating-pnl');
-        const kpiFloatingBadge = document.getElementById('cockpit-kpi-floating-badge');
-        if (kpiFloating) {
-          const eq = Number(d.total_equity_usd) || 0;
-          const bal = Number(d.total_balance_usd) || 0;
-          const floatPnl = (eq > 0 && bal > 0) ? (eq - bal) : 0;
-          kpiFloating.innerText = (floatPnl >= 0 ? '+$' : '-$') + Math.abs(floatPnl).toFixed(2);
-          kpiFloating.className = `text-lg sm:text-2xl font-bold font-mono tracking-tight ${floatPnl >= 0 ? 'text-[#065F46]' : 'text-[#D70015]'}`;
-          if (kpiFloatingBadge) {
-            const pct = bal > 0 ? (floatPnl / bal) * 100 : 0;
-            kpiFloatingBadge.innerText = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
-            kpiFloatingBadge.className = `font-mono text-[10px] py-0.5 px-1.5 ${pct >= 0 ? 'badge-success-live' : 'badge-warning-risk'}`;
-          }
-        }
-
-        const kpiDd = document.getElementById('cockpit-kpi-drawdown');
-        if (kpiDd) {
-          const eq = Number(d.total_equity_usd) || 0;
-          const bal = Number(d.total_balance_usd) || 0;
-          const ddVal = (eq < bal && bal > 0) ? ((eq - bal) / bal) * 100 : 0.0;
-          kpiDd.innerText = (ddVal < 0 ? '' : '-') + Math.abs(ddVal).toFixed(2) + '%';
-        }
-
-        const kpiMargin = document.getElementById('cockpit-kpi-margin-used');
-        if (kpiMargin) {
-          const eq = Number(d.total_equity_usd) || 0;
-          const bal = Number(d.total_balance_usd) || 0;
-          const hasOpen = Math.abs(eq - bal) > 0.1;
-          kpiMargin.innerText = hasOpen ? "0.85%" : "0.00%";
-        }
-
-        const kpiExp = document.getElementById('cockpit-kpi-net-exposure');
-        const kpiExpSub = document.getElementById('cockpit-kpi-net-subtext');
-        if (kpiExp) {
-          const eq = Number(d.total_equity_usd) || 0;
-          const bal = Number(d.total_balance_usd) || 0;
-          if (Math.abs(eq - bal) > 0.1) {
-            kpiExp.innerText = "LONG 100%";
-            if (kpiExpSub) kpiExpSub.innerText = "US500 / USTEC";
-          } else {
-            kpiExp.innerText = "FLAT (0.0%)";
-            if (kpiExpSub) kpiExpSub.innerText = "Sin posiciones";
-          }
-        }
-
         // Cuentas Individuales: MT5 Demo
         if (d.mt5) {
           const mt5Acc = document.getElementById('cockpit-mt5-account-id');
@@ -8679,7 +8614,7 @@
 
       if (mode === 'CAPITAL_PROPIO') {
         if (headerTitle) headerTitle.innerText = 'Monitoreo Unificado · Capital Propio';
-        if (headerDesc) headerDesc.innerText = 'Supervisión consolidada de capital propio en Forward Test: IC Markets (MT5 $1,000) y Hyperliquid (Crypto DEX 1,000 USDC).';
+        if (headerDesc) headerDesc.innerText = 'Supervisión consolidada de capital propio en Forward Test: 25 estrategias ($25,000 inicial) en MT5 Demo y Hyperliquid DEX.';
         if (deskBadge) {
           deskBadge.innerText = 'CAPITAL PROPIO';
           deskBadge.className = 'badge-brand-indigo font-mono';
