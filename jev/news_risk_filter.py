@@ -224,7 +224,7 @@ def get_macro_risk_status() -> Dict[str, Any]:
             continue
 
         diff_min = (ev_dt - now).total_seconds() / 60.0
-        if -30.0 <= diff_min <= 1440.0:
+        if -120.0 <= diff_min <= 10080.0:
             item = {
                 'currency': country,
                 'country': country,
@@ -248,7 +248,7 @@ def get_macro_risk_status() -> Dict[str, Any]:
         'blackout_window_minutes_after': policy.get('blackout_window_minutes_after', 5),
         'active_blackout': active_blackout,
         'upcoming_events_count': len(upcoming_high_impact),
-        'upcoming_events': upcoming_high_impact[:10]
+        'upcoming_events': upcoming_high_impact
     }
 
 

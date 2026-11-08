@@ -1015,7 +1015,7 @@
             </div>
 
             <!-- Fila individual de eventos en el orden requerido: DIVISA, Nombre (con url), hora España, cuenta atrás -->
-            <div id="cockpit-macro-events-container" class="space-y-2 pt-3 border-t border-[#F2F2F7]">
+            <div id="cockpit-macro-events-container" class="space-y-1.5 pt-3 border-t border-[#F2F2F7] max-h-80 overflow-y-auto pr-1">
               <div class="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-[#FAFAFC] border border-[#E5E5EA] text-xs">
                 <div class="flex items-center gap-2.5 min-w-0">
                   <span class="px-2 py-0.5 rounded-md font-mono font-bold text-[11px] bg-[#EEF2FF] text-[#3C45A5] border border-[#E0E7FF] shrink-0">USD</span>
@@ -1849,102 +1849,90 @@
             </div>
           </div>
 
-          <!-- Grid de 6 KPIs en Estilo Apple/Linear (Cockpit General) -->
+          <!-- Grid de 6 KPIs en Estilo Apple/Linear Unificado -->
           <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
             <!-- KPI 1: Balance en Vivo -->
             <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
-              <div>
-                <div class="flex items-center justify-between mb-1">
-                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">Balance Vivo</span>
-                  <div class="h-4 w-4 rounded bg-[#EEF2FF] flex items-center justify-center text-[#3C45A5] shrink-0">
-                    <i class="fa-solid fa-wallet text-[9px]"></i>
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <div class="h-4 w-4 rounded bg-[#F2F2F7] flex items-center justify-center text-[#1D1D1F] shrink-0">
+                    <i class="fa-solid fa-wallet text-[#1D1D1F] text-[9px]"></i>
                   </div>
+                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">Balance Vivo</span>
                 </div>
-                <div class="text-xs sm:text-sm font-bold font-mono text-[#1D1D1F] tracking-tight truncate" id="ft-pf-balance">$24,998.09</div>
+                <span id="ft-pf-balance-badge" class="badge-brand-indigo font-mono text-[9px] py-0.5 px-1 shrink-0">En Vivo</span>
               </div>
-              <div class="mt-2 pt-1 border-t border-[#F2F2F7] flex items-center justify-end text-[10px]">
-                <span id="ft-pf-balance-badge" class="badge-brand-indigo font-mono text-[9px] py-0.5 px-1">En Vivo</span>
-              </div>
+              <div class="text-xs sm:text-sm font-bold font-mono text-[#1D1D1F] tracking-tight truncate" id="ft-pf-balance">$24,998.09</div>
             </div>
 
             <!-- KPI 2: PnL Realizado -->
             <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
-              <div>
-                <div class="flex items-center justify-between mb-1">
-                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">PnL Realizado</span>
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-1.5 min-w-0">
                   <div class="h-4 w-4 rounded bg-[#F2F2F7] flex items-center justify-center text-[#1D1D1F] shrink-0">
-                    <i class="fa-solid fa-scale-balanced text-[9px]"></i>
+                    <i class="fa-solid fa-scale-balanced text-[#1D1D1F] text-[9px]"></i>
                   </div>
+                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">PnL Realizado</span>
                 </div>
-                <div class="text-xs sm:text-sm font-bold font-mono text-[#D70015] tracking-tight truncate" id="ft-pf-pnl">-$1.91</div>
+                <span id="ft-pf-pnl-badge" class="badge-warning-risk font-mono text-[9px] py-0.5 px-1 shrink-0">-0.01%</span>
               </div>
-              <div class="mt-2 pt-1 border-t border-[#F2F2F7] flex items-center justify-end text-[10px]">
-                <span id="ft-pf-pnl-badge" class="badge-warning-risk font-mono text-[9px] py-0.5 px-1">-0.01%</span>
-              </div>
+              <div class="text-xs sm:text-sm font-bold font-mono text-[#D70015] tracking-tight truncate" id="ft-pf-pnl">-$1.91</div>
             </div>
 
             <!-- KPI 3: PnL Flotante -->
             <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
-              <div>
-                <div class="flex items-center justify-between mb-1">
-                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">PnL Flotante</span>
-                  <div class="h-4 w-4 rounded bg-[#FEF2F2] flex items-center justify-center text-[#D70015] shrink-0">
-                    <i class="fa-solid fa-chart-line text-[9px]"></i>
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <div class="h-4 w-4 rounded bg-[#F2F2F7] flex items-center justify-center text-[#1D1D1F] shrink-0">
+                    <i class="fa-solid fa-chart-line text-[#1D1D1F] text-[9px]"></i>
                   </div>
+                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">PnL Flotante</span>
                 </div>
-                <div class="text-xs sm:text-sm font-bold font-mono text-[#D70015] tracking-tight truncate" id="ft-pf-floating-pnl">-$4.58</div>
+                <span id="ft-pf-floating-badge" class="badge-neutral-soft font-mono text-[9px] py-0.5 px-1 shrink-0">-0.02%</span>
               </div>
-              <div class="mt-2 pt-1 border-t border-[#F2F2F7] flex items-center justify-end text-[10px]">
-                <span id="ft-pf-floating-badge" class="badge-neutral-soft font-mono text-[9px] py-0.5 px-1">-0.02%</span>
-              </div>
+              <div class="text-xs sm:text-sm font-bold font-mono text-[#D70015] tracking-tight truncate" id="ft-pf-floating-pnl">-$4.58</div>
             </div>
 
             <!-- KPI 4: Riesgo Flotante (SL) -->
             <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
-              <div>
-                <div class="flex items-center justify-between mb-1">
-                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">Riesgo SL</span>
-                  <div class="h-4 w-4 rounded bg-[#FEF2F2] flex items-center justify-center text-[#D70015] shrink-0">
-                    <i class="fa-solid fa-shield-halved text-[9px]"></i>
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <div class="h-4 w-4 rounded bg-[#F2F2F7] flex items-center justify-center text-[#1D1D1F] shrink-0">
+                    <i class="fa-solid fa-shield-halved text-[#1D1D1F] text-[9px]"></i>
                   </div>
+                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">Riesgo SL</span>
                 </div>
-                <div class="text-xs sm:text-sm font-bold font-mono text-[#1D1D1F] tracking-tight truncate" id="ft-pf-risk-sl">$9.16</div>
+                <span id="ft-pf-risk-sl-badge" class="badge-warning-risk font-mono text-[9px] py-0.5 px-1 shrink-0">0.04%</span>
               </div>
-              <div class="mt-2 pt-1 border-t border-[#F2F2F7] flex items-center justify-end text-[10px]">
-                <span id="ft-pf-risk-sl-badge" class="badge-warning-risk font-mono text-[9px] py-0.5 px-1">0.04%</span>
-              </div>
+              <div class="text-xs sm:text-sm font-bold font-mono text-[#1D1D1F] tracking-tight truncate" id="ft-pf-risk-sl">$9.16</div>
             </div>
 
             <!-- KPI 5: Max Drawdown -->
             <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
-              <div>
-                <div class="flex items-center justify-between mb-1">
-                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate" id="ft-dd-header">Max DD</span>
-                  <div class="h-4 w-4 rounded bg-[#ECFDF5] flex items-center justify-center text-[#065F46] shrink-0">
-                    <i class="fa-solid fa-arrow-trend-down text-[9px]"></i>
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <div class="h-4 w-4 rounded bg-[#F2F2F7] flex items-center justify-center text-[#1D1D1F] shrink-0">
+                    <i class="fa-solid fa-arrow-trend-down text-[#1D1D1F] text-[9px]"></i>
                   </div>
+                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate" id="ft-dd-header">Max DD</span>
                 </div>
-                <div class="text-xs sm:text-sm font-bold font-mono text-[#065F46] tracking-tight truncate" id="ft-pf-dd">0.85%</div>
+                <span class="text-[#D70015] font-mono font-semibold text-[9px] shrink-0" id="ft-pf-dd-limit">-5.00% Max</span>
               </div>
-              <div class="mt-2 pt-1 border-t border-[#F2F2F7] flex items-center justify-end text-[10px]">
-                <span id="ft-pf-dd-limit" class="badge-neutral-soft font-mono text-[9px] py-0.5 px-1">$16.95</span>
-              </div>
+              <div class="text-xs sm:text-sm font-bold font-mono text-[#D70015] tracking-tight truncate" id="ft-pf-dd">-0.23%</div>
             </div>
 
-            <!-- KPI 6: Objetivo Anual -->
+            <!-- KPI 6: Target / Consistencia -->
             <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
-              <div>
-                <div class="flex items-center justify-between mb-1">
-                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate" id="ft-target-header">Objetivo</span>
-                  <div class="h-4 w-4 rounded bg-[#FFFBEB] flex items-center justify-center text-[#B45309] shrink-0">
-                    <i class="fa-solid fa-bullseye text-[9px]"></i>
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <div class="h-4 w-4 rounded bg-[#F2F2F7] flex items-center justify-center text-[#1D1D1F] shrink-0">
+                    <i class="fa-solid fa-flag-checkered text-[#1D1D1F] text-[9px]"></i>
                   </div>
+                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate" id="ft-target-header">Objetivo</span>
                 </div>
-                <div class="text-xs sm:text-sm font-bold font-mono text-[#B45309] tracking-tight truncate" id="ft-pf-target">&ge; +30.0%</div>
+                <span id="ft-pf-target-badge" class="badge-success-live font-mono text-[9px] py-0.5 px-1 shrink-0">Fase 1</span>
               </div>
-              <div class="mt-2 pt-1 border-t border-[#F2F2F7] flex items-center justify-end text-[10px]">
-                <span id="ft-pf-target-badge" class="badge-neutral-soft font-mono text-[9px] py-0.5 px-1">Meta</span>
-              </div>
+              <div class="text-xs sm:text-sm font-bold font-mono text-[#065F46] tracking-tight truncate" id="ft-pf-target">+10.0%</div>
             </div>
           </div>
 
@@ -1991,102 +1979,90 @@
             </div>
           </div>
 
-          <!-- Grid de 6 KPIs en Estilo Apple/Linear (Cockpit General) -->
+          <!-- Grid de 6 KPIs en Estilo Apple/Linear Unificado -->
           <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-            <!-- KPI 2.1: Balance en Vivo -->
+            <!-- KPI 1: Balance en Vivo -->
             <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
-              <div>
-                <div class="flex items-center justify-between mb-1">
-                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate" id="ft-card2-kpi1-label">Balance Vivo</span>
-                  <div class="h-4 w-4 rounded bg-[#EEF2FF] flex items-center justify-center text-[#3C45A5] shrink-0">
-                    <i class="fa-solid fa-coins text-[9px]"></i>
-                  </div>
-                </div>
-                <div class="text-xs sm:text-sm font-bold font-mono text-[#1D1D1F] tracking-tight truncate" id="ft-crypto-balance">1,013.56 USDC</div>
-              </div>
-              <div class="mt-2 pt-1 border-t border-[#F2F2F7] flex items-center justify-end text-[10px]">
-                <span id="ft-card2-balance-badge" class="badge-brand-indigo font-mono text-[9px] py-0.5 px-1">Testnet L1</span>
-              </div>
-            </div>
-
-            <!-- KPI 2.2: PnL Realizado -->
-            <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
-              <div>
-                <div class="flex items-center justify-between mb-1">
-                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate" id="ft-card2-kpi2-label">PnL Realizado</span>
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-1.5 min-w-0">
                   <div class="h-4 w-4 rounded bg-[#F2F2F7] flex items-center justify-center text-[#1D1D1F] shrink-0">
-                    <i class="fa-solid fa-scale-balanced text-[9px]"></i>
+                    <i class="fa-solid fa-wallet text-[#1D1D1F] text-[9px]"></i>
                   </div>
+                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">Balance Vivo</span>
                 </div>
-                <div class="text-xs sm:text-sm font-bold font-mono text-[#065F46] tracking-tight truncate" id="ft-crypto-pnl">+13.56 USDC</div>
+                <span id="ft-card2-balance-badge" class="badge-success-live font-mono text-[9px] py-0.5 px-1 shrink-0">+1.36%</span>
               </div>
-              <div class="mt-2 pt-1 border-t border-[#F2F2F7] flex items-center justify-end text-[10px]">
-                <span id="ft-card2-pnl-badge" class="badge-success-live font-mono text-[9px] py-0.5 px-1">+1.36%</span>
-              </div>
+              <div class="text-xs sm:text-sm font-bold font-mono text-[#1D1D1F] tracking-tight truncate" id="ft-crypto-balance">1,013.56 USDC</div>
             </div>
 
-            <!-- KPI 2.3: PnL Flotante -->
+            <!-- KPI 2: PnL Realizado -->
             <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
-              <div>
-                <div class="flex items-center justify-between mb-1">
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <div class="h-4 w-4 rounded bg-[#F2F2F7] flex items-center justify-center text-[#1D1D1F] shrink-0">
+                    <i class="fa-solid fa-scale-balanced text-[#1D1D1F] text-[9px]"></i>
+                  </div>
+                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">PnL Realizado</span>
+                </div>
+                <span id="ft-card2-pnl-badge" class="badge-success-live font-mono text-[9px] py-0.5 px-1 shrink-0">+1.36%</span>
+              </div>
+              <div class="text-xs sm:text-sm font-bold font-mono text-[#065F46] tracking-tight truncate" id="ft-crypto-pnl">+$13.56</div>
+            </div>
+
+            <!-- KPI 3: PnL Flotante -->
+            <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <div class="h-4 w-4 rounded bg-[#F2F2F7] flex items-center justify-center text-[#1D1D1F] shrink-0">
+                    <i class="fa-solid fa-chart-line text-[#1D1D1F] text-[9px]"></i>
+                  </div>
                   <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">PnL Flotante</span>
+                </div>
+                <span id="ft-card2-floating-badge" class="badge-neutral-soft font-mono text-[9px] py-0.5 px-1 shrink-0">0.00%</span>
+              </div>
+              <div class="text-xs sm:text-sm font-bold font-mono text-[#1D1D1F] tracking-tight truncate" id="ft-card2-floating-pnl">$0.00</div>
+            </div>
+
+            <!-- KPI 4: Riesgo Flotante (SL) -->
+            <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-1.5 min-w-0">
                   <div class="h-4 w-4 rounded bg-[#F2F2F7] flex items-center justify-center text-[#1D1D1F] shrink-0">
-                    <i class="fa-solid fa-chart-line text-[9px]"></i>
+                    <i class="fa-solid fa-shield-halved text-[#1D1D1F] text-[9px]"></i>
                   </div>
-                </div>
-                <div class="text-xs sm:text-sm font-bold font-mono text-[#1D1D1F] tracking-tight truncate" id="ft-card2-floating-pnl">$0.00</div>
-              </div>
-              <div class="mt-2 pt-1 border-t border-[#F2F2F7] flex items-center justify-end text-[10px]">
-                <span id="ft-card2-floating-badge" class="badge-neutral-soft font-mono text-[9px] py-0.5 px-1">0.00%</span>
-              </div>
-            </div>
-
-            <!-- KPI 2.4: Riesgo Flotante (SL) -->
-            <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
-              <div>
-                <div class="flex items-center justify-between mb-1">
                   <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">Riesgo SL</span>
-                  <div class="h-4 w-4 rounded bg-[#FEF2F2] flex items-center justify-center text-[#D70015] shrink-0">
-                    <i class="fa-solid fa-shield-halved text-[9px]"></i>
-                  </div>
                 </div>
-                <div class="text-xs sm:text-sm font-bold font-mono text-[#1D1D1F] tracking-tight truncate" id="ft-card2-risk-sl">$0.00</div>
+                <span id="ft-card2-risk-sl-badge" class="badge-neutral-soft font-mono text-[9px] py-0.5 px-1 shrink-0">0.00%</span>
               </div>
-              <div class="mt-2 pt-1 border-t border-[#F2F2F7] flex items-center justify-end text-[10px]">
-                <span id="ft-card2-risk-sl-badge" class="badge-neutral-soft font-mono text-[9px] py-0.5 px-1">0.00%</span>
-              </div>
+              <div class="text-xs sm:text-sm font-bold font-mono text-[#1D1D1F] tracking-tight truncate" id="ft-card2-risk-sl">$0.00</div>
             </div>
 
-            <!-- KPI 2.5: Max Drawdown -->
+            <!-- KPI 5: Max Drawdown -->
             <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
-              <div>
-                <div class="flex items-center justify-between mb-1">
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <div class="h-4 w-4 rounded bg-[#F2F2F7] flex items-center justify-center text-[#1D1D1F] shrink-0">
+                    <i class="fa-solid fa-arrow-trend-down text-[#1D1D1F] text-[9px]"></i>
+                  </div>
                   <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate" id="ft-card2-dd-header">Max DD</span>
-                  <div class="h-4 w-4 rounded bg-[#ECFDF5] flex items-center justify-center text-[#065F46] shrink-0">
-                    <i class="fa-solid fa-arrow-trend-down text-[9px]"></i>
-                  </div>
                 </div>
-                <div class="text-xs sm:text-sm font-bold font-mono text-[#065F46] tracking-tight truncate" id="ft-card2-dd">0.00%</div>
+                <span class="text-[#D70015] font-mono font-semibold text-[9px] shrink-0" id="ft-card2-dd-limit">-3.50% Max</span>
               </div>
-              <div class="mt-2 pt-1 border-t border-[#F2F2F7] flex items-center justify-end text-[10px]">
-                <span id="ft-card2-dd-limit" class="badge-neutral-soft font-mono text-[9px] py-0.5 px-1">0.00%</span>
-              </div>
+              <div class="text-xs sm:text-sm font-bold font-mono text-[#065F46] tracking-tight truncate" id="ft-card2-dd">0.00%</div>
             </div>
 
-            <!-- KPI 2.6: Objetivo Anual -->
+            <!-- KPI 6: Target / Consistencia -->
             <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
-              <div>
-                <div class="flex items-center justify-between mb-1">
-                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate" id="ft-card2-kpi3-label">Objetivo</span>
-                  <div class="h-4 w-4 rounded bg-[#FFFBEB] flex items-center justify-center text-[#B45309] shrink-0">
-                    <i class="fa-solid fa-bullseye text-[9px]"></i>
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <div class="h-4 w-4 rounded bg-[#F2F2F7] flex items-center justify-center text-[#1D1D1F] shrink-0">
+                    <i class="fa-solid fa-flag-checkered text-[#1D1D1F] text-[9px]"></i>
                   </div>
+                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate" id="ft-card2-target-header">Objetivo</span>
                 </div>
-                <div class="text-xs sm:text-sm font-bold font-mono text-[#B45309] tracking-tight truncate" id="ft-card2-target">&ge; +30.0%</div>
+                <span id="ft-card2-target-badge" class="badge-success-live font-mono text-[9px] py-0.5 px-1 shrink-0">Fase 1</span>
               </div>
-              <div class="mt-2 pt-1 border-t border-[#F2F2F7] flex items-center justify-end text-[10px]">
-                <span id="ft-card2-target-badge" class="badge-neutral-soft font-mono text-[9px] py-0.5 px-1">Meta</span>
-              </div>
+              <div class="text-xs sm:text-sm font-bold font-mono text-[#065F46] tracking-tight truncate" id="ft-card2-target">+10.0%</div>
             </div>
           </div>
 
@@ -5531,11 +5507,11 @@
           }
         }
 
-        // 2. Renderizado de eventos en una fila: DIVISA, Nombre (con URL), Hora España, Cuenta Atrás
+        // 2. Renderizado de noticias de alto impacto de la semana actual en el orden estricto:
+        // (icono calendario) tres primeras letras del nombre del dia de la semana dia (dd/mm), DIVISA, Nombre (con url), hora España (utc convertido), cuenta atrás con badge
         const container = document.getElementById('cockpit-macro-events-container');
         if (container) {
           const rawEvents = data.upcoming_events || [];
-          // Filtrado estricto adicional a EUR, USD, GBP por si acaso
           const events = rawEvents.filter(ev => {
             const c = (ev.currency || ev.country || '').toUpperCase();
             return ['EUR', 'USD', 'GBP'].includes(c);
@@ -5543,70 +5519,92 @@
 
           if (events.length === 0) {
             container.innerHTML = `
-              <div class="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-[#FAFAFC] border border-[#E5E5EA] text-xs">
-                <div class="flex items-center gap-2.5 min-w-0">
-                  <span class="px-2 py-0.5 rounded-md font-mono font-bold text-[11px] bg-[#F2F2F7] text-[#6E6E73] border border-[#E5E5EA] shrink-0">ALL</span>
-                  <span class="text-[#6E6E73] italic">Sin eventos de alto impacto para EUR, USD o GBP en las próximas 24 horas.</span>
+              <div class="flex items-center justify-between gap-3 p-3 rounded-xl bg-[#FAFAFC] border border-[#E5E5EA] text-xs">
+                <div class="flex items-center gap-2 min-w-0">
+                  <i class="fa-regular fa-calendar-check text-[#107C41] text-sm"></i>
+                  <span class="text-[#6E6E73]">Sin noticias de alto impacto para EUR, USD o GBP en la semana actual.</span>
                 </div>
-                <div class="flex items-center gap-3 shrink-0">
-                  <span class="badge-neutral-soft font-mono text-[10px] px-2 py-0.5 rounded-md">&gt;24h limpio</span>
-                </div>
+                <span class="badge-neutral-soft font-mono text-[10px] px-2 py-0.5 rounded-md">Semana limpia</span>
               </div>`;
           } else {
-            // Renderizar hasta 3 eventos próximos en filas individuales
-            container.innerHTML = events.slice(0, 3).map(ev => {
+            container.innerHTML = events.map(ev => {
               const cur = (ev.currency || ev.country || 'USD').toUpperCase();
               const title = ev.title || ev.event || 'Evento Macroeconómico';
               const evUrl = ev.url || 'https://www.forexfactory.com/calendar';
               
-              // Hora local de España
+              // Conversión de fecha y hora UTC a hora local de España
+              let dateFormatted = '--- --/--';
               let timeSpainStr = '--:--';
               if (ev.datetime_utc) {
                 try {
                   const evDate = new Date(ev.datetime_utc);
-                  timeSpainStr = evDate.toLocaleTimeString('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit' }) + ' CET';
+                  const weekday = evDate.toLocaleDateString('es-ES', { timeZone: 'Europe/Madrid', weekday: 'short' });
+                  const cleanWeekday = weekday.replace('.', '').trim();
+                  const capWeekday = cleanWeekday.charAt(0).toUpperCase() + cleanWeekday.slice(1);
+                  const day = evDate.toLocaleDateString('es-ES', { timeZone: 'Europe/Madrid', day: '2-digit' });
+                  const month = evDate.toLocaleDateString('es-ES', { timeZone: 'Europe/Madrid', month: '2-digit' });
+                  dateFormatted = `${capWeekday} ${day}/${month}`;
+                  timeSpainStr = evDate.toLocaleTimeString('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit' });
                 } catch (e) {
+                  dateFormatted = '--- --/--';
                   timeSpainStr = '--:--';
                 }
               }
 
-              // Cuenta atrás dinámica en badge
+              // Cuenta atrás con badge
               const mins = Math.round(ev.minutes_away);
               let badgeClass = 'badge-neutral-soft';
               let countdownText = '';
               if (ev.in_blackout) {
                 badgeClass = 'badge-danger-risk animate-pulse';
-                countdownText = '● BLACKOUT ACTIVO';
-              } else if (mins <= 0) {
-                badgeClass = 'badge-warning-risk';
-                countdownText = 'En curso';
+                countdownText = '● BLACKOUT';
+              } else if (mins < 0) {
+                badgeClass = 'badge-neutral-soft';
+                countdownText = 'Finalizado';
               } else if (mins <= 60) {
-                badgeClass = 'badge-warning-risk';
+                badgeClass = 'badge-warning-risk font-bold';
                 countdownText = `en ${mins}m`;
-              } else {
+              } else if (mins <= 1440) {
                 const h = Math.floor(mins / 60);
                 const m = mins % 60;
                 countdownText = `en ${h}h ${m}m`;
+              } else {
+                const dCount = Math.floor(mins / 1440);
+                const h = Math.floor((mins % 1440) / 60);
+                countdownText = `en ${dCount}d ${h}h`;
               }
 
-              // Color del badge según divisa
               let curBadgeColor = 'bg-[#EEF2FF] text-[#3C45A5] border-[#E0E7FF]';
               if (cur === 'EUR') curBadgeColor = 'bg-[#ECFDF5] text-[#065F46] border-[#A7F3D0]';
               if (cur === 'GBP') curBadgeColor = 'bg-[#FEF3C7] text-[#92400E] border-[#FDE68A]';
 
               return `
-                <div class="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-[#FAFAFC] border border-[#E5E5EA] text-xs hover:border-[#D1D1D6] transition">
-                  <div class="flex items-center gap-2.5 min-w-0">
-                    <!-- 1. DIVISA -->
-                    <span class="px-2 py-0.5 rounded-md font-mono font-bold text-[11px] border shrink-0 ${curBadgeColor}">${cur}</span>
-                    <!-- 2. Nombre del evento (con enlace URL a Forex Factory al pulsar) -->
-                    <a href="${evUrl}" target="_blank" rel="noopener noreferrer" class="font-semibold text-[#1D1D1F] hover:text-[#3C45A5] hover:underline transition truncate" title="Abrir en Forex Factory">${title}</a>
+                <div class="flex items-center justify-between gap-3 p-2 rounded-xl bg-[#FAFAFC] border border-[#E5E5EA] text-xs hover:border-[#D1D1D6] transition">
+                  <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                    <!-- 1. (icono de calendario) tres primeras letras del nombre del dia de la semana dia (dd/mm) -->
+                    <span class="flex items-center gap-1.5 font-mono text-xs text-[#1D1D1F] font-semibold shrink-0 min-w-[95px]">
+                      <i class="fa-regular fa-calendar text-[#86868B] text-[11px]"></i>
+                      ${dateFormatted}
+                    </span>
+                    <!-- 2. DIVISA -->
+                    <span class="px-2 py-0.5 rounded-md font-mono font-bold text-[11px] border shrink-0 ${curBadgeColor}">
+                      ${cur}
+                    </span>
+                    <!-- 3. Nombre del evento (con enlace url a forex factory al pulsar) -->
+                    <a href="${evUrl}" target="_blank" rel="noopener noreferrer" class="font-semibold text-[#1D1D1F] hover:text-[#3C45A5] hover:underline transition truncate min-w-0" title="Abrir en Forex Factory">
+                      ${title}
+                    </a>
                   </div>
                   <div class="flex items-center gap-3 shrink-0">
-                    <!-- 3. Hora (hora local de España) -->
-                    <span class="font-mono text-xs text-[#6E6E73] flex items-center gap-1.5"><i class="fa-regular fa-clock text-[#86868B]"></i>${timeSpainStr}</span>
-                    <!-- 4. Cuenta atrás en badge dinámico -->
-                    <span class="${badgeClass} font-mono text-[10px] px-2 py-0.5 rounded-md font-bold">${countdownText}</span>
+                    <!-- 4. hora (hora local de españa teniendo en cuenta formato utc) -->
+                    <span class="font-mono text-xs text-[#6E6E73] flex items-center gap-1 shrink-0 min-w-[65px]">
+                      <i class="fa-regular fa-clock text-[#86868B]"></i>
+                      ${timeSpainStr}
+                    </span>
+                    <!-- 5. cuenta atras con badge -->
+                    <span class="${badgeClass} font-mono text-[10px] px-2 py-0.5 rounded-md font-bold shrink-0 min-w-[75px] text-center">
+                      ${countdownText}
+                    </span>
                   </div>
                 </div>`;
             }).join('');
@@ -7890,11 +7888,22 @@
       renderNotificationsUI();
     }
 
-    function markAllNotificationsRead() {
+    async function markAllNotificationsRead() {
+      try {
+        await fetch('/api/notifications/clear', { method: 'POST' });
+      } catch (e) {
+        console.error('Error clearing notifications on server:', e);
+      }
+      currentNotifications = [];
+      localStorage.setItem('algrok_notifs_cleared_ts', Date.now().toString());
       const badge = document.getElementById('notifications-badge');
-      if (badge) badge.classList.add('hidden');
+      if (badge) {
+        badge.classList.add('hidden');
+        badge.innerText = '0';
+      }
       const chip = document.getElementById('notifications-count-chip');
-      if (chip) chip.innerText = '0 no leídas';
+      if (chip) chip.innerText = '0 eventos';
+      renderNotificationsUI();
     }
 
     function renderNotificationsUI() {
@@ -7957,7 +7966,7 @@
         const data = await res.json();
         currentNotifications = data.notifications || [];
         
-        const count = data.unread_count || currentNotifications.length;
+        const count = data.unread_count !== undefined ? data.unread_count : currentNotifications.length;
         const badge = document.getElementById('notifications-badge');
         const chip = document.getElementById('notifications-count-chip');
         if (badge) {
@@ -7965,6 +7974,7 @@
             badge.innerText = count > 9 ? '9+' : count;
             badge.classList.remove('hidden');
           } else {
+            badge.innerText = '0';
             badge.classList.add('hidden');
           }
         }

@@ -460,8 +460,42 @@ def get_account_stage():
     }
 
 
+CLEARED_NOTIFS_FILE = BASE_DIR / 'data/cleared_notifications.json'
+
+
+@app.post("/api/notifications/clear")
+def clear_notifications():
+    try:
+        CLEARED_NOTIFS_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with open(CLEARED_NOTIFS_FILE, 'w', encoding='utf-8') as f:
+            json.dump({"cleared_at": datetime.now(timezone.utc).isoformat(), "cleared": True}, f, indent=2)
+        return {"status": "ok", "message": "All notifications marked as cleared"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
 @app.get("/api/notifications")
 def get_notifications():
+    CLEARED_NOTIFS_FILE = BASE_DIR / 'data/cleared_notifications.json'
+    cleared_at_iso = None
+    if CLEARED_NOTIFS_FILE.exists():
+        try:
+            with open(CLEARED_NOTIFS_FILE, 'r', encoding='utf-8') as f:
+                c_data = json.load(f)
+                cleared_at_iso = c_data.get('cleared_at')
+        except Exception:
+            pass
+
+    # Si se limpiaron notificaciones y no han pasado 24h, devolver lista vacía a menos que surja un nuevo trigger
+    if cleared_at_iso:
+        try:
+            c_dt = datetime.fromisoformat(cleared_at_iso)
+            now_dt = datetime.now(timezone.utc)
+            if (now_dt - c_dt).total_seconds() < 86400:
+                return {"notifications": [], "unread_count": 0}
+        except Exception:
+            pass
+
     notifications = []
 
     # 1. Forward state notifications (Incubation Guardian & Drift Trigger)
