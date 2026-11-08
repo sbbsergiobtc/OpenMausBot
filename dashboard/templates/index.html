@@ -9620,8 +9620,7 @@
 
         const ghost = document.createElement('div');
         ghost.className = 'col-drag-ghost';
-        const labelText = drag.th.textContent.replace(/[
-]+/g, ' ').trim();
+        const labelText = (drag.th.innerText || drag.th.textContent || '').trim().replace(/\s+/g, ' ');
         ghost.innerHTML = `<i class="fa-solid fa-grip-vertical text-[#3C45A5] text-[10px]"></i> <span>${labelText}</span>`;
         ghost.style.width = `${Math.min(drag.width, 240)}px`;
         ghost.style.left = `${e.clientX - drag.offsetX}px`;
