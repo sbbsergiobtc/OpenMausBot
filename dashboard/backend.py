@@ -248,86 +248,197 @@ def simulate_q_action(
 
 
 
-@app.get("/api/account_stage")
-def get_account_stage():
+
+
+# ==============================================================================
+# GESTOR MULTICUENTA GRANULAR (CUENTAS CONECTADAS Y FASES DE FONDEO)
+# ==============================================================================
+
+@app.get("/api/accounts")
+def get_accounts_catalog():
     state_file = BASE_DIR / 'data/paper_trades/prop_firm_forward_test_state.json'
-    default_accounts = {
-        "prop_firm": {
-            "account_id": "PROP-50K-01",
-            "firm_name": "LUCID_TRADING",
-            "stage": "EVALUATION",
-            "consistency_rule_enabled": True,
-            "max_single_trade_profit_pct": 40.0,
-            "max_concurrent_trades": 3,
-            "available_stages": ["EVALUATION", "FUNDED", "LIVE_CAPITAL"]
-        },
-        "capital_propio": {
-            "account_id": "CAP-PROPIO-01",
-            "firm_name": "INTERACTIVE_BROKERS",
-            "stage": "LIVE_CAPITAL",
-            "consistency_rule_enabled": False,
-            "max_single_trade_profit_pct": None,
-            "max_concurrent_trades": 3,
-            "available_stages": ["LIVE_CAPITAL"]
-        }
-    }
+    s = {}
     if state_file.exists():
         try:
             with open(state_file, 'r', encoding='utf-8') as f:
                 s = json.load(f)
-            return s.get("active_accounts", default_accounts)
         except Exception:
-            return default_accounts
-    return default_accounts
+            pass
+
+    mt5_sync = s.get('live_broker_sync', {})
+    mt5_acc = str(mt5_sync.get('account') or '53120791')
+    mt5_srv = str(mt5_sync.get('server') or 'ICMarketsSC-Demo')
+    mt5_bal = float(mt5_sync.get('broker_balance') or 984.53)
+    mt5_eq = float(mt5_sync.get('broker_equity') or 979.95)
+
+    catalog = s.get('accounts_catalog', None)
+    if not catalog:
+        catalog = [
+            {
+                "account_id": mt5_acc,
+                "firm_name": f"{mt5_srv} (MT5)",
+                "desk_type": "PROP_FIRM",
+                "vehicle": "CFDs / Forex Spot",
+                "balance": mt5_bal,
+                "equity": mt5_eq,
+                "stage": "EVALUATION",
+                "consistency_rule_enabled": True,
+                "max_single_trade_profit_pct": 40.0,
+                "max_concurrent_trades": 3,
+                "status": "CONECTADA (MT5)"
+            },
+            {
+                "account_id": "PROP-CME-01",
+                "firm_name": "Rithmic / NinjaTrader",
+                "desk_type": "PROP_FIRM",
+                "vehicle": "Futuros CME (US500/USTEC)",
+                "balance": 50000.0,
+                "equity": 50000.0,
+                "stage": "EVALUATION",
+                "consistency_rule_enabled": True,
+                "max_single_trade_profit_pct": 40.0,
+                "max_concurrent_trades": 3,
+                "status": "INCUBACIÓN VIRTUAL"
+            },
+            {
+                "account_id": "IBKR-CAP-01",
+                "firm_name": "Interactive Brokers",
+                "desk_type": "CAPITAL_PROPIO",
+                "vehicle": "Multi-Activo Spot",
+                "balance": 10000.0,
+                "equity": 10000.0,
+                "stage": "LIVE_CAPITAL",
+                "consistency_rule_enabled": False,
+                "max_single_trade_profit_pct": None,
+                "max_concurrent_trades": 3,
+                "status": "LISTA PARA DESPLIEGUE"
+            }
+        ]
+        if state_file.exists():
+            try:
+                s['accounts_catalog'] = catalog
+                with open(state_file, 'w', encoding='utf-8') as f:
+                    json.dump(s, f, indent=2)
+            except Exception:
+                pass
+    else:
+        for acc in catalog:
+            if str(acc.get("account_id")) == mt5_acc:
+                acc["balance"] = mt5_bal
+                acc["equity"] = mt5_eq
+                acc["status"] = "CONECTADA (MT5)"
+
+    return {"accounts": catalog}
 
 
-@app.post("/api/account_stage")
-def update_account_stage(data: dict):
+@app.post("/api/accounts/update_stage")
+def update_single_account_stage(data: dict):
     state_file = BASE_DIR / 'data/paper_trades/prop_firm_forward_test_state.json'
-    default_accounts = {
-        "prop_firm": {
-            "account_id": "PROP-50K-01",
-            "firm_name": "LUCID_TRADING",
-            "stage": "EVALUATION",
-            "consistency_rule_enabled": True,
-            "max_single_trade_profit_pct": 40.0,
-            "max_concurrent_trades": 3
-        },
-        "capital_propio": {
-            "account_id": "CAP-PROPIO-01",
-            "firm_name": "INTERACTIVE_BROKERS",
-            "stage": "LIVE_CAPITAL",
-            "consistency_rule_enabled": False,
-            "max_single_trade_profit_pct": None,
-            "max_concurrent_trades": 3
-        }
-    }
+    account_id = str(data.get("account_id", "")).strip()
+    new_stage = str(data.get("stage", "EVALUATION")).upper()
+    if not account_id:
+        return {"error": "account_id es requerido"}
+
     try:
         s = {}
         if state_file.exists():
             with open(state_file, 'r', encoding='utf-8') as f:
                 s = json.load(f)
-        if "active_accounts" not in s:
-            s["active_accounts"] = default_accounts
 
-        branch = str(data.get("branch", "prop_firm")).lower()
-        if branch not in s["active_accounts"]:
-            s["active_accounts"][branch] = default_accounts.get(branch, {})
+        catalog = s.get('accounts_catalog', [])
+        target_acc = None
+        for acc in catalog:
+            if str(acc.get("account_id")) == account_id:
+                target_acc = acc
+                break
 
-        if "stage" in data:
-            new_stage = str(data["stage"]).upper()
-            s["active_accounts"][branch]["stage"] = new_stage
-            s["active_accounts"][branch]["consistency_rule_enabled"] = (new_stage == "EVALUATION")
+        if not target_acc:
+            return {"error": f"Cuenta {account_id} no encontrada en catálogo"}
+
+        target_acc["stage"] = new_stage
+        target_acc["consistency_rule_enabled"] = (new_stage == "EVALUATION")
+
         if "firm_name" in data:
-            s["active_accounts"][branch]["firm_name"] = str(data["firm_name"])
+            target_acc["firm_name"] = str(data["firm_name"])
         if "max_concurrent_trades" in data:
-            s["active_accounts"][branch]["max_concurrent_trades"] = int(data["max_concurrent_trades"])
+            target_acc["max_concurrent_trades"] = int(data["max_concurrent_trades"])
+
+        # Sincronizar también con active_accounts
+        branch = target_acc.get("desk_type", "PROP_FIRM").lower()
+        if "active_accounts" not in s:
+            s["active_accounts"] = {}
+        s["active_accounts"][branch] = {
+            "account_id": target_acc["account_id"],
+            "firm_name": target_acc["firm_name"],
+            "stage": target_acc["stage"],
+            "consistency_rule_enabled": target_acc["consistency_rule_enabled"],
+            "max_concurrent_trades": target_acc.get("max_concurrent_trades", 3)
+        }
 
         with open(state_file, 'w', encoding='utf-8') as f:
             json.dump(s, f, indent=2)
-        return {"status": "SUCCESS", "updated_branch": branch, "config": s["active_accounts"][branch]}
+
+        return {"status": "SUCCESS", "updated_account": target_acc}
     except Exception as e:
         return {"error": str(e)}
+
+
+@app.post("/api/accounts/add")
+def add_new_account(data: dict):
+    state_file = BASE_DIR / 'data/paper_trades/prop_firm_forward_test_state.json'
+    account_id = str(data.get("account_id", "")).strip()
+    firm_name = str(data.get("firm_name", "")).strip()
+    desk_type = str(data.get("desk_type", "PROP_FIRM")).upper()
+    vehicle = str(data.get("vehicle", "CFDs / Forex")).strip()
+    balance = float(data.get("balance", 50000.0))
+    stage = str(data.get("stage", "EVALUATION")).upper()
+
+    if not account_id or not firm_name:
+        return {"error": "account_id y firm_name son obligatorios"}
+
+    try:
+        s = {}
+        if state_file.exists():
+            with open(state_file, 'r', encoding='utf-8') as f:
+                s = json.load(f)
+
+        if "accounts_catalog" not in s:
+            s["accounts_catalog"] = []
+
+        s["accounts_catalog"] = [a for a in s["accounts_catalog"] if str(a.get("account_id")) != account_id]
+        new_acc = {
+            "account_id": account_id,
+            "firm_name": firm_name,
+            "desk_type": desk_type,
+            "vehicle": vehicle,
+            "balance": balance,
+            "equity": balance,
+            "stage": stage,
+            "consistency_rule_enabled": (stage == "EVALUATION"),
+            "max_single_trade_profit_pct": 40.0 if stage == "EVALUATION" else None,
+            "max_concurrent_trades": int(data.get("max_concurrent_trades", 3)),
+            "status": "REGISTRADA"
+        }
+        s["accounts_catalog"].append(new_acc)
+
+        with open(state_file, 'w', encoding='utf-8') as f:
+            json.dump(s, f, indent=2)
+
+        return {"status": "SUCCESS", "account": new_acc}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.get("/api/account_stage")
+def get_account_stage():
+    """Wrapper de compatibilidad para consultas legacy."""
+    cat = get_accounts_catalog().get("accounts", [])
+    pf = next((a for a in cat if a.get("desk_type") == "PROP_FIRM"), None)
+    cap = next((a for a in cat if a.get("desk_type") == "CAPITAL_PROPIO"), None)
+    return {
+        "prop_firm": pf or {"firm_name": "ICMarketsSC-Demo", "stage": "EVALUATION", "consistency_rule_enabled": True},
+        "capital_propio": cap or {"firm_name": "Interactive Brokers", "stage": "LIVE_CAPITAL", "consistency_rule_enabled": False}
+    }
 
 
 @app.get("/api/notifications")

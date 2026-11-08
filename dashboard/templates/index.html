@@ -606,27 +606,45 @@
         <div id="tab-content-dashboard" class="tab-pane space-y-6">
 
           <!-- ==================== RISK HUD SUPERIOR & KILL-SWITCH CONSOLIDADO ==================== -->
-          <div id="portfolio-risk-hud" class="my-4 p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs space-y-4">
-            
-            <!-- Fila Superior: Perfil de Cuenta de Fondeo & Acciones Operativas -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-[#F2F2F7]">
-              <!-- Izquierda: Estado de la Firma & Selector de Fase -->
-              <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
-                <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#E5E5EA] bg-[#FAFAFC] text-xs font-mono">
-                  <span class="text-[#6E6E73] font-semibold text-[11px]"><i class="fa-solid fa-building-columns text-[#3C45A5]"></i> Cuenta:</span>
-                  <span id="hud-account-firm" class="font-bold text-[#1D1D1F]">Lucid Trading</span>
+                    <!-- ==================== RISK HUD SUPERIOR & KILL-SWITCH CONSOLIDADO ==================== -->
+          <div id="portfolio-risk-hud" class="my-4 p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs">
+            <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-5">
+              <!-- 4 Métricas de Riesgo Clave de Cartera (Espaciado Generoso Anti-Colisión) -->
+              <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 flex-1 min-w-0">
+                <div class="border-r border-[#F2F2F7] pr-3 min-w-0">
+                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] block mb-1 truncate">Margen Utilizado</span>
+                  <div class="flex items-baseline gap-2 flex-wrap">
+                    <span class="text-lg sm:text-xl font-bold font-mono text-[#1D1D1F]" id="hud-margin-used">14.2%</span>
+                    <span class="badge-success-live text-[10px] py-0.5 px-2">Seguro</span>
+                  </div>
                 </div>
-                <div class="flex items-center gap-2">
-                  <button id="hud-btn-stage-toggle" onclick="toggleAccountStage()" class="px-3 py-1.5 rounded-xl text-xs font-mono font-bold bg-[#FEF3C7] text-[#B45309] border border-[#FDE68A] hover:opacity-90 transition cursor-pointer flex items-center gap-1.5 shadow-2xs" title="Clic para alternar fase: Evaluación (40% Clamp) <-> Fondeada (Libre)">
-                    <span class="w-2 h-2 rounded-full bg-[#B45309] animate-pulse" id="hud-account-stage-dot"></span>
-                    <span id="hud-account-stage-text">EVALUACIÓN (40% Clamp)</span>
-                  </button>
-                  <span class="text-[11px] font-mono text-[#86868B] hidden md:inline">· Clic para cambiar política</span>
+                <div class="border-r border-[#F2F2F7] pr-3 min-w-0">
+                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] block mb-1 truncate">Drawdown Cartera</span>
+                  <div class="flex items-baseline gap-2 flex-wrap">
+                    <span class="text-lg sm:text-xl font-bold font-mono text-[#D70015]" id="hud-global-dd">-4.20%</span>
+                    <span class="text-[11px] text-[#86868B] font-mono whitespace-nowrap">Máx: -20.0%</span>
+                  </div>
+                </div>
+                <div class="border-r border-[#F2F2F7] pr-3 min-w-0">
+                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] block mb-1 truncate">PnL Flotante Total</span>
+                  <div class="flex items-baseline gap-1.5 flex-wrap">
+                    <span class="text-lg sm:text-xl font-bold font-mono text-[#065F46]" id="hud-floating-pnl">+$1,420.50</span>
+                    <span class="text-xs font-mono text-[#065F46] font-semibold whitespace-nowrap">(+1.42%)</span>
+                  </div>
+                </div>
+                <div class="min-w-0">
+                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] block mb-1 truncate">Exposición Neta</span>
+                  <div class="flex items-baseline gap-2 flex-wrap">
+                    <span class="text-lg sm:text-xl font-bold font-mono text-[#3C45A5]" id="hud-net-exposure">LONG 62%</span>
+                    <span class="text-[11px] font-mono text-[#86868B] whitespace-nowrap">Asimétrico</span>
+                  </div>
                 </div>
               </div>
-
-              <!-- Derecha: Acciones de Emergencia y Auditoría -->
-              <div class="flex items-center gap-2.5">
+              <!-- Acciones de Intervención Operativa & Gestor de Cuentas -->
+              <div class="flex items-center gap-2.5 pt-3 xl:pt-0 border-t xl:border-t-0 border-[#F2F2F7] shrink-0">
+                <button onclick="toggleAccountsManagerModal()" class="btn-secondary whitespace-nowrap cursor-pointer text-xs flex items-center gap-1.5" title="Gestionar Cuentas Conectadas y Fases de Fondeo">
+                  <i class="fa-solid fa-building-columns text-[#3C45A5]"></i> Cuentas & Fases
+                </button>
                 <button onclick="toggleRiskAuditModal()" class="btn-secondary whitespace-nowrap cursor-pointer text-xs" title="Ver auditoría de drawdown multianual">
                   <i class="fa-solid fa-shield-halved text-[#3C45A5]"></i> Auditoría Riesgo
                 </button>
@@ -635,42 +653,9 @@
                 </button>
               </div>
             </div>
-
-            <!-- Fila Inferior: 4 Métricas de Riesgo Clave de Cartera (100% de Ancho Disponible, Cero Colisión) -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full pt-1">
-              <div class="border-r border-[#F2F2F7] pr-3 min-w-0">
-                <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] block mb-1 truncate">Margen Utilizado</span>
-                <div class="flex items-baseline gap-2 flex-wrap">
-                  <span class="text-lg sm:text-xl font-bold font-mono text-[#1D1D1F]" id="hud-margin-used">14.2%</span>
-                  <span class="badge-success-live text-[10px] py-0.5 px-2">Seguro</span>
-                </div>
-              </div>
-              <div class="border-r border-[#F2F2F7] pr-3 min-w-0">
-                <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] block mb-1 truncate">Drawdown Cartera</span>
-                <div class="flex items-baseline gap-2 flex-wrap">
-                  <span class="text-lg sm:text-xl font-bold font-mono text-[#D70015]" id="hud-global-dd">-4.20%</span>
-                  <span class="text-[11px] text-[#86868B] font-mono whitespace-nowrap">Máx: -20.0%</span>
-                </div>
-              </div>
-              <div class="border-r border-[#F2F2F7] pr-3 min-w-0">
-                <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] block mb-1 truncate">PnL Flotante Total</span>
-                <div class="flex items-baseline gap-1.5 flex-wrap">
-                  <span class="text-lg sm:text-xl font-bold font-mono text-[#065F46]" id="hud-floating-pnl">+$1,420.50</span>
-                  <span class="text-xs font-mono text-[#065F46] font-semibold whitespace-nowrap">(+1.42%)</span>
-                </div>
-              </div>
-              <div class="min-w-0">
-                <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] block mb-1 truncate">Exposición Neta</span>
-                <div class="flex items-baseline gap-2 flex-wrap">
-                  <span class="text-lg sm:text-xl font-bold font-mono text-[#3C45A5]" id="hud-net-exposure">LONG 62%</span>
-                  <span class="text-[11px] font-mono text-[#86868B] whitespace-nowrap">Asimétrico</span>
-                </div>
-              </div>
-            </div>
-
           </div>
 
-          <!-- ==================== GESTIÓN DE CARTERA ACTIVA (TABLA DENSA Y GRID) ==================== -->
+<!-- ==================== GESTIÓN DE CARTERA ACTIVA (TABLA DENSA Y GRID) ==================== -->
           <div id="active-portfolio-section">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3 px-1">
               <div class="flex items-center gap-2">
@@ -7277,6 +7262,135 @@
       }
     }
 
+    
+    // =========================================================================
+    // GESTOR MULTICUENTA GRANULAR (MODAL & TOGGLES POR CUENTA)
+    // =========================================================================
+    let cachedAccountsList = [];
+
+    function toggleAccountsManagerModal() {
+      const modal = document.getElementById('accounts-manager-modal');
+      if (!modal) return;
+      modal.classList.toggle('hidden');
+      if (!modal.classList.contains('hidden')) {
+        fetchAccountsCatalog();
+      }
+    }
+
+    async function fetchAccountsCatalog() {
+      try {
+        const res = await fetch('/api/accounts');
+        if (!res.ok) return;
+        const data = await res.json();
+        cachedAccountsList = data.accounts || [];
+        renderAccountsManagerUI();
+      } catch (e) {
+        console.error('Error fetching accounts catalog:', e);
+      }
+    }
+
+    function renderAccountsManagerUI() {
+      const tbody = document.getElementById('accounts-table-tbody');
+      if (!tbody) return;
+
+      if (cachedAccountsList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-[#86868B]">No hay cuentas registradas</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = cachedAccountsList.map(acc => {
+        const isEval = (acc.stage === 'EVALUATION');
+        const isFunded = (acc.stage === 'FUNDED');
+        const isCap = (acc.stage === 'LIVE_CAPITAL');
+
+        const consistencyBadge = isEval
+          ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#FEF3C7] text-[#B45309] border border-[#FDE68A]">🛡️ 40% Clamp Activo</span>'
+          : '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0]">⚡ Desactivada (Full Alpha)</span>';
+
+        const deskBadge = (acc.desk_type === 'CAPITAL_PROPIO')
+          ? '<span class="badge-success-live text-[10px] py-0.5 px-2">Capital Propio</span>'
+          : '<span class="badge-brand-indigo text-[10px] py-0.5 px-2">Fondeo (Prop Firm)</span>';
+
+        return `
+          <tr class="hover:bg-[#FAFAFC] transition">
+            <td class="py-3 px-3 font-bold text-[#1D1D1F]">${acc.account_id}</td>
+            <td class="py-3 px-3">
+              <div class="font-bold text-[#1D1D1F]">${acc.firm_name}</div>
+              <div class="text-[10px] text-[#86868B]">${acc.status || 'ACTIVA'}</div>
+            </td>
+            <td class="py-3 px-3">${deskBadge}</td>
+            <td class="py-3 px-3 text-right font-bold text-[#1D1D1F]">$${Number(acc.balance || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+            <td class="py-3 px-3 text-center">
+              <div class="inline-flex rounded-lg border border-[#E5E5EA] p-0.5 bg-[#F5F5F7] shadow-2xs">
+                <button onclick="setSingleAccountStage('${acc.account_id}', 'EVALUATION')" class="px-2.5 py-1 rounded-md text-[10px] font-bold transition cursor-pointer ${isEval ? 'bg-[#FEF3C7] text-[#B45309] shadow-xs' : 'text-[#6E6E73] hover:text-[#1D1D1F]'}">
+                  Evaluación
+                </button>
+                <button onclick="setSingleAccountStage('${acc.account_id}', 'FUNDED')" class="px-2.5 py-1 rounded-md text-[10px] font-bold transition cursor-pointer ${isFunded ? 'bg-[#ECFDF5] text-[#065F46] shadow-xs' : 'text-[#6E6E73] hover:text-[#1D1D1F]'}">
+                  Fondeada
+                </button>
+                ${(acc.desk_type === 'CAPITAL_PROPIO') ? `
+                <button onclick="setSingleAccountStage('${acc.account_id}', 'LIVE_CAPITAL')" class="px-2.5 py-1 rounded-md text-[10px] font-bold transition cursor-pointer ${isCap ? 'bg-[#EEF2FF] text-[#3C45A5] shadow-xs' : 'text-[#6E6E73] hover:text-[#1D1D1F]'}">
+                  Capital Propio
+                </button>` : ''}
+              </div>
+            </td>
+            <td class="py-3 px-3 text-center">${consistencyBadge}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function setSingleAccountStage(accountId, newStage) {
+      try {
+        const res = await fetch('/api/accounts/update_stage', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ account_id: accountId, stage: newStage })
+        });
+        if (res.ok) {
+          fetchAccountsCatalog();
+          if (typeof fetchNotifications === 'function') fetchNotifications();
+        }
+      } catch (e) {
+        console.error('Error updating account stage:', e);
+      }
+    }
+
+    async function submitNewAccount() {
+      const id = document.getElementById('new-acc-id').value.trim();
+      const firm = document.getElementById('new-acc-firm').value.trim();
+      const desk = document.getElementById('new-acc-desk').value;
+      const balance = parseFloat(document.getElementById('new-acc-balance').value) || 50000.0;
+      const stage = document.getElementById('new-acc-stage').value;
+
+      if (!id || !firm) {
+        alert('Por favor introduce el ID de cuenta y el nombre del Bróker/Firma.');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/accounts/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            account_id: id,
+            firm_name: firm,
+            desk_type: desk,
+            balance: balance,
+            stage: stage
+          })
+        });
+        if (res.ok) {
+          document.getElementById('new-acc-id').value = '';
+          document.getElementById('new-acc-firm').value = '';
+          fetchAccountsCatalog();
+        }
+      } catch (e) {
+        console.error('Error adding new account:', e);
+      }
+    }
+
+
     // =========================================================================
     // CENTRO DE ALERTAS Y NOTIFICACIONES CUANTITATIVAS
     // =========================================================================
@@ -9048,6 +9162,100 @@
       <div class="text-right pt-2 border-t border-[#E5E5EA]">
         <button onclick="closeQExplainModal()" class="cta-primary-btn font-mono text-xs px-4 py-1.5">Entendido</button>
       </div>
+    </div>
+  </div>
+
+
+  <!-- =========================================================================
+       MODAL INSTITUCIONAL DE GESTIÓN MULTICUENTA GRANULAR
+       ========================================================================= -->
+  <div id="accounts-manager-modal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="max-w-4xl w-full bg-[#FFFFFF] border border-[#E5E5EA] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] my-8">
+      
+      <!-- Cabecera del Modal -->
+      <div class="p-5 border-b border-[#F2F2F7] bg-[#FAFAFC] flex items-center justify-between">
+        <div>
+          <div class="overline-text">INFRAESTRUCTURA MULTICUENTA</div>
+          <h3 class="text-base font-bold text-[#1D1D1F] mt-0.5">Gestor de Cuentas Conectadas & Fases de Fondeo</h3>
+          <p class="text-xs text-[#6E6E73] mt-0.5">Control individual e independiente por cuenta: alterna entre Evaluación (40% Clamp) y Fondeada (Full Alpha) con botones explícitos.</p>
+        </div>
+        <button onclick="toggleAccountsManagerModal()" class="w-8 h-8 rounded-lg hover:bg-[#E5E5EA] text-[#6E6E73] flex items-center justify-center transition cursor-pointer" title="Cerrar ventana">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Contenido: Tabla de Cuentas Registradas -->
+      <div class="p-5 overflow-y-auto space-y-6 flex-1">
+        <div class="overflow-x-auto rounded-xl border border-[#E5E5EA]">
+          <table class="w-full text-left text-xs font-mono border-collapse">
+            <thead>
+              <tr class="border-b border-[#E5E5EA] bg-[#FAFAFC] text-[#6E6E73] text-[11px] uppercase">
+                <th class="py-2.5 px-3">ID Cuenta</th>
+                <th class="py-2.5 px-3">Firma / Bróker</th>
+                <th class="py-2.5 px-3">Mesa / Vehículo</th>
+                <th class="py-2.5 px-3 text-right">Saldo / Equidad</th>
+                <th class="py-2.5 px-3 text-center">Fase Operativa (Selector Individual)</th>
+                <th class="py-2.5 px-3 text-center">Consistencia 40%</th>
+              </tr>
+            </thead>
+            <tbody id="accounts-table-tbody" class="divide-y divide-[#F2F2F7]">
+              <!-- Populado dinámicamente por renderAccountsManagerUI() -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Formulario para Registrar Nueva Cuenta -->
+        <div class="p-4 rounded-xl border border-[#E5E5EA] bg-[#FAFAFC] space-y-3">
+          <h4 class="text-xs font-bold text-[#1D1D1F] uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-plus-circle text-[#3C45A5]"></i> Registrar Nueva Cuenta de Fondeo o Broker
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            <div>
+              <label class="text-[10px] uppercase font-bold text-[#6E6E73] block mb-1">ID Cuenta</label>
+              <input type="text" id="new-acc-id" placeholder="Ej: 53120791 o PROP-100K" class="w-full px-2.5 py-1.5 rounded-lg border border-[#E5E5EA] bg-white text-xs font-mono text-[#1D1D1F]">
+            </div>
+            <div>
+              <label class="text-[10px] uppercase font-bold text-[#6E6E73] block mb-1">Firma / Bróker</label>
+              <input type="text" id="new-acc-firm" placeholder="Ej: Topstep, Tradeify, Apex..." class="w-full px-2.5 py-1.5 rounded-lg border border-[#E5E5EA] bg-white text-xs font-mono text-[#1D1D1F]">
+            </div>
+            <div>
+              <label class="text-[10px] uppercase font-bold text-[#6E6E73] block mb-1">Mesa / Tipo</label>
+              <select id="new-acc-desk" class="w-full px-2.5 py-1.5 rounded-lg border border-[#E5E5EA] bg-white text-xs font-mono text-[#1D1D1F]">
+                <option value="PROP_FIRM">Fondeo (Prop Firm)</option>
+                <option value="CAPITAL_PROPIO">Capital Propio</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-[10px] uppercase font-bold text-[#6E6E73] block mb-1">Saldo ($ USD)</label>
+              <input type="number" id="new-acc-balance" value="50000" class="w-full px-2.5 py-1.5 rounded-lg border border-[#E5E5EA] bg-white text-xs font-mono text-[#1D1D1F]">
+            </div>
+            <div>
+              <label class="text-[10px] uppercase font-bold text-[#6E6E73] block mb-1">Fase Inicial</label>
+              <select id="new-acc-stage" class="w-full px-2.5 py-1.5 rounded-lg border border-[#E5E5EA] bg-white text-xs font-mono text-[#1D1D1F]">
+                <option value="EVALUATION">Evaluación (40% Clamp)</option>
+                <option value="FUNDED">Fondeada (Full Alpha)</option>
+                <option value="LIVE_CAPITAL">Capital Propio</option>
+              </select>
+            </div>
+          </div>
+          <div class="flex justify-end pt-1">
+            <button onclick="submitNewAccount()" class="px-3 py-1.5 rounded-lg bg-[#3C45A5] hover:bg-[#32398a] text-white text-xs font-bold font-mono transition cursor-pointer flex items-center gap-1.5 shadow-xs">
+              <i class="fa-solid fa-check text-xs"></i> Guardar y Conectar Cuenta
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer del Modal -->
+      <div class="p-3.5 border-t border-[#F2F2F7] bg-[#FAFAFC] flex items-center justify-between text-xs font-mono">
+        <span class="text-[#6E6E73] text-[11px] flex items-center gap-1.5">
+          <i class="fa-solid fa-shield text-[#107C41]"></i> Anti-Hedging acotado por firma activo
+        </span>
+        <button onclick="toggleAccountsManagerModal()" class="btn-secondary text-xs cursor-pointer">
+          Cerrar
+        </button>
+      </div>
+
     </div>
   </div>
 

@@ -512,10 +512,15 @@ def run_cycle():
             # ==============================================================
             # REGLAS DE GESTION DE CARTERA INSTITUCIONAL (BLOQUE 2)
             # ==============================================================
-            acc_info = state.get('active_accounts', {}).get(branch.lower(), {})
-            firm_name = acc_info.get('firm_name', 'LUCID_TRADING' if branch == 'PROP_FIRM' else 'INTERACTIVE_BROKERS')
-            account_stage = acc_info.get('stage', 'EVALUATION' if branch == 'PROP_FIRM' else 'LIVE_CAPITAL')
-            consistency_active = (account_stage == 'EVALUATION') and acc_info.get('consistency_rule_enabled', True)
+            # Búsqueda dinámica en el catálogo de cuentas registradas (sin hardcodeo)
+            catalog = state.get('accounts_catalog', [])
+            matched_acc = next((a for a in catalog if a.get('desk_type') == branch), None)
+            if matched_acc is None:
+                matched_acc = state.get('active_accounts', {}).get(branch.lower(), {})
+
+            firm_name = matched_acc.get('firm_name', 'ICMarketsSC-Demo' if branch == 'PROP_FIRM' else 'INTERACTIVE_BROKERS')
+            account_stage = matched_acc.get('stage', 'EVALUATION' if branch == 'PROP_FIRM' else 'LIVE_CAPITAL')
+            consistency_active = (account_stage == 'EVALUATION') and matched_acc.get('consistency_rule_enabled', True)
 
             # 1. CANDADO DIRECCIONAL POR FIRMA (Firm-Scoped Anti-Hedging)
             # Solo bloquea si existe posición contraria en el MISMO ACTIVO dentro de la MISMA FIRMA
