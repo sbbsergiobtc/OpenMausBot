@@ -1,13 +1,48 @@
 # =====================================================================
-# REGLA SUPREMA DE NOTICIAS DE ALTO IMPACTO (DIRECTIVA MANDATORIA SERGIO)
+# GOBERNANZA SUPREMA Y GESTIÓN DE RIESGO INSTITUCIONAL (DIRECTIVA SERGIO)
 # =====================================================================
+
+# 1. REGLA SUPREMA DE NOTICIAS DE ALTO IMPACTO (CARPETAS ROJAS)
 news_trading_policy:
   allow_news_trading: false
   blackout_window_minutes_before: 5
   blackout_window_minutes_after: 5
+  mandatory_hard_close_prior_to_news: true
+  allowed_macro_currencies:
+    - "USD"
+    - "EUR"
+    - "GBP"
   high_impact_events:
     - "FOMC / Fed Rate Decision"
     - "CPI (Consumer Price Index)"
     - "NFP (Non-Farm Payrolls)"
     - "PPI / PCE Core Inflation"
     - "Interest Rate Decisions"
+    - "GDP (Gross Domestic Product)"
+    - "ECB Rate Decision"
+    - "BOE Rate Decision"
+
+# 2. CANDADO DE ROLLOVER Y SWAPS BANCARIOS
+rollover_policy:
+  allow_new_orders_in_rollover: false
+  rollover_start_cet: "22:58"
+  rollover_end_cet: "23:05"
+  keep_existing_positions_open: true
+
+# 3. FRICCIONES REALES EN PERPETUOS / CRIPTO (HYPERLIQUID & BINANCE)
+crypto_friction_policy:
+  account_funding_rates_hourly: true
+  taker_fee_pct: 0.035
+  maker_fee_pct: 0.010
+  slippage_model: "DYNAMIC_L2_DEPTH"
+
+# 4. REGLA DE CONSISTENCIA DEL 40% (PROP FIRMS)
+consistency_policy:
+  evaluation_stage_clamp_enabled: true
+  max_single_trade_profit_pct_of_target: 40.0
+  funded_stage_clamp_enabled: false  # Se desactiva automáticamente tras aprobar el challenge
+
+# 5. LÍMITES DE CONCURRENCIA POR MESA
+portfolio_concurrency:
+  capital_propio_max_concurrent_trades: 2
+  prop_firm_max_concurrent_trades: 3

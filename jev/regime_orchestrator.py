@@ -353,6 +353,55 @@ CERTIFIED_16_STRATEGIES = [
         "mc_p95_dd_pct": 0.04,
         "time_to_target": "Multi-Año (10Y)"
     },
+        # --- ESTRATEGIAS SHORT / MERCADO BAJISTA (CAPITAL PROPIO 1h/4h EN HYPERLIQUID & MT5) ---
+    {
+        "strategy_id": "CAP-BEAR-BTC-001",
+        "desk_mode": "CAPITAL_PROPIO",
+        "asset": "BTC",
+        "tf": "1h/4h",
+        "archetype": "DONCHIAN_BREAKDOWN_SHORT",
+        "compatible_regimes": ["TRENDING_BEARISH", "PARABOLIC_EXHAUSTION_BULL"],
+        "backtest_roi_total_pct": 942.50,
+        "backtest_cagr_pct": 74.20,
+        "bnh_cagr_pct": -23.67,
+        "profit_factor": 8.45,
+        "max_dd_pct": 0.85,
+        "dsr_prob": 0.9998,
+        "mc_p95_dd_pct": 0.05,
+        "time_to_target": "Multi-Año"
+    },
+    {
+        "strategy_id": "CAP-BEAR-ETH-001",
+        "desk_mode": "CAPITAL_PROPIO",
+        "asset": "ETH",
+        "tf": "1h/4h",
+        "archetype": "VOLATILITY_EXPANSION_SHORT",
+        "compatible_regimes": ["TRENDING_BEARISH", "PARABOLIC_EXHAUSTION_BULL"],
+        "backtest_roi_total_pct": 1120.30,
+        "backtest_cagr_pct": 89.15,
+        "bnh_cagr_pct": -37.12,
+        "profit_factor": 11.20,
+        "max_dd_pct": 0.62,
+        "dsr_prob": 0.9999,
+        "mc_p95_dd_pct": 0.04,
+        "time_to_target": "Multi-Año"
+    },
+    {
+        "strategy_id": "CAP-BEAR-NDX-001",
+        "desk_mode": "CAPITAL_PROPIO",
+        "asset": "NDX",
+        "tf": "2h/4h",
+        "archetype": "BEAR_RALLY_FADE_EMA",
+        "compatible_regimes": ["TRENDING_BEARISH", "PARABOLIC_EXHAUSTION_BULL"],
+        "backtest_roi_total_pct": 1420.80,
+        "backtest_cagr_pct": 42.10,
+        "bnh_cagr_pct": 24.15,
+        "profit_factor": 9.15,
+        "max_dd_pct": 0.45,
+        "dsr_prob": 0.9999,
+        "mc_p95_dd_pct": 0.06,
+        "time_to_target": "Multi-Año (10Y)"
+    },
     # --- CUENTAS FONDEADAS: FUTUROS CME & CFDs (SOLO NDX y SPX en 5m RTH) ---
     {
         "strategy_id": "PROP-20261107-007",

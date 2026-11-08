@@ -567,6 +567,31 @@ def run_cycle():
                         )
                     continue
 
+            # 0b. CANDADO DE ROLLOVER Y SWAPS BANCARIOS (22:58 A 23:05 CET - DIRECTIVA SERGIO)
+            # Se prohíbe abrir posiciones nuevas en esta ventana de ensanchamiento de spreads. Las existentes continúan.
+            try:
+                import zoneinfo
+                now_madrid = datetime.datetime.now(datetime.timezone.utc).astimezone(zoneinfo.ZoneInfo("Europe/Madrid"))
+                cur_time_int = now_madrid.hour * 100 + now_madrid.minute
+                if 2258 <= cur_time_int <= 2305:
+                    print(f"  [BLOQUEO ROLLOVER 22:58-23:05 CET] {sym} ({strat_id}): Prohibido abrir orden en ventana de rollover.")
+                    if record_libro_c_telemetry is not None:
+                        record_libro_c_telemetry(
+                            event_type="REJECTED_ROLLOVER_WINDOW",
+                            desk_mode=branch,
+                            symbol=sym,
+                            strategy_id=strat_id,
+                            regime_id_10=regime_id_10,
+                            archetype_or_anchor=strat_id,
+                            guardian_traffic_light=guard_light,
+                            action_multiplier=0.0,
+                            q_value=float(q_dec.get('q_value', 0.0)),
+                            details={'reason': 'Ventana de Rollover 22:58-23:05 CET activa. Prohibido abrir nuevas ordenes.'}
+                        )
+                    continue
+            except Exception:
+                pass
+
             # 1. CANDADO DIRECCIONAL POR FIRMA (Firm-Scoped Anti-Hedging)
             # Solo bloquea si existe posición contraria en el MISMO ACTIVO dentro de la MISMA FIRMA
             has_opposite_firm_trade = False
