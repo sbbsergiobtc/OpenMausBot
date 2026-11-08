@@ -39,3 +39,11 @@ El daemon `algrokquant-forward-test.service` ejecuta un bucle 24/7 con libro vir
 * `algrokquant-forward-test.service` (PID activo, bucle continuo multiactivo).
 * `algrokquant-dashboard.service` (FastAPI Uvicorn en `:8080`, estado OK).
 * `openmausbot.service` (Servicio core de mensajería y orquestación, estado OK).
+
+---
+
+## 4. Próximo Hito en Roadmap a Medio Plazo
+* **Hito:** Opción 3 · Pasarela de Despliegue Real para Estrategias Graduadas (*Real Execution Bridge*).
+* **Condición de Disparo:** Conteo $\ge 30$ trades en verde dentro del Cono Monte Carlo ($P_{05}\text{--}P_{95}$) con veredicto `GRADUATED_FOR_REAL_ACCOUNT`.
+* **Especificación Completa:** Véase [`ROADMAP.md`](file:///C:/Users/Sergio/Documents/Antigravity/OpenMausBot/ROADMAP.md) y [`library/ROADMAP.md`](file:///C:/Users/Sergio/Documents/Antigravity/OpenMausBot/library/ROADMAP.md).
+
