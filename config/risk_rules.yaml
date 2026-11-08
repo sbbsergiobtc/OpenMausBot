@@ -1,0 +1,13 @@
+# =====================================================================
+# REGLA SUPREMA DE NOTICIAS DE ALTO IMPACTO (DIRECTIVA MANDATORIA SERGIO)
+# =====================================================================
+news_trading_policy:
+  allow_news_trading: false
+  blackout_window_minutes_before: 5
+  blackout_window_minutes_after: 5
+  high_impact_events:
+    - "FOMC / Fed Rate Decision"
+    - "CPI (Consumer Price Index)"
+    - "NFP (Non-Farm Payrolls)"
+    - "PPI / PCE Core Inflation"
+    - "Interest Rate Decisions"
