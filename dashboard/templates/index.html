@@ -639,18 +639,8 @@
                   </div>
                 </div>
               </div>
-              <!-- Acciones de Intervención Operativa & Selector de Fase -->
-              <div class="flex items-center gap-2.5 pt-3 xl:pt-0 border-t xl:border-t-0 border-[#F2F2F7] shrink-0 flex-wrap">
-                <!-- Selector de Fase de Cuenta de Fondeo (EVALUATION 40% vs. FUNDED / LIVE) -->
-                <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#E5E5EA] bg-[#FAFAFC] text-xs font-mono shadow-2xs">
-                  <span class="text-[#6E6E73] font-semibold text-[11px]"><i class="fa-solid fa-building-columns text-[#3C45A5]"></i> Cuenta:</span>
-                  <span id="hud-account-firm" class="font-bold text-[#1D1D1F]">Lucid Trading</span>
-                  <div class="h-3 w-[1px] bg-[#E5E5EA]"></div>
-                  <button id="hud-btn-stage-toggle" onclick="toggleAccountStage()" class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-[#FEF3C7] text-[#B45309] border border-[#FDE68A] hover:opacity-90 transition cursor-pointer flex items-center gap-1" title="Clic para alternar fase: Evaluación (40% Clamp) <-> Fondeada (Libre)">
-                    <span class="w-1.5 h-1.5 rounded-full bg-[#B45309] animate-pulse" id="hud-account-stage-dot"></span>
-                    <span id="hud-account-stage-text">EVALUACIÓN (40% Clamp)</span>
-                  </button>
-                </div>
+              <!-- Acciones de Intervención Operativa -->
+              <div class="flex items-center gap-2.5 pt-3 xl:pt-0 border-t xl:border-t-0 border-[#F2F2F7] shrink-0">
                 <button onclick="toggleRiskAuditModal()" class="btn-secondary whitespace-nowrap cursor-pointer" title="Ver auditoría de drawdown multianual">
                   <i class="fa-solid fa-shield-halved text-[#3C45A5]"></i> Auditoría Riesgo
                 </button>
@@ -7201,71 +7191,6 @@
 
     
     // =========================================================================
-    // GESTIÓN DINÁMICA DE CUENTAS & SELECTOR DE FASE (EVALUATION vs FUNDED)
-    // =========================================================================
-    let currentAccountState = {
-      prop_firm: {
-        firm_name: 'Lucid Trading',
-        stage: 'EVALUATION',
-        consistency_rule_enabled: true
-      }
-    };
-
-    async function fetchAccountStage() {
-      try {
-        const res = await fetch('/api/account_stage');
-        if (!res.ok) return;
-        const data = await res.json();
-        currentAccountState = data;
-        renderAccountStageUI();
-      } catch (e) {
-        console.error('Error fetching account stage:', e);
-      }
-    }
-
-    function renderAccountStageUI() {
-      const pf = (currentAccountState && currentAccountState.prop_firm) ? currentAccountState.prop_firm : { firm_name: 'Lucid Trading', stage: 'EVALUATION' };
-      const firmEl = document.getElementById('hud-account-firm');
-      const textEl = document.getElementById('hud-account-stage-text');
-      const dotEl = document.getElementById('hud-account-stage-dot');
-      const btnEl = document.getElementById('hud-btn-stage-toggle');
-      if (firmEl) firmEl.innerText = pf.firm_name || 'Lucid Trading';
-      
-      const isEval = (pf.stage === 'EVALUATION');
-      if (textEl) textEl.innerText = isEval ? 'EVALUACIÓN (40% Clamp)' : 'FONDEADA (Full Alpha)';
-      if (dotEl) {
-        dotEl.className = isEval ? 'w-1.5 h-1.5 rounded-full bg-[#B45309] animate-pulse' : 'w-1.5 h-1.5 rounded-full bg-[#107C41]';
-      }
-      if (btnEl) {
-        btnEl.className = isEval
-          ? 'px-2 py-0.5 rounded-lg text-[10px] font-bold bg-[#FEF3C7] text-[#B45309] border border-[#FDE68A] hover:opacity-90 transition cursor-pointer flex items-center gap-1'
-          : 'px-2 py-0.5 rounded-lg text-[10px] font-bold bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] hover:opacity-90 transition cursor-pointer flex items-center gap-1';
-      }
-    }
-
-    async function toggleAccountStage() {
-      const pf = (currentAccountState && currentAccountState.prop_firm) ? currentAccountState.prop_firm : { stage: 'EVALUATION' };
-      const nextStage = (pf.stage === 'EVALUATION') ? 'FUNDED' : 'EVALUATION';
-      try {
-        const res = await fetch('/api/account_stage', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ branch: 'prop_firm', stage: nextStage })
-        });
-        if (res.ok) {
-          const resData = await res.json();
-          if (resData.config) {
-            currentAccountState.prop_firm = resData.config;
-            renderAccountStageUI();
-            if (typeof fetchNotifications === 'function') fetchNotifications();
-          }
-        }
-      } catch (e) {
-        console.error('Error toggling account stage:', e);
-      }
-    }
-
-    // =========================================================================
     // CENTRO DE ALERTAS Y NOTIFICACIONES CUANTITATIVAS
     // =========================================================================
     let currentNotifications = [];
@@ -7401,7 +7326,6 @@
       const startT = performance.now();
       try {
         const results = await Promise.allSettled([
-          fetchAccountStage(),
           fetchNotifications(),
           fetchSummary(),
           fetchAnalyticsData(currentAccountFilter),
@@ -7447,7 +7371,6 @@
       if (typeof initDefaultFtEquityCurve === 'function') {
         setTimeout(initDefaultFtEquityCurve, 250);
       }
-      fetchAccountStage();
       fetchNotifications();
       setInterval(fetchNotifications, 30000);
       fetchSummary();
