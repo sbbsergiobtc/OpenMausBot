@@ -547,17 +547,6 @@
         </div>
 
         <div class="flex items-center space-x-3">
-          <!-- Selector de Fase de Cuenta de Fondeo (EVALUATION 40% vs. FUNDED / LIVE) -->
-          <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] text-xs font-mono shadow-xs">
-            <span class="text-[#6E6E73] font-semibold text-[11px] hidden md:inline"><i class="fa-solid fa-building-columns text-[#3C45A5]"></i> Cuenta:</span>
-            <span id="header-account-firm" class="font-bold text-[#1D1D1F]">Lucid Trading</span>
-            <div class="h-3 w-[1px] bg-[#E5E5EA]"></div>
-            <button id="header-btn-stage-toggle" onclick="toggleAccountStage()" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-[#FEF3C7] text-[#B45309] border border-[#FDE68A] hover:opacity-90 transition cursor-pointer flex items-center gap-1.5" title="Clic para alternar fase: Evaluación (40% Clamp) <-> Fondeada (Libre)">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#B45309] animate-pulse" id="header-account-stage-dot"></span>
-              <span id="header-account-stage-text">EVALUACIÓN (40% Clamp)</span>
-            </button>
-          </div>
-
           <div class="text-right hidden sm:block">
             <p class="text-xs text-[#181A20] font-bold font-mono" id="live-clock">--:--:-- UTC</p>
             <p class="text-[11px] text-[#065F46] font-semibold flex items-center justify-end transition-colors" id="daemon-health-container">
@@ -617,50 +606,28 @@
         <div id="tab-content-dashboard" class="tab-pane space-y-6">
 
           <!-- ==================== RISK HUD SUPERIOR & KILL-SWITCH CONSOLIDADO ==================== -->
-          <div id="portfolio-risk-hud" class="my-4 p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs">
-            <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-5">
-              <!-- 4 Métricas de Riesgo Clave de Cartera (Espaciado Generoso Anti-Colisión) -->
-              <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 flex-1 min-w-0">
-                <div class="border-r border-[#F2F2F7] pr-3 min-w-0">
-                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] block mb-1 truncate">Margen Utilizado</span>
-                  <div class="flex items-baseline gap-2 flex-wrap">
-                    <span class="text-lg sm:text-xl font-bold font-mono text-[#1D1D1F]" id="hud-margin-used">14.2%</span>
-                    <span class="badge-success-live text-[10px] py-0.5 px-2">Seguro</span>
-                  </div>
+          <div id="portfolio-risk-hud" class="my-4 p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs space-y-4">
+            
+            <!-- Fila Superior: Perfil de Cuenta de Fondeo & Acciones Operativas -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-[#F2F2F7]">
+              <!-- Izquierda: Estado de la Firma & Selector de Fase -->
+              <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#E5E5EA] bg-[#FAFAFC] text-xs font-mono">
+                  <span class="text-[#6E6E73] font-semibold text-[11px]"><i class="fa-solid fa-building-columns text-[#3C45A5]"></i> Cuenta:</span>
+                  <span id="hud-account-firm" class="font-bold text-[#1D1D1F]">Lucid Trading</span>
                 </div>
-                <div class="border-r border-[#F2F2F7] pr-3 min-w-0">
-                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] block mb-1 truncate">Drawdown Cartera</span>
-                  <div class="flex items-baseline gap-2 flex-wrap">
-                    <span class="text-lg sm:text-xl font-bold font-mono text-[#D70015]" id="hud-global-dd">-4.20%</span>
-                    <span class="text-[11px] text-[#86868B] font-mono whitespace-nowrap">Máx: -20.0%</span>
-                  </div>
-                </div>
-                <div class="border-r border-[#F2F2F7] pr-3 min-w-0">
-                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] block mb-1 truncate">PnL Flotante Total</span>
-                  <div class="flex items-baseline gap-1.5 flex-wrap">
-                    <span class="text-lg sm:text-xl font-bold font-mono text-[#065F46]" id="hud-floating-pnl">+$1,420.50</span>
-                    <span class="text-xs font-mono text-[#065F46] font-semibold whitespace-nowrap">(+1.42%)</span>
-                  </div>
-                </div>
-                <div class="min-w-0">
-                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] block mb-1 truncate">Exposición Neta</span>
-                  <div class="flex items-baseline gap-2 flex-wrap">
-                    <span class="text-lg sm:text-xl font-bold font-mono text-[#3C45A5]" id="hud-net-exposure">LONG 62%</span>
-                    <span class="text-[11px] font-mono text-[#86868B] whitespace-nowrap">Asimétrico</span>
-                  </div>
-                </div>
-              </div>
-              <!-- Acciones de Intervención Operativa -->
-              <div class="flex items-center gap-2.5 pt-3 xl:pt-0 border-t xl:border-t-0 border-[#F2F2F7] shrink-0 flex-wrap">
-                <!-- Selector de Fase HUD Cockpit -->
-                <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#E5E5EA] bg-[#FAFAFC] text-xs font-mono shadow-2xs">
-                  <span class="text-[#6E6E73] font-semibold text-[11px]"><i class="fa-solid fa-building-columns text-[#3C45A5]"></i> <span id="hud-account-firm">Lucid Trading</span>:</span>
-                  <button id="hud-btn-stage-toggle" onclick="toggleAccountStage()" class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-[#FEF3C7] text-[#B45309] border border-[#FDE68A] hover:opacity-90 transition cursor-pointer flex items-center gap-1" title="Clic para alternar fase">
-                    <span class="w-1.5 h-1.5 rounded-full bg-[#B45309] animate-pulse" id="hud-account-stage-dot"></span>
+                <div class="flex items-center gap-2">
+                  <button id="hud-btn-stage-toggle" onclick="toggleAccountStage()" class="px-3 py-1.5 rounded-xl text-xs font-mono font-bold bg-[#FEF3C7] text-[#B45309] border border-[#FDE68A] hover:opacity-90 transition cursor-pointer flex items-center gap-1.5 shadow-2xs" title="Clic para alternar fase: Evaluación (40% Clamp) <-> Fondeada (Libre)">
+                    <span class="w-2 h-2 rounded-full bg-[#B45309] animate-pulse" id="hud-account-stage-dot"></span>
                     <span id="hud-account-stage-text">EVALUACIÓN (40% Clamp)</span>
                   </button>
+                  <span class="text-[11px] font-mono text-[#86868B] hidden md:inline">· Clic para cambiar política</span>
                 </div>
-                <button onclick="toggleRiskAuditModal()" class="btn-secondary whitespace-nowrap cursor-pointer" title="Ver auditoría de drawdown multianual">
+              </div>
+
+              <!-- Derecha: Acciones de Emergencia y Auditoría -->
+              <div class="flex items-center gap-2.5">
+                <button onclick="toggleRiskAuditModal()" class="btn-secondary whitespace-nowrap cursor-pointer text-xs" title="Ver auditoría de drawdown multianual">
                   <i class="fa-solid fa-shield-halved text-[#3C45A5]"></i> Auditoría Riesgo
                 </button>
                 <button onclick="triggerEmergencyKillSwitch()" id="btn-kill-switch" class="px-4 py-2 rounded-lg bg-[#D70015] hover:bg-[#B50012] text-white text-xs font-bold font-mono flex items-center gap-2 transition shadow-xs cursor-pointer whitespace-nowrap" title="Desconexión preventiva y pausa de todos los bots">
@@ -668,6 +635,39 @@
                 </button>
               </div>
             </div>
+
+            <!-- Fila Inferior: 4 Métricas de Riesgo Clave de Cartera (100% de Ancho Disponible, Cero Colisión) -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full pt-1">
+              <div class="border-r border-[#F2F2F7] pr-3 min-w-0">
+                <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] block mb-1 truncate">Margen Utilizado</span>
+                <div class="flex items-baseline gap-2 flex-wrap">
+                  <span class="text-lg sm:text-xl font-bold font-mono text-[#1D1D1F]" id="hud-margin-used">14.2%</span>
+                  <span class="badge-success-live text-[10px] py-0.5 px-2">Seguro</span>
+                </div>
+              </div>
+              <div class="border-r border-[#F2F2F7] pr-3 min-w-0">
+                <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] block mb-1 truncate">Drawdown Cartera</span>
+                <div class="flex items-baseline gap-2 flex-wrap">
+                  <span class="text-lg sm:text-xl font-bold font-mono text-[#D70015]" id="hud-global-dd">-4.20%</span>
+                  <span class="text-[11px] text-[#86868B] font-mono whitespace-nowrap">Máx: -20.0%</span>
+                </div>
+              </div>
+              <div class="border-r border-[#F2F2F7] pr-3 min-w-0">
+                <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] block mb-1 truncate">PnL Flotante Total</span>
+                <div class="flex items-baseline gap-1.5 flex-wrap">
+                  <span class="text-lg sm:text-xl font-bold font-mono text-[#065F46]" id="hud-floating-pnl">+$1,420.50</span>
+                  <span class="text-xs font-mono text-[#065F46] font-semibold whitespace-nowrap">(+1.42%)</span>
+                </div>
+              </div>
+              <div class="min-w-0">
+                <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] block mb-1 truncate">Exposición Neta</span>
+                <div class="flex items-baseline gap-2 flex-wrap">
+                  <span class="text-lg sm:text-xl font-bold font-mono text-[#3C45A5]" id="hud-net-exposure">LONG 62%</span>
+                  <span class="text-[11px] font-mono text-[#86868B] whitespace-nowrap">Asimétrico</span>
+                </div>
+              </div>
+            </div>
+
           </div>
 
           <!-- ==================== GESTIÓN DE CARTERA ACTIVA (TABLA DENSA Y GRID) ==================== -->
