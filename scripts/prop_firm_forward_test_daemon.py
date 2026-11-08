@@ -42,6 +42,13 @@ except Exception as e:
     print(f"[WARN] RegimeOrchestrator no inicializado: {e}")
 
 try:
+    from jev.news_risk_filter import check_news_blackout, get_macro_risk_status
+except Exception as e:
+    check_news_blackout = None
+    get_macro_risk_status = None
+    print(f"[WARN] NewsRiskFilter no inicializado: {e}")
+
+try:
     from jev.auto_deployer import evaluate_forward_test_incubation_guardian, dispatch_telegram_message
 except Exception as e:
     evaluate_forward_test_incubation_guardian = None
@@ -299,6 +306,17 @@ def run_cycle():
     # 1. Sincronizar Balance Vivo con IC Markets MT5
     current_live_balance = sync_broker_state(state)
 
+    # 1a. Estado de Riesgo Macro y Calendario Económico (Regla Blackout ±5 min)
+    if get_macro_risk_status is not None:
+        try:
+            m_status = get_macro_risk_status()
+            state['macro_risk_status'] = m_status
+            if m_status.get('active_blackout'):
+                ab = m_status['active_blackout']
+                print(f"  [ALERTA MACRO] BLACKOUT ACTIVO: {ab['title']} ({ab['country']}) a las {ab['datetime_utc']}")
+        except Exception as me:
+            print(f"  [WARN] Error actualizando MacroRiskStatus: {me}")
+
     # 1b. Actualizar Orquestador Paralelo A/B (10 Sub-estados y multiplicadores de lotaje 1.25x..0.00x)
     if run_parallel_orchestrator_evaluation is not None:
         try:
@@ -521,6 +539,26 @@ def run_cycle():
             firm_name = matched_acc.get('firm_name', 'ICMarketsSC-Demo' if branch == 'PROP_FIRM' else 'INTERACTIVE_BROKERS')
             account_stage = matched_acc.get('stage', 'EVALUATION' if branch == 'PROP_FIRM' else 'LIVE_CAPITAL')
             consistency_active = (account_stage == 'EVALUATION') and matched_acc.get('consistency_rule_enabled', True)
+
+            # 0. CANDADO DE RIESGO MACRO (BLACKOUT NOTICIAS ±5 MINUTOS - DIRECTIVA SERGIO)
+            if check_news_blackout is not None:
+                is_blackout, blackout_reason, ev_data = check_news_blackout(sym)
+                if is_blackout:
+                    print(f"  [BLOQUEO NOTICIAS MACRO ±5 MIN] {sym} ({strat_id}): {blackout_reason}")
+                    if record_libro_c_telemetry is not None:
+                        record_libro_c_telemetry(
+                            event_type="REJECTED_NEWS_BLACKOUT",
+                            desk_mode=branch,
+                            symbol=sym,
+                            strategy_id=strat_id,
+                            regime_id_10=regime_id_10,
+                            archetype_or_anchor=strat_id,
+                            guardian_traffic_light=guard_light,
+                            action_multiplier=0.0,
+                            q_value=float(q_dec.get('q_value', 0.0)),
+                            details={'reason': blackout_reason, 'event': ev_data.get('title'), 'date': ev_data.get('date')}
+                        )
+                    continue
 
             # 1. CANDADO DIRECCIONAL POR FIRMA (Firm-Scoped Anti-Hedging)
             # Solo bloquea si existe posición contraria en el MISMO ACTIVO dentro de la MISMA FIRMA

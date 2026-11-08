@@ -69,6 +69,20 @@ class StrategySimulationRequest(BaseModel):
     execution_delay_bars: int = 1
 
 
+try:
+    from jev.news_risk_filter import get_macro_risk_status, check_news_blackout
+except Exception as e:
+    get_macro_risk_status = None
+    check_news_blackout = None
+
+
+@app.get("/api/macro_news_risk")
+def get_macro_news_risk():
+    if get_macro_risk_status is not None:
+        return get_macro_risk_status()
+    return {"policy_enabled": True, "active_blackout": None, "upcoming_events": []}
+
+
 @app.get("/api/ping")
 def get_ping():
     return {"status": "ok", "timestamp_utc": datetime.now(timezone.utc).isoformat()}
