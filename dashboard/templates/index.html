@@ -9364,8 +9364,9 @@
 
 
   <!-- =========================================================================
-       ALGROK UNIVERSAL MOTION TABLE COLUMN DRAG & REORDER ENGINE
+       ALGROK UNIVERSAL MOTION TABLE COLUMN DRAG & REORDER ENGINE (BULLETPROOF V3)
        Impulsado por el motor de físicas de muelle (Motion / Framer Motion)
+       Grip dedicado, PointerCapture, Idempotencia por Map y Persistencia Local
        ========================================================================= -->
   <script>
   (function() {
@@ -9373,7 +9374,7 @@
 
     class AlgrokTableColumnReorderController {
       constructor() {
-        this.storagePrefix = 'algrok_col_order_v2_';
+        this.storagePrefix = 'algrok_col_order_v3_';
         this.tables = new Map();
         this.activeDrag = null;
         this.ghostEl = null;
@@ -9382,20 +9383,25 @@
       }
 
       init() {
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', () => this.scanAndAttachAll());
-        } else {
+        const runScan = () => {
           this.scanAndAttachAll();
+        };
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', runScan);
+        } else {
+          runScan();
         }
 
-        // Re-escaneo preventivo tras la inicialización de vistas asíncronas
-        setTimeout(() => this.scanAndAttachAll(), 800);
-        setTimeout(() => this.scanAndAttachAll(), 2500);
+        // Re-escaneos preventivos tras carga asíncrona de módulos
+        setTimeout(runScan, 500);
+        setTimeout(runScan, 1500);
+        setTimeout(runScan, 3000);
 
-        // Limpieza de eventos globales
+        // Eventos globales de arrastre
         window.addEventListener('pointermove', (e) => this.onGlobalPointerMove(e), { passive: false });
-        window.addEventListener('pointerup', (e) => this.onGlobalPointerUp(e));
-        window.addEventListener('pointercancel', (e) => this.onGlobalPointerUp(e));
+        window.addEventListener('pointerup', (e) => this.onGlobalPointerUp(e), { passive: false });
+        window.addEventListener('pointercancel', (e) => this.onGlobalPointerUp(e), { passive: false });
       }
 
       scanAndAttachAll() {
@@ -9416,29 +9422,39 @@
         const ths = Array.from(headerRow.querySelectorAll('th'));
         if (ths.length < 2) return;
 
-        // Asignar ID si falta
+        // Asignar ID canónico si no lo tiene
         if (!table.id) {
           const tbId = tbody.id ? tbody.id.replace('-tbody', '').replace('-body', '') : '';
           table.id = tbId ? `table-${tbId}` : `table-auto-${fallbackIdx}`;
         }
-
         const tableId = table.id;
+
         if (this.tables.has(tableId)) {
-          // Ya inicializada, verificar si hay nuevas columnas o filas
+          // Ya adjuntado, re-aplicar orden guardado a filas si se añadieron dinámicamente
+          const state = this.tables.get(tableId);
+          const savedOrder = this.getSavedOrder(tableId);
+          if (savedOrder && !this.isDefaultOrder(state.originalKeys, savedOrder)) {
+            this.permuteTbodyRows(state, savedOrder);
+          }
           return;
         }
 
-        // Asegurar position relative en contenedor para la guía de inserción
+        // Asegurar que el contenedor padre soporte la guía de inserción absoluta
         const parentWrapper = table.parentElement;
         if (parentWrapper && getComputedStyle(parentWrapper).position === 'static') {
           parentWrapper.style.position = 'relative';
         }
 
-        // Guardar orden original canónico
+        // Definir claves originales fijas para cada columna
         const originalKeys = ths.map((th, colIdx) => {
-          const key = th.dataset.colKey || `col_${colIdx}`;
-          th.dataset.colKey = key;
+          let key = th.dataset.colKey;
+          if (!key) {
+            key = `col_${colIdx}`;
+            th.dataset.colKey = key;
+          }
           th.dataset.origIdx = colIdx.toString();
+          th.setAttribute('draggable', 'false');
+          th.addEventListener('dragstart', (e) => e.preventDefault());
           return key;
         });
 
@@ -9454,13 +9470,14 @@
         };
         this.tables.set(tableId, tableState);
 
-        // Decorar cada <th> con clase y grip icon
+        // Decorar th con grip handle y listener de pointerdown
         ths.forEach((th, colIdx) => {
           th.classList.add('algrok-col-header');
-          th.title = 'Arrastra para reordenar columna (Framer Motion)';
+          th.title = 'Arrastra para reordenar columna';
           
-          if (!th.querySelector('.col-drag-grip')) {
-            const grip = document.createElement('span');
+          let grip = th.querySelector('.col-drag-grip');
+          if (!grip) {
+            grip = document.createElement('span');
             grip.className = 'col-drag-grip';
             grip.innerHTML = '<i class="fa-solid fa-grip-vertical"></i>';
             th.insertBefore(grip, th.firstChild);
@@ -9469,8 +9486,8 @@
           th.onpointerdown = (e) => this.onHeaderPointerDown(e, tableId, th);
         });
 
-        // Configurar MutationObserver en tbody para que cada nuevo render por polling se ordene automáticamente
-        const observer = new MutationObserver((mutations) => {
+        // Configurar MutationObserver para sincronizar filas dinámicas (polling)
+        const observer = new MutationObserver(() => {
           if (tableState.isPermuting) return;
           const savedOrder = this.getSavedOrder(tableId);
           if (!savedOrder || this.isDefaultOrder(originalKeys, savedOrder)) return;
@@ -9486,10 +9503,10 @@
         observer.observe(tbody, { childList: true });
         tableState.observer = observer;
 
-        // Inyectar botón discreto de reset si no existe
+        // Inyectar botón de restablecer orden
         this.injectResetControl(table, tableId);
 
-        // Restaurar orden desde localStorage si existe
+        // Restaurar orden previo si está guardado en localStorage
         const savedOrder = this.getSavedOrder(tableId);
         if (savedOrder && !this.isDefaultOrder(originalKeys, savedOrder) && savedOrder.length === originalKeys.length) {
           this.applyOrderToTable(tableId, savedOrder, false);
@@ -9497,10 +9514,9 @@
       }
 
       injectResetControl(table, tableId) {
-        // Buscar un contenedor de cabecera cercano
         const parent = table.closest('.rounded-2xl, .overflow-hidden, .card') || table.parentElement;
         if (!parent) return;
-        
+
         let resetBtn = parent.querySelector(`.btn-reset-cols[data-for="${tableId}"]`);
         if (!resetBtn) {
           resetBtn = document.createElement('button');
@@ -9514,7 +9530,6 @@
             this.resetTableOrder(tableId);
           };
 
-          // Intentar insertar cerca del título o filtros
           const headingArea = parent.querySelector('h2, h3, .flex.items-center.justify-between, .flex.items-center.gap-2');
           if (headingArea) {
             headingArea.appendChild(resetBtn);
@@ -9541,7 +9556,7 @@
       }
 
       onHeaderPointerDown(e, tableId, th) {
-        // Ignorar si se hace clic en inputs, botones o links dentro del th
+        // Ignorar si el clic fue en un botón, enlace o input interno
         if (e.target.closest('button, input, select, a') && !e.target.closest('.col-drag-grip')) {
           return;
         }
@@ -9553,8 +9568,17 @@
         const fromIndex = currentThs.indexOf(th);
         if (fromIndex === -1) return;
 
+        // Prevenir selección de texto y native drag
+        e.preventDefault();
+
+        // Capturar puntero en el th
+        try {
+          if (th.setPointerCapture) th.setPointerCapture(e.pointerId);
+        } catch (err) {}
+
         const rect = th.getBoundingClientRect();
         this.activeDrag = {
+          pointerId: e.pointerId,
           tableId,
           tableState,
           th,
@@ -9575,13 +9599,11 @@
         const drag = this.activeDrag;
 
         const dist = Math.hypot(e.clientX - drag.startX, e.clientY - drag.startY);
-        if (!drag.isDragging && dist > 5) {
-          // Iniciar arrastre real
+        if (!drag.isDragging && dist > 4) {
           drag.isDragging = true;
           document.body.style.cursor = 'grabbing';
           drag.th.classList.add('col-is-dragging');
 
-          // Crear Ghost pill con diseño Framer Motion
           this.createGhost(drag, e);
           this.createDropIndicator(drag);
         }
@@ -9598,25 +9620,26 @@
 
         const ghost = document.createElement('div');
         ghost.className = 'col-drag-ghost';
-        // Obtener texto limpio
-        const textContent = drag.th.textContent.replace(/[\r\n]+/g, ' ').trim();
-        ghost.innerHTML = `<i class="fa-solid fa-grip-vertical text-[#3C45A5] text-[10px]"></i> <span>${textContent}</span>`;
-        ghost.style.width = `${Math.min(drag.width, 220)}px`;
+        const labelText = drag.th.textContent.replace(/[
+]+/g, ' ').trim();
+        ghost.innerHTML = `<i class="fa-solid fa-grip-vertical text-[#3C45A5] text-[10px]"></i> <span>${labelText}</span>`;
+        ghost.style.width = `${Math.min(drag.width, 240)}px`;
         ghost.style.left = `${e.clientX - drag.offsetX}px`;
         ghost.style.top = `${e.clientY - drag.offsetY}px`;
 
         document.body.appendChild(ghost);
         this.ghostEl = ghost;
 
-        // Animación suave de entrada con Motion si está disponible
         if (window.Motion && Motion.animate) {
-          Motion.animate(ghost, {
-            scale: [0.94, 1.04],
-            rotate: [0, 1.5],
-            opacity: [0.6, 0.98]
-          }, {
-            easing: Motion.spring({ stiffness: 450, damping: 25 })
-          });
+          try {
+            Motion.animate(ghost, {
+              scale: [0.95, 1.04],
+              rotate: [0, 1.2],
+              opacity: [0.6, 0.98]
+            }, {
+              easing: Motion.spring({ stiffness: 450, damping: 25 })
+            });
+          } catch (err) {}
         }
       }
 
@@ -9625,7 +9648,7 @@
 
         const indicator = document.createElement('div');
         indicator.className = 'col-drop-indicator';
-        
+
         const wrapper = drag.tableState.table.parentElement;
         wrapper.appendChild(indicator);
         this.indicatorEl = indicator;
@@ -9647,20 +9670,21 @@
         const drag = this.activeDrag;
         const ths = Array.from(drag.tableState.headerRow.querySelectorAll('th'));
 
+        // Localizar qué encabezado está más cerca del cursor X
         let closestIndex = drag.fromIndex;
         let minDistance = Infinity;
 
-        ths.forEach((th, idx) => {
-          const rect = th.getBoundingClientRect();
+        ths.forEach((targetTh, idx) => {
+          const rect = targetTh.getBoundingClientRect();
           const centerX = rect.left + rect.width / 2;
           const dist = Math.abs(e.clientX - centerX);
           if (dist < minDistance) {
             minDistance = dist;
-            closestIndex = (e.clientX > centerX && idx < ths.length - 1) ? idx + 1 : idx;
+            closestIndex = idx;
           }
         });
 
-        drag.toIndex = Math.max(0, Math.min(ths.length - 1, closestIndex));
+        drag.toIndex = closestIndex;
         this.updateIndicatorPosition(drag.toIndex);
       }
 
@@ -9691,26 +9715,19 @@
         this.activeDrag = null;
         document.body.style.cursor = '';
 
+        try {
+          if (drag.th.releasePointerCapture && drag.pointerId !== undefined) {
+            drag.th.releasePointerCapture(drag.pointerId);
+          }
+        } catch (err) {}
+
         if (drag.isDragging) {
           drag.th.classList.remove('col-is-dragging');
 
+          // Limpieza inmediata del ghost
           if (this.ghostEl) {
-            // Animación de disolución con físicas spring
-            if (window.Motion && Motion.animate) {
-              Motion.animate(this.ghostEl, {
-                scale: 0.9,
-                opacity: 0
-              }, {
-                duration: 0.18,
-                easing: 'ease-out'
-              }).finished.then(() => {
-                if (this.ghostEl) this.ghostEl.remove();
-                this.ghostEl = null;
-              });
-            } else {
-              this.ghostEl.remove();
-              this.ghostEl = null;
-            }
+            this.ghostEl.remove();
+            this.ghostEl = null;
           }
 
           if (this.indicatorEl) {
@@ -9718,7 +9735,7 @@
             this.indicatorEl = null;
           }
 
-          // Ejecutar intercambio si cambió de posición
+          // Ejecutar reordenamiento si la posición destino es diferente
           if (drag.fromIndex !== drag.toIndex) {
             this.reorderColumn(drag.tableId, drag.fromIndex, drag.toIndex);
           }
@@ -9729,18 +9746,16 @@
         const tableState = this.tables.get(tableId);
         if (!tableState) return;
 
-        const ths = Array.from(tableState.headerRow.querySelectorAll('th'));
-        const movedTh = ths[fromIdx];
-        if (!movedTh) return;
+        // Obtener el orden actual de claves desde los <th> del DOM
+        const currentThs = Array.from(tableState.headerRow.querySelectorAll('th'));
+        const currentOrder = currentThs.map(th => th.dataset.colKey);
 
-        // Calcular nuevo arreglo de orden
-        const newOrder = [...tableState.currentOrder];
-        const [removedKey] = newOrder.splice(fromIdx, 1);
-        newOrder.splice(toIdx, 0, removedKey);
+        const [movedKey] = currentOrder.splice(fromIdx, 1);
+        currentOrder.splice(toIdx, 0, movedKey);
 
-        // Aplicar orden al DOM y persistir
-        this.applyOrderToTable(tableId, newOrder, true);
-        this.saveOrder(tableId, newOrder);
+        // Aplicar orden al DOM (encabezados y celdas)
+        this.applyOrderToTable(tableId, currentOrder, true);
+        this.saveOrder(tableId, currentOrder);
         this.updateResetButtonVisibility(tableId);
       }
 
@@ -9762,13 +9777,15 @@
               tableState.headerRow.appendChild(th);
               if (triggerAnimation) {
                 th.classList.add('col-reorder-flash');
-                setTimeout(() => th.classList.remove('col-reorder-flash'), 800);
+                setTimeout(() => th.classList.remove('col-reorder-flash'), 750);
                 if (window.Motion && Motion.animate) {
-                  Motion.animate(th, {
-                    scale: [0.96, 1.02, 1]
-                  }, {
-                    easing: Motion.spring({ stiffness: 400, damping: 26 })
-                  });
+                  try {
+                    Motion.animate(th, {
+                      scale: [0.96, 1.02, 1]
+                    }, {
+                      easing: Motion.spring({ stiffness: 450, damping: 25 })
+                    });
+                  } catch (err) {}
                 }
               }
             }
@@ -9786,20 +9803,25 @@
         const rows = tableState.tbody.querySelectorAll('tr');
         if (!rows.length) return;
 
-        // Crear mapa de posiciones: para cada posición en targetOrder, qué índice original le corresponde
-        const keyToIndex = new Map();
-        tableState.originalKeys.forEach((key, idx) => keyToIndex.set(key, idx));
-        const indexMapping = targetOrder.map(key => keyToIndex.get(key));
-
         rows.forEach(tr => {
           const cells = Array.from(tr.children);
-          // Si la fila tiene colspan (ej. "No hay operaciones registradas") o no coincide en columnas, ignorar
+          // Ignorar filas de mensaje vacío o colspan
           if (cells.length !== tableState.originalKeys.length) return;
 
-          // Reordenar las celdas
-          const permutedCells = indexMapping.map(origIdx => cells[origIdx]).filter(Boolean);
-          if (permutedCells.length === cells.length) {
-            tr.replaceChildren(...permutedCells);
+          // Asignar dataset.colKey a cada celda si no lo tiene (en orden canónico original)
+          cells.forEach((td, idx) => {
+            if (!td.dataset.colKey) {
+              td.dataset.colKey = tableState.originalKeys[idx];
+            }
+          });
+
+          // Lookup map por clave para garantizar idempotencia total
+          const cellMap = new Map();
+          cells.forEach(td => cellMap.set(td.dataset.colKey, td));
+
+          const permuted = targetOrder.map(key => cellMap.get(key)).filter(Boolean);
+          if (permuted.length === cells.length) {
+            tr.replaceChildren(...permuted);
           }
         });
       }
@@ -9836,7 +9858,7 @@
       }
     }
 
-    // Inicializar singleton y exponer globalmente para acceso manual
+    // Inicializar controlador global único
     window.AlgrokTables = new AlgrokTableColumnReorderController();
   })();
   </script>
