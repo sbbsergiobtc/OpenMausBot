@@ -246,6 +246,90 @@ def simulate_q_action(
         return {"error": str(e)}
 
 
+
+
+@app.get("/api/account_stage")
+def get_account_stage():
+    state_file = BASE_DIR / 'data/paper_trades/prop_firm_forward_test_state.json'
+    default_accounts = {
+        "prop_firm": {
+            "account_id": "PROP-50K-01",
+            "firm_name": "LUCID_TRADING",
+            "stage": "EVALUATION",
+            "consistency_rule_enabled": True,
+            "max_single_trade_profit_pct": 40.0,
+            "max_concurrent_trades": 3,
+            "available_stages": ["EVALUATION", "FUNDED", "LIVE_CAPITAL"]
+        },
+        "capital_propio": {
+            "account_id": "CAP-PROPIO-01",
+            "firm_name": "INTERACTIVE_BROKERS",
+            "stage": "LIVE_CAPITAL",
+            "consistency_rule_enabled": False,
+            "max_single_trade_profit_pct": None,
+            "max_concurrent_trades": 3,
+            "available_stages": ["LIVE_CAPITAL"]
+        }
+    }
+    if state_file.exists():
+        try:
+            with open(state_file, 'r', encoding='utf-8') as f:
+                s = json.load(f)
+            return s.get("active_accounts", default_accounts)
+        except Exception:
+            return default_accounts
+    return default_accounts
+
+
+@app.post("/api/account_stage")
+def update_account_stage(data: dict):
+    state_file = BASE_DIR / 'data/paper_trades/prop_firm_forward_test_state.json'
+    default_accounts = {
+        "prop_firm": {
+            "account_id": "PROP-50K-01",
+            "firm_name": "LUCID_TRADING",
+            "stage": "EVALUATION",
+            "consistency_rule_enabled": True,
+            "max_single_trade_profit_pct": 40.0,
+            "max_concurrent_trades": 3
+        },
+        "capital_propio": {
+            "account_id": "CAP-PROPIO-01",
+            "firm_name": "INTERACTIVE_BROKERS",
+            "stage": "LIVE_CAPITAL",
+            "consistency_rule_enabled": False,
+            "max_single_trade_profit_pct": None,
+            "max_concurrent_trades": 3
+        }
+    }
+    try:
+        s = {}
+        if state_file.exists():
+            with open(state_file, 'r', encoding='utf-8') as f:
+                s = json.load(f)
+        if "active_accounts" not in s:
+            s["active_accounts"] = default_accounts
+
+        branch = str(data.get("branch", "prop_firm")).lower()
+        if branch not in s["active_accounts"]:
+            s["active_accounts"][branch] = default_accounts.get(branch, {})
+
+        if "stage" in data:
+            new_stage = str(data["stage"]).upper()
+            s["active_accounts"][branch]["stage"] = new_stage
+            s["active_accounts"][branch]["consistency_rule_enabled"] = (new_stage == "EVALUATION")
+        if "firm_name" in data:
+            s["active_accounts"][branch]["firm_name"] = str(data["firm_name"])
+        if "max_concurrent_trades" in data:
+            s["active_accounts"][branch]["max_concurrent_trades"] = int(data["max_concurrent_trades"])
+
+        with open(state_file, 'w', encoding='utf-8') as f:
+            json.dump(s, f, indent=2)
+        return {"status": "SUCCESS", "updated_branch": branch, "config": s["active_accounts"][branch]}
+    except Exception as e:
+        return {"error": str(e)}
+
+
 @app.get("/api/notifications")
 def get_notifications():
     notifications = []
@@ -337,6 +421,28 @@ def get_notifications():
                         "level": "NEUTRAL",
                         "title": f"Whipsaw Evitado: {ev.get('symbol')}",
                         "message": f"Agente Q asignó 0.00x en {ev.get('regime_code')}",
+                        "timestamp": ev.get('timestamp_utc', 'Reciente'),
+                        "badge": "neutral"
+                    })
+                    break
+                elif ev.get('event_type') == 'REJECTED_SAME_FIRM_HEDGING':
+                    notifications.append({
+                        "id": f"NOTIF-{ev.get('id', 'HEDGE')}",
+                        "category": "PROP_FIRM",
+                        "level": "WARNING",
+                        "title": f"Anti-Hedging: {ev.get('symbol')}",
+                        "message": f"Bloqueada posición opuesta en misma firma ({ev.get('details', {}).get('firm', 'Firma')})",
+                        "timestamp": ev.get('timestamp_utc', 'Reciente'),
+                        "badge": "warning"
+                    })
+                    break
+                elif ev.get('event_type') == 'TRADE_BLOCKED_PORTFOLIO_CAP':
+                    notifications.append({
+                        "id": f"NOTIF-{ev.get('id', 'CAP')}",
+                        "category": "PROP_FIRM",
+                        "level": "INFO",
+                        "title": f"Cap Concurrencia: {ev.get('symbol')}",
+                        "message": f"Tope de 3 trades alcanzado en cartera ({ev.get('details', {}).get('reason', 'Cap')})",
                         "timestamp": ev.get('timestamp_utc', 'Reciente'),
                         "badge": "neutral"
                     })

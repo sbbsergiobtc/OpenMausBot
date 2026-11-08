@@ -113,6 +113,25 @@ def load_state() -> dict:
                     state['capital_propio'] = {'open_positions': {}, 'closed_trades': []}
                 if 'prop_firm' not in state:
                     state['prop_firm'] = {'open_positions': {}, 'closed_trades': []}
+                if 'active_accounts' not in state:
+                    state['active_accounts'] = {
+                        'prop_firm': {
+                            'account_id': 'PROP-50K-01',
+                            'firm_name': 'LUCID_TRADING',
+                            'stage': 'EVALUATION',
+                            'consistency_rule_enabled': True,
+                            'max_single_trade_profit_pct': 40.0,
+                            'max_concurrent_trades': 3
+                        },
+                        'capital_propio': {
+                            'account_id': 'CAP-PROPIO-01',
+                            'firm_name': 'INTERACTIVE_BROKERS',
+                            'stage': 'LIVE_CAPITAL',
+                            'consistency_rule_enabled': False,
+                            'max_single_trade_profit_pct': None,
+                            'max_concurrent_trades': 3
+                        }
+                    }
                 return state
         except Exception as e:
             print(f"Error cargando estado ({e}). Reinicializando...")
@@ -490,15 +509,69 @@ def run_cycle():
                     )
                 continue
 
+            # ==============================================================
+            # REGLAS DE GESTION DE CARTERA INSTITUCIONAL (BLOQUE 2)
+            # ==============================================================
+            acc_info = state.get('active_accounts', {}).get(branch.lower(), {})
+            firm_name = acc_info.get('firm_name', 'LUCID_TRADING' if branch == 'PROP_FIRM' else 'INTERACTIVE_BROKERS')
+            account_stage = acc_info.get('stage', 'EVALUATION' if branch == 'PROP_FIRM' else 'LIVE_CAPITAL')
+            consistency_active = (account_stage == 'EVALUATION') and acc_info.get('consistency_rule_enabled', True)
+
+            # 1. CANDADO DIRECCIONAL POR FIRMA (Firm-Scoped Anti-Hedging)
+            # Solo bloquea si existe posición contraria en el MISMO ACTIVO dentro de la MISMA FIRMA
+            has_opposite_firm_trade = False
+            for open_sym, open_pos in pos_container.items():
+                if open_sym == sym and open_pos.get('firm_name', firm_name) == firm_name:
+                    open_action = str(open_pos.get('action', 'BUY')).upper()
+                    if ('SELL' in open_action and sig == 'BUY') or ('BUY' in open_action and sig == 'SELL'):
+                        has_opposite_firm_trade = True
+                        break
+
+            if has_opposite_firm_trade:
+                print(f"  [BLOQUEO ANTI-HEDGING MISMA FIRMA] {sym} ({strat_id}): Posicion contraria activa en {firm_name}")
+                if record_libro_c_telemetry is not None:
+                    record_libro_c_telemetry(
+                        event_type="REJECTED_SAME_FIRM_HEDGING",
+                        desk_mode=branch,
+                        symbol=sym,
+                        strategy_id=strat_id,
+                        regime_id_10=regime_id_10,
+                        archetype_or_anchor=strat_id,
+                        guardian_traffic_light=guard_light,
+                        action_multiplier=0.0,
+                        q_value=float(q_dec.get('q_value', 0.0)),
+                        details={'reason': f"Anti-Hedging Rule: posicion opuesta en {firm_name}", 'firm': firm_name}
+                    )
+                continue
+
+            # 2. LÍMITE DE CONCURRENCIA DE CARTERA (Max 3 trades simultáneos por cuenta)
+            max_concurrent = int(acc_info.get('max_concurrent_trades', 3))
+            if len(pos_container) >= max_concurrent:
+                print(f"  [BLOQUEO CONCURRENCIA CARTERA] {sym} ({strat_id}): Limite de {max_concurrent} trades simultaneos alcanzado en {branch}")
+                if record_libro_c_telemetry is not None:
+                    record_libro_c_telemetry(
+                        event_type="TRADE_BLOCKED_PORTFOLIO_CAP",
+                        desk_mode=branch,
+                        symbol=sym,
+                        strategy_id=strat_id,
+                        regime_id_10=regime_id_10,
+                        archetype_or_anchor=strat_id,
+                        guardian_traffic_light=guard_light,
+                        action_multiplier=0.0,
+                        q_value=float(q_dec.get('q_value', 0.0)),
+                        details={'reason': f"Cap de concurrencia alcanzado ({max_concurrent} trades)", 'max_cap': max_concurrent}
+                    )
+                continue
+
             entry_p = price + (cfg['spread_pts'] / 2.0)
             sl_dist = atr * 1.5
             sl_price = entry_p - sl_dist
             tp_price = entry_p + (atr * 2.5)
 
-            # En Prop Firm: Aplicar Regla del 40% de Consistencia (Early TP Clamp si 1.25x o 1.00x supera el tope)
-            consistency_note = "N/A_CAP_PROPIO"
+            # 3. SELECTOR DE FASE DE CUENTA (Consistencia activa en EVALUATION, libre en FUNDED/LIVE)
+            consistency_note = "UNCLAMPED_FUNDED_STAGE" if not consistency_active else "N/A_CAP_PROPIO"
             is_early_clamped = False
-            if branch == 'PROP_FIRM' and apply_prop_firm_consistency_tp_clamp is not None:
+            if branch == 'PROP_FIRM' and consistency_active and apply_prop_firm_consistency_tp_clamp is not None:
                 today_realized_pct = float(state.get('prop_firm', {}).get('today_realized_profit_pct', 0.0))
                 clamp_res = apply_prop_firm_consistency_tp_clamp(
                     entry_price=entry_p,
@@ -567,6 +640,9 @@ def run_cycle():
             pos_container[sym] = {
                 'strategy_id': strat_id,
                 'branch': branch,
+                'firm_name': firm_name,
+                'account_stage': account_stage,
+                'action': sig,
                 'entry_price': entry_p,
                 'dynamic_lots': dynamic_lots,
                 'risk_usd': risk_usd,

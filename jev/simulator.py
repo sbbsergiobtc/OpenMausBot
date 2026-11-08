@@ -307,9 +307,12 @@ def simulate_signals_numba(
 def extract_candidate_trade_pnls(
     candidate: dict,
     df: pd.DataFrame,
-    risk_per_trade_pct: Optional[float] = None
+    risk_per_trade_pct: Optional[float] = None,
+    apply_consistency_clamp: bool = False,
+    target_challenge_pct: float = 6.0
 ) -> np.ndarray:
-    """Reconstruye el array de PnLs individuales de cada trade del candidato con sizing proporcional."""
+    """Reconstruye el array de PnLs individuales de cada trade del candidato con sizing proporcional.
+    Soporta apply_consistency_clamp=True para simular el modo de evaluación con regla del 40%."""
     close = np.ascontiguousarray(df["close"].values, dtype=np.float64)
     high = np.ascontiguousarray(df["high"].values, dtype=np.float64)
     low = np.ascontiguousarray(df["low"].values, dtype=np.float64)
@@ -393,6 +396,10 @@ def extract_candidate_trade_pnls(
                 notional = entry_px * pos_units
                 comm = notional * friction
                 pnl = gross_pnl - comm
+                if apply_consistency_clamp and pnl > 0:
+                    max_allowed_profit = 1000.0 * (target_challenge_pct / 100.0) * 0.40 * 0.95
+                    if pnl > max_allowed_profit:
+                        pnl = max_allowed_profit
                 running_eq += pnl
                 trade_pnls.append(pnl)
                 in_pos = 0
@@ -429,6 +436,10 @@ def extract_candidate_trade_pnls(
                 notional = entry_px * pos_units
                 comm = notional * friction
                 pnl = gross_pnl - comm
+                if apply_consistency_clamp and pnl > 0:
+                    max_allowed_profit = 1000.0 * (target_challenge_pct / 100.0) * 0.40 * 0.95
+                    if pnl > max_allowed_profit:
+                        pnl = max_allowed_profit
                 running_eq += pnl
                 trade_pnls.append(pnl)
                 in_pos = 0
@@ -462,7 +473,8 @@ def extract_candidate_trade_pnls(
 def extract_candidate_trade_diagnostics(
     candidate: dict,
     df: pd.DataFrame,
-    risk_per_trade_pct: Optional[float] = None
+    risk_per_trade_pct: Optional[float] = None,
+    dual_lens: bool = True
 ) -> Dict[str, Any]:
     """
     Reconstruye las métricas microestructurales trade a trade del candidato:
@@ -534,6 +546,13 @@ def extract_candidate_trade_diagnostics(
     winner_mae_atr: List[float] = []
     winner_mfe_atr: List[float] = []
 
+    # Segmentación MAE/MFE Condicionada por Régimen Canónico (Ignacio Ayago / Techain)
+    entry_regime_7 = 0
+    trending_winner_mae_atr: List[float] = []
+    trending_winner_mfe_atr: List[float] = []
+    choppy_winner_mae_atr: List[float] = []
+    choppy_winner_mfe_atr: List[float] = []
+
     running_eq = 1000.0
     continuous_peak_eq = 1000.0
     continuous_max_dd_pct = 0.0
@@ -591,6 +610,12 @@ def extract_candidate_trade_diagnostics(
                 if pnl > 0:
                     winner_mae_atr.append(mae_val)
                     winner_mfe_atr.append(mfe_val)
+                    if entry_regime_7 in (0, 1, 3, 4):  # Tendencias S0/S1/S3/S4
+                        trending_winner_mae_atr.append(mae_val)
+                        trending_winner_mfe_atr.append(mfe_val)
+                    elif entry_regime_7 in (2, 5, 6, 7, 8):  # Rango / Choppy S2/S5/S6/S7/S8
+                        choppy_winner_mae_atr.append(mae_val)
+                        choppy_winner_mfe_atr.append(mfe_val)
 
                 in_pos = 0
                 pos_units = 0.0
@@ -639,6 +664,12 @@ def extract_candidate_trade_diagnostics(
                 if pnl > 0:
                     winner_mae_atr.append(mae_val)
                     winner_mfe_atr.append(mfe_val)
+                    if entry_regime_7 in (0, 1, 3, 4):  # Tendencias S0/S1/S3/S4
+                        trending_winner_mae_atr.append(mae_val)
+                        trending_winner_mfe_atr.append(mfe_val)
+                    elif entry_regime_7 in (2, 5, 6, 7, 8):  # Rango / Choppy S2/S5/S6/S7/S8
+                        choppy_winner_mae_atr.append(mae_val)
+                        choppy_winner_mfe_atr.append(mfe_val)
 
                 in_pos = 0
                 pos_units = 0.0
@@ -648,6 +679,7 @@ def extract_candidate_trade_diagnostics(
                 in_pos = 1
                 entry_px = close[i]
                 entry_atr = cur_atr
+                entry_regime_7 = int(factory.regime_7[i]) if hasattr(factory, "regime_7") else 0
                 sl_dist = max(1e-6, sl_m * cur_atr)
                 sl_px = entry_px - sl_dist
                 tp_px = entry_px + tp_m * cur_atr
@@ -660,6 +692,7 @@ def extract_candidate_trade_diagnostics(
                 in_pos = -1
                 entry_px = close[i]
                 entry_atr = cur_atr
+                entry_regime_7 = int(factory.regime_7[i]) if hasattr(factory, "regime_7") else 0
                 sl_dist = max(1e-6, sl_m * cur_atr)
                 sl_px = entry_px + sl_dist
                 tp_px = entry_px - tp_m * cur_atr
@@ -702,6 +735,92 @@ def extract_candidate_trade_diagnostics(
     opt_sl_atr = float(np.percentile(winner_mae_atr, 95)) if len(winner_mae_atr) >= 5 else sl_m
     opt_tp_atr = float(np.percentile(winner_mfe_atr, 75)) if len(winner_mfe_atr) >= 5 else tp_m
 
+    # Calibración Dinámica de MAE/MFE Condicionada por Régimen Canónico (1.2):
+    # En S0/S1/S3/S4 (Tendencias Fuertes): TP = P85(MFE) para dejar correr beneficios (Fat-Tail Capture)
+    # En S5/S6/S8 (Choppy Mean Reversion): TP = P60(MFE) y SL = P90(MAE) para cortes rápidos
+    trending_tp_atr = float(np.percentile(trending_winner_mfe_atr, 85)) if len(trending_winner_mfe_atr) >= 4 else round(opt_tp_atr * 1.25, 2)
+    trending_sl_atr = float(np.percentile(trending_winner_mae_atr, 95)) if len(trending_winner_mae_atr) >= 4 else opt_sl_atr
+
+    choppy_tp_atr = float(np.percentile(choppy_winner_mfe_atr, 60)) if len(choppy_winner_mfe_atr) >= 4 else round(opt_tp_atr * 0.75, 2)
+    choppy_sl_atr = float(np.percentile(choppy_winner_mae_atr, 90)) if len(choppy_winner_mae_atr) >= 4 else round(opt_sl_atr * 0.85, 2)
+
+    # -------------------------------------------------------------
+    # GENERADOR DE REPORTES BIFÁSICOS (EVALUACIÓN vs. FUNDED)
+    # -------------------------------------------------------------
+    # 1. Lente Evaluación (Challenge Mode con Hard Clamp 40% de consistencia):
+    target_challenge_pct = 6.0 if "FUTURES" in str(candidate.get("desk_mode", "")).upper() else 8.0
+    consistency_cap_ratio = 0.40
+    safety_buffer = 0.95
+    max_single_trade_usd = 1000.0 * (target_challenge_pct / 100.0) * consistency_cap_ratio * safety_buffer
+
+    eval_trade_pnls = []
+    eval_clamped_count = 0
+    for p in trade_pnls:
+        if p > max_single_trade_usd:
+            eval_trade_pnls.append(max_single_trade_usd)
+            eval_clamped_count += 1
+        else:
+            eval_trade_pnls.append(p)
+
+    eval_pnls_arr = np.array(eval_trade_pnls, dtype=np.float64)
+    eval_net_pnl = float(np.sum(eval_pnls_arr)) if len(eval_pnls_arr) > 0 else 0.0
+    eval_roi_pct = round((eval_net_pnl / 1000.0) * 100.0, 2)
+
+    # Simulación Monte Carlo (1000 caminos) de tasa de pase en < 15 días:
+    eval_pass_rate_pct = 0.0
+    if len(eval_pnls_arr) >= 10:
+        trades_per_window = min(len(eval_pnls_arr), 15)
+        sim_paths = 1000
+        passes = 0
+        target_cash = 1000.0 * (target_challenge_pct / 100.0)
+        max_loss_cash = 1000.0 * 0.04  # 4% max loss
+        for _ in range(sim_paths):
+            sampled = np.random.choice(eval_pnls_arr, size=trades_per_window, replace=True)
+            cumsum = np.cumsum(sampled)
+            hit_target = np.any(cumsum >= target_cash)
+            hit_fail = np.any(cumsum <= -max_loss_cash)
+            if hit_target and not hit_fail:
+                passes += 1
+            elif hit_target and hit_fail:
+                idx_target = int(np.argmax(cumsum >= target_cash))
+                idx_fail = int(np.argmax(cumsum <= -max_loss_cash))
+                if idx_target < idx_fail:
+                    passes += 1
+        eval_pass_rate_pct = round((passes / sim_paths) * 100.0, 1)
+
+    eval_lens = {
+        "lens_name": "EVALUATION_CHALLENGE_VIEW",
+        "consistency_clamp_active": True,
+        "consistency_cap_usd": round(max_single_trade_usd, 2),
+        "clamped_trades_count": eval_clamped_count,
+        "net_pnl_usd": round(eval_net_pnl, 2),
+        "net_roi_pct": eval_roi_pct,
+        "eod_max_dd_pct": round(float(eod_max_dd_pct), 2),
+        "mc_pass_rate_pct": eval_pass_rate_pct,
+        "verdict": "QUALIFIED_FOR_EVALUATION" if (eval_pass_rate_pct >= 70.0 and eod_max_dd_pct <= 3.5) else "NEEDS_TUNING",
+        "description": "Evalúa el reto de fondeo con Hard Clamp 40% de consistencia y tasa de pase Monte Carlo >= 70%."
+    }
+
+    # 2. Lente Funded / Live (Harvest Mode sin consistencia):
+    funded_pnls_arr = pnls_arr
+    funded_net_pnl = float(np.sum(funded_pnls_arr)) if len(funded_pnls_arr) > 0 else 0.0
+    funded_roi_pct = round((funded_net_pnl / 1000.0) * 100.0, 2)
+    calmar_ratio = round(funded_roi_pct / max(0.1, float(eod_max_dd_pct)), 2)
+    est_monthly_payout = round((funded_roi_pct / 100.0) * 50000.0 * 0.40, 2)
+
+    funded_lens = {
+        "lens_name": "FUNDED_HARVEST_VIEW",
+        "consistency_clamp_active": False,
+        "clamped_trades_count": 0,
+        "net_pnl_usd": round(funded_net_pnl, 2),
+        "net_roi_pct": funded_roi_pct,
+        "eod_max_dd_pct": round(float(eod_max_dd_pct), 2),
+        "calmar_ratio": calmar_ratio,
+        "expected_monthly_payout_usd_50k": est_monthly_payout,
+        "verdict": "GRADUATED_FOR_PAYOUTS" if (calmar_ratio >= 2.5 and funded_roi_pct > 15.0) else "ACCEPTABLE",
+        "description": "Evalúa la cuenta fondeada real dejando correr los beneficios sin límite de consistencia."
+    }
+
     return {
         "trade_pnls": pnls_arr,
         "trade_mae_atr": np.array(trade_mae_atr, dtype=np.float64),
@@ -714,6 +833,33 @@ def extract_candidate_trade_diagnostics(
         "win_rate_pct": round(win_rate_pct, 2),
         "avg_win_usd": round(avg_win, 2),
         "avg_loss_usd": round(avg_loss, 2),
-        "reward_risk_ratio": round(rr_ratio, 2)
+        "reward_risk_ratio": round(rr_ratio, 2),
+        "regime_conditioned_exits": {
+            "trending_s0_s1": {
+                "tp_atr": round(trending_tp_atr, 2),
+                "sl_atr": round(trending_sl_atr, 2),
+                "mfe_percentile": 85,
+                "mae_percentile": 95,
+                "description": "Fat-Tail Capture en tendencias limpias"
+            },
+            "choppy_s5_s6": {
+                "tp_atr": round(choppy_tp_atr, 2),
+                "sl_atr": round(choppy_sl_atr, 2),
+                "mfe_percentile": 60,
+                "mae_percentile": 90,
+                "description": "Cortes rápidos en rango/reversión"
+            },
+            "baseline_global": {
+                "tp_atr": round(opt_tp_atr, 2),
+                "sl_atr": round(opt_sl_atr, 2),
+                "mfe_percentile": 75,
+                "mae_percentile": 95,
+                "description": "Percentiles globales de referencia"
+            }
+        },
+        "dual_lens_report": {
+            "evaluation_lens": eval_lens,
+            "funded_lens": funded_lens
+        }
     }
 

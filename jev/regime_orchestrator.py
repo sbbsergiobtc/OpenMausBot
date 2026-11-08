@@ -696,6 +696,10 @@ def run_parallel_orchestrator_evaluation() -> Dict[str, Any]:
     result = {
         "timestamp_utc": now_utc,
         "status": "OPERATIONAL_PARALLEL_AB",
+        "active_accounts": fstate.get("active_accounts", {
+            "prop_firm": {"firm_name": "LUCID_TRADING", "stage": "EVALUATION", "consistency_rule_enabled": True, "max_concurrent_trades": 3},
+            "capital_propio": {"firm_name": "INTERACTIVE_BROKERS", "stage": "LIVE_CAPITAL", "consistency_rule_enabled": False, "max_concurrent_trades": 3}
+        }),
         "summary": {
             "total_strategies": len(CERTIFIED_16_STRATEGIES),
             "active_in_orchestrator": active_in_orchestrator_count,
