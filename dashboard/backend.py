@@ -1771,11 +1771,30 @@ def get_telemetry():
     pf_pnl = float(pf_data.get("total_realized_pnl", 2.01))
     pf_dd = float(pf_data.get("current_eod_dd_pct", 0.0))
 
+    # Cálculo del Riesgo Flotante al SL (Suma de risk_usd de posiciones abiertas)
+    pf_open_positions = pf_data.get("open_positions", {})
+    pf_open_risk = 0.0
+    for pos_key, pos_val in pf_open_positions.items():
+        if isinstance(pos_val, dict):
+            pf_open_risk += float(pos_val.get("risk_usd", 0.0))
+    pf_open_risk = round(pf_open_risk, 2)
+    pf_open_risk_pct = round((pf_open_risk / pf_bal * 100), 2) if pf_bal > 0 else 0.0
+
     cp_bal = total_bal
     cp_eq = total_eq
     cp_pnl = total_pnl
     cp_float = round(cp_eq - cp_bal, 2)
     cp_dd = round(max(0.0, ((cp_bal - cp_eq) / cp_bal * 100) if cp_bal > 0 else 0.0), 2)
+
+    cp_open_positions = d.get("capital_propio", {}).get("open_positions", {})
+    cp_open_risk = 0.0
+    for pos_key, pos_val in cp_open_positions.items():
+        if isinstance(pos_val, dict):
+            cp_open_risk += float(pos_val.get("risk_usd", 0.0))
+    if cp_open_risk == 0.0 and abs(ic_eq - ic_bal) > 0.1:
+        cp_open_risk = round(abs(ic_eq - ic_bal) * 2.0, 2)
+    cp_open_risk = round(cp_open_risk, 2)
+    cp_open_risk_pct = round((cp_open_risk / cp_bal * 100), 2) if cp_bal > 0 else 0.0
 
     return {
         "status": "ONLINE",
@@ -1791,10 +1810,10 @@ def get_telemetry():
                 "total_floating_pnl_usd": cp_float,
                 "drawdown_pct": -cp_dd if cp_dd > 0 else 0.0,
                 "margin_used_pct": 0.85 if abs(cp_float) > 0.1 else 0.0,
-                "net_exposure": "LONG 100%" if abs(cp_float) > 0.1 else "FLAT (0.0%)",
-                "net_subtext": "US500 / USTEC" if abs(cp_float) > 0.1 else "Sin posiciones",
+                "open_sl_risk_usd": cp_open_risk,
+                "open_sl_risk_pct": cp_open_risk_pct,
                 "badge_desk": "CAPITAL PROPIO",
-                "sub_badge": "TradFi MT5 + DEX Crypto",
+                "sub_badge": "MT5 + DEX",
                 "sync_badge": "● 2 CUENTAS SYNC",
                 "risk_limit_label": "Límite Máx DD",
                 "risk_limit_val": "-5.00%",
@@ -1807,10 +1826,10 @@ def get_telemetry():
                 "total_floating_pnl_usd": 0.0,
                 "drawdown_pct": -pf_dd if pf_dd > 0 else 0.0,
                 "margin_used_pct": 0.0,
-                "net_exposure": "FLAT (0.0%)",
-                "net_subtext": "Futuros CME & CFDs",
+                "open_sl_risk_usd": pf_open_risk,
+                "open_sl_risk_pct": pf_open_risk_pct,
                 "badge_desk": "CUENTAS DE FONDEO",
-                "sub_badge": "Challenge Prop Firm $100k",
+                "sub_badge": "Challenge $100k",
                 "sync_badge": "● CHALLENGE $100K ACTIVO",
                 "risk_limit_label": "Límite EOD DD",
                 "risk_limit_val": "-3.50%",

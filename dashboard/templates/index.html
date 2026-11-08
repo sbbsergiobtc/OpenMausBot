@@ -717,8 +717,7 @@
                 </div>
                 <div class="text-lg sm:text-2xl font-bold font-mono text-[#1D1D1F] tracking-tight" id="cockpit-kpi-total-balance">$1,998.09</div>
               </div>
-              <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-between text-[11px]">
-                <span class="text-[#86868B] font-medium" id="cockpit-kpi-total-sublabel">Suma Cuentas FT</span>
+              <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-end text-[11px]">
                 <span id="cockpit-kpi-total-subtext" class="badge-brand-indigo font-mono text-[10px] py-0.5 px-1.5">MT5 + DEX</span>
               </div>
             </div>
@@ -734,8 +733,7 @@
                 </div>
                 <div class="text-lg sm:text-2xl font-bold font-mono text-[#D70015] tracking-tight" id="cockpit-kpi-realized-pnl">-$1.91</div>
               </div>
-              <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-between text-[11px]">
-                <span class="text-[#86868B] font-medium">Trades cerrados</span>
+              <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-end text-[11px]">
                 <span id="cockpit-kpi-realized-badge" class="badge-warning-risk font-mono text-[10px] py-0.5 px-1.5">-0.10%</span>
               </div>
             </div>
@@ -751,8 +749,7 @@
                 </div>
                 <div class="text-lg sm:text-2xl font-bold font-mono text-[#D70015] tracking-tight" id="cockpit-kpi-floating-pnl">-$4.58</div>
               </div>
-              <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-between text-[11px]">
-                <span class="text-[#86868B] font-medium">Posiciones vivas</span>
+              <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-end text-[11px]">
                 <span id="cockpit-kpi-floating-badge" class="badge-neutral-soft font-mono text-[10px] py-0.5 px-1.5">-0.23%</span>
               </div>
             </div>
@@ -768,8 +765,7 @@
                 </div>
                 <div class="text-lg sm:text-2xl font-bold font-mono text-[#D70015] tracking-tight" id="cockpit-kpi-drawdown">-0.23%</div>
               </div>
-              <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-between text-[11px]">
-                <span class="text-[#86868B] font-medium" id="cockpit-kpi-drawdown-label">Límite máx</span>
+              <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-end text-[11px]">
                 <span class="text-[#D70015] font-mono font-semibold text-[11px]" id="cockpit-kpi-drawdown-limit">-5.00%</span>
               </div>
             </div>
@@ -785,26 +781,24 @@
                 </div>
                 <div class="text-lg sm:text-2xl font-bold font-mono text-[#1D1D1F] tracking-tight" id="cockpit-kpi-margin-used">0.85%</div>
               </div>
-              <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-between text-[11px]">
-                <span class="text-[#86868B] font-medium">Apalancamiento</span>
+              <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-end text-[11px]">
                 <span id="cockpit-kpi-margin-badge" class="badge-success-live font-mono text-[10px] py-0.5 px-1.5">Seguro</span>
               </div>
             </div>
 
-            <!-- KPI 6: Exposición Neta -->
+            <!-- KPI 6: Riesgo Flotante al SL (Suma de posiciones abiertas) -->
             <div class="p-4 sm:p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
               <div>
                 <div class="flex items-center justify-between mb-2">
-                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">Exposición Neta</span>
-                  <div class="h-6 w-6 rounded-lg bg-[#EEF2FF] flex items-center justify-center text-[#3C45A5] shrink-0">
-                    <i class="fa-solid fa-arrows-split-up-and-left text-[11px]"></i>
+                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">Riesgo Flotante (SL)</span>
+                  <div class="h-6 w-6 rounded-lg bg-[#FEF2F2] flex items-center justify-center text-[#D70015] shrink-0">
+                    <i class="fa-solid fa-crosshairs text-[11px]"></i>
                   </div>
                 </div>
-                <div class="text-lg sm:text-2xl font-bold font-mono text-[#3C45A5] tracking-tight" id="cockpit-kpi-net-exposure">LONG 100%</div>
+                <div class="text-lg sm:text-2xl font-bold font-mono text-[#D70015] tracking-tight" id="cockpit-kpi-open-risk">$0.00</div>
               </div>
-              <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-between text-[11px]">
-                <span class="text-[#86868B] font-medium">Dirección</span>
-                <span class="badge-neutral-soft font-mono text-[10px] py-0.5 px-1.5" id="cockpit-kpi-net-subtext">US500 / USTEC</span>
+              <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-end text-[11px]">
+                <span id="cockpit-kpi-open-risk-badge" class="badge-warning-risk font-mono text-[10px] py-0.5 px-1.5">0.00%</span>
               </div>
             </div>
 
@@ -8780,11 +8774,20 @@
       const kpiMargin = document.getElementById('cockpit-kpi-margin-used');
       if (kpiMargin) kpiMargin.innerText = Number(marginVal).toFixed(2) + '%';
 
-      // 6. Exposición Neta
-      const kpiExp = document.getElementById('cockpit-kpi-net-exposure');
-      const kpiExpSub = document.getElementById('cockpit-kpi-net-subtext');
-      if (kpiExp) kpiExp.innerText = expVal;
-      if (kpiExpSub) kpiExpSub.innerText = expSub;
+      // 6. Riesgo Flotante al SL (Suma del valor en riesgo de posiciones vivas)
+      const kpiRisk = document.getElementById('cockpit-kpi-open-risk');
+      const kpiRiskBadge = document.getElementById('cockpit-kpi-open-risk-badge');
+      const riskVal = deskData ? Number(deskData.open_sl_risk_usd || 0.0) : 0.0;
+      const riskPct = deskData ? Number(deskData.open_sl_risk_pct || 0.0) : 0.0;
+
+      if (kpiRisk) {
+        kpiRisk.innerText = '$' + riskVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        kpiRisk.className = `text-lg sm:text-2xl font-bold font-mono tracking-tight ${riskVal > 0 ? 'text-[#D70015]' : 'text-[#1D1D1F]'}`;
+      }
+      if (kpiRiskBadge) {
+        kpiRiskBadge.innerText = riskPct.toFixed(2) + '%';
+        kpiRiskBadge.className = `font-mono text-[10px] py-0.5 px-1.5 ${riskVal > 0 ? 'badge-warning-risk' : 'badge-neutral-soft'}`;
+      }
     }
     window.updateCockpitKPIs = updateCockpitKPIs;
 
