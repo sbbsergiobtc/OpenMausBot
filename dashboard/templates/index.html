@@ -679,23 +679,15 @@
         <div id="tab-content-dashboard" class="tab-pane space-y-6">
 
           <!-- ==================== HEADER EJECUTIVO & CONTROLES GLOBALES ==================== -->
-          <div class="p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="space-y-1">
-              <div class="flex items-center gap-2">
-                <span id="cockpit-desk-badge" class="badge-brand-indigo font-mono">CAPITAL PROPIO</span>
-                <span id="cockpit-sync-badge" class="badge-success-live font-mono">● 25 CUENTAS FT</span>
-                <span id="cockpit-news-badge" class="badge-neutral-soft font-mono"><i class="fa-solid fa-newspaper mr-1 text-[#3C45A5]"></i>FILTRO NOTICIAS: ±5 MIN</span>
-              </div>
               <h1 class="text-xl sm:text-2xl font-bold text-[#1D1D1F] tracking-tight" id="cockpit-header-title">Monitoreo Unificado · Capital Propio</h1>
               <p class="text-xs text-[#6E6E73]" id="cockpit-header-desc">Supervisión consolidada de capital propio en Forward Test: 25 estrategias ($25,000 inicial) en MT5 Demo y Hyperliquid DEX.</p>
             </div>
             <!-- Acciones de Intervención Operativa & Gestor de Cuentas -->
-            <div class="flex items-center gap-2.5 shrink-0 flex-wrap">
+            <div class="flex items-center gap-2.5 flex-wrap">
               <button onclick="toggleAccountsManagerModal()" class="btn-secondary whitespace-nowrap cursor-pointer text-xs flex items-center gap-1.5" title="Gestionar Cuentas Conectadas y Fases de Fondeo">
                 <i class="fa-solid fa-building-columns text-[#3C45A5]"></i> Cuentas & Fases
-              </button>
-              <button onclick="toggleRiskAuditModal()" class="btn-secondary whitespace-nowrap cursor-pointer text-xs flex items-center gap-1.5" title="Ver auditoría de drawdown multianual">
-                <i class="fa-solid fa-shield-halved text-[#3C45A5]"></i> Auditoría Riesgo
               </button>
               <button onclick="triggerEmergencyKillSwitch()" id="btn-kill-switch" class="px-4 py-2 rounded-lg bg-[#D70015] hover:bg-[#B50012] text-white text-xs font-bold font-mono flex items-center gap-2 transition shadow-xs cursor-pointer whitespace-nowrap" title="Desconexión preventiva y pausa de todos los bots">
                 <i class="fa-solid fa-hand text-white"></i> PAUSA PREVENTIVA
@@ -704,7 +696,7 @@
           </div>
 
           <!-- ==================== 6 TARJETAS DE KPI INDEPENDIENTES (APPLE / LINEAR STYLE) ==================== -->
-          <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3.5 sm:gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
             
             <!-- KPI 1: Balance Total en Forward Test -->
             <div class="p-4 sm:p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
@@ -817,7 +809,6 @@
                   <div>
                     <div class="flex items-center gap-2">
                       <span class="text-xs font-bold text-[#1D1D1F]">IC Markets · MT5 Demo</span>
-                      <span id="cockpit-mt5-status-badge" class="badge-success-live font-mono text-[10px]">● CONECTADA</span>
                     </div>
                     <div class="text-[11px] text-[#6E6E73] font-mono">Cuenta <span id="cockpit-mt5-account-id">53120791</span> · ICMarketsSC-Demo</div>
                   </div>
@@ -846,14 +837,6 @@
                   <span id="cockpit-mt5-floating" class="font-bold text-[#D70015] text-sm">-$4.58</span>
                 </div>
               </div>
-
-              <div class="flex items-center justify-between text-xs text-[#6E6E73] pt-1">
-                <span class="flex items-center gap-1.5">
-                  <i class="fa-solid fa-shield-halved text-[#3C45A5] text-xs"></i>
-                  <span>Riesgo Dinámico Compuesto 1.5%</span>
-                </span>
-                <span class="font-mono text-[11px] text-[#1D1D1F] font-semibold">US500 · USTEC · EURUSD</span>
-              </div>
             </div>
 
             <!-- TARJETA CUENTA 2: HYPERLIQUID TESTNET (CRYPTO DEX) -->
@@ -866,7 +849,6 @@
                   <div>
                     <div class="flex items-center gap-2">
                       <span class="text-xs font-bold text-[#1D1D1F]">Hyperliquid L1 Testnet</span>
-                      <span id="cockpit-hl-status-badge" class="badge-success-live font-mono text-[10px]">● SYNCD</span>
                     </div>
                     <div class="text-[11px] text-[#6E6E73] font-mono">DEX Perpetuos · Arbitrum L1</div>
                   </div>
@@ -894,14 +876,6 @@
                   <span class="text-[10px] text-[#86868B] block uppercase tracking-wider mb-0.5">PnL Flotante</span>
                   <span id="cockpit-hl-floating" class="font-bold text-[#1D1D1F] text-sm">$0.00</span>
                 </div>
-              </div>
-
-              <div class="flex items-center justify-between text-xs text-[#6E6E73] pt-1">
-                <span class="flex items-center gap-1.5">
-                  <i class="fa-solid fa-bolt text-[#065F46] text-xs"></i>
-                  <span>STRAT-FAST-035 (BTC 1h)</span>
-                </span>
-                <span class="font-mono text-[11px] text-[#1D1D1F] font-semibold">14 bps Taker + Funding 1h</span>
               </div>
             </div>
 
@@ -1011,14 +985,14 @@
           </div>
 
           <!-- ==================== BANNER INTEGRADO: FILTRO DE NOTICIAS MACRO (±5 MIN) ==================== -->
-          <div id="cockpit-news-risk-banner" class="p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div id="cockpit-news-risk-banner" class="p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs space-y-3.5">
             <div class="flex items-start sm:items-center gap-3.5">
               <div class="h-10 w-10 rounded-xl bg-[#EEF2FF] border border-[#E0E7FF] flex items-center justify-center text-[#3C45A5] shrink-0 mt-0.5 sm:mt-0">
                 <i class="fa-solid fa-newspaper text-base"></i>
               </div>
-              <div class="space-y-0.5">
+              <div class="space-y-0.5 flex-1">
                 <div class="flex items-center gap-2 flex-wrap">
-                  <span class="text-xs font-bold text-[#1D1D1F]">Filtro de Riesgo Macro (ForexFactory / FairEconomy)</span>
+                  <span class="text-xs font-bold text-[#1D1D1F]">Filtro de Riesgo Macro (Forex Factory)</span>
                   <span id="cockpit-news-state-badge" class="badge-success-live font-mono text-[10px]">● OPERATIVA PERMITIDA</span>
                 </div>
                 <p class="text-xs text-[#6E6E73]">
@@ -1026,13 +1000,16 @@
                 </p>
               </div>
             </div>
-            <div class="flex items-center gap-3 shrink-0 bg-[#FAFAFC] px-3.5 py-2 rounded-xl border border-[#E5E5EA] text-xs font-mono">
-              <div class="text-right">
-                <div class="text-[10px] text-[#86868B] uppercase">Próximo Evento High Impact</div>
-                <div id="cockpit-news-next-event" class="font-bold text-[#1D1D1F]">Sin eventos inmediatos (&gt;6h)</div>
+
+            <!-- Fila individual inferior para Próximo Evento -->
+            <div class="pt-3 border-t border-[#F2F2F7] flex items-center justify-between flex-wrap gap-2 text-xs font-mono">
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] text-[#86868B] uppercase tracking-wider font-semibold">Próximo Evento High Impact:</span>
+                <span id="cockpit-news-next-event" class="font-bold text-[#1D1D1F] bg-[#FAFAFC] px-2.5 py-1 rounded-lg border border-[#E5E5EA]">Sin eventos inmediatos (&gt;6h)</span>
               </div>
-              <div class="h-7 w-7 rounded-lg bg-[#EBF5FB] flex items-center justify-center text-[#3C45A5]">
-                <i class="fa-solid fa-clock text-xs"></i>
+              <div class="flex items-center gap-1.5 text-[11px] text-[#6E6E73]">
+                <i class="fa-solid fa-clock text-[#3C45A5]"></i>
+                <span>Forex Factory</span>
               </div>
             </div>
           </div>

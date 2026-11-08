@@ -72,7 +72,7 @@ def load_news_policy() -> Dict[str, Any]:
 
 def fetch_and_cache_economic_calendar(force_refresh: bool = False) -> List[Dict[str, Any]]:
     """
-    Descarga el calendario económico semanal de ForexFactory / FairEconomy y lo cachea localmente.
+    Descarga el calendario económico semanal de Forex Factory y lo cachea localmente.
     Usa caché en memoria y archivo por 1 hora para evitar latencias de red en cada evaluación.
     """
     global _MEM_CALENDAR_CACHE, _LAST_FETCH_TIME
