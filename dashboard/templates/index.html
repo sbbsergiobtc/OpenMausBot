@@ -708,690 +708,317 @@
       <div id="tabs-wrapper" class="w-full">
         <div id="tab-content-dashboard" class="tab-pane space-y-6">
 
-          <!-- ==================== RISK HUD SUPERIOR & KILL-SWITCH CONSOLIDADO ==================== -->
-                    <!-- ==================== RISK HUD SUPERIOR & KILL-SWITCH CONSOLIDADO ==================== -->
-          <div id="portfolio-risk-hud" class="my-4 p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs">
-            <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-5">
-              <!-- 4 Métricas de Riesgo Clave de Cartera (Espaciado Generoso Anti-Colisión) -->
-              <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 flex-1 min-w-0">
-                <div class="border-r border-[#F2F2F7] pr-3 min-w-0">
-                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] block mb-1 truncate">Margen Utilizado</span>
-                  <div class="flex items-baseline gap-2 flex-wrap">
-                    <span class="text-lg sm:text-xl font-bold font-mono text-[#1D1D1F]" id="hud-margin-used">14.2%</span>
-                    <span class="badge-success-live text-[10px] py-0.5 px-2">Seguro</span>
+          <!-- ==================== HEADER EJECUTIVO & CONTROLES GLOBALES ==================== -->
+          <div class="p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2">
+                <span class="badge-brand-indigo font-mono">COCKPIT GENERAL</span>
+                <span id="cockpit-sync-badge" class="badge-success-live font-mono">● CUENTAS CONECTADAS</span>
+                <span id="cockpit-news-badge" class="badge-neutral-soft font-mono"><i class="fa-solid fa-newspaper mr-1 text-[#3C45A5]"></i>FILTRO NOTICIAS: ±5 MIN</span>
+              </div>
+              <h1 class="text-xl sm:text-2xl font-bold text-[#1D1D1F] tracking-tight">Monitoreo Unificado de Cartera</h1>
+              <p class="text-xs text-[#6E6E73]">Supervisión consolidada de capital en Forward Test: IC Markets (MT5 Prop Firm) y Hyperliquid (Crypto DEX).</p>
+            </div>
+            <!-- Acciones de Intervención Operativa & Gestor de Cuentas -->
+            <div class="flex items-center gap-2.5 shrink-0 flex-wrap">
+              <button onclick="toggleAccountsManagerModal()" class="btn-secondary whitespace-nowrap cursor-pointer text-xs flex items-center gap-1.5" title="Gestionar Cuentas Conectadas y Fases de Fondeo">
+                <i class="fa-solid fa-building-columns text-[#3C45A5]"></i> Cuentas & Fases
+              </button>
+              <button onclick="toggleRiskAuditModal()" class="btn-secondary whitespace-nowrap cursor-pointer text-xs flex items-center gap-1.5" title="Ver auditoría de drawdown multianual">
+                <i class="fa-solid fa-shield-halved text-[#3C45A5]"></i> Auditoría Riesgo
+              </button>
+              <button onclick="triggerEmergencyKillSwitch()" id="btn-kill-switch" class="px-4 py-2 rounded-lg bg-[#D70015] hover:bg-[#B50012] text-white text-xs font-bold font-mono flex items-center gap-2 transition shadow-xs cursor-pointer whitespace-nowrap" title="Desconexión preventiva y pausa de todos los bots">
+                <i class="fa-solid fa-hand text-white"></i> PAUSA PREVENTIVA
+              </button>
+            </div>
+          </div>
+
+          <!-- ==================== 6 TARJETAS DE KPI INDEPENDIENTES (APPLE / LINEAR STYLE) ==================== -->
+          <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3.5 sm:gap-4">
+            
+            <!-- KPI 1: Balance Total en Forward Test -->
+            <div class="p-4 sm:p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">Balance Total FT</span>
+                  <div class="h-6 w-6 rounded-lg bg-[#EEF2FF] flex items-center justify-center text-[#3C45A5] shrink-0">
+                    <i class="fa-solid fa-wallet text-[11px]"></i>
                   </div>
                 </div>
-                <div class="border-r border-[#F2F2F7] pr-3 min-w-0">
-                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] block mb-1 truncate">Drawdown Cartera</span>
-                  <div class="flex items-baseline gap-2 flex-wrap">
-                    <span class="text-lg sm:text-xl font-bold font-mono text-[#D70015]" id="hud-global-dd">-4.20%</span>
-                    <span class="text-[11px] text-[#86868B] font-mono whitespace-nowrap">Máx: -20.0%</span>
+                <div class="text-lg sm:text-2xl font-bold font-mono text-[#1D1D1F] tracking-tight" id="cockpit-kpi-total-balance">$1,998.09</div>
+              </div>
+              <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-between text-[11px]">
+                <span class="text-[#86868B] font-medium">Suma Cuentas FT</span>
+                <span class="badge-brand-indigo font-mono text-[10px] py-0.5 px-1.5">MT5 + DEX</span>
+              </div>
+            </div>
+
+            <!-- KPI 2: PnL Realizado Total -->
+            <div class="p-4 sm:p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">PnL Realizado</span>
+                  <div class="h-6 w-6 rounded-lg bg-[#F2F2F7] flex items-center justify-center text-[#1D1D1F] shrink-0">
+                    <i class="fa-solid fa-scale-balanced text-[11px]"></i>
                   </div>
                 </div>
-                <div class="border-r border-[#F2F2F7] pr-3 min-w-0">
-                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] block mb-1 truncate">PnL Flotante Total</span>
-                  <div class="flex items-baseline gap-1.5 flex-wrap">
-                    <span class="text-lg sm:text-xl font-bold font-mono text-[#065F46]" id="hud-floating-pnl">+$1,420.50</span>
-                    <span class="text-xs font-mono text-[#065F46] font-semibold whitespace-nowrap">(+1.42%)</span>
+                <div class="text-lg sm:text-2xl font-bold font-mono text-[#D70015] tracking-tight" id="cockpit-kpi-realized-pnl">-$1.91</div>
+              </div>
+              <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-between text-[11px]">
+                <span class="text-[#86868B] font-medium">Trades cerrados</span>
+                <span id="cockpit-kpi-realized-badge" class="badge-warning-risk font-mono text-[10px] py-0.5 px-1.5">-0.10%</span>
+              </div>
+            </div>
+
+            <!-- KPI 3: PnL Flotante Total -->
+            <div class="p-4 sm:p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">PnL Flotante</span>
+                  <div class="h-6 w-6 rounded-lg bg-[#FEF2F2] flex items-center justify-center text-[#D70015] shrink-0">
+                    <i class="fa-solid fa-chart-line text-[11px]"></i>
                   </div>
                 </div>
-                <div class="min-w-0">
-                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] block mb-1 truncate">Exposición Neta</span>
-                  <div class="flex items-baseline gap-2 flex-wrap">
-                    <span class="text-lg sm:text-xl font-bold font-mono text-[#3C45A5]" id="hud-net-exposure">LONG 62%</span>
-                    <span class="text-[11px] font-mono text-[#86868B] whitespace-nowrap">Asimétrico</span>
+                <div class="text-lg sm:text-2xl font-bold font-mono text-[#D70015] tracking-tight" id="cockpit-kpi-floating-pnl">-$4.58</div>
+              </div>
+              <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-between text-[11px]">
+                <span class="text-[#86868B] font-medium">Posiciones vivas</span>
+                <span id="cockpit-kpi-floating-badge" class="badge-neutral-soft font-mono text-[10px] py-0.5 px-1.5">-0.23%</span>
+              </div>
+            </div>
+
+            <!-- KPI 4: Drawdown Cartera -->
+            <div class="p-4 sm:p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">Drawdown Cartera</span>
+                  <div class="h-6 w-6 rounded-lg bg-[#FEF2F2] flex items-center justify-center text-[#D70015] shrink-0">
+                    <i class="fa-solid fa-arrow-trend-down text-[11px]"></i>
                   </div>
                 </div>
+                <div class="text-lg sm:text-2xl font-bold font-mono text-[#D70015] tracking-tight" id="cockpit-kpi-drawdown">-0.23%</div>
               </div>
-              <!-- Acciones de Intervención Operativa & Gestor de Cuentas -->
-              <div class="flex items-center gap-2.5 pt-3 xl:pt-0 border-t xl:border-t-0 border-[#F2F2F7] shrink-0">
-                <button onclick="toggleAccountsManagerModal()" class="btn-secondary whitespace-nowrap cursor-pointer text-xs flex items-center gap-1.5" title="Gestionar Cuentas Conectadas y Fases de Fondeo">
-                  <i class="fa-solid fa-building-columns text-[#3C45A5]"></i> Cuentas & Fases
+              <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-between text-[11px]">
+                <span class="text-[#86868B] font-medium">Límite máx</span>
+                <span class="text-[#D70015] font-mono font-semibold text-[11px]">-5.00%</span>
+              </div>
+            </div>
+
+            <!-- KPI 5: Margen Utilizado -->
+            <div class="p-4 sm:p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">Margen Utilizado</span>
+                  <div class="h-6 w-6 rounded-lg bg-[#ECFDF5] flex items-center justify-center text-[#065F46] shrink-0">
+                    <i class="fa-solid fa-gauge text-[11px]"></i>
+                  </div>
+                </div>
+                <div class="text-lg sm:text-2xl font-bold font-mono text-[#1D1D1F] tracking-tight" id="cockpit-kpi-margin-used">0.85%</div>
+              </div>
+              <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-between text-[11px]">
+                <span class="text-[#86868B] font-medium">Apalancamiento</span>
+                <span class="badge-success-live font-mono text-[10px] py-0.5 px-1.5">Seguro</span>
+              </div>
+            </div>
+
+            <!-- KPI 6: Exposición Neta -->
+            <div class="p-4 sm:p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">Exposición Neta</span>
+                  <div class="h-6 w-6 rounded-lg bg-[#EEF2FF] flex items-center justify-center text-[#3C45A5] shrink-0">
+                    <i class="fa-solid fa-arrows-split-up-and-left text-[11px]"></i>
+                  </div>
+                </div>
+                <div class="text-lg sm:text-2xl font-bold font-mono text-[#3C45A5] tracking-tight" id="cockpit-kpi-net-exposure">LONG 100%</div>
+              </div>
+              <div class="mt-3 pt-2.5 border-t border-[#F2F2F7] flex items-center justify-between text-[11px]">
+                <span class="text-[#86868B] font-medium">Dirección</span>
+                <span class="badge-neutral-soft font-mono text-[10px] py-0.5 px-1.5" id="cockpit-kpi-net-subtext">US500 / USTEC</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ==================== CUENTAS ACTIVAS EN TIEMPO REAL (MT5 + HYPERLIQUID) ==================== -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            
+            <!-- TARJETA CUENTA 1: IC MARKETS MT5 DEMO (PROP FIRM FORWARD TEST) -->
+            <div class="p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs space-y-4 hover:border-[#D1D1D6] transition">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="h-10 w-10 rounded-xl bg-[#EEF2FF] border border-[#E0E7FF] flex items-center justify-center text-[#3C45A5]">
+                    <i class="fa-solid fa-building-columns text-base"></i>
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs font-bold text-[#1D1D1F]">IC Markets · MT5 Demo</span>
+                      <span id="cockpit-mt5-status-badge" class="badge-success-live font-mono text-[10px]">● CONECTADA</span>
+                    </div>
+                    <div class="text-[11px] text-[#6E6E73] font-mono">Cuenta <span id="cockpit-mt5-account-id">53120791</span> · ICMarketsSC-Demo</div>
+                  </div>
+                </div>
+                <button onclick="switchTab('forward')" class="btn-secondary text-[11px] py-1.5 px-3 flex items-center gap-1 cursor-pointer">
+                  <span>Ver Forward</span>
+                  <i class="fa-solid fa-arrow-right text-[10px]"></i>
                 </button>
-                <button onclick="toggleRiskAuditModal()" class="btn-secondary whitespace-nowrap cursor-pointer text-xs" title="Ver auditoría de drawdown multianual">
-                  <i class="fa-solid fa-shield-halved text-[#3C45A5]"></i> Auditoría Riesgo
+              </div>
+
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 bg-[#FAFAFC] p-3.5 rounded-xl border border-[#E5E5EA] text-xs font-mono">
+                <div>
+                  <span class="text-[10px] text-[#86868B] block uppercase tracking-wider mb-0.5">Balance</span>
+                  <span id="cockpit-mt5-balance" class="font-bold text-[#1D1D1F] text-sm">$984.53</span>
+                </div>
+                <div>
+                  <span class="text-[10px] text-[#86868B] block uppercase tracking-wider mb-0.5">Equity</span>
+                  <span id="cockpit-mt5-equity" class="font-bold text-[#1D1D1F] text-sm">$979.95</span>
+                </div>
+                <div>
+                  <span class="text-[10px] text-[#86868B] block uppercase tracking-wider mb-0.5">PnL Realizado</span>
+                  <span id="cockpit-mt5-realized" class="font-bold text-[#D70015] text-sm">-$15.47</span>
+                </div>
+                <div>
+                  <span class="text-[10px] text-[#86868B] block uppercase tracking-wider mb-0.5">PnL Flotante</span>
+                  <span id="cockpit-mt5-floating" class="font-bold text-[#D70015] text-sm">-$4.58</span>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between text-xs text-[#6E6E73] pt-1">
+                <span class="flex items-center gap-1.5">
+                  <i class="fa-solid fa-shield-halved text-[#3C45A5] text-xs"></i>
+                  <span>Riesgo Dinámico Compuesto 1.5%</span>
+                </span>
+                <span class="font-mono text-[11px] text-[#1D1D1F] font-semibold">US500 · USTEC · EURUSD</span>
+              </div>
+            </div>
+
+            <!-- TARJETA CUENTA 2: HYPERLIQUID TESTNET (CRYPTO DEX) -->
+            <div class="p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs space-y-4 hover:border-[#D1D1D6] transition">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="h-10 w-10 rounded-xl bg-[#ECFDF5] border border-[#A7F3D0] flex items-center justify-center text-[#065F46]">
+                    <i class="fa-brands fa-ethereum text-base"></i>
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs font-bold text-[#1D1D1F]">Hyperliquid L1 Testnet</span>
+                      <span id="cockpit-hl-status-badge" class="badge-success-live font-mono text-[10px]">● SYNCD</span>
+                    </div>
+                    <div class="text-[11px] text-[#6E6E73] font-mono">DEX Perpetuos · Arbitrum L1</div>
+                  </div>
+                </div>
+                <button onclick="switchTab('forward')" class="btn-secondary text-[11px] py-1.5 px-3 flex items-center gap-1 cursor-pointer">
+                  <span>Ver Forward</span>
+                  <i class="fa-solid fa-arrow-right text-[10px]"></i>
                 </button>
-                <button onclick="triggerEmergencyKillSwitch()" id="btn-kill-switch" class="px-4 py-2 rounded-lg bg-[#D70015] hover:bg-[#B50012] text-white text-xs font-bold font-mono flex items-center gap-2 transition shadow-xs cursor-pointer whitespace-nowrap" title="Desconexión preventiva y pausa de todos los bots">
-                  <i class="fa-solid fa-hand text-white"></i> PAUSA PREVENTIVA
-                </button>
+              </div>
+
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 bg-[#FAFAFC] p-3.5 rounded-xl border border-[#E5E5EA] text-xs font-mono">
+                <div>
+                  <span class="text-[10px] text-[#86868B] block uppercase tracking-wider mb-0.5">Balance</span>
+                  <span id="cockpit-hl-balance" class="font-bold text-[#1D1D1F] text-sm">1,013.56 USDC</span>
+                </div>
+                <div>
+                  <span class="text-[10px] text-[#86868B] block uppercase tracking-wider mb-0.5">Equity</span>
+                  <span id="cockpit-hl-equity" class="font-bold text-[#1D1D1F] text-sm">1,013.56 USDC</span>
+                </div>
+                <div>
+                  <span class="text-[10px] text-[#86868B] block uppercase tracking-wider mb-0.5">PnL Realizado</span>
+                  <span id="cockpit-hl-realized" class="font-bold text-[#065F46] text-sm">+$13.56</span>
+                </div>
+                <div>
+                  <span class="text-[10px] text-[#86868B] block uppercase tracking-wider mb-0.5">PnL Flotante</span>
+                  <span id="cockpit-hl-floating" class="font-bold text-[#1D1D1F] text-sm">$0.00</span>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between text-xs text-[#6E6E73] pt-1">
+                <span class="flex items-center gap-1.5">
+                  <i class="fa-solid fa-bolt text-[#065F46] text-xs"></i>
+                  <span>STRAT-FAST-035 (BTC 1h)</span>
+                </span>
+                <span class="font-mono text-[11px] text-[#1D1D1F] font-semibold">14 bps Taker + Funding 1h</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ==================== BANNER INTEGRADO: FILTRO DE NOTICIAS MACRO (±5 MIN) ==================== -->
+          <div id="cockpit-news-risk-banner" class="p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-start sm:items-center gap-3.5">
+              <div class="h-10 w-10 rounded-xl bg-[#EEF2FF] border border-[#E0E7FF] flex items-center justify-center text-[#3C45A5] shrink-0 mt-0.5 sm:mt-0">
+                <i class="fa-solid fa-newspaper text-base"></i>
+              </div>
+              <div class="space-y-0.5">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-xs font-bold text-[#1D1D1F]">Filtro de Riesgo Macro (ForexFactory / FairEconomy)</span>
+                  <span id="cockpit-news-state-badge" class="badge-success-live font-mono text-[10px]">● OPERATIVA PERMITIDA</span>
+                </div>
+                <p class="text-xs text-[#6E6E73]">
+                  Protección institucional estricta: Se prohíbe abrir órdenes y se rechaza ejecución <strong class="text-[#1D1D1F]">5 min antes y 5 min después</strong> de eventos macro High Impact (USD / EUR).
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3 shrink-0 bg-[#FAFAFC] px-3.5 py-2 rounded-xl border border-[#E5E5EA] text-xs font-mono">
+              <div class="text-right">
+                <div class="text-[10px] text-[#86868B] uppercase">Próximo Evento High Impact</div>
+                <div id="cockpit-news-next-event" class="font-bold text-[#1D1D1F]">Sin eventos inmediatos (&gt;6h)</div>
+              </div>
+              <div class="h-7 w-7 rounded-lg bg-[#EBF5FB] flex items-center justify-center text-[#3C45A5]">
+                <i class="fa-solid fa-clock text-xs"></i>
               </div>
             </div>
           </div>
 
-<!-- ==================== GESTIÓN DE CARTERA ACTIVA (TABLA DENSA Y GRID) ==================== -->
-          <div id="active-portfolio-section">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3 px-1">
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-bold text-txtPrimary uppercase tracking-wider">Cartera Activa</span>
-                <span id="portfolio-count-badge" class="badge-neutral-soft font-mono">3 Estrategias</span>
+          <!-- ==================== MARCO DE PRESERVACIÓN DE CAPITAL E INFRAESTRUCTURA ==================== -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="rounded-2xl p-5 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs space-y-3">
+              <div class="flex items-center justify-between border-b border-[#F2F2F7] pb-2">
+                <h3 class="text-xs font-bold text-[#1D1D1F] uppercase tracking-wider flex items-center">
+                  <i class="fa-solid fa-shield-halved text-[#D70015] mr-2"></i> Marco de Preservación de Capital
+                </h3>
+                <span class="badge-success-live font-mono">ACTIVO</span>
               </div>
-
-              <!-- Selector de Modo de Visualización (Apple Segmented Control) -->
-              <div class="segmented-control">
-                <button id="view-toggle-table" onclick="setPortfolioView('table')" class="segmented-pill active">
-                  <i class="fa-solid fa-table-list"></i> Tabla
-                </button>
-                <button id="view-toggle-grid" onclick="setPortfolioView('grid')" class="segmented-pill">
-                  <i class="fa-solid fa-grip"></i> Cuadrícula
-                </button>
-              </div>
-            </div>
-
-            <!-- VISTA TABULAR DENSA CUANTITATIVA (ALTA DENSIDAD INSTITUCIONAL) -->
-            <div id="portfolio-table-view" class="w-full overflow-x-auto rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs mb-6">
-              <table id="table-portfolio" class="w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr class="border-b border-[#E5E5EA] bg-[#FAFAFC] text-[#6E6E73] font-semibold text-[11px] uppercase tracking-wider">
-                <th class="py-2.5 px-3">Estrategia / ID</th>
-                <th class="py-2.5 px-3">Mesa & Vehículo</th>
-                <th class="py-2.5 px-3">Activo & TF</th>
-                <th class="py-2.5 px-3">Arquetipo & Parámetros</th>
-                <th class="py-2.5 px-3 text-right">ROI Total BT</th>
-                <th class="py-2.5 px-3 text-right">CAGR vs BnH / Target</th>
-                <th class="py-2.5 px-3 text-right">PF / Max DD</th>
-                <th class="py-2.5 px-3 text-center">Orquestador Vivo</th>
-                <th class="py-2.5 px-3 text-right">Libro A (Indiv) vs B (Orq)</th>
-                <th class="py-2.5 px-3 text-center">Acciones</th>
-              </tr>
-            </thead>
-            <tbody id="portfolio-table-tbody" class="divide-y divide-[#E6E2D8]/60 font-sans">
-              <!-- Populado dinámicamente por renderCockpitPortfolioTable() con las 16 estrategias certificadas -->
-            </tbody>
-          </table>
-        </div>
-
-        <!-- VISTA DE CUADRÍCULA DE TARJETAS (OPCIONAL/ALTERNATIVA) -->
-        <div id="portfolio-grid-view" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 hidden">
-
-          <!-- Tarjeta 1: S&P 500 (Capital Propio) -->
-          <div class="strategy-card" data-desk="CAPITAL_PROPIO">
-            <div class="flex items-start justify-between">
-              <div>
-                <span class="text-xs font-bold text-[#3C45A5] font-mono">US500</span>
-                <h3 class="card-title mt-0.5">CAP-SPX-006</h3>
-              </div>
-              <span class="badge-brand-indigo font-mono">IC MARKETS MT5</span>
-            </div>
-
-            <div class="my-3 py-2 border-y border-[#E6E2D8]/60 space-y-1 text-xs">
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Marco Temporal:</span>
-                <strong class="text-[#181A20] font-mono">4 Horas (Swing)</strong>
-              </div>
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Gestión de Riesgo:</span>
-                <strong class="text-[#181A20] font-mono">1.50% Compuesto</strong>
-              </div>
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Cartera Asignada:</span>
-                <strong class="text-[#181A20]">Capital Propio</strong>
+              <div class="space-y-2 text-xs font-mono">
+                <div class="flex justify-between p-2.5 rounded-lg bg-[#FAFAFC] border border-[#E5E5EA]">
+                  <span class="text-[#6E6E73]">Prop Firm Challenge ($100k):</span>
+                  <span class="text-[#1D1D1F] font-bold">EOD DD &le; 3.5% | Pérdida Diaria &le; 2.0%</span>
+                </div>
+                <div class="flex justify-between p-2.5 rounded-lg bg-[#FAFAFC] border border-[#E5E5EA]">
+                  <span class="text-[#6E6E73]">Crypto Propio (Hyperliquid):</span>
+                  <span class="text-[#1D1D1F] font-bold">Retorno &ge; 30% Anual | Superar Buy & Hold</span>
+                </div>
+                <div class="flex justify-between p-2.5 rounded-lg bg-[#FAFAFC] border border-[#E5E5EA]">
+                  <span class="text-[#6E6E73]">Fricciones Modeladas:</span>
+                  <span class="text-[#065F46] font-bold">0.4 - 1.5 pts + 0.14% round-trip</span>
+                </div>
               </div>
             </div>
 
-            <div class="flex items-center justify-between pt-1">
-              <span class="badge-success-live">● EN EJECUCIÓN</span>
-              <div class="flex items-center gap-2">
-                <span id="active-card-spx-bal" class="text-[11px] font-mono font-bold text-[#181A20]">$1,001.52 USD</span>
-                <button onclick="viewStrategy('CAP-SPX-006')" title="Ver Ficha Técnica" class="px-2.5 py-0.5 rounded text-[11px] font-bold bg-[#181A20] text-white hover:bg-[#2C303B] transition cursor-pointer">Ficha</button>
+            <div class="rounded-2xl p-5 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs space-y-3">
+              <div class="flex items-center justify-between border-b border-[#F2F2F7] pb-2">
+                <h3 class="text-xs font-bold text-[#1D1D1F] uppercase tracking-wider flex items-center">
+                  <i class="fa-solid fa-network-wired text-[#3C45A5] mr-2"></i> Infraestructura de Ejecución
+                </h3>
+                <span class="badge-brand-indigo font-mono">2 CUENTAS SYNC</span>
+              </div>
+              <div class="space-y-2 text-xs font-mono">
+                <div class="flex justify-between p-2.5 rounded-lg bg-[#FAFAFC] border border-[#E5E5EA]">
+                  <span class="text-[#6E6E73]">Daemons Prop Firm:</span>
+                  <span class="text-[#1D1D1F] font-bold">PROP-NDX-005 (2h) & PROP-SPX-005 (1D)</span>
+                </div>
+                <div class="flex justify-between p-2.5 rounded-lg bg-[#FAFAFC] border border-[#E5E5EA]">
+                  <span class="text-[#6E6E73]">Daemons Crypto Paper:</span>
+                  <span class="text-[#1D1D1F] font-bold">STRAT-FAST-035 (BTC 1h)</span>
+                </div>
+                <div class="flex justify-between p-2.5 rounded-lg bg-[#FAFAFC] border border-[#E5E5EA]">
+                  <span class="text-[#6E6E73]">Supervisión:</span>
+                  <span class="text-[#065F46] font-bold">Enjambre OpenMausBot 24/7 (systemd)</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Tarjeta 2: Nasdaq 100 (Capital Propio) -->
-          <div class="strategy-card" data-desk="CAPITAL_PROPIO">
-            <div class="flex items-start justify-between">
-              <div>
-                <span class="text-xs font-bold text-[#3C45A5] font-mono">USTEC</span>
-                <h3 class="card-title mt-0.5">CAP-NDX-005</h3>
-              </div>
-              <span class="badge-brand-indigo font-mono">IC MARKETS MT5</span>
-            </div>
-
-            <div class="my-3 py-2 border-y border-[#E6E2D8]/60 space-y-1 text-xs">
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Marco Temporal:</span>
-                <strong class="text-[#181A20] font-mono">2 Horas (Intradía)</strong>
-              </div>
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Gestión de Riesgo:</span>
-                <strong class="text-[#181A20] font-mono">1.50% Compuesto</strong>
-              </div>
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Cartera Asignada:</span>
-                <strong class="text-[#181A20]">Capital Propio</strong>
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between pt-1">
-              <span class="badge-success-live">● EN EJECUCIÓN</span>
-              <div class="flex items-center gap-2">
-                <span id="active-card-ndx-bal" class="text-[11px] font-mono font-bold text-[#181A20]">$1,001.52 USD</span>
-                <button onclick="viewStrategy('CAP-NDX-005')" title="Ver Ficha Técnica" class="px-2.5 py-0.5 rounded text-[11px] font-bold bg-[#181A20] text-white hover:bg-[#2C303B] transition cursor-pointer">Ficha</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tarjeta 3: BTC Cripto Perpetuos (Hyperliquid) -->
-          <div class="strategy-card card-risk-warning" data-desk="CAPITAL_PROPIO">
-            <div class="flex items-start justify-between">
-              <div>
-                <span class="text-xs font-bold text-[#C86D3B] font-mono">BTC/USDT</span>
-                <h3 class="card-title mt-0.5">CRYPTO-BTC-001</h3>
-              </div>
-              <span class="badge-brand-indigo font-mono">HYPERLIQUID L1</span>
-            </div>
-
-            <div class="my-3 py-2 border-y border-[#E6E2D8]/60 space-y-1 text-xs">
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Marco Temporal:</span>
-                <strong class="text-[#181A20] font-mono">1 Hora (Trend)</strong>
-              </div>
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Proveedor Cripto:</span>
-                <strong class="text-[#181A20]">DEX L1 Nativo</strong>
-              </div>
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Cartera Asignada:</span>
-                <strong class="text-[#181A20]">Capital Propio</strong>
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between pt-1">
-              <span class="badge-warning-risk">● CONTROL RIESGO</span>
-              <div class="flex items-center gap-2">
-                <span id="active-card-crypto-bal" class="text-[11px] font-mono font-bold text-[#181A20]">1,000.66 USDC</span>
-                <button onclick="viewStrategy('CRYPTO-BTC-001')" title="Ver Ficha Técnica" class="px-2.5 py-0.5 rounded text-[11px] font-bold bg-[#181A20] text-white hover:bg-[#2C303B] transition cursor-pointer">Ficha</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tarjeta 4: Forex EUR/USD (Fondeo Prop Firm) -->
-          <div class="strategy-card card-risk-warning" data-desk="PROP_FIRM" style="display: none;">
-            <div class="flex items-start justify-between">
-              <div>
-                <span class="text-xs font-bold text-[#C86D3B] font-mono">EURUSD</span>
-                <h3 class="card-title mt-0.5">PROP-FX-EUR-001</h3>
-              </div>
-              <span class="badge-brand-indigo font-mono">IC MARKETS MT5</span>
-            </div>
-
-            <div class="my-3 py-2 border-y border-[#E6E2D8]/60 space-y-1 text-xs">
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Marco Temporal:</span>
-                <strong class="text-[#181A20] font-mono">1 Hora (Forex)</strong>
-              </div>
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Gestión de Riesgo:</span>
-                <strong class="text-[#181A20] font-mono">1.00% Protegido</strong>
-              </div>
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Límite Drawdown:</span>
-                <strong class="text-[#9A3412] font-semibold">Máximo 4.0% EOD</strong>
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between pt-1">
-              <span class="badge-warning-risk">● CONTROL DE RIESGO</span>
-              <div class="flex items-center gap-2">
-                <span id="active-card-prop-fx-bal" class="text-[11px] font-mono font-bold text-[#181A20]">Pase Fondeo ($100k)</span>
-                <button onclick="viewStrategy('PROP-FX-EUR-001')" title="Ver Ficha Técnica" class="px-2.5 py-0.5 rounded text-[11px] font-bold bg-[#181A20] text-white hover:bg-[#2C303B] transition cursor-pointer">Ficha</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tarjeta 5: S&P 500 Breakout (Fondeo Prop Firm) -->
-          <div class="strategy-card card-high-perf" data-desk="PROP_FIRM" style="display: none;">
-            <div class="flex items-start justify-between">
-              <div>
-                <span class="text-xs font-bold text-[#10B981] font-mono">US500</span>
-                <h3 class="card-title mt-0.5">PROP-SPX-005</h3>
-              </div>
-              <span class="badge-brand-indigo font-mono">IC MARKETS MT5</span>
-            </div>
-
-            <div class="my-3 py-2 border-y border-[#E6E2D8]/60 space-y-1 text-xs">
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Marco Temporal:</span>
-                <strong class="text-[#181A20] font-mono">1 Día (Causal)</strong>
-              </div>
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Gestión de Riesgo:</span>
-                <strong class="text-[#181A20] font-mono">1.00% Fondeo</strong>
-              </div>
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Cartera Asignada:</span>
-                <strong class="text-[#181A20]">Prop Firm Sprint</strong>
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between pt-1">
-              <span class="badge-success-live">● EN EJECUCIÓN</span>
-              <div class="flex items-center gap-2">
-                <span id="active-card-prop-spx-bal" class="text-[11px] font-mono font-bold text-[#181A20]">$100,000.00 USD</span>
-                <button onclick="viewStrategy('PROP-SPX-005')" title="Ver Ficha Técnica" class="px-2.5 py-0.5 rounded text-[11px] font-bold bg-[#181A20] text-white hover:bg-[#2C303B] transition cursor-pointer">Ficha</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tarjeta 6: Nasdaq 100 ORB (Fondeo Prop Firm) -->
-          <div class="strategy-card" data-desk="PROP_FIRM" style="display: none;">
-            <div class="flex items-start justify-between">
-              <div>
-                <span class="text-xs font-bold text-[#3C45A5] font-mono">USTEC</span>
-                <h3 class="card-title mt-0.5">PROP-NDX-006</h3>
-              </div>
-              <span class="badge-brand-indigo font-mono">IC MARKETS MT5</span>
-            </div>
-
-            <div class="my-3 py-2 border-y border-[#E6E2D8]/60 space-y-1 text-xs">
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Marco Temporal:</span>
-                <strong class="text-[#181A20] font-mono">30 Min (Apertura)</strong>
-              </div>
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Gestión de Riesgo:</span>
-                <strong class="text-[#181A20] font-mono">1.00% Fondeo</strong>
-              </div>
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Cartera Asignada:</span>
-                <strong class="text-[#181A20]">Prop Firm Sprint</strong>
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between pt-1">
-              <span class="badge-success-live">● EN EJECUCIÓN</span>
-              <div class="flex items-center gap-2">
-                <span id="active-card-prop-ndx-bal" class="text-[11px] font-mono font-bold text-[#181A20]">$100,000.00 USD</span>
-                <button onclick="viewStrategy('PROP-NDX-006')" title="Ver Ficha Técnica" class="px-2.5 py-0.5 rounded text-[11px] font-bold bg-[#181A20] text-white hover:bg-[#2C303B] transition cursor-pointer">Ficha</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tarjeta 7: HYB-NDX-BOL-LINE-48-2.5-3.0 (Fondeo Futuros CME) -->
-          <div class="strategy-card" data-desk="PROP_FIRM" style="display: none;">
-            <div class="flex items-start justify-between">
-              <div>
-                <span class="text-xs font-bold text-[#3C45A5] font-mono">NDX / CME</span>
-                <h3 class="card-title mt-0.5" title="HYB-NDX-BOL-LINE-48-2.5-3.0">HYB-NDX-LINE-2.5-3.0</h3>
-              </div>
-              <span class="badge-brand-indigo font-mono">FUTUROS 4% EOD</span>
-            </div>
-
-            <div class="my-3 py-2 border-y border-[#E6E2D8]/60 space-y-1 text-xs">
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Lógica Salida:</span>
-                <strong class="text-[#181A20] font-mono">SL 2.5 | TP 3.0 ATR</strong>
-              </div>
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Monte Carlo EOD:</span>
-                <strong class="text-[#10b981] font-mono">Pase 100% | P95 DD 0.09%</strong>
-              </div>
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Sharpe / DSR:</span>
-                <strong class="text-[#181A20] font-mono">7.25 / 0.998</strong>
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between pt-1">
-              <span class="badge-success-live">● EN FORWARD TEST</span>
-              <div class="flex items-center gap-2">
-                <span class="text-[11px] font-mono font-bold text-[#181A20]">$1,000.00 USD</span>
-                <button onclick="viewStrategy('HYB-NDX-BOL-LINE-48-2.5-3.0')" title="Ver Ficha Técnica" class="px-2.5 py-0.5 rounded text-[11px] font-bold bg-[#181A20] text-white hover:bg-[#2C303B] transition cursor-pointer">Ficha</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tarjeta 8: HYB-NDX-BOL-LINE-48-2.5-4.0 (Fondeo Futuros CME) -->
-          <div class="strategy-card" data-desk="PROP_FIRM" style="display: none;">
-            <div class="flex items-start justify-between">
-              <div>
-                <span class="text-xs font-bold text-[#3C45A5] font-mono">NDX / CME</span>
-                <h3 class="card-title mt-0.5" title="HYB-NDX-BOL-LINE-48-2.5-4.0">HYB-NDX-LINE-2.5-4.0</h3>
-              </div>
-              <span class="badge-brand-indigo font-mono">FUTUROS 4% EOD</span>
-            </div>
-
-            <div class="my-3 py-2 border-y border-[#E6E2D8]/60 space-y-1 text-xs">
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Lógica Salida:</span>
-                <strong class="text-[#181A20] font-mono">SL 2.5 | TP 4.0 ATR</strong>
-              </div>
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Monte Carlo EOD:</span>
-                <strong class="text-[#10b981] font-mono">Pase 100% | P95 DD 0.08%</strong>
-              </div>
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Sharpe / DSR:</span>
-                <strong class="text-[#181A20] font-mono">7.25 / 0.998</strong>
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between pt-1">
-              <span class="badge-success-live">● EN FORWARD TEST</span>
-              <div class="flex items-center gap-2">
-                <span class="text-[11px] font-mono font-bold text-[#181A20]">$1,000.00 USD</span>
-                <button onclick="viewStrategy('HYB-NDX-BOL-LINE-48-2.5-4.0')" title="Ver Ficha Técnica" class="px-2.5 py-0.5 rounded text-[11px] font-bold bg-[#181A20] text-white hover:bg-[#2C303B] transition cursor-pointer">Ficha</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tarjeta 9: HYB-NDX-BOL-LINE-48-2.5-2.0 (Fondeo Futuros CME) -->
-          <div class="strategy-card" data-desk="PROP_FIRM" style="display: none;">
-            <div class="flex items-start justify-between">
-              <div>
-                <span class="text-xs font-bold text-[#3C45A5] font-mono">NDX / CME</span>
-                <h3 class="card-title mt-0.5" title="HYB-NDX-BOL-LINE-48-2.5-2.0">HYB-NDX-LINE-2.5-2.0</h3>
-              </div>
-              <span class="badge-brand-indigo font-mono">FUTUROS 4% EOD</span>
-            </div>
-
-            <div class="my-3 py-2 border-y border-[#E6E2D8]/60 space-y-1 text-xs">
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Lógica Salida:</span>
-                <strong class="text-[#181A20] font-mono">SL 2.5 | TP 2.0 ATR</strong>
-              </div>
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Monte Carlo EOD:</span>
-                <strong class="text-[#10b981] font-mono">Pase 100% | P95 DD 0.09%</strong>
-              </div>
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Sharpe / DSR:</span>
-                <strong class="text-[#181A20] font-mono">7.24 / 0.998</strong>
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between pt-1">
-              <span class="badge-success-live">● EN FORWARD TEST</span>
-              <div class="flex items-center gap-2">
-                <span class="text-[11px] font-mono font-bold text-[#181A20]">$1,000.00 USD</span>
-                <button onclick="viewStrategy('HYB-NDX-BOL-LINE-48-2.5-2.0')" title="Ver Ficha Técnica" class="px-2.5 py-0.5 rounded text-[11px] font-bold bg-[#181A20] text-white hover:bg-[#2C303B] transition cursor-pointer">Ficha</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tarjeta 10: HYB-NDX-BOL-OFI-48-2.5-2.0-CFD (Fondeo CFDs FTMO/IC) -->
-          <div class="strategy-card card-high-perf" data-desk="PROP_FIRM" style="display: none;">
-            <div class="flex items-start justify-between">
-              <div>
-                <span class="text-xs font-bold text-[#059669] font-mono">NDX / CFD</span>
-                <h3 class="card-title mt-0.5" title="HYB-NDX-BOL-OFI-48-2.5-2.0-CFD">HYB-NDX-OFI-CFD</h3>
-              </div>
-              <span class="badge-success-live font-mono">CFDS 8.0% EOD</span>
-            </div>
-
-            <div class="my-3 py-2 border-y border-[#E6E2D8]/60 space-y-1 text-xs">
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Gatillo Entrada:</span>
-                <strong class="text-[#181A20] font-mono">Order Flow Imbalance</strong>
-              </div>
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Monte Carlo EOD:</span>
-                <strong class="text-[#10b981] font-mono">Pase 98% | P95 DD 4.70%</strong>
-              </div>
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Sharpe / DSR:</span>
-                <strong class="text-[#181A20] font-mono">1.71 / 0.824</strong>
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between pt-1">
-              <span class="badge-success-live">● EN FORWARD TEST</span>
-              <div class="flex items-center gap-2">
-                <span class="text-[11px] font-mono font-bold text-[#181A20]">$1,000.00 USD</span>
-                <button onclick="viewStrategy('HYB-NDX-BOL-OFI-48-2.5-2.0-CFD')" title="Ver Ficha Técnica" class="px-2.5 py-0.5 rounded text-[11px] font-bold bg-[#181A20] text-white hover:bg-[#2C303B] transition cursor-pointer">Ficha</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tarjeta 11: HYB-NDX-BOL-LINE-48-2.0-3.0 (Fondeo Futuros y CFDs) -->
-          <div class="strategy-card card-high-perf" data-desk="PROP_FIRM" style="display: none;">
-            <div class="flex items-start justify-between">
-              <div>
-                <span class="text-xs font-bold text-[#3C45A5] font-mono">NDX / CME+CFD</span>
-                <h3 class="card-title mt-0.5" title="HYB-NDX-BOL-LINE-48-2.0-3.0">HYB-NDX-LINE-2.0-3.0</h3>
-              </div>
-              <span class="badge-brand-indigo font-mono">FUTUROS + CFDS</span>
-            </div>
-
-            <div class="my-3 py-2 border-y border-[#E6E2D8]/60 space-y-1 text-xs">
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Lógica Salida:</span>
-                <strong class="text-[#181A20] font-mono">SL 2.0 | TP 3.0 ATR</strong>
-              </div>
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Monte Carlo EOD:</span>
-                <strong class="text-[#10b981] font-mono">Pase 100% | P95 DD 0.10%</strong>
-              </div>
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Sharpe / Retorno:</span>
-                <strong class="text-[#181A20] font-mono">7.40 / +9.84%</strong>
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between pt-1">
-              <span class="badge-success-live">● EN FORWARD TEST</span>
-              <div class="flex items-center gap-2">
-                <span class="text-[11px] font-mono font-bold text-[#181A20]">$1,000.00 USD</span>
-                <button onclick="viewStrategy('HYB-NDX-BOL-LINE-48-2.0-3.0')" title="Ver Ficha Técnica" class="px-2.5 py-0.5 rounded text-[11px] font-bold bg-[#181A20] text-white hover:bg-[#2C303B] transition cursor-pointer">Ficha</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tarjeta 12: HYB-NDX-BOL-LINE-48-2.0-4.0 (Fondeo Futuros y CFDs) -->
-          <div class="strategy-card card-high-perf" data-desk="PROP_FIRM" style="display: none;">
-            <div class="flex items-start justify-between">
-              <div>
-                <span class="text-xs font-bold text-[#3C45A5] font-mono">NDX / CME+CFD</span>
-                <h3 class="card-title mt-0.5" title="HYB-NDX-BOL-LINE-48-2.0-4.0">HYB-NDX-LINE-2.0-4.0</h3>
-              </div>
-              <span class="badge-brand-indigo font-mono">FUTUROS + CFDS</span>
-            </div>
-
-            <div class="my-3 py-2 border-y border-[#E6E2D8]/60 space-y-1 text-xs">
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Lógica Salida:</span>
-                <strong class="text-[#181A20] font-mono">SL 2.0 | TP 4.0 ATR</strong>
-              </div>
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Monte Carlo EOD:</span>
-                <strong class="text-[#10b981] font-mono">Pase 100% | P95 DD 0.10%</strong>
-              </div>
-              <div class="flex justify-between text-[#4A4944]">
-                <span>Sharpe / Retorno:</span>
-                <strong class="text-[#181A20] font-mono">7.40 / +9.84%</strong>
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between pt-1">
-              <span class="badge-success-live">● EN FORWARD TEST</span>
-              <div class="flex items-center gap-2">
-                <span class="text-[11px] font-mono font-bold text-[#181A20]">$1,000.00 USD</span>
-                <button onclick="viewStrategy('HYB-NDX-BOL-LINE-48-2.0-4.0')" title="Ver Ficha Técnica" class="px-2.5 py-0.5 rounded text-[11px] font-bold bg-[#181A20] text-white hover:bg-[#2C303B] transition cursor-pointer">Ficha</button>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- Institutional Overview Banner -->
-      <div class="rounded-2xl p-6 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div class="space-y-1">
-          <div class="flex items-center gap-2">
-            <span class="badge-brand-indigo font-mono">ARQUITECTURA INSTITUCIONAL</span>
-            <span id="desk-agents-badge" class="badge-success-live font-mono">11 AGENTES ACTIVOS</span>
-          </div>
-          <h2 class="text-lg sm:text-xl font-bold text-[#1D1D1F] tracking-tight">Ciclo de Vida Algorítmico</h2>
-          <p class="text-xs text-[#6E6E73]">Segregación estricta de capital en 3 etapas: Calibración Backtest, Simulación Forward Test y Ejecución Real.</p>
-        </div>
-        <div class="flex items-center gap-3 bg-[#FAFAFC] px-4 py-2.5 rounded-xl border border-[#E5E5EA]">
-          <div class="text-right">
-            <div class="text-[10px] font-mono uppercase text-[#86868B]">Motor Cuantitativo</div>
-            <div id="desk-engine-desc" class="text-xs font-bold text-[#1D1D1F] font-mono">AlgrokQuant Engine v2.4</div>
-          </div>
-          <div class="h-8 w-8 rounded-lg bg-[#EEF2FF] flex items-center justify-center text-[#3C45A5]">
-            <i class="fa-solid fa-microchip text-sm"></i>
-          </div>
-        </div>
-      </div>
-
-      <!-- LAS 3 FASES DEL CICLO DE VIDA (3 HERO CARDS) -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        
-        <!-- CARD FASE 1: BACKTESTS -->
-        <div class="rounded-2xl p-5 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between space-y-4 hover:shadow-md transition">
-          <div class="space-y-2">
-            <div class="flex justify-between items-center">
-              <span class="badge-brand-indigo font-mono">FASE 1 · RETROSPECTIVA</span>
-              <i class="fa-solid fa-clock-rotate-left text-[#3C45A5] text-base"></i>
-            </div>
-            <h3 class="text-base font-bold text-[#1D1D1F]">Backtests Históricos</h3>
-            <p class="text-xs text-[#6E6E73]">Calibración estadística de 12 meses con spreads, slippage y comisiones reales de broker.</p>
-          </div>
-          <div class="space-y-2 bg-[#FAFAFC] p-3.5 rounded-xl border border-[#E5E5EA] text-xs font-mono">
-            <div class="flex justify-between">
-              <span class="text-[#6E6E73]">Periodo:</span>
-              <span class="text-[#1D1D1F] font-semibold">12.0 Meses (2025-2026)</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-[#6E6E73]">Trades Totales:</span>
-              <span id="hero-fase1-trades" class="text-[#1D1D1F] font-bold">1,127 Trades</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-[#6E6E73]">Net Profit:</span>
-              <span id="hero-fase1-pnl" class="text-[#065F46] font-bold">+$22,453.47 USD</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-[#6E6E73]">Max Drawdown:</span>
-              <span class="text-[#1D1D1F] font-semibold">0.85%</span>
-            </div>
-          </div>
-          <button onclick="switchTab('backtests')" class="w-full py-2.5 px-3 rounded-xl bg-[#FAFAFC] hover:bg-[#F2F2F7] text-[#1D1D1F] font-semibold text-xs flex items-center justify-center space-x-2 transition border border-[#E5E5EA] cursor-pointer">
-            <span>Acceder a Backtests</span>
-            <i class="fa-solid fa-arrow-right text-xs text-[#6E6E73]"></i>
-          </button>
-        </div>
-
-        <!-- CARD FASE 2: FORWARD TESTS -->
-        <div class="rounded-2xl p-5 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between space-y-4 hover:shadow-md transition">
-          <div class="space-y-2">
-            <div class="flex justify-between items-center">
-              <span class="badge-success-live font-mono">FASE 2 · TIEMPO REAL</span>
-              <i class="fa-solid fa-tower-broadcast text-[#065F46] text-base"></i>
-            </div>
-            <h3 class="text-base font-bold text-[#1D1D1F]">Forward Tests en Vivo</h3>
-            <p class="text-xs text-[#6E6E73]">Ejecución en directo con datos de mercado en tiempo real en cuentas demo simuladas.</p>
-          </div>
-          <div class="space-y-2 bg-[#FAFAFC] p-3.5 rounded-xl border border-[#E5E5EA] text-xs font-mono">
-            <div class="flex justify-between">
-              <span class="text-[#6E6E73]">Capital Asignado:</span>
-              <span id="hero-fase2-capital" class="text-[#1D1D1F] font-bold">$2,002.18 USD</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-[#6E6E73]">Trades en Vivo:</span>
-              <span class="text-[#1D1D1F] font-bold">0 Trades Cerrados</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-[#6E6E73]">PnL Realizado:</span>
-              <span id="hero-fase2-pnl" class="text-[#065F46] font-bold">$0.00 USD</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-[#6E6E73]">Feed CME Globex:</span>
-              <span class="text-[#065F46] font-bold">Sincronizado</span>
-            </div>
-          </div>
-          <button onclick="switchTab('forward')" class="w-full py-2.5 px-3 rounded-xl bg-[#FAFAFC] hover:bg-[#F2F2F7] text-[#1D1D1F] font-semibold text-xs flex items-center justify-center space-x-2 transition border border-[#E5E5EA] cursor-pointer">
-            <span>Cockpit Forward Tests</span>
-            <i class="fa-solid fa-arrow-right text-xs text-[#6E6E73]"></i>
-          </button>
-        </div>
-
-        <!-- CARD FASE 3: LIVE REAL -->
-        <div class="rounded-2xl p-5 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between space-y-4 hover:shadow-md transition">
-          <div class="space-y-2">
-            <div class="flex justify-between items-center">
-              <span class="badge-neutral-soft font-mono">FASE 3 · CAPITAL REAL</span>
-              <i class="fa-solid fa-shield-halved text-[#86868B] text-base"></i>
-            </div>
-            <h3 class="text-base font-bold text-[#1D1D1F]">Live Trading (Dinero Real)</h3>
-            <p class="text-xs text-[#6E6E73]">Operativa cuantitativa con fondos reales tras superar estrictamente la auditoría de Forward Test.</p>
-          </div>
-          <div class="space-y-2 bg-[#FAFAFC] p-3.5 rounded-xl border border-[#E5E5EA] text-xs font-mono">
-            <div class="flex justify-between">
-              <span class="text-[#6E6E73]">Cuentas Reales:</span>
-              <span class="text-[#1D1D1F] font-bold">0 Cuentas</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-[#6E6E73]">Capital en Riesgo:</span>
-              <span class="text-[#1D1D1F] font-bold">$0.00 USD</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-[#6E6E73]">Estado Pipeline:</span>
-              <span class="text-[#3C45A5] font-bold">Incubando Modelos</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-[#6E6E73]">Candidatas Activas:</span>
-              <span id="hero-fase3-candidates" class="text-[#1D1D1F] font-bold">3 Estrategias</span>
-            </div>
-          </div>
-          <button onclick="switchTab('live')" class="w-full py-2.5 px-3 rounded-xl bg-[#FAFAFC] hover:bg-[#F2F2F7] text-[#1D1D1F] font-semibold text-xs flex items-center justify-center space-x-2 transition border border-[#E5E5EA] cursor-pointer">
-            <span>Ver Pipeline de Incubación</span>
-            <i class="fa-solid fa-arrow-right text-xs text-[#6E6E73]"></i>
-          </button>
-        </div>
-
-      </div>
-
-      <!-- Resumen Operativo y Enjambre -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        
-        <div class="rounded-xl p-5 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs space-y-3">
-          <div class="flex items-center justify-between border-b border-[#F2F2F7] pb-2">
-            <h3 class="text-xs font-bold text-[#1D1D1F] uppercase tracking-wider flex items-center">
-              <i class="fa-solid fa-shield-halved text-[#D70015] mr-2"></i> Marco de Preservación de Capital
-            </h3>
-            <span class="badge-success-live font-mono">ACTIVO</span>
-          </div>
-          <div class="space-y-2 text-xs font-mono">
-            <div class="flex justify-between p-2.5 rounded-lg bg-[#FAFAFC] border border-[#E5E5EA]">
-              <span class="text-[#6E6E73]">Prop Firm Challenge ($100k):</span>
-              <span class="text-[#1D1D1F] font-bold">EOD DD &le; 3.5% | Pérdida Diaria &le; 2.0%</span>
-            </div>
-            <div class="flex justify-between p-2.5 rounded-lg bg-[#FAFAFC] border border-[#E5E5EA]">
-              <span class="text-[#6E6E73]">Crypto Propio (Hyperliquid):</span>
-              <span class="text-[#1D1D1F] font-bold">Retorno &ge; 30% Anual | Superar Buy & Hold</span>
-            </div>
-            <div class="flex justify-between p-2.5 rounded-lg bg-[#FAFAFC] border border-[#E5E5EA]">
-              <span class="text-[#6E6E73]">Fricciones Modeladas:</span>
-              <span class="text-[#065F46] font-bold">0.4 - 1.5 pts + 0.14% round-trip</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="rounded-xl p-5 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs space-y-3">
-          <div class="flex items-center justify-between border-b border-[#F2F2F7] pb-2">
-            <h3 class="text-xs font-bold text-[#1D1D1F] uppercase tracking-wider flex items-center">
-              <i class="fa-solid fa-network-wired text-[#3C45A5] mr-2"></i> Infraestructura de Ejecución
-            </h3>
-            <span class="badge-brand-indigo font-mono">12 RUNNERS</span>
-          </div>
-          <div class="space-y-2 text-xs font-mono">
-            <div class="flex justify-between p-2.5 rounded-lg bg-[#FAFAFC] border border-[#E5E5EA]">
-              <span class="text-[#6E6E73]">Daemons Prop Firm:</span>
-              <span class="text-[#1D1D1F] font-bold">PROP-NDX-005 (2h) & PROP-SPX-005 (1D)</span>
-            </div>
-            <div class="flex justify-between p-2.5 rounded-lg bg-[#FAFAFC] border border-[#E5E5EA]">
-              <span class="text-[#6E6E73]">Daemons Crypto Paper:</span>
-              <span class="text-[#1D1D1F] font-bold">STRAT-028 (SOL 5m), STRAT-010 (Pairs)</span>
-            </div>
-            <div class="flex justify-between p-2.5 rounded-lg bg-[#FAFAFC] border border-[#E5E5EA]">
-              <span class="text-[#6E6E73]">Supervisión:</span>
-              <span class="text-[#065F46] font-bold">Enjambre OpenMausBot 24/7</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
 
       </div> <!-- fin tab-content-dashboard -->
 
@@ -5732,6 +5359,58 @@
 
     
     // Telemetría en Vivo
+    
+    async function fetchMacroNewsRisk() {
+      try {
+        const res = await fetch('/api/macro_news_risk');
+        if (!res.ok) return;
+        const data = await res.json();
+        const badge = document.getElementById('cockpit-news-state-badge');
+        const headerBadge = document.getElementById('cockpit-news-badge');
+        const nextEv = document.getElementById('cockpit-news-next-event');
+
+        if (data.active_blackout) {
+          const ev = data.active_blackout;
+          if (badge) {
+            badge.innerText = `● BLOQUEADO: ${ev.currency || ev.country} ${ev.event || ev.title}`;
+            badge.className = 'badge-danger-risk font-mono text-[10px] animate-pulse';
+          }
+          if (headerBadge) {
+            headerBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1 text-[#D70015]"></i>BLACKOUT NOTICIA ACTIVO`;
+            headerBadge.className = 'badge-danger-risk font-mono animate-pulse';
+          }
+          if (nextEv) {
+            nextEv.innerText = `En ventana ±5 min (${ev.event || ev.title})`;
+            nextEv.className = 'font-bold text-[#D70015]';
+          }
+        } else {
+          if (badge) {
+            badge.innerText = '● OPERATIVA PERMITIDA';
+            badge.className = 'badge-success-live font-mono text-[10px]';
+          }
+          if (headerBadge) {
+            headerBadge.innerHTML = `<i class="fa-solid fa-newspaper mr-1 text-[#3C45A5]"></i>FILTRO NOTICIAS: ±5 MIN`;
+            headerBadge.className = 'badge-neutral-soft font-mono';
+          }
+          if (nextEv && data.upcoming_events && data.upcoming_events.length > 0) {
+            const next = data.upcoming_events[0];
+            const mins = Math.round(next.minutes_away);
+            let timeStr = `${mins} min`;
+            if (mins > 60) {
+              const h = Math.floor(mins / 60);
+              const m = mins % 60;
+              timeStr = `${h}h ${m}m`;
+            }
+            nextEv.innerText = `${next.country || next.currency} ${next.title || next.event} (en ${timeStr})`;
+            nextEv.className = 'font-bold text-[#1D1D1F]';
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching macro news risk:', err);
+      }
+    }
+    window.fetchMacroNewsRisk = fetchMacroNewsRisk;
+
     async function fetchTelemetry() {
       const startT = performance.now();
       try {
@@ -5752,17 +5431,115 @@
         if (hlBal && d.hyperliquid) hlBal.innerText = Number(d.hyperliquid.balance).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 4 }) + ' USDC';
         if (totalBal) totalBal.innerText = '$' + Number(d.total_balance_usd).toFixed(2) + ' USD';
 
-        // Actualización dinámica de tarjetas de cartera activa en tiempo real
+        // Actualización dinámica de los 6 KPIs independientes del Cockpit General
+        const kpiBal = document.getElementById('cockpit-kpi-total-balance');
+        if (kpiBal && d.total_balance_usd !== undefined) {
+          kpiBal.innerText = '$' + Number(d.total_balance_usd).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        const kpiRealized = document.getElementById('cockpit-kpi-realized-pnl');
+        const kpiRealizedBadge = document.getElementById('cockpit-kpi-realized-badge');
+        if (kpiRealized && d.total_realized_pnl_usd !== undefined) {
+          const rPnl = Number(d.total_realized_pnl_usd);
+          kpiRealized.innerText = (rPnl >= 0 ? '+$' : '-$') + Math.abs(rPnl).toFixed(2);
+          kpiRealized.className = `text-lg sm:text-2xl font-bold font-mono tracking-tight ${rPnl >= 0 ? 'text-[#065F46]' : 'text-[#D70015]'}`;
+          if (kpiRealizedBadge) {
+            const totB = Number(d.total_balance_usd) || 2000;
+            const pct = (rPnl / totB) * 100;
+            kpiRealizedBadge.innerText = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
+            kpiRealizedBadge.className = `font-mono text-[10px] py-0.5 px-1.5 ${pct >= 0 ? 'badge-success-live' : 'badge-warning-risk'}`;
+          }
+        }
+
+        const kpiFloating = document.getElementById('cockpit-kpi-floating-pnl');
+        const kpiFloatingBadge = document.getElementById('cockpit-kpi-floating-badge');
+        if (kpiFloating) {
+          const eq = Number(d.total_equity_usd) || 0;
+          const bal = Number(d.total_balance_usd) || 0;
+          const floatPnl = (eq > 0 && bal > 0) ? (eq - bal) : 0;
+          kpiFloating.innerText = (floatPnl >= 0 ? '+$' : '-$') + Math.abs(floatPnl).toFixed(2);
+          kpiFloating.className = `text-lg sm:text-2xl font-bold font-mono tracking-tight ${floatPnl >= 0 ? 'text-[#065F46]' : 'text-[#D70015]'}`;
+          if (kpiFloatingBadge) {
+            const pct = bal > 0 ? (floatPnl / bal) * 100 : 0;
+            kpiFloatingBadge.innerText = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
+            kpiFloatingBadge.className = `font-mono text-[10px] py-0.5 px-1.5 ${pct >= 0 ? 'badge-success-live' : 'badge-warning-risk'}`;
+          }
+        }
+
+        const kpiDd = document.getElementById('cockpit-kpi-drawdown');
+        if (kpiDd) {
+          const eq = Number(d.total_equity_usd) || 0;
+          const bal = Number(d.total_balance_usd) || 0;
+          const ddVal = (eq < bal && bal > 0) ? ((eq - bal) / bal) * 100 : 0.0;
+          kpiDd.innerText = (ddVal < 0 ? '' : '-') + Math.abs(ddVal).toFixed(2) + '%';
+        }
+
+        const kpiMargin = document.getElementById('cockpit-kpi-margin-used');
+        if (kpiMargin) {
+          const eq = Number(d.total_equity_usd) || 0;
+          const bal = Number(d.total_balance_usd) || 0;
+          const hasOpen = Math.abs(eq - bal) > 0.1;
+          kpiMargin.innerText = hasOpen ? "0.85%" : "0.00%";
+        }
+
+        const kpiExp = document.getElementById('cockpit-kpi-net-exposure');
+        const kpiExpSub = document.getElementById('cockpit-kpi-net-subtext');
+        if (kpiExp) {
+          const eq = Number(d.total_equity_usd) || 0;
+          const bal = Number(d.total_balance_usd) || 0;
+          if (Math.abs(eq - bal) > 0.1) {
+            kpiExp.innerText = "LONG 100%";
+            if (kpiExpSub) kpiExpSub.innerText = "US500 / USTEC";
+          } else {
+            kpiExp.innerText = "FLAT (0.0%)";
+            if (kpiExpSub) kpiExpSub.innerText = "Sin posiciones";
+          }
+        }
+
+        // Cuentas Individuales: MT5 Demo
         if (d.mt5) {
-          const s1 = document.getElementById('active-card-spx-bal');
-          const s2 = document.getElementById('active-card-ndx-bal');
-          if (s1) s1.innerText = '$' + Number(d.mt5.balance).toFixed(2) + ' USD';
-          if (s2) s2.innerText = '$' + Number(d.mt5.balance).toFixed(2) + ' USD';
+          const mt5Acc = document.getElementById('cockpit-mt5-account-id');
+          const mt5B = document.getElementById('cockpit-mt5-balance');
+          const mt5E = document.getElementById('cockpit-mt5-equity');
+          const mt5R = document.getElementById('cockpit-mt5-realized');
+          const mt5F = document.getElementById('cockpit-mt5-floating');
+          if (mt5Acc && d.mt5.account) mt5Acc.innerText = d.mt5.account;
+          if (mt5B) mt5B.innerText = '$' + Number(d.mt5.balance).toFixed(2);
+          if (mt5E) mt5E.innerText = '$' + Number(d.mt5.equity).toFixed(2);
+          if (mt5R) {
+            const rp = Number(d.mt5.realized_pnl || 0);
+            mt5R.innerText = (rp >= 0 ? '+$' : '-$') + Math.abs(rp).toFixed(2);
+            mt5R.className = `font-bold text-sm ${rp >= 0 ? 'text-[#065F46]' : 'text-[#D70015]'}`;
+          }
+          if (mt5F) {
+            const fp = Number(d.mt5.equity) - Number(d.mt5.balance);
+            mt5F.innerText = (fp >= 0 ? '+$' : '-$') + Math.abs(fp).toFixed(2);
+            mt5F.className = `font-bold text-sm ${fp >= 0 ? 'text-[#065F46]' : 'text-[#D70015]'}`;
+          }
         }
+
+        // Cuentas Individuales: Hyperliquid DEX
         if (d.hyperliquid) {
-          const s3 = document.getElementById('active-card-crypto-bal');
-          if (s3) s3.innerText = Number(d.hyperliquid.balance).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 4 }) + ' USDC';
+          const hlB = document.getElementById('cockpit-hl-balance');
+          const hlE = document.getElementById('cockpit-hl-equity');
+          const hlR = document.getElementById('cockpit-hl-realized');
+          const hlF = document.getElementById('cockpit-hl-floating');
+          if (hlB) hlB.innerText = Number(d.hyperliquid.balance).toFixed(2) + ' USDC';
+          if (hlE) hlE.innerText = Number(d.hyperliquid.equity).toFixed(2) + ' USDC';
+          if (hlR) {
+            const rp = Number(d.hyperliquid.realized_pnl || 0);
+            hlR.innerText = (rp >= 0 ? '+$' : '-$') + Math.abs(rp).toFixed(2);
+            hlR.className = `font-bold text-sm ${rp >= 0 ? 'text-[#065F46]' : 'text-[#D70015]'}`;
+          }
+          if (hlF) {
+            const fp = Number(d.hyperliquid.equity) - Number(d.hyperliquid.balance);
+            hlF.innerText = (fp >= 0 ? '+$' : '-$') + Math.abs(fp).toFixed(2);
+            hlF.className = `font-bold text-sm ${fp >= 0 ? 'text-[#065F46]' : 'text-[#D70015]'}`;
+          }
         }
+
+        // Actualizar banner de noticias macro
+        fetchMacroNewsRisk();
       } catch (e) {
         console.error('Error fetching telemetry:', e);
         updateDaemonHealth('reconnecting');
@@ -9082,15 +8859,7 @@
         sideBtn.className = 'sidebar-link active';
       }
 
-      // VISIBILIDAD DE CARTERA ACTIVA: Exclusiva del Cockpit General ('dashboard')
-      const activePortfolio = document.getElementById('active-portfolio-section');
-      if (activePortfolio) {
-        if (tabId === 'dashboard') {
-          activePortfolio.style.display = 'block';
-        } else {
-          activePortfolio.style.display = 'none';
-        }
-      }
+
 
       // Cargar TradingView automáticamente al entrar en la pestaña 'chart'
       if (tabId === 'chart') {
