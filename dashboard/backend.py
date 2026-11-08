@@ -2151,7 +2151,7 @@ def get_forward_state(refresh: bool = False):
                     'id': s.get('id'),
                     'symbol': s.get('asset'),
                     'asset': s.get('asset'),
-                    'timeframe': s.get('timeframe'),
+                    'timeframe': s.get('timeframe') or s.get('tf') or ('1h/4h' if s.get('desk_mode') == 'CAPITAL_PROPIO' else '5m RTH'),
                     'desk_mode': s.get('desk_mode'),
                     'family': s.get('family'),
                     'params': s.get('params'),

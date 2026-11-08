@@ -6672,7 +6672,7 @@
           activeTbody.innerHTML = activeStrats.map(s => {
             const sid = s.strategy_id || s.id;
             const sym = s.symbol || s.asset || 'NDX';
-            const tf = s.timeframe || '5m';
+            const tf = s.timeframe || s.tf || (s.desk_mode === 'CAPITAL_PROPIO' ? '1h/4h' : '5m RTH');
             const roiBt = Number(s.roi_total_pct != null ? s.roi_total_pct : (s.backtest_roi_total_pct || 0)).toFixed(2);
             const isOrchOn = (s.orchestrator_state || 'ACTIVE_ON') === 'ACTIVE_ON';
             const orchBadge = isOrchOn
