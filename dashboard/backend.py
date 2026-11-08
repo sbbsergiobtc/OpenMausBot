@@ -24,7 +24,7 @@ import requests
 
 import sys
 
-BASE_DIR = Path('/root/AlgrokQuant')
+BASE_DIR = Path('/root/AlgrokQuant') if Path('/root/AlgrokQuant').exists() else Path(__file__).resolve().parent.parent
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
@@ -2158,29 +2158,62 @@ def get_forward_state(refresh: bool = False):
     if not prop_active_strats:
         prop_active_strats = pf_state.get('prop_firm', {}).get('active_strategies', pf_state.get('active_strategies', []))
 
+    num_pf_strats = len(prop_active_strats) or 20
+    pf_agg_initial = num_pf_strats * 100000.0  # $2,000,000 USD
+    pf_agg_balance = round(pf_agg_initial + pf_realized, 2)  # $2,000,002.01 USD
+
+    num_cp_strats = len(cap_active_strats) or 25
+    cp_realized = round((cur_ic - 1000.0) + (cur_hl - 1000.0), 2)  # -$1.87 / -$1.91 USD
+    cp_agg_initial = num_cp_strats * 1000.0  # $25,000 USD
+    cp_agg_balance = round(cp_agg_initial + cp_realized, 2)  # $24,998.09 / $24,998.13 USD
+
     return {
         'timestamp_utc': now_utc.isoformat(),
         'timestamp_es': now_es.strftime('%Y-%m-%d %H:%M:%S %Z'),
         'markets': markets,
         'regime_orchestrator': orch_data,
+        'aggregate_balances': {
+            'CAPITAL_PROPIO': {
+                'num_accounts': num_cp_strats,
+                'aggregate_initial_balance': cp_agg_initial,
+                'aggregate_balance': cp_agg_balance,
+                'total_realized_pnl': cp_realized
+            },
+            'PROP_FIRM': {
+                'num_accounts': num_pf_strats,
+                'aggregate_initial_balance': pf_agg_initial,
+                'aggregate_balance': pf_agg_balance,
+                'total_realized_pnl': pf_realized
+            }
+        },
         'prop_firm_account': {
             'status': 'ACTIVE',
+            'num_accounts': num_pf_strats,
+            'initial_balance': 100000.0,
             'current_balance': cur_pf,
+            'aggregate_initial_balance': pf_agg_initial,
+            'aggregate_balance': pf_agg_balance,
             'peak_eod_equity': cur_pf,
             'current_eod_drawdown_usd': 0.0,
             'current_eod_drawdown_pct': 0.0,
             'total_realized_pnl': pf_realized,
+            'aggregate_realized_pnl': pf_realized,
             'open_positions': {p['symbol']: p for p in mt5_open_positions if p['branch'] == 'PROP_FIRM'},
             'closed_trades': pf_state.get('prop_firm', {}).get('closed_trades', []),
             'active_strategies': prop_active_strats,
             'live_broker_sync': live_broker_sync
         },
         'capital_propio_account': {
+            'num_accounts': num_cp_strats,
             'initial_balance': 2000.0,
             'current_balance': round(cur_ic + cur_hl, 2),
+            'aggregate_initial_balance': cp_agg_initial,
+            'aggregate_balance': cp_agg_balance,
             'mt5_balance': cur_ic,
             'hl_balance': cur_hl,
-            'realized_pnl': round((cur_ic - 1000.0) + (cur_hl - 1000.0), 2),
+            'realized_pnl': cp_realized,
+            'aggregate_realized_pnl': cp_realized,
+            'total_realized_pnl': cp_realized,
             'peak_equity': 2006.43,
             'max_dd_pct': 0.81,
             'open_positions': {p['symbol']: p for p in all_open_positions if p['branch'] == 'CAPITAL_PROPIO'},

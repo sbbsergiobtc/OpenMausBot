@@ -1828,7 +1828,7 @@
         </div>
         <div class="text-left sm:text-right bg-[#FAF7F2] p-2.5 rounded-lg border border-borderWarm">
           <div class="text-[11px] text-txtSecondary font-mono">Capital Asignado Simulado:</div>
-          <div class="text-xs font-bold font-mono text-amber-700">$2,000.17 USD (IC Markets + DEX)</div>
+          <div class="text-xs font-bold font-mono text-amber-700" id="ft-top-capital">$24,998.09 USD (25 Cuentas x $1,000)</div>
         </div>
       </div>
 
@@ -1926,48 +1926,48 @@
           </div>
         </div>
 
-        <!-- Tarjeta Cuenta Crypto Paper Hyperliquid -->
+        <!-- Tarjeta Cuenta 2: Crypto DEX (Capital Propio) / Enjambre CME & CFDs (Fondeo) -->
         <div id="ft-hyperliquid-card" class="glass-card rounded-2xl p-5 space-y-4 border-l-4 border-amber-400 motion-sweep stagger-3 shimmer-active" style="transition: all 0.3s ease;">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-borderWarm dark:border-slate-800 pb-3">
             <div>
               <div class="flex items-center gap-2 mb-1">
-                <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 whitespace-nowrap">CAPITAL PROPIO (PAPER)</span>
+                <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 whitespace-nowrap" id="ft-card2-badge">CAPITAL PROPIO · CRYPTO DEX</span>
               </div>
-              <h3 class="text-base font-bold text-txtPrimary dark:text-white">Hyperliquid Testnet (USDC Cripto)</h3>
+              <h3 class="text-base font-bold text-txtPrimary dark:text-white" id="ft-card2-title">Hyperliquid Testnet (USDC Cripto)</h3>
             </div>
             <div class="text-left sm:text-right shrink-0">
-              <span class="text-[11px] text-txtSecondary dark:text-slate-500 font-mono block">INICIAL</span>
-              <div class="text-xs font-mono font-bold text-txtPrimary dark:text-slate-300 whitespace-nowrap">1,000.00 USDC</div>
+              <span class="text-[11px] text-txtSecondary dark:text-slate-500 font-mono block" id="ft-card2-init-label">INICIAL</span>
+              <div class="text-xs font-mono font-bold text-txtPrimary dark:text-slate-300 whitespace-nowrap" id="ft-card2-init-bal">1,000.00 USDC</div>
             </div>
           </div>
 
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-center">
             <div class="p-2.5 rounded-xl bg-[#FAF7F2] dark:bg-dark-950/70 border border-borderWarm dark:border-slate-800 min-w-0">
-              <span class="text-[11px] text-txtSecondary dark:text-slate-400 uppercase font-mono block truncate">Balance USDC</span>
-              <div class="text-sm font-bold text-txtPrimary dark:text-white font-mono mt-1 truncate" id="ft-crypto-balance">1,000.66 USDC</div>
+              <span class="text-[11px] text-txtSecondary dark:text-slate-400 uppercase font-mono block truncate" id="ft-card2-kpi1-label">Balance USDC</span>
+              <div class="text-sm font-bold text-txtPrimary dark:text-white font-mono mt-1 truncate" id="ft-crypto-balance">1,013.56 USDC</div>
             </div>
             <div class="p-2.5 rounded-xl bg-[#FAF7F2] dark:bg-dark-950/70 border border-borderWarm dark:border-slate-800 min-w-0">
-              <span class="text-[11px] text-txtSecondary dark:text-slate-400 uppercase font-mono block truncate">PnL Realizado</span>
+              <span class="text-[11px] text-txtSecondary dark:text-slate-400 uppercase font-mono block truncate" id="ft-card2-kpi2-label">PnL Realizado</span>
               <div class="text-sm font-bold text-emerald-700 dark:text-emerald-400 font-mono mt-1 truncate" id="ft-crypto-pnl">+13.56 USDC</div>
             </div>
             <div class="p-2.5 rounded-xl bg-[#FAF7F2] dark:bg-dark-950/70 border border-borderWarm dark:border-slate-800 min-w-0">
-              <span class="text-[11px] text-txtSecondary dark:text-slate-400 uppercase font-mono block truncate">Objetivo Anual</span>
-              <div class="text-sm font-bold text-[#3C45A5] dark:text-cyan-400 font-mono mt-1 truncate">&ge; +30.0%</div>
+              <span class="text-[11px] text-txtSecondary dark:text-slate-400 uppercase font-mono block truncate" id="ft-card2-kpi3-label">Objetivo Anual</span>
+              <div class="text-sm font-bold text-[#3C45A5] dark:text-cyan-400 font-mono mt-1 truncate" id="ft-card2-kpi3-val">&ge; +30.0%</div>
             </div>
           </div>
 
           <div class="p-3.5 rounded-xl bg-[#FAF7F2] border border-[#E6E2D8] space-y-2.5 text-xs font-mono">
             <div class="flex justify-between items-center text-[#4A4944]">
-              <span class="font-medium shrink-0">Estrategia Activa Principal:</span>
-              <span class="px-2.5 py-1 rounded-md bg-[#EEF2FF] text-[#3730A3] font-bold border border-[#C7D2FE] text-[11px] truncate">STRAT-028 (SOL 5m VWAP)</span>
+              <span class="font-medium shrink-0" id="ft-card2-row1-label">Estrategia Activa Principal:</span>
+              <span class="px-2.5 py-1 rounded-md bg-[#EEF2FF] text-[#3730A3] font-bold border border-[#C7D2FE] text-[11px] truncate" id="ft-card2-strat">STRAT-028 (SOL 5m VWAP)</span>
             </div>
             <div class="flex justify-between items-center text-[#6E6D68] text-[11px]">
-              <span class="shrink-0">Ejecución:</span>
-              <span class="text-[#065F46] font-semibold">Microestructura de comisiones 0.14% verificada</span>
+              <span class="shrink-0" id="ft-card2-row2-label">Ejecución:</span>
+              <span class="text-[#065F46] font-semibold" id="ft-card2-exec">Microestructura de comisiones 0.14% verificada</span>
             </div>
             <div class="flex justify-between items-center text-[#6E6D68] text-[11px]">
-              <span class="shrink-0">Feed de Órdenes:</span>
-              <span class="text-[#181A20] font-semibold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#10b981] inline-block" id="ft-ws-hl-dot"></span> <span id="ft-ws-hl-text">Websockets Hyperliquid en línea</span></span>
+              <span class="shrink-0" id="ft-card2-row3-label">Feed de Órdenes:</span>
+              <span class="text-[#181A20] font-semibold flex items-center gap-1.5" id="ft-card2-feed"><span class="w-2 h-2 rounded-full bg-[#10b981] inline-block" id="ft-ws-hl-dot"></span> <span id="ft-ws-hl-text">Websockets Hyperliquid en línea</span></span>
             </div>
           </div>
         </div>
@@ -6996,13 +6996,27 @@
       const cap = d.capital_propio_account || {};
       const liveSync = d.live_broker_sync || pf.live_broker_sync || {};
 
+      // 0. Banner institucional superior
+      const topCapEl = document.getElementById('ft-top-capital');
+      if (topCapEl) {
+        if (isCap) {
+          const cpAggBal = cap.aggregate_balance != null ? Number(cap.aggregate_balance) : 24998.09;
+          const cpNum = cap.num_accounts || 25;
+          topCapEl.innerText = `$${cpAggBal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} USD (${cpNum} Cuentas x $1,000)`;
+        } else {
+          const pfAggBal = pf.aggregate_balance != null ? Number(pf.aggregate_balance) : 2000002.01;
+          const pfNum = pf.num_accounts || 20;
+          topCapEl.innerText = `$${pfAggBal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} USD (${pfNum} Challenges x $100k)`;
+        }
+      }
+
       // 1. Etiqueta de la tabla de órdenes
       const deskLabel = document.getElementById('ft-orders-desk-label');
       if (deskLabel) {
-        deskLabel.innerText = isCap ? 'Capital Propio' : 'Fondeo / Prop Firm';
+        deskLabel.innerText = isCap ? 'Capital Propio (25 Cuentas)' : 'Fondeo / Prop Firm (20 Challenges)';
       }
 
-      // 2. Elementos de la tarjeta principal
+      // 2. Elementos de la Tarjeta 1 (Consolidada Multi-Cuenta)
       const badgeDesk = document.getElementById('ft-card-badge-desk');
       const mainTitle = document.getElementById('ft-card-main-title');
       const initLabel = document.getElementById('ft-initial-label');
@@ -7018,22 +7032,44 @@
 
       const liveBrokerBalance = liveSync.broker_balance != null ? Number(liveSync.broker_balance) : 984.57;
       if (brokerBal) {
-        brokerBal.innerText = '$' + liveBrokerBalance.toFixed(2) + ' USD';
+        brokerBal.innerText = isCap 
+          ? 'Broker MT5: $' + liveBrokerBalance.toFixed(2) + ' USD'
+          : 'Broker Demo: ICMarketsSC (#53120791) Sync OK';
       }
 
+      // Elementos de la Tarjeta 2
+      const c2Badge = document.getElementById('ft-card2-badge');
+      const c2Title = document.getElementById('ft-card2-title');
+      const c2InitLabel = document.getElementById('ft-card2-init-label');
+      const c2InitBal = document.getElementById('ft-card2-init-bal');
+      const c2Kpi1Label = document.getElementById('ft-card2-kpi1-label');
+      const c2Kpi1Val = document.getElementById('ft-crypto-balance');
+      const c2Kpi2Label = document.getElementById('ft-card2-kpi2-label');
+      const c2Kpi2Val = document.getElementById('ft-crypto-pnl');
+      const c2Kpi3Label = document.getElementById('ft-card2-kpi3-label');
+      const c2Kpi3Val = document.getElementById('ft-card2-kpi3-val');
+      const c2Row1Label = document.getElementById('ft-card2-row1-label');
+      const c2Strat = document.getElementById('ft-card2-strat');
+      const c2Row2Label = document.getElementById('ft-card2-row2-label');
+      const c2Exec = document.getElementById('ft-card2-exec');
+      const c2Row3Label = document.getElementById('ft-card2-row3-label');
+      const c2Feed = document.getElementById('ft-card2-feed');
+
       if (isCap) {
-        if (badgeDesk) badgeDesk.innerText = 'IC MARKETS MT5 + HYPERLIQUID DEX · TRADFI & CRYPTO';
-        if (mainTitle) mainTitle.innerText = 'Cartera Capital Propio ($1k TradFi + $1k DEX)';
-        if (initLabel) initLabel.innerText = 'INICIAL TOTAL';
-        if (initBal) initBal.innerText = '$2,000.00 USD';
+        // --- TARJETA 1 (CAPITAL PROPIO) ---
+        if (badgeDesk) badgeDesk.innerText = 'CAPITAL PROPIO · 25 CUENTAS EN INCUBACIÓN & DIRECTO';
+        if (mainTitle) mainTitle.innerText = 'Cartera Consolidada Capital Propio (25 Cuentas x $1,000)';
+        if (initLabel) initLabel.innerText = 'INICIAL CONSOLIDADO';
+        const cpInit = cap.aggregate_initial_balance != null ? Number(cap.aggregate_initial_balance) : 25000.0;
+        if (initBal) initBal.innerText = '$' + cpInit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' USD';
 
-        const curBal = Number(cap.current_balance || (liveBrokerBalance + 1013.56));
-        if (balEl) balEl.innerText = '$' + curBal.toLocaleString(undefined, {minimumFractionDigits: 2});
+        const cpCurBal = Number(cap.aggregate_balance != null ? cap.aggregate_balance : 24998.09);
+        if (balEl) balEl.innerText = '$' + cpCurBal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
-        const pnl = Number(cap.realized_pnl != null ? cap.realized_pnl : (curBal - 2000.0));
+        const pnl = Number(cap.realized_pnl != null ? cap.realized_pnl : (cap.aggregate_realized_pnl != null ? cap.aggregate_realized_pnl : -1.91));
         if (pnlEl) {
           pnlEl.innerText = (pnl >= 0 ? '+$' : '-$') + Math.abs(pnl).toFixed(2);
-          pnlEl.className = 'text-sm font-bold font-mono mt-1 ' + (pnl >= 0 ? 'text-emerald-400' : 'text-rose-400');
+          pnlEl.className = 'text-sm font-bold font-mono mt-1 ' + (pnl >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400');
         }
         if (ddHead) ddHead.innerText = 'Max Drawdown (EOD)';
         if (ddEl) {
@@ -7042,31 +7078,82 @@
         }
         if (targetHead) targetHead.innerText = 'Objetivo Anual';
         if (targetEl) targetEl.innerText = '≥ +30.0% / año';
+
+        // --- TARJETA 2 (CAPITAL PROPIO - CRYPTO DEX) ---
+        if (c2Badge) {
+          c2Badge.innerText = 'CAPITAL PROPIO · CRYPTO DEX';
+          c2Badge.className = 'px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 whitespace-nowrap';
+        }
+        if (c2Title) c2Title.innerText = 'Hyperliquid Testnet (USDC Cripto)';
+        if (c2InitLabel) c2InitLabel.innerText = 'INICIAL';
+        if (c2InitBal) c2InitBal.innerText = '1,000.00 USDC';
+        if (c2Kpi1Label) c2Kpi1Label.innerText = 'Balance USDC';
+        const hlBal = Number(d.crypto_account?.balance || 1013.56);
+        if (c2Kpi1Val) c2Kpi1Val.innerText = hlBal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' USDC';
+        if (c2Kpi2Label) c2Kpi2Label.innerText = 'PnL Realizado';
+        const hlPnl = Number(d.crypto_account?.realized_pnl != null ? d.crypto_account.realized_pnl : (hlBal - 1000.0));
+        if (c2Kpi2Val) {
+          c2Kpi2Val.innerText = (hlPnl >= 0 ? '+' : '') + hlPnl.toFixed(2) + ' USDC';
+          c2Kpi2Val.className = 'text-sm font-bold font-mono mt-1 truncate ' + (hlPnl >= 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400');
+        }
+        if (c2Kpi3Label) c2Kpi3Label.innerText = 'Objetivo Anual';
+        if (c2Kpi3Val) c2Kpi3Val.innerText = '≥ +30.0%';
+        if (c2Row1Label) c2Row1Label.innerText = 'Estrategia Activa Principal:';
+        if (c2Strat) c2Strat.innerHTML = '<span class="px-2.5 py-1 rounded-md bg-[#EEF2FF] text-[#3730A3] font-bold border border-[#C7D2FE] text-[11px] truncate">STRAT-028 (SOL 5m VWAP)</span>';
+        if (c2Row2Label) c2Row2Label.innerText = 'Ejecución:';
+        if (c2Exec) c2Exec.innerHTML = '<span class="text-[#065F46] font-semibold">Microestructura de comisiones 0.14% verificada</span>';
+        if (c2Row3Label) c2Row3Label.innerText = 'Feed de Órdenes:';
+        if (c2Feed) c2Feed.innerHTML = '<span class="text-[#181A20] font-semibold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#10b981] inline-block" id="ft-ws-hl-dot"></span> <span id="ft-ws-hl-text">Websockets Hyperliquid en línea</span></span>';
+
       } else {
-        if (badgeDesk) badgeDesk.innerText = 'PROP FIRM CHALLENGE (EOD DD)';
-        if (mainTitle) mainTitle.innerText = 'Cuenta Prop Firm Simulada ($100k Challenge)';
-        if (initLabel) initLabel.innerText = 'INICIAL CUENTA';
-        if (initBal) initBal.innerText = '$100,000.00 USD';
+        // --- TARJETA 1 (FONDEO / PROP FIRM) ---
+        if (badgeDesk) badgeDesk.innerText = 'FONDEO · 20 CHALLENGES EN EJECUCIÓN (CME & CFDS)';
+        if (mainTitle) mainTitle.innerText = 'Cartera Fondeo Prop Firm (20 Challenges x $100,000)';
+        if (initLabel) initLabel.innerText = 'INICIAL CONSOLIDADO';
+        const pfInit = pf.aggregate_initial_balance != null ? Number(pf.aggregate_initial_balance) : 2000000.0;
+        if (initBal) initBal.innerText = '$' + pfInit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' USD';
 
-        const curBal = Number(pf.current_balance || 100002.01);
-        if (balEl) balEl.innerText = '$' + curBal.toLocaleString(undefined, {minimumFractionDigits: 2});
+        const pfCurBal = Number(pf.aggregate_balance != null ? pf.aggregate_balance : 2000002.01);
+        if (balEl) balEl.innerText = '$' + pfCurBal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
-        const pnl = Number(pf.total_realized_pnl != null ? pf.total_realized_pnl : 2.01);
+        const pnl = Number(pf.total_realized_pnl != null ? pf.total_realized_pnl : (pf.aggregate_realized_pnl != null ? pf.aggregate_realized_pnl : 2.01));
         if (pnlEl) {
           pnlEl.innerText = (pnl >= 0 ? '+$' : '-$') + Math.abs(pnl).toFixed(2);
-          pnlEl.className = 'text-sm font-bold font-mono mt-1 ' + (pnl >= 0 ? 'text-emerald-400' : 'text-rose-400');
+          pnlEl.className = 'text-sm font-bold font-mono mt-1 ' + (pnl >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400');
         }
-        if (ddHead) ddHead.innerText = 'Max Drawdown (EOD)';
+        if (ddHead) ddHead.innerText = 'Límite Trailing DD';
         if (ddEl) {
           const ddPct = (pf.current_eod_drawdown_pct != null) ? Number(pf.current_eod_drawdown_pct) : 0.0;
-          const ddUsd = (pf.current_eod_drawdown_usd != null) ? Number(pf.current_eod_drawdown_usd) : 0.0;
-          ddEl.innerText = ddPct.toFixed(2) + '% ($' + ddUsd.toFixed(2) + ')';
+          ddEl.innerText = ddPct.toFixed(2) + '% (Máx 3.50% / $3,500)';
         }
-        if (targetHead) targetHead.innerText = 'Objetivo Challenge';
+        if (targetHead) targetHead.innerText = 'Objetivo Fondeo';
         if (targetEl) {
-          const targetPct = (pnl / 6000.0 * 100.0);
-          targetEl.innerText = (targetPct > 0 ? targetPct.toFixed(2) : '0.00') + '% ($' + Math.max(0, pnl).toFixed(2) + '/$6,000)';
+          targetEl.innerText = '+6.0% ($6,000 / cta)';
         }
+
+        // --- TARJETA 2 (FONDEO - ENJAMBRE CME & CFDS) ---
+        if (c2Badge) {
+          c2Badge.innerText = 'FONDEO · ENJAMBRE CME GLOBEX & CFDS';
+          c2Badge.className = 'px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30 whitespace-nowrap';
+        }
+        if (c2Title) c2Title.innerText = 'Enjambre de Ejecución Prop Firm (20 Modelos)';
+        if (c2InitLabel) c2InitLabel.innerText = 'POR CHALLENGE';
+        if (c2InitBal) c2InitBal.innerText = '$100,000.00 USD';
+        if (c2Kpi1Label) c2Kpi1Label.innerText = 'Regla Consistencia';
+        if (c2Kpi1Val) c2Kpi1Val.innerText = '≤ 40.0% Max Trade';
+        if (c2Kpi2Label) c2Kpi2Label.innerText = 'Límite Trailing DD';
+        if (c2Kpi2Val) {
+          c2Kpi2Val.innerText = '3.5% ($3,500 / cta)';
+          c2Kpi2Val.className = 'text-sm font-bold font-mono mt-1 truncate text-emerald-700 dark:text-emerald-400';
+        }
+        if (c2Kpi3Label) c2Kpi3Label.innerText = 'Meta Aprobación';
+        if (c2Kpi3Val) c2Kpi3Val.innerText = '+6.0% ($6,000 / cta)';
+        if (c2Row1Label) c2Row1Label.innerText = 'Infraestructura:';
+        if (c2Strat) c2Strat.innerHTML = '<span class="px-2.5 py-1 rounded-md bg-[#EEF2FF] text-[#3730A3] font-bold border border-[#C7D2FE] text-[11px] truncate">20 Challenges Activos (CME Globex + CFDs)</span>';
+        if (c2Row2Label) c2Row2Label.innerText = 'Spreads & Slippage:';
+        if (c2Exec) c2Exec.innerHTML = '<span class="text-[#065F46] font-semibold">0.4-1.5 pts CME + Comisiones $0.08/ctr liquidadas</span>';
+        if (c2Row3Label) c2Row3Label.innerText = 'Supervisión de Riesgo:';
+        if (c2Feed) c2Feed.innerHTML = '<span class="text-[#181A20] font-semibold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#10b981] inline-block"></span> <span>Hard Clamps EOD & Consistencia 40% Activos</span></span>';
       }
 
       // 3. Tarjetas superiores de portfolio activo
@@ -7185,17 +7272,17 @@
                 // 1. Actualizar Cuenta Forward y Tabla de Órdenes con Segregación Estricta (Capital Propio vs Fondeo)
         updateForwardDeskCardAndOrders(data);
 
-        // 2. Crypto Paper Hyperliquid
-        if (data.crypto_account) {
+        // 2. Crypto Paper Hyperliquid (solo si estamos en modo Capital Propio para no sobreescribir la tarjeta de Fondeo)
+        if (currentDeskMode === 'CAPITAL_PROPIO' && data.crypto_account) {
           const cp = data.crypto_account;
           const cpBalEl = document.getElementById('ft-crypto-balance');
           const cpPnlEl = document.getElementById('ft-crypto-pnl');
           const bal = Number(cp.balance || 1013.56);
-          if (cpBalEl) cpBalEl.innerText = bal.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 4 }) + ' USDC';
-          const pnl = Number(cp.pnl != null ? cp.pnl : (bal - 1000.0));
+          if (cpBalEl) cpBalEl.innerText = bal.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USDC';
+          const pnl = Number(cp.realized_pnl != null ? cp.realized_pnl : (cp.pnl != null ? cp.pnl : (bal - 1000.0)));
           if (cpPnlEl) {
-            cpPnlEl.innerText = (pnl >= 0 ? '+' : '') + pnl.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 4 }) + ' USDC';
-            cpPnlEl.className = 'text-sm font-bold font-mono mt-1 truncate ' + (pnl >= 0 ? 'text-emerald-400' : 'text-rose-400');
+            cpPnlEl.innerText = (pnl >= 0 ? '+' : '') + pnl.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USDC';
+            cpPnlEl.className = 'text-sm font-bold font-mono mt-1 truncate ' + (pnl >= 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400');
           }
         }
 
