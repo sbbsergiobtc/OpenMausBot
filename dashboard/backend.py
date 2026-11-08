@@ -69,6 +69,11 @@ class StrategySimulationRequest(BaseModel):
     execution_delay_bars: int = 1
 
 
+@app.get("/api/ping")
+def get_ping():
+    return {"status": "ok", "timestamp_utc": datetime.now(timezone.utc).isoformat()}
+
+
 @app.get("/api/summary")
 def get_summary():
     pf_state_file = BASE_DIR / 'data/paper_trades/prop_firm_forward_test_state.json'

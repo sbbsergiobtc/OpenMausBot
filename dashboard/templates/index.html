@@ -3915,6 +3915,23 @@
       }
     }
 
+
+    // Medición exacta y ligera de latencia Heartbeat/Ping (RTT)
+    async function checkFeedPing() {
+      const t0 = performance.now();
+      try {
+        const res = await fetch('/api/ping');
+        if (res.ok) {
+          const rtt = Math.max(5, Math.round(performance.now() - t0));
+          updateDaemonHealth('online', rtt);
+        } else {
+          updateDaemonHealth('reconnecting');
+        }
+      } catch (err) {
+        updateDaemonHealth('reconnecting');
+      }
+    }
+
     function formatQuantPrice(val, asset) {
       if (val === null || val === undefined || val === '') return '-';
       const num = Number(val);
@@ -5724,8 +5741,8 @@
           return;
         }
         const d = await res.json();
-        const lat = Math.max(5, Math.round(performance.now() - startT));
-        updateDaemonHealth('online', lat);
+        // Payload recibido OK - el ping ligero se gestiona via checkFeedPing
+        if (!isDaemonOnline) checkFeedPing();
 
         const mt5Bal = document.getElementById('tele-mt5-bal');
         const hlBal = document.getElementById('tele-hl-bal');
@@ -7392,8 +7409,8 @@
           return;
         }
         const data = await res.json();
-        const lat = Math.max(5, Math.round(performance.now() - startT));
-        updateDaemonHealth('online', lat);
+        // Payload recibido OK - el ping ligero se gestiona via checkFeedPing
+        if (!isDaemonOnline) checkFeedPing();
         
         // Mercados dinámicos
         if (data.markets) {
@@ -7503,8 +7520,8 @@
           return;
         }
         const d = await res.json();
-        const lat = Math.max(5, Math.round(performance.now() - startT));
-        updateDaemonHealth('online', lat);
+        // Payload recibido OK - el ping ligero se gestiona via checkFeedPing
+        if (!isDaemonOnline) checkFeedPing();
 
         // Enjambre y motor en Cockpit General
         const agentsBadge = document.getElementById('desk-agents-badge');
@@ -7904,8 +7921,7 @@
         ]);
         const anyOk = results.some(r => r.status === 'fulfilled');
         if (anyOk) {
-          const lat = Math.max(5, Math.round(performance.now() - startT));
-          updateDaemonHealth('online', lat);
+          checkFeedPing();
         } else {
           updateDaemonHealth('reconnecting');
         }
@@ -7936,6 +7952,8 @@
       if (typeof initDefaultFtEquityCurve === 'function') {
         setTimeout(initDefaultFtEquityCurve, 250);
       }
+      checkFeedPing();
+      setInterval(checkFeedPing, 5000);
       fetchAccountStage();
       fetchNotifications();
       setInterval(fetchNotifications, 30000);
