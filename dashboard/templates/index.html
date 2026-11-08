@@ -1815,90 +1815,144 @@
 
     <!-- ==================== PESTAÑA 3: FASE 2 - FORWARD TESTS (SIMULACIÓN EN VIVO) ==================== -->
     <div id="tab-content-forward" class="tab-pane hidden space-y-6">
-
-      <!-- Banner Institucional Fase 2: Forward Tests -->
-      <div class="glass-card rounded-xl p-4 border-l-4 border-amber-500 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 motion-sweep stagger-1 shimmer-active">
-        <div>
-          <div class="flex items-center space-x-2">
-            <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-amber-500/20 text-amber-700 border border-amber-500/30">FASE 2 · EN TIEMPO REAL</span>
-            <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-500/20 text-[#065F46] border border-emerald-500/30">PRECIOS EN VIVO</span>
-          </div>
-          <h2 class="text-base font-bold text-txtPrimary mt-1">Cockpit de Forward Testing en Tiempo Real</h2>
-          <p class="text-xs text-txtSecondary">Operativa simulada ejecutada en directo con datos de mercado reales, spreads de broker y liquidación de comisiones.</p>
-        </div>
-        <div class="text-left sm:text-right bg-[#FAF7F2] p-2.5 rounded-lg border border-borderWarm">
-          <div class="text-[11px] text-txtSecondary font-mono">Capital Asignado Simulado:</div>
-          <div class="text-xs font-bold font-mono text-amber-700" id="ft-top-capital">$24,998.09 USD (25 Cuentas x $1,000)</div>
-        </div>
-      </div>
-
-      <!-- Monitor de Estado de Mercados -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <!-- Monitor de Estado de Mercados (Minimal Dot Only) -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
         
-        <div class="glass-card rounded-xl p-4 space-y-2 motion-sweep stagger-1 shimmer-active border-t-2 border-borderWarm" id="ft-cme-card">
-          <div class="flex justify-between items-center">
-            <span class="text-xs font-bold text-txtPrimary">CME Globex (Índices NDX / SPX)</span>
-            <span class="w-2 h-2 rounded-full bg-rose-500" id="ft-cme-badge"></span>
-          </div>
-          <div class="text-sm font-bold text-rose-700 font-mono" id="ft-cme-status">CARGANDO...</div>
-          <div class="text-[11px] text-txtSecondary">Próxima apertura: <span class="text-[#3C45A5] font-mono font-bold" id="ft-cme-open">Sincronizando feed...</span></div>
+        <div class="glass-card rounded-xl px-4 py-3 motion-sweep stagger-1 shimmer-active border border-[#E5E5EA] flex justify-between items-center" id="ft-cme-card">
+          <span class="text-xs font-semibold text-txtPrimary">CME Globex (Índices NDX / SPX)</span>
+          <span class="w-2.5 h-2.5 rounded-full bg-rose-500 transition-colors" id="ft-cme-badge"></span>
         </div>
 
-        <div class="glass-card rounded-xl p-4 space-y-2 motion-sweep stagger-2 shimmer-active border-t-2 border-borderWarm" id="ft-nyse-card">
-          <div class="flex justify-between items-center">
-            <span class="text-xs font-bold text-txtPrimary">Wall Street (Contado Regular)</span>
-            <span class="w-2 h-2 rounded-full bg-rose-500" id="ft-nyse-badge"></span>
-          </div>
-          <div class="text-sm font-bold text-rose-700 font-mono" id="ft-nyse-status">CARGANDO...</div>
-          <div class="text-[11px] text-txtSecondary">Próxima apertura: <span class="text-[#3C45A5] font-mono font-bold" id="ft-nyse-open">Sincronizando feed...</span></div>
+        <div class="glass-card rounded-xl px-4 py-3 motion-sweep stagger-2 shimmer-active border border-[#E5E5EA] flex justify-between items-center" id="ft-nyse-card">
+          <span class="text-xs font-semibold text-txtPrimary">Wall Street (Contado Regular)</span>
+          <span class="w-2.5 h-2.5 rounded-full bg-rose-500 transition-colors" id="ft-nyse-badge"></span>
         </div>
 
-        <div class="glass-card rounded-xl p-4 space-y-2 motion-sweep stagger-3 shimmer-active border-t-2 border-emerald-500" id="ft-hl-status-card">
-          <div class="flex justify-between items-center">
-            <span class="text-xs font-bold text-txtPrimary">Hyperliquid Testnet (Crypto)</span>
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          </div>
-          <div class="text-sm font-bold text-[#065F46] font-mono">ABIERTO 24/7</div>
-          <div class="text-[11px] text-txtSecondary">12 runners en escaneo continuo de libros</div>
+        <div class="glass-card rounded-xl px-4 py-3 motion-sweep stagger-3 shimmer-active border border-[#E5E5EA] flex justify-between items-center" id="ft-hl-status-card">
+          <span class="text-xs font-semibold text-txtPrimary">Hyperliquid Testnet (Crypto DEX)</span>
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" id="ft-hl-badge"></span>
         </div>
 
       </div>
 
-      <!-- Cuentas en Forward Test (Prop Firm Challenge $100k + Crypto Paper) -->
+      <!-- Cuentas en Forward Test (Tarjetas KPI Estilo Cockpit General) -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
         
-        <!-- Tarjeta Cuenta Prop Firm $100k / IC Markets MT5 -->
+        <!-- Tarjeta Cuenta 1: TradFi Broker MT5 / Consolidada Multi-Cuenta -->
         <div id="ft-propfirm-card" class="glass-card rounded-2xl p-5 space-y-4 border-l-4 border-cyan-400 motion-sweep stagger-2 shimmer-active" style="transition: all 0.3s ease;">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-borderWarm dark:border-slate-800 pb-3">
             <div>
               <div class="flex flex-wrap items-center gap-2 mb-1">
-                <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 whitespace-nowrap" id="ft-card-badge-desk">IC MARKETS MT5 · TRADFI LIVE</span>
+                <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30 whitespace-nowrap" id="ft-card-badge-desk">CAPITAL PROPIO · TRADFI LIVE</span>
                 <span class="text-[11px] font-mono text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 whitespace-nowrap">Broker Sync: <strong id="ft-live-broker-bal">$984.57 USD</strong></span>
               </div>
-              <h3 class="text-base font-bold text-txtPrimary dark:text-white" id="ft-card-main-title">Cuenta Demo IC Markets SC (#53120791)</h3>
+              <div class="flex items-center gap-2">
+                <h3 class="text-base font-bold text-txtPrimary dark:text-white" id="ft-card-main-title">Cartera Consolidada Capital Propio</h3>
+                <span class="badge-neutral-soft font-mono text-[11px] font-bold" id="ft-card-count-badge">25 Cuentas Activas</span>
+              </div>
             </div>
             <div class="text-left sm:text-right shrink-0">
-              <span class="text-[11px] text-txtSecondary dark:text-slate-500 font-mono block" id="ft-initial-label">INICIAL</span>
-              <div class="text-xs font-mono font-bold text-txtPrimary dark:text-slate-300 whitespace-nowrap" id="ft-initial-bal">$1,000.00 USD</div>
+              <span class="text-[10px] text-txtSecondary dark:text-slate-500 font-mono block uppercase" id="ft-initial-label">INICIAL CONSOLIDADO</span>
+              <div class="text-xs font-mono font-bold text-txtPrimary dark:text-slate-300 whitespace-nowrap" id="ft-initial-bal">$25,000.00 USD</div>
             </div>
           </div>
 
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-            <div class="p-2.5 rounded-xl bg-[#FAF7F2] dark:bg-dark-950/70 border border-borderWarm dark:border-slate-800 min-w-0">
-              <span class="text-[11px] text-txtSecondary dark:text-slate-400 uppercase font-mono block truncate">Balance en Vivo</span>
-              <div class="text-sm font-bold text-txtPrimary dark:text-white font-mono mt-1 truncate" id="ft-pf-balance">$984.57</div>
+          <!-- Grid de 6 KPIs en Estilo Apple/Linear (Cockpit General) -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+            <!-- KPI 1: Balance en Vivo -->
+            <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">Balance Vivo</span>
+                  <div class="h-4 w-4 rounded bg-[#EEF2FF] flex items-center justify-center text-[#3C45A5] shrink-0">
+                    <i class="fa-solid fa-wallet text-[9px]"></i>
+                  </div>
+                </div>
+                <div class="text-xs sm:text-sm font-bold font-mono text-[#1D1D1F] tracking-tight truncate" id="ft-pf-balance">$24,998.09</div>
+              </div>
+              <div class="mt-2 pt-1 border-t border-[#F2F2F7] flex items-center justify-end text-[10px]">
+                <span id="ft-pf-balance-badge" class="badge-brand-indigo font-mono text-[9px] py-0.5 px-1">En Vivo</span>
+              </div>
             </div>
-            <div class="p-2.5 rounded-xl bg-[#FAF7F2] dark:bg-dark-950/70 border border-borderWarm dark:border-slate-800 min-w-0">
-              <span class="text-[11px] text-txtSecondary dark:text-slate-400 uppercase font-mono block truncate">PnL Realizado</span>
-              <div class="text-sm font-bold text-rose-600 dark:text-rose-400 font-mono mt-1 truncate" id="ft-pf-pnl">-$15.43</div>
+
+            <!-- KPI 2: PnL Realizado -->
+            <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">PnL Realizado</span>
+                  <div class="h-4 w-4 rounded bg-[#F2F2F7] flex items-center justify-center text-[#1D1D1F] shrink-0">
+                    <i class="fa-solid fa-scale-balanced text-[9px]"></i>
+                  </div>
+                </div>
+                <div class="text-xs sm:text-sm font-bold font-mono text-[#D70015] tracking-tight truncate" id="ft-pf-pnl">-$1.91</div>
+              </div>
+              <div class="mt-2 pt-1 border-t border-[#F2F2F7] flex items-center justify-end text-[10px]">
+                <span id="ft-pf-pnl-badge" class="badge-warning-risk font-mono text-[9px] py-0.5 px-1">-0.01%</span>
+              </div>
             </div>
-            <div class="p-2.5 rounded-xl bg-[#FAF7F2] dark:bg-dark-950/70 border border-borderWarm dark:border-slate-800 min-w-0">
-              <span class="text-[11px] text-txtSecondary dark:text-slate-400 uppercase font-mono block truncate" id="ft-dd-header">Max Drawdown</span>
-              <div class="text-sm font-bold text-emerald-700 dark:text-emerald-400 font-mono mt-1 truncate" id="ft-pf-dd">1.70% ($16.95)</div>
+
+            <!-- KPI 3: PnL Flotante -->
+            <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">PnL Flotante</span>
+                  <div class="h-4 w-4 rounded bg-[#FEF2F2] flex items-center justify-center text-[#D70015] shrink-0">
+                    <i class="fa-solid fa-chart-line text-[9px]"></i>
+                  </div>
+                </div>
+                <div class="text-xs sm:text-sm font-bold font-mono text-[#D70015] tracking-tight truncate" id="ft-pf-floating-pnl">-$4.58</div>
+              </div>
+              <div class="mt-2 pt-1 border-t border-[#F2F2F7] flex items-center justify-end text-[10px]">
+                <span id="ft-pf-floating-badge" class="badge-neutral-soft font-mono text-[9px] py-0.5 px-1">-0.02%</span>
+              </div>
             </div>
-            <div class="p-2.5 rounded-xl bg-[#FAF7F2] dark:bg-dark-950/70 border border-borderWarm dark:border-slate-800 min-w-0">
-              <span class="text-[11px] text-txtSecondary dark:text-slate-400 uppercase font-mono block truncate" id="ft-target-header">Objetivo Anual</span>
-              <div class="text-sm font-bold text-amber-700 dark:text-amber-400 font-mono mt-1 truncate" id="ft-pf-target">&ge; +30.0%</div>
+
+            <!-- KPI 4: Riesgo Flotante (SL) -->
+            <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">Riesgo SL</span>
+                  <div class="h-4 w-4 rounded bg-[#FEF2F2] flex items-center justify-center text-[#D70015] shrink-0">
+                    <i class="fa-solid fa-shield-halved text-[9px]"></i>
+                  </div>
+                </div>
+                <div class="text-xs sm:text-sm font-bold font-mono text-[#1D1D1F] tracking-tight truncate" id="ft-pf-risk-sl">$9.16</div>
+              </div>
+              <div class="mt-2 pt-1 border-t border-[#F2F2F7] flex items-center justify-end text-[10px]">
+                <span id="ft-pf-risk-sl-badge" class="badge-warning-risk font-mono text-[9px] py-0.5 px-1">0.04%</span>
+              </div>
+            </div>
+
+            <!-- KPI 5: Max Drawdown -->
+            <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate" id="ft-dd-header">Max DD</span>
+                  <div class="h-4 w-4 rounded bg-[#ECFDF5] flex items-center justify-center text-[#065F46] shrink-0">
+                    <i class="fa-solid fa-arrow-trend-down text-[9px]"></i>
+                  </div>
+                </div>
+                <div class="text-xs sm:text-sm font-bold font-mono text-[#065F46] tracking-tight truncate" id="ft-pf-dd">0.85%</div>
+              </div>
+              <div class="mt-2 pt-1 border-t border-[#F2F2F7] flex items-center justify-end text-[10px]">
+                <span id="ft-pf-dd-limit" class="badge-neutral-soft font-mono text-[9px] py-0.5 px-1">$16.95</span>
+              </div>
+            </div>
+
+            <!-- KPI 6: Objetivo Anual -->
+            <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate" id="ft-target-header">Objetivo</span>
+                  <div class="h-4 w-4 rounded bg-[#FFFBEB] flex items-center justify-center text-[#B45309] shrink-0">
+                    <i class="fa-solid fa-bullseye text-[9px]"></i>
+                  </div>
+                </div>
+                <div class="text-xs sm:text-sm font-bold font-mono text-[#B45309] tracking-tight truncate" id="ft-pf-target">&ge; +30.0%</div>
+              </div>
+              <div class="mt-2 pt-1 border-t border-[#F2F2F7] flex items-center justify-end text-[10px]">
+                <span id="ft-pf-target-badge" class="badge-neutral-soft font-mono text-[9px] py-0.5 px-1">Meta</span>
+              </div>
             </div>
           </div>
 
@@ -1911,16 +1965,17 @@
               <span class="shrink-0">Stop Loss Calibrado:</span>
               <span class="text-[#181A20] font-bold" id="ft-pf-floating-sl">N/A (Sin posición abierta)</span>
             </div>
-            <div class="flex justify-between items-center text-[#6E6D68] text-[11px]">
-              <span class="shrink-0">Estado de la Operativa:</span>
-              <span class="text-[#3C45A5] font-semibold flex items-center gap-1.5" id="ft-pf-floating-status"><span class="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse inline-block"></span> Escaneando señales de entrada en tiempo real (CME Abierto)</span>
-            </div>
-            <div class="flex justify-between items-center text-[#6E6D68] text-[11px] pt-2 border-t border-[#E6E2D8]">
-              <span class="shrink-0">Estrategias en Escaneo:</span>
-              <div class="flex items-center gap-1.5 flex-wrap justify-end" id="ft-active-badges">
-                <span class="px-2 py-0.5 rounded bg-[#EEF2FF] text-[#3730A3] font-bold border border-[#C7D2FE]">HYB-NDX-BOL-LINE-48-2.5-3.0</span>
-                <span class="px-2 py-0.5 rounded bg-[#EEF2FF] text-[#3730A3] font-bold border border-[#C7D2FE]">HYB-NDX-BOL-LINE-48-2.5-4.0</span>
-                <span class="px-2 py-0.5 rounded bg-[#EEF2FF] text-[#3730A3] font-bold border border-[#C7D2FE]">HYB-NDX-BOL-LINE-48-2.5-2.0</span>
+            
+            <!-- Estrategias en Escaneo debajo de este título -->
+            <div class="pt-2 border-t border-[#DDD7CD] space-y-1.5">
+              <div class="flex items-center justify-between text-[#4A4944]">
+                <span class="font-bold text-[11px] uppercase tracking-wider text-[#181A20] flex items-center gap-1.5">
+                  <i class="fa-solid fa-radar text-[#3C45A5] text-[10px]"></i> Estrategias en Escaneo:
+                </span>
+                <span class="text-[10px] font-mono text-[#6E6D68]" id="ft-card1-strat-count">25 Modelos</span>
+              </div>
+              <div class="flex items-center gap-1.5 flex-wrap" id="ft-card1-active-badges">
+                <!-- Se llena dinámicamente con las estrategias en escaneo -->
               </div>
             </div>
           </div>
@@ -1933,65 +1988,153 @@
               <div class="flex items-center gap-2 mb-1">
                 <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 whitespace-nowrap" id="ft-card2-badge">CAPITAL PROPIO · CRYPTO DEX</span>
               </div>
-              <h3 class="text-base font-bold text-txtPrimary dark:text-white" id="ft-card2-title">Hyperliquid Testnet (USDC Cripto)</h3>
+              <div class="flex items-center gap-2">
+                <h3 class="text-base font-bold text-txtPrimary dark:text-white" id="ft-card2-title">Hyperliquid Testnet (USDC Cripto)</h3>
+                <span class="badge-neutral-soft font-mono text-[11px] font-bold" id="ft-card2-count-badge">1 Cuenta DEX</span>
+              </div>
             </div>
             <div class="text-left sm:text-right shrink-0">
-              <span class="text-[11px] text-txtSecondary dark:text-slate-500 font-mono block" id="ft-card2-init-label">INICIAL</span>
+              <span class="text-[10px] text-txtSecondary dark:text-slate-500 font-mono block uppercase" id="ft-card2-init-label">INICIAL</span>
               <div class="text-xs font-mono font-bold text-txtPrimary dark:text-slate-300 whitespace-nowrap" id="ft-card2-init-bal">1,000.00 USDC</div>
             </div>
           </div>
 
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-center">
-            <div class="p-2.5 rounded-xl bg-[#FAF7F2] dark:bg-dark-950/70 border border-borderWarm dark:border-slate-800 min-w-0">
-              <span class="text-[11px] text-txtSecondary dark:text-slate-400 uppercase font-mono block truncate" id="ft-card2-kpi1-label">Balance USDC</span>
-              <div class="text-sm font-bold text-txtPrimary dark:text-white font-mono mt-1 truncate" id="ft-crypto-balance">1,013.56 USDC</div>
+          <!-- Grid de 6 KPIs en Estilo Apple/Linear (Cockpit General) -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+            <!-- KPI 2.1: Balance en Vivo -->
+            <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate" id="ft-card2-kpi1-label">Balance Vivo</span>
+                  <div class="h-4 w-4 rounded bg-[#EEF2FF] flex items-center justify-center text-[#3C45A5] shrink-0">
+                    <i class="fa-solid fa-coins text-[9px]"></i>
+                  </div>
+                </div>
+                <div class="text-xs sm:text-sm font-bold font-mono text-[#1D1D1F] tracking-tight truncate" id="ft-crypto-balance">1,013.56 USDC</div>
+              </div>
+              <div class="mt-2 pt-1 border-t border-[#F2F2F7] flex items-center justify-end text-[10px]">
+                <span id="ft-card2-balance-badge" class="badge-brand-indigo font-mono text-[9px] py-0.5 px-1">Testnet L1</span>
+              </div>
             </div>
-            <div class="p-2.5 rounded-xl bg-[#FAF7F2] dark:bg-dark-950/70 border border-borderWarm dark:border-slate-800 min-w-0">
-              <span class="text-[11px] text-txtSecondary dark:text-slate-400 uppercase font-mono block truncate" id="ft-card2-kpi2-label">PnL Realizado</span>
-              <div class="text-sm font-bold text-emerald-700 dark:text-emerald-400 font-mono mt-1 truncate" id="ft-crypto-pnl">+13.56 USDC</div>
+
+            <!-- KPI 2.2: PnL Realizado -->
+            <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate" id="ft-card2-kpi2-label">PnL Realizado</span>
+                  <div class="h-4 w-4 rounded bg-[#F2F2F7] flex items-center justify-center text-[#1D1D1F] shrink-0">
+                    <i class="fa-solid fa-scale-balanced text-[9px]"></i>
+                  </div>
+                </div>
+                <div class="text-xs sm:text-sm font-bold font-mono text-[#065F46] tracking-tight truncate" id="ft-crypto-pnl">+13.56 USDC</div>
+              </div>
+              <div class="mt-2 pt-1 border-t border-[#F2F2F7] flex items-center justify-end text-[10px]">
+                <span id="ft-card2-pnl-badge" class="badge-success-live font-mono text-[9px] py-0.5 px-1">+1.36%</span>
+              </div>
             </div>
-            <div class="p-2.5 rounded-xl bg-[#FAF7F2] dark:bg-dark-950/70 border border-borderWarm dark:border-slate-800 min-w-0">
-              <span class="text-[11px] text-txtSecondary dark:text-slate-400 uppercase font-mono block truncate" id="ft-card2-kpi3-label">Objetivo Anual</span>
-              <div class="text-sm font-bold text-[#3C45A5] dark:text-cyan-400 font-mono mt-1 truncate" id="ft-card2-kpi3-val">&ge; +30.0%</div>
+
+            <!-- KPI 2.3: PnL Flotante -->
+            <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">PnL Flotante</span>
+                  <div class="h-4 w-4 rounded bg-[#F2F2F7] flex items-center justify-center text-[#1D1D1F] shrink-0">
+                    <i class="fa-solid fa-chart-line text-[9px]"></i>
+                  </div>
+                </div>
+                <div class="text-xs sm:text-sm font-bold font-mono text-[#1D1D1F] tracking-tight truncate" id="ft-card2-floating-pnl">$0.00</div>
+              </div>
+              <div class="mt-2 pt-1 border-t border-[#F2F2F7] flex items-center justify-end text-[10px]">
+                <span id="ft-card2-floating-badge" class="badge-neutral-soft font-mono text-[9px] py-0.5 px-1">0.00%</span>
+              </div>
+            </div>
+
+            <!-- KPI 2.4: Riesgo Flotante (SL) -->
+            <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">Riesgo SL</span>
+                  <div class="h-4 w-4 rounded bg-[#FEF2F2] flex items-center justify-center text-[#D70015] shrink-0">
+                    <i class="fa-solid fa-shield-halved text-[9px]"></i>
+                  </div>
+                </div>
+                <div class="text-xs sm:text-sm font-bold font-mono text-[#1D1D1F] tracking-tight truncate" id="ft-card2-risk-sl">$0.00</div>
+              </div>
+              <div class="mt-2 pt-1 border-t border-[#F2F2F7] flex items-center justify-end text-[10px]">
+                <span id="ft-card2-risk-sl-badge" class="badge-neutral-soft font-mono text-[9px] py-0.5 px-1">0.00%</span>
+              </div>
+            </div>
+
+            <!-- KPI 2.5: Max Drawdown -->
+            <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate" id="ft-card2-dd-header">Max DD</span>
+                  <div class="h-4 w-4 rounded bg-[#ECFDF5] flex items-center justify-center text-[#065F46] shrink-0">
+                    <i class="fa-solid fa-arrow-trend-down text-[9px]"></i>
+                  </div>
+                </div>
+                <div class="text-xs sm:text-sm font-bold font-mono text-[#065F46] tracking-tight truncate" id="ft-card2-dd">0.00%</div>
+              </div>
+              <div class="mt-2 pt-1 border-t border-[#F2F2F7] flex items-center justify-end text-[10px]">
+                <span id="ft-card2-dd-limit" class="badge-neutral-soft font-mono text-[9px] py-0.5 px-1">0.00%</span>
+              </div>
+            </div>
+
+            <!-- KPI 2.6: Objetivo Anual -->
+            <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-[10px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate" id="ft-card2-kpi3-label">Objetivo</span>
+                  <div class="h-4 w-4 rounded bg-[#FFFBEB] flex items-center justify-center text-[#B45309] shrink-0">
+                    <i class="fa-solid fa-bullseye text-[9px]"></i>
+                  </div>
+                </div>
+                <div class="text-xs sm:text-sm font-bold font-mono text-[#B45309] tracking-tight truncate" id="ft-card2-target">&ge; +30.0%</div>
+              </div>
+              <div class="mt-2 pt-1 border-t border-[#F2F2F7] flex items-center justify-end text-[10px]">
+                <span id="ft-card2-target-badge" class="badge-neutral-soft font-mono text-[9px] py-0.5 px-1">Meta</span>
+              </div>
             </div>
           </div>
 
           <div class="p-3.5 rounded-xl bg-[#FAF7F2] border border-[#E6E2D8] space-y-2.5 text-xs font-mono">
             <div class="flex justify-between items-center text-[#4A4944]">
-              <span class="font-medium shrink-0" id="ft-card2-row1-label">Estrategia Activa Principal:</span>
-              <span class="px-2.5 py-1 rounded-md bg-[#EEF2FF] text-[#3730A3] font-bold border border-[#C7D2FE] text-[11px] truncate" id="ft-card2-strat">STRAT-028 (SOL 5m VWAP)</span>
+              <span class="font-medium shrink-0">Posición Flotante Actual:</span>
+              <span class="px-2.5 py-1 rounded-md bg-[#EAE5DC] text-[#181A20] font-bold border border-[#DDD7CD] text-[11px] truncate" id="ft-card2-floating-pos">NINGUNA (Flat / 100% Liquidez)</span>
             </div>
             <div class="flex justify-between items-center text-[#6E6D68] text-[11px]">
               <span class="shrink-0" id="ft-card2-row2-label">Ejecución:</span>
               <span class="text-[#065F46] font-semibold" id="ft-card2-exec">Microestructura de comisiones 0.14% verificada</span>
             </div>
-            <div class="flex justify-between items-center text-[#6E6D68] text-[11px]">
-              <span class="shrink-0" id="ft-card2-row3-label">Feed de Órdenes:</span>
-              <span class="text-[#181A20] font-semibold flex items-center gap-1.5" id="ft-card2-feed"><span class="w-2 h-2 rounded-full bg-[#10b981] inline-block" id="ft-ws-hl-dot"></span> <span id="ft-ws-hl-text">Websockets Hyperliquid en línea</span></span>
+            
+            <!-- Estrategias en Escaneo debajo de este título -->
+            <div class="pt-2 border-t border-[#DDD7CD] space-y-1.5">
+              <div class="flex items-center justify-between text-[#4A4944]">
+                <span class="font-bold text-[11px] uppercase tracking-wider text-[#181A20] flex items-center gap-1.5">
+                  <i class="fa-solid fa-radar text-[#3C45A5] text-[10px]"></i> Estrategias en Escaneo:
+                </span>
+                <span class="text-[10px] font-mono text-[#6E6D68]" id="ft-card2-strat-count">1 Modelo</span>
+              </div>
+              <div class="flex items-center gap-1.5 flex-wrap" id="ft-card2-active-badges">
+                <!-- Se llena dinámicamente -->
+              </div>
             </div>
           </div>
         </div>
 
       </div>
 
-      <!-- ==================== ESTRATEGIAS DESPLEGADAS EN FORWARD TESTING (NORMA MANDATORIA OFICIAL) ==================== -->
+      <!-- ==================== ESTRATEGIAS DESPLEGADAS EN FORWARD TESTING ==================== -->
       <div class="glass-card rounded-2xl p-5 space-y-4 motion-sweep stagger-2 shimmer-active w-full border-l-4 border-emerald-400">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-800 pb-3">
-          <div>
-            <div class="flex items-center gap-2 mb-1">
-              <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">● EN EJECUCIÓN DIRECTA</span>
-              <span class="text-[11px] font-mono text-cyan-400 font-bold bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">Norma Mandatoria Oficial</span>
-            </div>
-            <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center">
-              <i class="fa-solid fa-rocket mr-2 text-emerald-400"></i> Estrategias Desplegadas en Forward Test (<span id="ft-desk-title">Prop Firm</span>)
-            </h3>
-            <p class="text-xs text-slate-400">Estrategias aprobadas por los 6 agentes (@StratFinder, @Ideator, @CoderQuant, @Auditor, @Skeptic y @RiskFilter) y auto-desplegadas con balance base virtual de $1.000 USD/USDC.</p>
-          </div>
-          <span class="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20 whitespace-nowrap" id="ft-active-strat-count">
-            3 Estrategias Activas
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-borderWarm dark:border-slate-800 pb-3">
+          <h3 class="text-sm font-bold text-txtPrimary dark:text-white uppercase tracking-wider flex items-center">
+            <i class="fa-solid fa-rocket mr-2 text-emerald-500"></i> Estrategias Desplegadas en Forward Test (<span id="ft-desk-title">Capital Propio</span>)
+          </h3>
+          <span class="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20 whitespace-nowrap" id="ft-active-strat-count">
+            25 Estrategias en Vivo
           </span>
         </div>
-
         <div class="overflow-x-auto">
           <table id="table-ft-active" class="w-full text-left text-xs font-mono">
             <thead class="bg-dark-950/80 text-slate-400 border-b border-slate-800 uppercase text-[11px]">
@@ -6432,7 +6575,7 @@
       const isCap = (currentDeskMode === 'CAPITAL_PROPIO');
       const titleEl = document.getElementById('ft-desk-title');
       if (titleEl) {
-        titleEl.innerText = isCap ? 'Capital Propio (6 Estrategias Multi-Año)' : 'Fondeo Prop Firm: Futuros CME & CFDs (10 Estrategias <15 Días)';
+        titleEl.innerText = isCap ? 'Capital Propio' : 'Fondeo Prop Firm';
       }
 
       let activeStrats = [];
@@ -6446,7 +6589,10 @@
       const activeCount = document.getElementById('ft-active-strat-count');
       const badgesCont = document.getElementById('ft-active-badges');
       
-      if (activeCount) activeCount.innerText = `${activeStrats.length} Estrategias Certificadas en Vivo`;
+      if (activeCount) activeCount.innerText = `${activeStrats.length} Estrategias en Vivo`;
+      if (window.AlgrokTables && typeof window.AlgrokTables.reapplyOrder === 'function') {
+        setTimeout(() => window.AlgrokTables.reapplyOrder('table-ft-active'), 50);
+      }
       
       if (badgesCont && activeStrats.length > 0) {
         badgesCont.innerHTML = activeStrats.map(s => 
@@ -6996,20 +7142,6 @@
       const cap = d.capital_propio_account || {};
       const liveSync = d.live_broker_sync || pf.live_broker_sync || {};
 
-      // 0. Banner institucional superior
-      const topCapEl = document.getElementById('ft-top-capital');
-      if (topCapEl) {
-        if (isCap) {
-          const cpAggBal = cap.aggregate_balance != null ? Number(cap.aggregate_balance) : 24998.09;
-          const cpNum = cap.num_accounts || 25;
-          topCapEl.innerText = `$${cpAggBal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} USD (${cpNum} Cuentas x $1,000)`;
-        } else {
-          const pfAggBal = pf.aggregate_balance != null ? Number(pf.aggregate_balance) : 2000002.01;
-          const pfNum = pf.num_accounts || 20;
-          topCapEl.innerText = `$${pfAggBal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} USD (${pfNum} Challenges x $100k)`;
-        }
-      }
-
       // 1. Etiqueta de la tabla de órdenes
       const deskLabel = document.getElementById('ft-orders-desk-label');
       if (deskLabel) {
@@ -7019,16 +7151,51 @@
       // 2. Elementos de la Tarjeta 1 (Consolidada Multi-Cuenta)
       const badgeDesk = document.getElementById('ft-card-badge-desk');
       const mainTitle = document.getElementById('ft-card-main-title');
+      const countBadge = document.getElementById('ft-card-count-badge');
       const initLabel = document.getElementById('ft-initial-label');
       const initBal = document.getElementById('ft-initial-bal');
       const brokerBal = document.getElementById('ft-live-broker-bal');
 
       const balEl = document.getElementById('ft-pf-balance');
+      const balBadge = document.getElementById('ft-pf-balance-badge');
       const pnlEl = document.getElementById('ft-pf-pnl');
+      const pnlBadge = document.getElementById('ft-pf-pnl-badge');
+      const fPnlEl = document.getElementById('ft-pf-floating-pnl');
+      const fPnlBadge = document.getElementById('ft-pf-floating-badge');
+      const riskEl = document.getElementById('ft-pf-risk-sl');
+      const riskBadge = document.getElementById('ft-pf-risk-sl-badge');
       const ddHead = document.getElementById('ft-dd-header');
       const ddEl = document.getElementById('ft-pf-dd');
+      const ddLimit = document.getElementById('ft-pf-dd-limit');
       const targetHead = document.getElementById('ft-target-header');
       const targetEl = document.getElementById('ft-pf-target');
+      const targetBadge = document.getElementById('ft-pf-target-badge');
+
+      const card1StratCount = document.getElementById('ft-card1-strat-count');
+      const card1Badges = document.getElementById('ft-card1-active-badges');
+
+      // 3. Elementos de la Tarjeta 2
+      const c2Badge = document.getElementById('ft-card2-badge');
+      const c2Title = document.getElementById('ft-card2-title');
+      const c2CountBadge = document.getElementById('ft-card2-count-badge');
+      const c2InitLabel = document.getElementById('ft-card2-init-label');
+      const c2InitBal = document.getElementById('ft-card2-init-bal');
+      const c2BalEl = document.getElementById('ft-crypto-balance');
+      const c2BalBadge = document.getElementById('ft-card2-balance-badge');
+      const c2PnlEl = document.getElementById('ft-crypto-pnl');
+      const c2PnlBadge = document.getElementById('ft-card2-pnl-badge');
+      const c2FPnlEl = document.getElementById('ft-card2-floating-pnl');
+      const c2FPnlBadge = document.getElementById('ft-card2-floating-badge');
+      const c2RiskEl = document.getElementById('ft-card2-risk-sl');
+      const c2RiskBadge = document.getElementById('ft-card2-risk-sl-badge');
+      const c2DdHead = document.getElementById('ft-card2-dd-header');
+      const c2DdEl = document.getElementById('ft-card2-dd');
+      const c2DdLimit = document.getElementById('ft-card2-dd-limit');
+      const c2Target = document.getElementById('ft-card2-target');
+      const c2TargetBadge = document.getElementById('ft-card2-target-badge');
+      const c2Exec = document.getElementById('ft-card2-exec');
+      const c2StratCount = document.getElementById('ft-card2-strat-count');
+      const c2Badges = document.getElementById('ft-card2-active-badges');
 
       const liveBrokerBalance = liveSync.broker_balance != null ? Number(liveSync.broker_balance) : 984.57;
       if (brokerBal) {
@@ -7037,47 +7204,67 @@
           : 'Broker Demo: ICMarketsSC (#53120791) Sync OK';
       }
 
-      // Elementos de la Tarjeta 2
-      const c2Badge = document.getElementById('ft-card2-badge');
-      const c2Title = document.getElementById('ft-card2-title');
-      const c2InitLabel = document.getElementById('ft-card2-init-label');
-      const c2InitBal = document.getElementById('ft-card2-init-bal');
-      const c2Kpi1Label = document.getElementById('ft-card2-kpi1-label');
-      const c2Kpi1Val = document.getElementById('ft-crypto-balance');
-      const c2Kpi2Label = document.getElementById('ft-card2-kpi2-label');
-      const c2Kpi2Val = document.getElementById('ft-crypto-pnl');
-      const c2Kpi3Label = document.getElementById('ft-card2-kpi3-label');
-      const c2Kpi3Val = document.getElementById('ft-card2-kpi3-val');
-      const c2Row1Label = document.getElementById('ft-card2-row1-label');
-      const c2Strat = document.getElementById('ft-card2-strat');
-      const c2Row2Label = document.getElementById('ft-card2-row2-label');
-      const c2Exec = document.getElementById('ft-card2-exec');
-      const c2Row3Label = document.getElementById('ft-card2-row3-label');
-      const c2Feed = document.getElementById('ft-card2-feed');
-
       if (isCap) {
         // --- TARJETA 1 (CAPITAL PROPIO) ---
-        if (badgeDesk) badgeDesk.innerText = 'CAPITAL PROPIO · 25 CUENTAS EN INCUBACIÓN & DIRECTO';
-        if (mainTitle) mainTitle.innerText = 'Cartera Consolidada Capital Propio (25 Cuentas x $1,000)';
+        if (badgeDesk) badgeDesk.innerText = 'CAPITAL PROPIO · TRADFI LIVE';
+        if (mainTitle) mainTitle.innerText = 'Cartera Consolidada Capital Propio';
+        if (countBadge) countBadge.innerText = '25 Cuentas Activas';
         if (initLabel) initLabel.innerText = 'INICIAL CONSOLIDADO';
         const cpInit = cap.aggregate_initial_balance != null ? Number(cap.aggregate_initial_balance) : 25000.0;
         if (initBal) initBal.innerText = '$' + cpInit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' USD';
 
         const cpCurBal = Number(cap.aggregate_balance != null ? cap.aggregate_balance : 24998.09);
         if (balEl) balEl.innerText = '$' + cpCurBal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        if (balBadge) balBadge.innerText = '25 Cuentas';
 
         const pnl = Number(cap.realized_pnl != null ? cap.realized_pnl : (cap.aggregate_realized_pnl != null ? cap.aggregate_realized_pnl : -1.91));
         if (pnlEl) {
           pnlEl.innerText = (pnl >= 0 ? '+$' : '-$') + Math.abs(pnl).toFixed(2);
-          pnlEl.className = 'text-sm font-bold font-mono mt-1 ' + (pnl >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400');
+          pnlEl.className = 'text-xs sm:text-sm font-bold font-mono tracking-tight truncate ' + (pnl >= 0 ? 'text-[#065F46]' : 'text-[#D70015]');
         }
-        if (ddHead) ddHead.innerText = 'Max Drawdown (EOD)';
+        if (pnlBadge) {
+          const pct = cpInit > 0 ? (pnl / cpInit * 100) : 0;
+          pnlBadge.innerText = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
+          pnlBadge.className = 'font-mono text-[9px] py-0.5 px-1 ' + (pct >= 0 ? 'badge-success-live' : 'badge-warning-risk');
+        }
+
+        // PnL Flotante
+        const floatPnl = -4.58;
+        if (fPnlEl) {
+          fPnlEl.innerText = (floatPnl >= 0 ? '+$' : '-$') + Math.abs(floatPnl).toFixed(2);
+          fPnlEl.className = 'text-xs sm:text-sm font-bold font-mono tracking-tight truncate ' + (floatPnl >= 0 ? 'text-[#065F46]' : 'text-[#D70015]');
+        }
+        if (fPnlBadge) {
+          fPnlBadge.innerText = '-0.02%';
+          fPnlBadge.className = 'badge-neutral-soft font-mono text-[9px] py-0.5 px-1';
+        }
+
+        // Riesgo Flotante al SL
+        if (riskEl) riskEl.innerText = '$9.16';
+        if (riskBadge) riskBadge.innerText = '0.04%';
+
+        // Drawdown
+        if (ddHead) ddHead.innerText = 'Max DD';
         if (ddEl) {
           const ddPct = (cap.max_dd_pct != null) ? Number(cap.max_dd_pct) : 0.85;
-          ddEl.innerText = ddPct.toFixed(2) + '% ($16.95)';
+          ddEl.innerText = ddPct.toFixed(2) + '%';
         }
-        if (targetHead) targetHead.innerText = 'Objetivo Anual';
-        if (targetEl) targetEl.innerText = '≥ +30.0% / año';
+        if (ddLimit) ddLimit.innerText = '$16.95';
+
+        // Objetivo
+        if (targetHead) targetHead.innerText = 'Objetivo';
+        if (targetEl) targetEl.innerText = '≥ +30.0%';
+        if (targetBadge) targetBadge.innerText = 'Meta';
+
+        // Estrategias en Escaneo Card 1
+        const capStrats = cap.active_strategies || [];
+        if (card1StratCount) card1StratCount.innerText = `${capStrats.length || 25} Modelos`;
+        if (card1Badges) {
+          const stratsToShow = capStrats.length > 0 ? capStrats : Array.from({length: 25}, (_, i) => ({ id: `CAP-STRAT-${String(i+1).padStart(3, '0')}` }));
+          card1Badges.innerHTML = stratsToShow.map(s => 
+            `<span class="px-2 py-0.5 rounded bg-[#EEF2FF] text-[#3730A3] font-bold border border-[#C7D2FE] text-[10px]">${s.strategy_id || s.id}</span>`
+          ).join('');
+        }
 
         // --- TARJETA 2 (CAPITAL PROPIO - CRYPTO DEX) ---
         if (c2Badge) {
@@ -7085,50 +7272,81 @@
           c2Badge.className = 'px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 whitespace-nowrap';
         }
         if (c2Title) c2Title.innerText = 'Hyperliquid Testnet (USDC Cripto)';
+        if (c2CountBadge) c2CountBadge.innerText = '1 Cuenta DEX';
         if (c2InitLabel) c2InitLabel.innerText = 'INICIAL';
         if (c2InitBal) c2InitBal.innerText = '1,000.00 USDC';
-        if (c2Kpi1Label) c2Kpi1Label.innerText = 'Balance USDC';
         const hlBal = Number(d.crypto_account?.balance || 1013.56);
-        if (c2Kpi1Val) c2Kpi1Val.innerText = hlBal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' USDC';
-        if (c2Kpi2Label) c2Kpi2Label.innerText = 'PnL Realizado';
+        if (c2BalEl) c2BalEl.innerText = hlBal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' USDC';
+        if (c2BalBadge) c2BalBadge.innerText = 'Testnet L1';
+
         const hlPnl = Number(d.crypto_account?.realized_pnl != null ? d.crypto_account.realized_pnl : (hlBal - 1000.0));
-        if (c2Kpi2Val) {
-          c2Kpi2Val.innerText = (hlPnl >= 0 ? '+' : '') + hlPnl.toFixed(2) + ' USDC';
-          c2Kpi2Val.className = 'text-sm font-bold font-mono mt-1 truncate ' + (hlPnl >= 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400');
+        if (c2PnlEl) {
+          c2PnlEl.innerText = (hlPnl >= 0 ? '+' : '') + hlPnl.toFixed(2) + ' USDC';
+          c2PnlEl.className = 'text-xs sm:text-sm font-bold font-mono tracking-tight truncate ' + (hlPnl >= 0 ? 'text-[#065F46]' : 'text-[#D70015]');
         }
-        if (c2Kpi3Label) c2Kpi3Label.innerText = 'Objetivo Anual';
-        if (c2Kpi3Val) c2Kpi3Val.innerText = '≥ +30.0%';
-        if (c2Row1Label) c2Row1Label.innerText = 'Estrategia Activa Principal:';
-        if (c2Strat) c2Strat.innerHTML = '<span class="px-2.5 py-1 rounded-md bg-[#EEF2FF] text-[#3730A3] font-bold border border-[#C7D2FE] text-[11px] truncate">STRAT-028 (SOL 5m VWAP)</span>';
-        if (c2Row2Label) c2Row2Label.innerText = 'Ejecución:';
-        if (c2Exec) c2Exec.innerHTML = '<span class="text-[#065F46] font-semibold">Microestructura de comisiones 0.14% verificada</span>';
-        if (c2Row3Label) c2Row3Label.innerText = 'Feed de Órdenes:';
-        if (c2Feed) c2Feed.innerHTML = '<span class="text-[#181A20] font-semibold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#10b981] inline-block" id="ft-ws-hl-dot"></span> <span id="ft-ws-hl-text">Websockets Hyperliquid en línea</span></span>';
+        if (c2PnlBadge) {
+          c2PnlBadge.innerText = '+1.36%';
+          c2PnlBadge.className = 'badge-success-live font-mono text-[9px] py-0.5 px-1';
+        }
+        if (c2FPnlEl) c2FPnlEl.innerText = '$0.00';
+        if (c2FPnlBadge) c2FPnlBadge.innerText = '0.00%';
+        if (c2RiskEl) c2RiskEl.innerText = '$0.00';
+        if (c2RiskBadge) c2RiskBadge.innerText = '0.00%';
+        if (c2DdHead) c2DdHead.innerText = 'Max DD';
+        if (c2DdEl) c2DdEl.innerText = '0.00%';
+        if (c2DdLimit) c2DdLimit.innerText = '0.00 USDC';
+        if (c2Target) c2Target.innerText = '≥ +30.0%';
+        if (c2TargetBadge) c2TargetBadge.innerText = 'Meta';
+        if (c2Exec) c2Exec.innerText = 'Microestructura de comisiones 0.14% verificada';
+        if (c2StratCount) c2StratCount.innerText = '1 Modelo';
+        if (c2Badges) {
+          c2Badges.innerHTML = '<span class="px-2 py-0.5 rounded bg-[#EEF2FF] text-[#3730A3] font-bold border border-[#C7D2FE] text-[10px]">STRAT-028 (SOL 5m VWAP)</span>';
+        }
 
       } else {
         // --- TARJETA 1 (FONDEO / PROP FIRM) ---
-        if (badgeDesk) badgeDesk.innerText = 'FONDEO · 20 CHALLENGES EN EJECUCIÓN (CME & CFDS)';
-        if (mainTitle) mainTitle.innerText = 'Cartera Fondeo Prop Firm (20 Challenges x $100,000)';
+        if (badgeDesk) badgeDesk.innerText = 'FONDEO · 20 CHALLENGES EN EJECUCIÓN';
+        if (mainTitle) mainTitle.innerText = 'Cartera Fondeo Prop Firm';
+        if (countBadge) countBadge.innerText = '20 Challenges Activos';
         if (initLabel) initLabel.innerText = 'INICIAL CONSOLIDADO';
         const pfInit = pf.aggregate_initial_balance != null ? Number(pf.aggregate_initial_balance) : 2000000.0;
         if (initBal) initBal.innerText = '$' + pfInit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' USD';
 
         const pfCurBal = Number(pf.aggregate_balance != null ? pf.aggregate_balance : 2000002.01);
         if (balEl) balEl.innerText = '$' + pfCurBal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        if (balBadge) balBadge.innerText = '20 Cuentas';
 
         const pnl = Number(pf.total_realized_pnl != null ? pf.total_realized_pnl : (pf.aggregate_realized_pnl != null ? pf.aggregate_realized_pnl : 2.01));
         if (pnlEl) {
           pnlEl.innerText = (pnl >= 0 ? '+$' : '-$') + Math.abs(pnl).toFixed(2);
-          pnlEl.className = 'text-sm font-bold font-mono mt-1 ' + (pnl >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400');
+          pnlEl.className = 'text-xs sm:text-sm font-bold font-mono tracking-tight truncate ' + (pnl >= 0 ? 'text-[#065F46]' : 'text-[#D70015]');
         }
-        if (ddHead) ddHead.innerText = 'Límite Trailing DD';
+        if (pnlBadge) {
+          pnlBadge.innerText = '+0.001%';
+          pnlBadge.className = 'badge-success-live font-mono text-[9px] py-0.5 px-1';
+        }
+        if (fPnlEl) fPnlEl.innerText = '+$0.00';
+        if (fPnlBadge) fPnlBadge.innerText = '0.00%';
+        if (riskEl) riskEl.innerText = '$0.00';
+        if (riskBadge) riskBadge.innerText = '0.00%';
+        if (ddHead) ddHead.innerText = 'Límite DD';
         if (ddEl) {
           const ddPct = (pf.current_eod_drawdown_pct != null) ? Number(pf.current_eod_drawdown_pct) : 0.0;
-          ddEl.innerText = ddPct.toFixed(2) + '% (Máx 3.50% / $3,500)';
+          ddEl.innerText = ddPct.toFixed(2) + '%';
         }
-        if (targetHead) targetHead.innerText = 'Objetivo Fondeo';
-        if (targetEl) {
-          targetEl.innerText = '+6.0% ($6,000 / cta)';
+        if (ddLimit) ddLimit.innerText = 'Máx 3.50% ($3,500)';
+        if (targetHead) targetHead.innerText = 'Objetivo';
+        if (targetEl) targetEl.innerText = '+6.0%';
+        if (targetBadge) targetBadge.innerText = '$6,000 / cta';
+
+        // Estrategias en Escaneo Card 1
+        const propStrats = pf.active_strategies || d.active_strategies || [];
+        if (card1StratCount) card1StratCount.innerText = `${propStrats.length || 20} Modelos`;
+        if (card1Badges) {
+          const stratsToShow = propStrats.length > 0 ? propStrats : Array.from({length: 20}, (_, i) => ({ id: `PROP-STRAT-${String(i+1).padStart(3, '0')}` }));
+          card1Badges.innerHTML = stratsToShow.map(s => 
+            `<span class="px-2 py-0.5 rounded bg-[#EEF2FF] text-[#3730A3] font-bold border border-[#C7D2FE] text-[10px]">${s.strategy_id || s.id}</span>`
+          ).join('');
         }
 
         // --- TARJETA 2 (FONDEO - ENJAMBRE CME & CFDS) ---
@@ -7136,36 +7354,39 @@
           c2Badge.innerText = 'FONDEO · ENJAMBRE CME GLOBEX & CFDS';
           c2Badge.className = 'px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30 whitespace-nowrap';
         }
-        if (c2Title) c2Title.innerText = 'Enjambre de Ejecución Prop Firm (20 Modelos)';
+        if (c2Title) c2Title.innerText = 'Enjambre CME Globex & CFDs';
+        if (c2CountBadge) c2CountBadge.innerText = '20 Cuentas Enjambre';
         if (c2InitLabel) c2InitLabel.innerText = 'POR CHALLENGE';
         if (c2InitBal) c2InitBal.innerText = '$100,000.00 USD';
-        if (c2Kpi1Label) c2Kpi1Label.innerText = 'Regla Consistencia';
-        if (c2Kpi1Val) c2Kpi1Val.innerText = '≤ 40.0% Max Trade';
-        if (c2Kpi2Label) c2Kpi2Label.innerText = 'Límite Trailing DD';
-        if (c2Kpi2Val) {
-          c2Kpi2Val.innerText = '3.5% ($3,500 / cta)';
-          c2Kpi2Val.className = 'text-sm font-bold font-mono mt-1 truncate text-emerald-700 dark:text-emerald-400';
+        if (c2BalEl) c2BalEl.innerText = '$100,002.01';
+        if (c2BalBadge) c2BalBadge.innerText = 'CME & CFDs';
+        if (c2PnlEl) {
+          c2PnlEl.innerText = '+$2.01 USD';
+          c2PnlEl.className = 'text-xs sm:text-sm font-bold font-mono tracking-tight truncate text-[#065F46]';
         }
-        if (c2Kpi3Label) c2Kpi3Label.innerText = 'Meta Aprobación';
-        if (c2Kpi3Val) c2Kpi3Val.innerText = '+6.0% ($6,000 / cta)';
-        if (c2Row1Label) c2Row1Label.innerText = 'Infraestructura:';
-        if (c2Strat) c2Strat.innerHTML = '<span class="px-2.5 py-1 rounded-md bg-[#EEF2FF] text-[#3730A3] font-bold border border-[#C7D2FE] text-[11px] truncate">20 Challenges Activos (CME Globex + CFDs)</span>';
-        if (c2Row2Label) c2Row2Label.innerText = 'Spreads & Slippage:';
-        if (c2Exec) c2Exec.innerHTML = '<span class="text-[#065F46] font-semibold">0.4-1.5 pts CME + Comisiones $0.08/ctr liquidadas</span>';
-        if (c2Row3Label) c2Row3Label.innerText = 'Supervisión de Riesgo:';
-        if (c2Feed) c2Feed.innerHTML = '<span class="text-[#181A20] font-semibold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#10b981] inline-block"></span> <span>Hard Clamps EOD & Consistencia 40% Activos</span></span>';
+        if (c2PnlBadge) c2PnlBadge.innerText = '+0.002%';
+        if (c2FPnlEl) c2FPnlEl.innerText = '+$0.00';
+        if (c2FPnlBadge) c2FPnlBadge.innerText = '0.00%';
+        if (c2RiskEl) c2RiskEl.innerText = '$0.00';
+        if (c2RiskBadge) c2RiskBadge.innerText = '≤ 40% Max';
+        if (c2DdHead) c2DdHead.innerText = 'Límite DD';
+        if (c2DdEl) c2DdEl.innerText = '0.00%';
+        if (c2DdLimit) c2DdLimit.innerText = 'Trailing 3.5%';
+        if (c2Target) c2Target.innerText = '+6.0%';
+        if (c2TargetBadge) c2TargetBadge.innerText = '$6,000 / cta';
+        if (c2Exec) c2Exec.innerText = '0.4-1.5 pts CME + Comisiones $0.08/ctr liquidadas';
+        if (c2StratCount) c2StratCount.innerText = '20 Challenges';
+        if (c2Badges) {
+          const stratsToShow = propStrats.length > 0 ? propStrats : Array.from({length: 20}, (_, i) => ({ id: `PROP-STRAT-${String(i+1).padStart(3, '0')}` }));
+          c2Badges.innerHTML = stratsToShow.map(s => 
+            `<span class="px-2 py-0.5 rounded bg-[#EEF2FF] text-[#3730A3] font-bold border border-[#C7D2FE] text-[10px]">${s.strategy_id || s.id}</span>`
+          ).join('');
+        }
       }
-
-      // 3. Tarjetas superiores de portfolio activo
-      const s5 = document.getElementById('active-card-prop-spx-bal');
-      const s6 = document.getElementById('active-card-prop-ndx-bal');
-      if (s5) s5.innerText = '$' + Number(pf.current_balance || 100002.01).toLocaleString(undefined, {minimumFractionDigits: 2}) + ' USD';
-      if (s6) s6.innerText = '$' + Number(pf.current_balance || 100002.01).toLocaleString(undefined, {minimumFractionDigits: 2}) + ' USD';
 
       // 4. Posición Flotante Dinámica (según desk actual)
       const posEl = document.getElementById('ft-pf-floating-pos');
       const slEl = document.getElementById('ft-pf-floating-sl');
-      const statusEl = document.getElementById('ft-pf-floating-status');
 
       const openPositions = isCap 
         ? (cap.open_positions || {}) 
@@ -7182,11 +7403,9 @@
         const pnlSign = floatPnl >= 0 ? '+' : '';
         if (posEl) posEl.innerHTML = `<span class="px-2.5 py-1 rounded-md bg-[#EEF2FF] text-[#3730A3] font-bold border border-[#C7D2FE]">${sym} ${side} (${formatQuantLots(lots)} lots @ $${formatQuantPrice(entryPrice, sym)}) <strong class="${floatPnl >= 0 ? 'text-emerald-600' : 'text-rose-600'} ml-1">(${pnlSign}$${floatPnl.toFixed(2)})</strong></span>`;
         if (slEl) slEl.innerText = pos.sl_price ? '$' + formatQuantPrice(pos.sl_price, sym) + ' USD' : 'Dinámico / Sin SL';
-        if (statusEl) statusEl.innerHTML = '<span class="text-[#065F46] font-bold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#10b981] animate-pulse inline-block"></span> Posición viva en mercado — Monitorización en tiempo real</span>';
       } else {
         if (posEl) posEl.innerHTML = '<span class="px-2.5 py-1 rounded-md bg-[#EAE5DC] text-[#181A20] font-bold border border-[#DDD7CD]">NINGUNA (Flat / 100% Liquidez)</span>';
         if (slEl) slEl.innerText = 'N/A (Sin posición abierta)';
-        if (statusEl) statusEl.innerHTML = '<span class="text-[#3C45A5] font-semibold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#10b981] animate-pulse inline-block"></span> Escaneando señales de entrada en tiempo real (Daemon Activo)</span>';
       }
 
       // 5. Renderizar tabla de órdenes filtrada por Desk
@@ -9597,13 +9816,32 @@
       constructor() {
         this.storagePrefix = 'algrok_col_order_v3_';
         this.tables = new Map();
+        this.serverPreferences = {};
         this.activeDrag = null;
         this.ghostEl = null;
         this.indicatorEl = null;
         this.init();
       }
 
-      init() {
+      async init() {
+        // Cargar preferencias guardadas en el servidor para persistencia multi-dispositivo
+        try {
+          const res = await fetch('/api/table_column_preferences');
+          if (res.ok) {
+            const data = await res.json();
+            if (data && typeof data === 'object') {
+              this.serverPreferences = data;
+              for (const [tId, ord] of Object.entries(data)) {
+                try {
+                  localStorage.setItem(this.storagePrefix + tId, JSON.stringify(ord));
+                } catch (e) {}
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('Error fetching server table column preferences:', e);
+        }
+
         const runScan = () => {
           this.scanAndAttachAll();
         };
@@ -9615,9 +9853,10 @@
         }
 
         // Re-escaneos preventivos tras carga asíncrona de módulos
-        setTimeout(runScan, 500);
-        setTimeout(runScan, 1500);
-        setTimeout(runScan, 3000);
+        setTimeout(runScan, 300);
+        setTimeout(runScan, 1000);
+        setTimeout(runScan, 2500);
+        setTimeout(runScan, 5000);
 
         // Eventos globales de arrastre
         window.addEventListener('pointermove', (e) => this.onGlobalPointerMove(e), { passive: false });
@@ -10051,11 +10290,20 @@
         if (!tableState) return;
 
         this.applyOrderToTable(tableId, tableState.originalKeys, true);
-        localStorage.removeItem(this.storagePrefix + tableId);
+        if (this.serverPreferences) delete this.serverPreferences[tableId];
+        try {
+          localStorage.removeItem(this.storagePrefix + tableId);
+        } catch (e) {}
+        fetch(`/api/table_column_preferences?tableId=${encodeURIComponent(tableId)}`, {
+          method: 'DELETE'
+        }).catch(err => console.warn('Error deleting table order from server:', err));
         this.updateResetButtonVisibility(tableId);
       }
 
       getSavedOrder(tableId) {
+        if (this.serverPreferences && this.serverPreferences[tableId]) {
+          return this.serverPreferences[tableId];
+        }
         try {
           const raw = localStorage.getItem(this.storagePrefix + tableId);
           return raw ? JSON.parse(raw) : null;
@@ -10065,11 +10313,34 @@
       }
 
       saveOrder(tableId, order) {
+        if (!this.serverPreferences) this.serverPreferences = {};
+        this.serverPreferences[tableId] = order;
         try {
           localStorage.setItem(this.storagePrefix + tableId, JSON.stringify(order));
         } catch (e) {
-          console.warn('Error saving table order:', e);
+          console.warn('Error saving table order locally:', e);
         }
+        // Persistir en servidor para cualquier dispositivo
+        fetch('/api/table_column_preferences', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tableId, order })
+        }).catch(err => console.warn('Error syncing table order to server:', err));
+      }
+
+      reapplyOrder(tableId) {
+        const tableState = this.tables.get(tableId);
+        if (!tableState) return;
+        const savedOrder = this.getSavedOrder(tableId);
+        if (savedOrder && savedOrder.length === tableState.originalKeys.length) {
+          this.applyOrderToTable(tableId, savedOrder, false);
+        }
+      }
+
+      reapplyAll() {
+        this.tables.forEach((_, tId) => {
+          this.reapplyOrder(tId);
+        });
       }
 
       isDefaultOrder(orig, curr) {

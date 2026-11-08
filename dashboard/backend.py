@@ -3082,5 +3082,59 @@ def get_forward_trades(branch: Optional[str] = None):
     return {"trades": trades_out, "total": len(trades_out)}
 
 
+TABLE_PREFS_FILE = BASE_DIR / 'data/table_column_preferences.json'
+
+
+class TableColumnPreferencePayload(BaseModel):
+    tableId: str
+    order: List[str]
+
+
+@app.get("/api/table_column_preferences")
+def get_table_column_preferences():
+    if TABLE_PREFS_FILE.exists():
+        try:
+            with open(TABLE_PREFS_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception:
+            return {}
+    return {}
+
+
+@app.post("/api/table_column_preferences")
+def save_table_column_preference(payload: TableColumnPreferencePayload):
+    data = {}
+    if TABLE_PREFS_FILE.exists():
+        try:
+            with open(TABLE_PREFS_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except Exception:
+            data = {}
+    data[payload.tableId] = payload.order
+    try:
+        TABLE_PREFS_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with open(TABLE_PREFS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+        return {"status": "ok", "tableId": payload.tableId, "order": payload.order}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/api/table_column_preferences")
+def delete_table_column_preference(tableId: str = Query(...)):
+    if TABLE_PREFS_FILE.exists():
+        try:
+            with open(TABLE_PREFS_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            if tableId in data:
+                del data[tableId]
+                with open(TABLE_PREFS_FILE, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, indent=2, ensure_ascii=False)
+            return {"status": "ok", "deleted": tableId}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+    return {"status": "ok"}
+
+
 if __name__ == '__main__':
     uvicorn.run(app, host="0.0.0.0", port=8080)
