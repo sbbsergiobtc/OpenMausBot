@@ -3884,6 +3884,12 @@
 
     function renderMainEquityChart(curveData) {
       if (!curveData || curveData.length === 0) return;
+      const chartEl = document.getElementById('chart-main-equity') || document.querySelector('#chart-main-equity') || document.getElementById('main-equity-chart');
+      if (!chartEl) {
+        console.warn('Contenedor de curva de balance (#chart-main-equity) no encontrado');
+        return;
+      }
+
       // Formatear eje X en español DD/MM/AAAA (autoajustable por ApexCharts)
       const categories = curveData.map(d => formatSpanishDate(d.timestamp));
       const balances = curveData.map(d => d.balance);
@@ -3898,22 +3904,22 @@
           yaxis: [
             {
               y: targetVal,
-              borderColor: '#10b981',
+              borderColor: '#10B981',
               strokeDashArray: 4,
               label: {
-                borderColor: '#10b981',
+                borderColor: '#10B981',
                 style: { color: '#ffffff', background: '#059669', fontSize: '10px', fontWeight: 'bold' },
-                text: `Target Reto Superado (+8% / $${targetVal.toLocaleString('es-ES', {minimumFractionDigits: 0})})`
+                text: `Target Reto (+8% / $${targetVal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})})`
               }
             },
             {
               y: eodDdLimitVal,
-              borderColor: '#ef4444',
+              borderColor: '#D70015',
               strokeDashArray: 4,
               label: {
-                borderColor: '#ef4444',
-                style: { color: '#ffffff', background: '#dc2626', fontSize: '10px', fontWeight: 'bold' },
-                text: `Límite EOD Drawdown (-4% / $${eodDdLimitVal.toLocaleString('es-ES', {minimumFractionDigits: 0})})`
+                borderColor: '#D70015',
+                style: { color: '#ffffff', background: '#DC2626', fontSize: '10px', fontWeight: 'bold' },
+                text: `Límite EOD (-4% / $${eodDdLimitVal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})})`
               }
             }
           ]
@@ -3923,22 +3929,22 @@
           yaxis: [
             {
               y: initBal * 1.10,
-              borderColor: '#6366f1',
+              borderColor: '#3C45A5',
               strokeDashArray: 4,
               label: {
-                borderColor: '#6366f1',
-                style: { color: '#ffffff', background: '#4f46e5', fontSize: '10px', fontWeight: 'bold' },
-                text: `Hito Cosecha Retiro #1 ($${(initBal * 1.10).toLocaleString('es-ES', {minimumFractionDigits: 0})})`
+                borderColor: '#3C45A5',
+                style: { color: '#ffffff', background: '#3C45A5', fontSize: '10px', fontWeight: 'bold' },
+                text: `Hito Cosecha Retiro ($${(initBal * 1.10).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})})`
               }
             },
             {
               y: initBal,
-              borderColor: '#64748b',
+              borderColor: '#6E6E73',
               strokeDashArray: 2,
               label: {
-                borderColor: '#64748b',
-                style: { color: '#ffffff', background: '#334155', fontSize: '10px', fontWeight: 'bold' },
-                text: `Buffer Capital Base ($${initBal.toLocaleString('es-ES', {minimumFractionDigits: 0})})`
+                borderColor: '#6E6E73',
+                style: { color: '#ffffff', background: '#48484A', fontSize: '10px', fontWeight: 'bold' },
+                text: `Buffer Capital Base ($${initBal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})})`
               }
             }
           ]
@@ -3949,32 +3955,25 @@
         chart: {
           type: 'area',
           height: 320,
-          toolbar: { show: true },
+          toolbar: { show: false },
           background: 'transparent',
           fontFamily: 'JetBrains Mono, monospace',
           animations: {
             enabled: true,
             easing: 'easeinout',
-            speed: 950,
-            animateGradually: {
-              enabled: true,
-              delay: 140
-            },
-            dynamicAnimation: {
-              enabled: true,
-              speed: 400
-            }
+            speed: 600,
+            dynamicAnimation: { enabled: true, speed: 300 }
           }
         },
-        theme: { mode: 'dark' },
+        theme: { mode: 'light' },
         stroke: { curve: 'smooth', width: 2.2 },
-        colors: isEval ? ['#10b981'] : ['#6366f1'],
+        colors: isEval ? ['#10B981'] : ['#3C45A5'],
         fill: {
           type: 'gradient',
           gradient: {
             shadeIntensity: 1,
-            opacityFrom: 0.42,
-            opacityTo: 0.03,
+            opacityFrom: 0.30,
+            opacityTo: 0.04,
             stops: [0, 95, 100]
           }
         },
@@ -3987,68 +3986,71 @@
           categories: categories,
           tickAmount: Math.min(10, categories.length),
           labels: { 
-            style: { colors: '#94a3b8', fontSize: '10px', fontFamily: 'monospace' },
+            style: { colors: '#6E6E73', fontSize: '10px', fontFamily: 'JetBrains Mono, monospace' },
             rotate: -35,
             rotateAlways: false
           },
-          axisBorder: { show: false }
+          axisBorder: { show: false },
+          axisTicks: { show: false }
         },
         yaxis: {
           labels: {
-            formatter: (val) => '$' + Number(val).toLocaleString('es-ES', {minimumFractionDigits: 0}),
-            style: { colors: '#94a3b8', fontSize: '11px', fontFamily: 'monospace' }
+            formatter: (val) => '$' + Number(val).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0}),
+            style: { colors: '#6E6E73', fontSize: '11px', fontFamily: 'JetBrains Mono, monospace' }
           }
         },
         grid: {
-          borderColor: '#1e293b',
-          strokeDashArray: 3
+          borderColor: '#E5E5EA',
+          strokeDashArray: 3,
+          xaxis: { lines: { show: false } },
+          yaxis: { lines: { show: true } }
         },
         annotations: annotationsConfig,
         tooltip: {
-          theme: 'dark',
+          theme: 'light',
           custom: function({series, seriesIndex, dataPointIndex, w}) {
             const d = curveData[dataPointIndex];
-            const dateStr = formatSpanishDateTime(d.timestamp);
+            const dateStr = d ? formatSpanishDateTime(d.timestamp) : '';
             const val = series[seriesIndex][dataPointIndex];
-            const bal = '$' + Number(val).toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' USD';
+            const bal = '$' + Number(val).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' USD';
             const pnlFromStart = Number(val) - initBal;
             const sign = pnlFromStart >= 0 ? '+' : '';
-            const pnlStr = sign + '$' + pnlFromStart.toLocaleString('es-ES', {minimumFractionDigits: 2}) + ' USD';
+            const pnlStr = sign + '$' + pnlFromStart.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' USD';
             
             let extraHtml = '';
             if (isEval) {
               const distToTarget = targetVal - Number(val);
               const targetStatus = distToTarget <= 0 
-                ? '<span class="text-emerald-400 font-bold">🏆 ¡Reto Superado!</span>'
-                : `<span class="text-slate-300">Faltan: $${distToTarget.toLocaleString('es-ES', {minimumFractionDigits: 2})}</span>`;
+                ? '<span class="text-[#065F46] font-bold">✓ ¡Reto Superado!</span>'
+                : `<span class="text-[#6E6E73]">Faltan: $${distToTarget.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>`;
               extraHtml = `
-                <div class="text-[11px] border-t border-slate-700/60 pt-1 mt-1 text-slate-400 flex justify-between gap-2">
+                <div class="text-[11px] border-t border-[#E5E5EA] pt-1 mt-1 text-[#6E6E73] flex justify-between gap-2">
                   <span>Meta Reto (+8%):</span>
                   ${targetStatus}
                 </div>
               `;
             } else {
-              const payoutAvailable = pnlFromStart > 0 ? (pnlFromStart * 0.80).toLocaleString('es-ES', {minimumFractionDigits: 2}) : '0.00';
+              const payoutAvailable = pnlFromStart > 0 ? (pnlFromStart * 0.80).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00';
               extraHtml = `
-                <div class="text-[11px] border-t border-slate-700/60 pt-1 mt-1 text-slate-400 flex justify-between gap-2">
+                <div class="text-[11px] border-t border-[#E5E5EA] pt-1 mt-1 text-[#6E6E73] flex justify-between gap-2">
                   <span>Payout Retirable (80%):</span>
-                  <span class="text-indigo-300 font-bold font-mono">+$${payoutAvailable} USD</span>
+                  <span class="text-[#3C45A5] font-bold font-mono">+$${payoutAvailable} USD</span>
                 </div>
               `;
             }
 
             return `
-              <div class="p-2.5 bg-slate-900 border border-slate-700 rounded-lg shadow-xl font-mono text-xs">
-                <div class="text-slate-400 text-[11px] flex items-center gap-1.5 mb-1">
-                  <i class="fa-regular fa-calendar text-cyan-400"></i> ${dateStr}
+              <div class="p-2.5 bg-[#FFFFFF] border border-[#E5E5EA] rounded-xl shadow-lg font-mono text-xs">
+                <div class="text-[#6E6E73] text-[11px] flex items-center gap-1.5 mb-1">
+                  <i class="fa-regular fa-calendar text-[#3C45A5]"></i> ${dateStr}
                 </div>
-                <div class="text-white font-bold flex items-center justify-between gap-3">
-                  <span class="text-slate-400">Balance:</span>
-                  <span class="text-cyan-300 font-mono text-sm">${bal}</span>
+                <div class="text-[#1D1D1F] font-bold flex items-center justify-between gap-3">
+                  <span class="text-[#6E6E73]">Balance:</span>
+                  <span class="text-[#1D1D1F] font-mono text-sm">${bal}</span>
                 </div>
-                <div class="text-slate-300 text-[11px] flex items-center justify-between gap-3 mt-0.5">
-                  <span class="text-slate-400">PnL Acumulado:</span>
-                  <span class="${pnlFromStart >= 0 ? 'text-emerald-400' : 'text-rose-400'} font-bold">${pnlStr}</span>
+                <div class="text-[#1D1D1F] text-[11px] flex items-center justify-between gap-3 mt-0.5">
+                  <span class="text-[#6E6E73]">PnL Acumulado:</span>
+                  <span class="${pnlFromStart >= 0 ? 'text-[#065F46]' : 'text-[#D70015]'} font-bold">${pnlStr}</span>
                 </div>
                 ${extraHtml}
               </div>
@@ -4057,8 +4059,11 @@
         }
       };
 
-      if (mainEquityChart) mainEquityChart.destroy();
-      mainEquityChart = new ApexCharts(document.querySelector("#main-equity-chart"), options);
+      if (mainEquityChart) {
+        try { mainEquityChart.destroy(); } catch (err) {}
+        mainEquityChart = null;
+      }
+      mainEquityChart = new ApexCharts(chartEl, options);
       mainEquityChart.render();
     }
 
@@ -7967,7 +7972,7 @@
     });
   
     // Selector dinámico de Horizontes de Backtest (Apple Segmented Control)
-    function switchBacktestHorizon(horizon) {
+    async function switchBacktestHorizon(horizon) {
       currentBacktestHorizon = horizon;
       const b12m = document.getElementById('btn-backtest-12m');
       const bCyclic = document.getElementById('btn-backtest-cyclic');
@@ -7993,14 +7998,8 @@
         triggerMotionSweep(container);
       }
 
-      fetchAnalyticsData(currentAccountFilter);
-      fetchTradesData(currentAccountFilter);
-
-      setTimeout(() => {
-        if (mainEquityChart) mainEquityChart.render();
-        if (dowChart) dowChart.render();
-        if (hourlyChart) hourlyChart.render();
-      }, 100);
+      await fetchAnalyticsData(currentAccountFilter);
+      await fetchTradesData(currentAccountFilter);
     }
 
     // ==============================================================================
