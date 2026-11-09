@@ -1310,20 +1310,32 @@
           
           <!-- KPIs Resumen de Fondeo -->
           <div class="flex items-center gap-2 flex-wrap">
-            <div class="bg-[#FAFAFC] px-3.5 py-2 rounded-xl border border-[#E5E5EA] text-center">
-              <div class="text-[10px] text-[#86868B] uppercase font-mono tracking-wider" id="streak-kpi-passes-label">Pases Challenge (+8%)</div>
+            <div class="bg-[#FAFAFC] px-3.5 py-2 rounded-xl border border-[#E5E5EA]">
+              <div class="flex items-center gap-1.5 mb-1">
+                <i class="fa-solid fa-trophy text-[#1D1D1F] text-[10px]"></i>
+                <span class="text-[10px] text-[#86868B] uppercase font-mono tracking-wider" id="streak-kpi-passes-label">Pases Challenge (+8%)</span>
+              </div>
               <div class="text-sm font-bold font-mono text-[#065F46]" id="streak-kpi-passes">0 Cuentas</div>
             </div>
-            <div class="bg-[#FAFAFC] px-3.5 py-2 rounded-xl border border-[#E5E5EA] text-center">
-              <div class="text-[10px] text-[#86868B] uppercase font-mono tracking-wider" id="streak-kpi-worstdowndd-label">Peor Drawdown EOD</div>
-              <div class="text-sm font-bold font-mono text-[#92400E]" id="streak-kpi-worstdowndd">0.00% EOD</div>
+            <div class="bg-[#FAFAFC] px-3.5 py-2 rounded-xl border border-[#E5E5EA]">
+              <div class="flex items-center gap-1.5 mb-1">
+                <i class="fa-solid fa-shield-halved text-[#1D1D1F] text-[10px]"></i>
+                <span class="text-[10px] text-[#86868B] uppercase font-mono tracking-wider" id="streak-kpi-worstdowndd-label">Peor Drawdown EOD</span>
+              </div>
+              <div class="text-sm font-bold font-mono text-[#D70015]" id="streak-kpi-worstdowndd">0.00% EOD</div>
             </div>
-            <div class="bg-[#FAFAFC] px-3.5 py-2 rounded-xl border border-[#E5E5EA] text-center">
-              <div class="text-[10px] text-[#86868B] uppercase font-mono tracking-wider">Máx Racha Alcista</div>
+            <div class="bg-[#FAFAFC] px-3.5 py-2 rounded-xl border border-[#E5E5EA]">
+              <div class="flex items-center gap-1.5 mb-1">
+                <i class="fa-solid fa-arrow-trend-up text-[#1D1D1F] text-[10px]"></i>
+                <span class="text-[10px] text-[#86868B] uppercase font-mono tracking-wider">Máx Racha Alcista</span>
+              </div>
               <div class="text-sm font-bold font-mono text-[#065F46]" id="streak-kpi-maxup">+0.00%</div>
             </div>
-            <div class="bg-[#FAFAFC] px-3.5 py-2 rounded-xl border border-[#E5E5EA] text-center">
-              <div class="text-[10px] text-[#86868B] uppercase font-mono tracking-wider">Total Tramos</div>
+            <div class="bg-[#FAFAFC] px-3.5 py-2 rounded-xl border border-[#E5E5EA]">
+              <div class="flex items-center gap-1.5 mb-1">
+                <i class="fa-solid fa-layer-group text-[#1D1D1F] text-[10px]"></i>
+                <span class="text-[10px] text-[#86868B] uppercase font-mono tracking-wider">Total Tramos</span>
+              </div>
               <div class="text-sm font-bold font-mono text-[#1D1D1F]" id="streak-kpi-totaltramos">0 Tramos</div>
             </div>
           </div>
@@ -1384,68 +1396,62 @@
           
           <!-- 1. Mejor Día de la Semana -->
           <div class="rounded-xl p-4 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between min-w-0">
-            <div class="text-[11px] text-[#6E6E73] flex items-center justify-between">
-              <span>Mejor Día Semana</span>
-              <i class="fa-solid fa-calendar-check text-[#065F46] text-xs"></i>
+            <div class="flex items-center gap-2 mb-1.5">
+              <i class="fa-solid fa-calendar-check text-[#1D1D1F] text-xs"></i>
+              <span class="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider">Mejor Día Semana</span>
             </div>
             <div class="text-lg font-bold font-mono text-[#065F46] mt-1" id="stat-best-dow">Lunes</div>
             <div class="text-[11px] text-[#1D1D1F] font-mono mt-0.5" id="stat-best-dow-pnl">+$5,354.02</div>
-            <div class="text-[10px] text-[#86868B] mt-1">Mayor acumulación semanal</div>
           </div>
 
           <!-- 2. Mejor Hora Operativa -->
           <div class="rounded-xl p-4 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between min-w-0">
-            <div class="text-[11px] text-[#6E6E73] flex items-center justify-between">
-              <span>Mejor Hora del Día</span>
-              <i class="fa-solid fa-stopwatch text-[#3C45A5] text-xs"></i>
+            <div class="flex items-center gap-2 mb-1.5">
+              <i class="fa-solid fa-stopwatch text-[#1D1D1F] text-xs"></i>
+              <span class="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider">Mejor Hora del Día</span>
             </div>
             <div class="text-lg font-bold font-mono text-[#3C45A5] mt-1" id="stat-best-hour">04:00 UTC</div>
             <div class="text-[11px] text-[#1D1D1F] font-mono mt-0.5" id="stat-best-hour-pnl">+$3,261.41</div>
-            <div class="text-[10px] text-[#86868B] mt-1">Horario de mayor edge</div>
           </div>
 
           <!-- 3. Mejor Día Histórico -->
           <div class="rounded-xl p-4 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between min-w-0">
-            <div class="text-[11px] text-[#6E6E73] flex items-center justify-between">
-              <span>Mejor Día Histórico</span>
-              <i class="fa-solid fa-trophy text-[#B45309] text-xs"></i>
+            <div class="flex items-center gap-2 mb-1.5">
+              <i class="fa-solid fa-trophy text-[#1D1D1F] text-xs"></i>
+              <span class="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider">Mejor Día Histórico</span>
             </div>
             <div class="text-sm font-bold font-mono text-[#1D1D1F] mt-1 truncate" id="stat-best-day-date">13/04/2026</div>
             <div class="text-xs text-[#065F46] font-bold font-mono mt-0.5" id="stat-best-day-pnl">+$1,167.18</div>
-            <div class="text-[10px] text-[#86868B] mt-1" id="stat-best-day-sub">Lunes récord</div>
           </div>
 
           <!-- 4. Peor Día Histórico -->
           <div class="rounded-xl p-4 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between min-w-0">
-            <div class="text-[11px] text-[#6E6E73] flex items-center justify-between">
-              <span>Peor Día Histórico</span>
-              <i class="fa-solid fa-triangle-exclamation text-[#D70015] text-xs"></i>
+            <div class="flex items-center gap-2 mb-1.5">
+              <i class="fa-solid fa-triangle-exclamation text-[#1D1D1F] text-xs"></i>
+              <span class="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider">Peor Día Histórico</span>
             </div>
             <div class="text-sm font-bold font-mono text-[#1D1D1F] mt-1 truncate" id="stat-worst-day-date">29/09/2026</div>
             <div class="text-xs text-[#D70015] font-bold font-mono mt-0.5" id="stat-worst-day-pnl">-$689.08</div>
-            <div class="text-[10px] text-[#86868B] mt-1" id="stat-worst-day-sub">Bajo límite (-$2k)</div>
           </div>
 
           <!-- 5. Mayor Racha Ganadora -->
           <div class="rounded-xl p-4 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between min-w-0">
-            <div class="text-[11px] text-[#6E6E73] flex items-center justify-between">
-              <span>Racha Ganadora</span>
-              <i class="fa-solid fa-fire text-[#065F46] text-xs"></i>
+            <div class="flex items-center gap-2 mb-1.5">
+              <i class="fa-solid fa-fire text-[#1D1D1F] text-xs"></i>
+              <span class="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider">Racha Ganadora</span>
             </div>
             <div class="text-xl font-bold font-mono text-[#065F46] mt-1" id="stat-win-streak">10</div>
             <div class="text-[11px] text-[#1D1D1F] mt-0.5">Trades seguidos</div>
-            <div class="text-[10px] text-[#86868B] mt-1">Máxima secuencia</div>
           </div>
 
           <!-- 6. Peor Racha Perdedora -->
           <div class="rounded-xl p-4 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between min-w-0">
-            <div class="text-[11px] text-[#6E6E73] flex items-center justify-between">
-              <span>Racha Perdedora</span>
-              <i class="fa-solid fa-snowflake text-[#3C45A5] text-xs"></i>
+            <div class="flex items-center gap-2 mb-1.5">
+              <i class="fa-solid fa-snowflake text-[#1D1D1F] text-xs"></i>
+              <span class="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider">Racha Perdedora</span>
             </div>
             <div class="text-xl font-bold font-mono text-[#3C45A5] mt-1" id="stat-loss-streak">2</div>
             <div class="text-[11px] text-[#1D1D1F] mt-0.5">Trades seguidos</div>
-            <div class="text-[10px] text-[#86868B] mt-1">Control riguroso</div>
           </div>
 
         </div>
@@ -3831,19 +3837,16 @@
 
         if (kpi1Label) kpi1Label.innerText = 'Pass Rate Monte Carlo';
         if (kpi1Val) { kpi1Val.innerText = `${passRate}%`; kpi1Val.className = 'text-lg font-bold font-mono text-[#065F46]'; }
-        if (kpi1Badge) { kpi1Badge.innerText = passRate >= 70 ? 'Verde (>=70%)' : 'Ámbar'; kpi1Badge.className = passRate >= 70 ? 'badge-success-live text-[10px]' : 'badge-warning-risk text-[10px]'; }
-
-        if (kpi2Label) kpi2Label.innerText = 'Trades Clampeados (Tope 40%)';
+        if (kpi1Badge) { kpi1Badge.innerText = ''; kpi1Badge.className = 'hidden'; }
+        if (kpi2Label) kpi2Label.innerText = 'Trades Clampeados (tope 40%)';
         if (kpi2Val) kpi2Val.innerText = `${clampedCount} Trades`;
-        if (kpi2Sub) kpi2Sub.innerText = `$${penalty.toFixed(2)} penalización`;
-
-        if (kpi3Label) kpi3Label.innerText = 'Drawdown Máximo Reto';
-        if (kpi3Val) { kpi3Val.innerText = `-${maxDd.toFixed(2)}%`; kpi3Val.className = 'text-lg font-bold font-mono text-[#D70015]'; }
-        if (kpi3Sub) kpi3Sub.innerText = 'Límite EOD: -4.0%';
-
-        if (kpi4Label) kpi4Label.innerText = 'Target / Retorno Capped';
-        if (kpi4Val) { kpi4Val.innerText = `+$${netProfit.toLocaleString('en-US', {minimumFractionDigits: 2})}`; kpi4Val.className = 'text-lg font-bold font-mono text-[#3C45A5]'; }
-        if (kpi4Sub) kpi4Sub.innerText = 'Meta Reto: $8,000 (+8%)';
+        if (kpi2Sub) { kpi2Sub.innerText = ''; kpi2Sub.className = 'hidden'; }
+        if (kpi3Label) kpi3Label.innerText = 'Drawdown Máximo del Reto';
+        if (kpi3Val) { kpi3Val.innerText = `-${maxDd.toFixed(2)}%`; kpi3Val.className = 'text-xl font-bold font-mono text-[#D70015]'; }
+        if (kpi3Sub) { kpi3Sub.innerText = ''; kpi3Sub.className = 'hidden'; }
+        if (kpi4Label) kpi4Label.innerText = 'Target Retorno Reto';
+        if (kpi4Val) { kpi4Val.innerText = `+$${netProfit.toLocaleString('en-US', {minimumFractionDigits: 2})}`; kpi4Val.className = 'text-xl font-bold font-mono text-[#3C45A5]'; }
+        if (kpi4Sub) { kpi4Sub.innerText = ''; kpi4Sub.className = 'hidden'; }
 
         if (ev && ev.curve && ev.curve.length > 0) {
           renderMainEquityChart(ev.curve);
@@ -3860,19 +3863,16 @@
 
         if (kpi1Label) kpi1Label.innerText = 'Beneficio Total sin Topes';
         if (kpi1Val) { kpi1Val.innerText = `+$${totalAlpha.toLocaleString('en-US', {minimumFractionDigits: 2})}`; kpi1Val.className = 'text-lg font-bold font-mono text-[#065F46]'; }
-        if (kpi1Badge) { kpi1Badge.innerText = 'Full Alpha'; kpi1Badge.className = 'badge-brand-indigo text-[10px]'; }
-
+        if (kpi1Badge) { kpi1Badge.innerText = ''; kpi1Badge.className = 'hidden'; }
         if (kpi2Label) kpi2Label.innerText = 'Expectativa Retiro Mensual';
         if (kpi2Val) kpi2Val.innerText = `$${payout.toLocaleString('en-US', {minimumFractionDigits: 2})} / mes`;
-        if (kpi2Sub) kpi2Sub.innerText = 'Profit Split: 80% Trader';
-
+        if (kpi2Sub) { kpi2Sub.innerText = ''; kpi2Sub.className = 'hidden'; }
         if (kpi3Label) kpi3Label.innerText = 'Profit Factor / Sharpe';
-        if (kpi3Val) { kpi3Val.innerText = `PF ${pf} · S ${sharpe}`; kpi3Val.className = 'text-lg font-bold font-mono text-[#181A20]'; }
-        if (kpi3Sub) kpi3Sub.innerText = 'Métricas Reales sin Clamp';
-
+        if (kpi3Val) { kpi3Val.innerText = `PF ${pf} • S ${sharpe}`; kpi3Val.className = 'text-xl font-bold font-mono text-[#181A20]'; }
+        if (kpi3Sub) { kpi3Sub.innerText = ''; kpi3Sub.className = 'hidden'; }
         if (kpi4Label) kpi4Label.innerText = 'Drawdown Libre de Cartera';
-        if (kpi4Val) { kpi4Val.innerText = `-${maxDd.toFixed(2)}%`; kpi4Val.className = 'text-lg font-bold font-mono text-[#D70015]'; }
-        if (kpi4Sub) kpi4Sub.innerText = 'Sin riesgo de fallo de reto';
+        if (kpi4Val) { kpi4Val.innerText = `-${maxDd.toFixed(2)}%`; kpi4Val.className = 'text-xl font-bold font-mono text-[#D70015]'; }
+        if (kpi4Sub) { kpi4Sub.innerText = ''; kpi4Sub.className = 'hidden'; }
 
         if (fv && fv.curve && fv.curve.length > 0) {
           renderMainEquityChart(fv.curve);
@@ -4062,8 +4062,198 @@
       mainEquityChart.render();
     }
 
-    // Renderizar Gráfico de Rendimiento por Día de la Semana (Animación de barras)
+    // =========================================================================
+    // CONTROLADOR MULTI-HORIZONTE Y SELECTOR DINÁMICO DE ESTRATEGIAS (ALGROKQUANT)
+    // =========================================================================
+    let currentBacktestHorizon = '12m';
+
+    async function populateBacktestStrategiesDropdown(targetMode = null) {
+      const select = document.getElementById('account-selector');
+      if (!select) return;
+      try {
+        const res = await fetch('/api/backtest_strategies');
+        if (!res.ok) return;
+        const data = await res.json();
+        let html = '';
+
+        const desk = targetMode || (typeof currentDeskMode !== 'undefined' ? currentDeskMode : 'CAPITAL_PROPIO');
+
+        // Filtrar y agrupar según el modo de mesa
+        const filterByDesk = (items) => {
+          if (!items) return [];
+          if (!desk) return items;
+          return items.filter(s => !s.desk_mode || s.desk_mode === desk || s.desk_mode === 'MULTI' || s.desk_mode === 'BOTH');
+        };
+
+        const consList = filterByDesk(data.consolidated);
+        if (consList.length > 0) {
+          html += '<optgroup label="🏦 Consolidados Institucionales">';
+          consList.forEach(s => {
+            html += `<option value="${s.id}">${s.name}</option>`;
+          });
+          html += '</optgroup>';
+        }
+
+        const startersList = filterByDesk(data.starters);
+        if (startersList.length > 0) {
+          html += '<optgroup label="⭐ Estrategias Titulares Activas">';
+          startersList.forEach(s => {
+            html += `<option value="${s.id}">${s.name}</option>`;
+          });
+          html += '</optgroup>';
+        }
+
+        const reservesList = filterByDesk(data.reserves);
+        if (reservesList.length > 0) {
+          html += '<optgroup label="🏛️ Banco de Reserva (Vault DSR ≥ 0.85)">';
+          reservesList.forEach(s => {
+            html += `<option value="${s.id}">${s.name}</option>`;
+          });
+          html += '</optgroup>';
+        }
+
+        select.innerHTML = html;
+        if (currentAccountFilter) {
+          select.value = currentAccountFilter;
+        }
+      } catch (err) {
+        console.warn('Error cargando catálogo dinámico de estrategias:', err);
+      }
+    }
+
+    function renderYearlyBreakdown(yearlyList) {
+      const tbody = document.getElementById('yearly-breakdown-tbody');
+      if (!tbody) return;
+      if (!yearlyList || yearlyList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-[#86868B] font-mono">No hay operaciones registradas para este periodo y filtro</td></tr>';
+        return;
+      }
+
+      let html = '';
+      yearlyList.forEach(y => {
+        const isProfit = y.pnl >= 0;
+        const pnlClass = isProfit ? 'text-[#065F46] font-bold' : 'text-[#D70015] font-bold';
+        const pnlPrefix = isProfit ? '+$' : '-$';
+        const retPrefix = y.return_pct >= 0 ? '+' : '';
+        const badgeClass = isProfit ? 'badge-success-live' : 'badge-warning-risk';
+        const statusText = isProfit ? 'Aprobado' : 'Drawdown';
+
+        html += `
+          <tr class="hover:bg-[#FAFAFC] transition">
+            <td class="py-2.5 px-3 font-bold text-[#1D1D1F]">${y.year}</td>
+            <td class="py-2.5 px-3 text-right ${pnlClass}">${pnlPrefix}${Math.abs(y.pnl).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="py-2.5 px-3 text-right ${pnlClass}">${retPrefix}${y.return_pct}%</td>
+            <td class="py-2.5 px-3 text-center font-semibold text-[#1D1D1F]">${y.trades}</td>
+            <td class="py-2.5 px-3 text-right font-semibold text-[#1D1D1F]">${y.win_rate}%</td>
+            <td class="py-2.5 px-3 text-right font-semibold text-[#3C45A5]">${y.profit_factor}</td>
+            <td class="py-2.5 px-3 text-right font-semibold text-[#D70015]">-${y.max_drawdown}%</td>
+            <td class="py-2.5 px-3 text-center">
+              <span class="${badgeClass} text-[10px] uppercase font-bold tracking-wider">${statusText}</span>
+            </td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }
+
+    async function onAccountFilterChange() {
+      const select = document.getElementById('account-selector');
+      if (select) currentAccountFilter = select.value;
+
+      // Evaluar modo desk para visibilidad condicional de KPIs de Fondeo
+      const isProp = currentAccountFilter.startsWith('PROP') || currentAccountFilter === 'ALL_PROP' || currentAccountFilter === 'PORT-NDX-SPX' || currentAccountFilter.startsWith('RES-FUT') || currentAccountFilter.startsWith('RES-EUR');
+      const hud = document.getElementById('bifocal-metrics-hud');
+      if (hud) hud.style.display = isProp ? 'grid' : 'none';
+      const lensBox = document.getElementById('bifocal-lens-box');
+      if (lensBox) lensBox.style.display = isProp ? 'flex' : 'none';
+
+      const backtestPane = document.getElementById('tab-content-backtests') || document.getElementById('tab-content-dashboard');
+      if (typeof triggerMotionSweep === 'function') {
+        triggerMotionSweep(backtestPane);
+      }
+      await fetchAnalyticsData(currentAccountFilter);
+      await fetchTradesData(currentAccountFilter);
+    }
+
+    // Cargar Análisis y Métricas desde /api/analytics
+    async function fetchAnalyticsData(filter) {
+      let data = null;
+      try {
+        const res = await fetch(`/api/analytics?filter=${encodeURIComponent(filter)}&lens=${encodeURIComponent(currentBifocalLens)}&horizon=${encodeURIComponent(currentBacktestHorizon)}`);
+        if (res.ok) {
+          data = await res.json();
+        }
+      } catch (err) {
+        console.warn('Backend offline, utilizando modelo cuantitativo por defecto:', err);
+      }
+
+      if (!data) return;
+
+      currentAnalyticsData = data;
+
+      // Control dinámico de visibilidad según modo (Fondeo vs Capital Propio)
+      const deskMode = data.desk_mode || (filter.startsWith('PROP') || filter === 'ALL_PROP' || filter === 'PORT-NDX-SPX' || filter.startsWith('RES-FUT') || filter.startsWith('RES-EUR') ? 'PROP_FIRM' : 'CAPITAL_PROPIO');
+      const hud = document.getElementById('bifocal-metrics-hud');
+      if (hud) hud.style.display = (deskMode === 'PROP_FIRM') ? 'grid' : 'none';
+      const lensBox = document.getElementById('bifocal-lens-box');
+      if (lensBox) lensBox.style.display = (deskMode === 'PROP_FIRM') ? 'flex' : 'none';
+
+      renderBifocalUI();
+
+      // Renderizar desglose año por año si viene en data
+      if (data.yearly_breakdown) {
+        renderYearlyBreakdown(data.yearly_breakdown);
+      }
+
+      // 1. Actualizar KPIs Principales
+      const kpis = data.kpis;
+      const isEval = currentBifocalLens === 'EVALUATION';
+
+      if (document.getElementById('kpi-balance')) document.getElementById('kpi-balance').innerText = '$' + kpis.final_balance.toLocaleString(undefined, {minimumFractionDigits: 2});
+      if (document.getElementById('kpi-init-bal')) document.getElementById('kpi-init-bal').innerText = '$' + kpis.initial_balance.toLocaleString(undefined, {minimumFractionDigits: 0});
+      if (document.getElementById('kpi-net-profit')) document.getElementById('kpi-net-profit').innerText = (kpis.net_profit >= 0 ? '+' : '') + '$' + kpis.net_profit.toLocaleString(undefined, {minimumFractionDigits: 2});
+      if (document.getElementById('kpi-pf')) document.getElementById('kpi-pf').innerText = kpis.profit_factor;
+      if (document.getElementById('kpi-wr')) document.getElementById('kpi-wr').innerText = kpis.win_rate + '%';
+      if (document.getElementById('kpi-trades-count')) document.getElementById('kpi-trades-count').innerText = `${kpis.win_count}W / ${kpis.loss_count}L (${kpis.total_trades} total)`;
+      if (document.getElementById('kpi-dd')) document.getElementById('kpi-dd').innerText = kpis.max_drawdown.toFixed(2) + '%';
+      if (document.getElementById('kpi-sharpe')) document.getElementById('kpi-sharpe').innerText = kpis.sharpe_ratio;
+      if (document.getElementById('kpi-return')) document.getElementById('kpi-return').innerText = (kpis.return_pct >= 0 ? '+' : '') + kpis.return_pct + '%';
+
+      const kpiDdSub = document.getElementById('kpi-dd-sub');
+      if (kpiDdSub) {
+        kpiDdSub.innerText = (deskMode === 'PROP_FIRM') ? (isEval ? `Límite Reto: -4.00%` : `Fondeo Libre`) : 'Control de Riesgo TradFi';
+      }
+
+      if (document.getElementById('badge-chart-pnl')) {
+        document.getElementById('badge-chart-pnl').innerText = `${(kpis.net_profit >= 0 ? '+' : '')}$${kpis.net_profit.toLocaleString(undefined, {minimumFractionDigits: 2})} USD`;
+      }
+
+      if (document.getElementById('chart-subtitle')) {
+        document.getElementById('chart-subtitle').innerText = `${data.account_name} · [${currentBacktestHorizon.toUpperCase()}] Balance y control progresivo de drawdown`;
+      }
+
+      // 2. Day & Time Edge Cards
+      if (data.best_dow && document.getElementById('stat-best-dow')) document.getElementById('stat-best-dow').innerText = data.best_dow.day;
+      if (data.best_dow && document.getElementById('stat-best-dow-pnl')) document.getElementById('stat-best-dow-pnl').innerText = '+$' + data.best_dow.pnl.toLocaleString(undefined, {minimumFractionDigits: 2});
+      if (data.best_hour && document.getElementById('stat-best-hour')) document.getElementById('stat-best-hour').innerText = data.best_hour.label;
+      if (data.best_hour && document.getElementById('stat-best-hour-pnl')) document.getElementById('stat-best-hour-pnl').innerText = '+$' + data.best_hour.pnl.toLocaleString(undefined, {minimumFractionDigits: 2});
+      if (data.best_single_day && document.getElementById('stat-best-day-date')) document.getElementById('stat-best-day-date').innerText = data.best_single_day.date;
+      if (data.best_single_day && document.getElementById('stat-best-day-pnl')) document.getElementById('stat-best-day-pnl').innerText = '+$' + data.best_single_day.pnl.toLocaleString(undefined, {minimumFractionDigits: 2});
+      if (data.worst_single_day && document.getElementById('stat-worst-day-date')) document.getElementById('stat-worst-day-date').innerText = data.worst_single_day.date;
+      if (data.worst_single_day && document.getElementById('stat-worst-day-pnl')) document.getElementById('stat-worst-day-pnl').innerText = '$' + data.worst_single_day.pnl.toLocaleString(undefined, {minimumFractionDigits: 2});
+      if (document.getElementById('stat-win-streak')) document.getElementById('stat-win-streak').innerText = data.max_win_streak || 0;
+      if (document.getElementById('stat-loss-streak')) document.getElementById('stat-loss-streak').innerText = data.max_loss_streak || 0;
+
+      // 3. Renderizar Gráficos con Animaciones
+      if (data.balance_curve) renderMainEquityChart(data.balance_curve);
+      if (data.dow_distribution) renderDowChart(data.dow_distribution);
+      if (data.hourly_distribution) renderHourlyChart(data.hourly_distribution);
+      if (data.streaks_analysis) renderStreaksAnalysis(data.streaks_analysis, data.balance_curve);
+    }
+
+    // Renderizar Gráfico de Rendimiento por Día de la Semana
     function renderDowChart(dowData) {
+      if (!dowData) return;
       const days = Object.keys(dowData);
       const values = Object.values(dowData);
 
@@ -4133,7 +4323,9 @@
       }
     }
 
+    // Renderizar Gráfico de Rendimiento por Hora
     function renderHourlyChart(hourlyData) {
+      if (!hourlyData) return;
       const categories = hourlyData.map(h => h.label);
       const values = hourlyData.map(h => h.pnl);
 
@@ -4207,12 +4399,6 @@
       }
     }
 
-
-    if (data.streaks_analysis) renderStreaksAnalysis(data.streaks_analysis, data.balance_curve);
-    }
-
-    // Cargar Historial de Operaciones desde /api/trade_history
-    
     // =========================================================================
     // MOTOR DE DESGLOSE DE RACHAS (PEAK-VALLEY SWING ANALYSIS)
     // =========================================================================
@@ -4327,6 +4513,8 @@
             type: 'bar',
             height: 180,
             toolbar: { show: false },
+            background: 'transparent',
+            fontFamily: 'JetBrains Mono, monospace',
             events: {
               dataPointSelection: function(event, chartContext, config) {
                 const streakId = config.dataPointIndex + 1;
@@ -4334,14 +4522,15 @@
               }
             }
           },
+          theme: { mode: 'light' },
           plotOptions: {
             bar: {
-              borderRadius: 3,
+              borderRadius: 4,
               columnWidth: '55%',
               colors: {
                 ranges: [
-                  { from: -100, to: 0, color: '#d97706' },
-                  { from: 0.001, to: 1000, color: '#10b981' }
+                  { from: -1000, to: -0.001, color: '#D70015' },
+                  { from: 0, to: 1000, color: '#10B981' }
                 ]
               }
             }
@@ -4350,17 +4539,23 @@
           xaxis: {
             categories: barCategories,
             labels: {
-              style: { colors: '#94a3b8', fontSize: '10px', fontFamily: 'monospace' }
+              style: { colors: '#6E6E73', fontSize: '10px', fontFamily: 'JetBrains Mono, monospace' }
             },
-            axisBorder: { color: '#334155' }
+            axisBorder: { show: false },
+            axisTicks: { show: false }
           },
           yaxis: {
             labels: {
               formatter: val => (val >= 0 ? '+' : '') + Number(val).toFixed(1) + '%',
-              style: { colors: '#94a3b8', fontSize: '10px', fontFamily: 'monospace' }
+              style: { colors: '#6E6E73', fontSize: '10px', fontFamily: 'JetBrains Mono, monospace' }
             }
           },
-          grid: { borderColor: '#1e293b', strokeDashArray: 3 },
+          grid: {
+            borderColor: '#E5E5EA',
+            strokeDashArray: 3,
+            xaxis: { lines: { show: false } },
+            yaxis: { lines: { show: true } }
+          },
           tooltip: {
             theme: 'dark',
             custom: function({series, seriesIndex, dataPointIndex, w}) {
@@ -8833,35 +9028,10 @@
           : `${visibleCount} ESTRATEGIAS FONDEO (PROP FIRM)`;
       }
 
-    // Segregación estricta del selector de Backtest según Mesa Operativa
+    // Sincronización dinámica del selector de Backtests según Mesa Operativa
     function updateAccountSelectorOptions(mode) {
-      const bFilter = document.getElementById('account-selector');
-      if (!bFilter) return;
-
-      if (mode === 'PROP_FIRM') {
-        bFilter.innerHTML = `
-          <option value="PORT-NDX-SPX" selected>🏆 Cartera Combinada Sprint (NDX-005 + SPX-005 · 62 Trades · Target en 18 Días)</option>
-          <option value="PROP-NDX-005">🏛️ Nasdaq 100 2h Bollinger Dip (PROP-NDX-005 · 30 Trades · Target en 21 Días)</option>
-          <option value="PROP-SPX-005">🏛️ S&P 500 1D Connors RSI2 (PROP-SPX-005 · 32 Trades · Target en 28 Días)</option>
-          <option value="PROP-NDX-006">🏛️ Nasdaq 100 1h Bollinger Dip (PROP-NDX-006 · 63 Trades · Target en 32 Días)</option>
-          <option value="PROP-FX-EUR-001">💶 EUR/USD 1h London-NY (PROP-FX-EUR-001 · 120 Trades)</option>
-          <option value="HYB-NDX-BOL-LINE-48-2.0-3.0">⚡ NDX Híbrido Linear Decay 2.0/3.0 (Futuros/CFD · 43 Trades · Target en 25 Días)</option>
-          <option value="HYB-NDX-BOL-LINE-48-2.0-4.0">⚡ NDX Híbrido Linear Decay 2.0/4.0 (Futuros/CFD · 43 Trades · Target en 25 Días)</option>
-          <option value="HYB-NDX-BOL-LINE-48-2.5-3.0">⚡ NDX Híbrido Linear Decay 2.5/3.0 (Prop Firm · 43 Trades · Target en 29 Días)</option>
-          <option value="HYB-NDX-BOL-LINE-48-2.5-4.0">⚡ NDX Híbrido Linear Decay 2.5/4.0 (Prop Firm · 43 Trades · Target en 29 Días)</option>
-          <option value="HYB-NDX-BOL-LINE-48-2.5-2.0">⚡ NDX Híbrido Linear Decay 2.5/2.0 (Prop Firm · 43 Trades · Target en 29 Días)</option>
-          <option value="ALL_PROP">🏛️ Consolidado Fondeo (Cartera Completa · 460 Trades)</option>
-        `;
-        bFilter.value = 'PORT-NDX-SPX';
-      } else {
-        bFilter.innerHTML = `
-          <option value="CAP-SPX-006" selected>📊 S&P 500 4h Bollinger Dip (Capital Propio TradFi · 318 Trades)</option>
-          <option value="CAP-NDX-005">📈 Nasdaq 100 2h Bollinger Dip (Capital Propio TradFi · 365 Trades)</option>
-          <option value="STRAT-FAST-035">⚡ Bitcoin 1h Shannon Entropy (Capital Propio DEX · 262 Trades)</option>
-          <option value="CRYPTO-HL">⚡ Crypto Paper Hyperliquid (1.000 USDC · Testnet Activo)</option>
-          <option value="ALL_CAP">💼 Consolidado Capital Propio (TradFi + DEX · 945 Trades)</option>
-        `;
-        bFilter.value = 'CAP-SPX-006';
+      if (typeof populateBacktestStrategiesDropdown === 'function') {
+        populateBacktestStrategiesDropdown(mode);
       }
     }
 
