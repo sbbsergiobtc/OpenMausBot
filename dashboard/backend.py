@@ -3194,5 +3194,14 @@ def delete_table_column_preference(tableId: str = Query(...)):
     return {"status": "ok"}
 
 
+@app.get("/api/strategy_vault")
+def get_strategy_vault_state():
+    try:
+        from jev.strategy_vault import get_vault_summary
+        return get_vault_summary()
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
 if __name__ == '__main__':
     uvicorn.run(app, host="0.0.0.0", port=8080)

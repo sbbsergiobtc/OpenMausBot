@@ -371,8 +371,55 @@ def run_cycle():
                     curr_dd = float(strat.get('current_dd_pct') or branch_obj.get('current_eod_dd_pct') or 0.0)
                     g_res = evaluate_forward_test_incubation_guardian(strat, strat_pnls, curr_dd)
                     strat['incubation_guardian'] = g_res
+                    t_light = str(g_res.get('traffic_light', 'GREEN'))
                     guardian_mult_by_id[sid] = float(g_res.get('lot_sizing_multiplier', 1.0))
-                    guardian_light_by_id[sid] = str(g_res.get('traffic_light', 'GREEN'))
+                    guardian_light_by_id[sid] = t_light
+
+                    # ==============================================================
+                    # FASE 3: RELEVO AUTÓNOMO POR STRATEGY VAULT (SEMÁFORO ROJO)
+                    # ==============================================================
+                    if t_light == 'RED':
+                        print(f"  [ALERTA SEMÁFORO ROJO] Titular {sid} en drawdown/ruptura ({g_res.get('verdict')}). Activando Relevo Autónomo...")
+                        try:
+                            from jev.strategy_vault import execute_autonomous_relay
+                            relay_res = execute_autonomous_relay(
+                                injured_strat_id=sid,
+                                reason=g_res.get('verdict', 'Ruptura Cono Monte Carlo P95 / DD'),
+                                asset=strat.get('symbol') or strat.get('asset', 'EURUSD'),
+                                desk_mode='PROP_FIRM' if branch_key == 'prop_firm' else 'CAPITAL_PROPIO'
+                            )
+                            if relay_res:
+                                promoted = relay_res['promoted_strategy']
+                                print(f"  [RELEVO VAULT EJECUTADO] 🔄 {sid} -> {promoted['strategy_id']} (DSR: {promoted.get('dsr_prob', 0.0):.4f} >= 0.85)")
+                                strat['strategy_id'] = promoted['strategy_id']
+                                strat['status'] = 'ACTIVE_STARTER'
+                                strat['incubation_guardian'] = {
+                                    'traffic_light': 'GREEN',
+                                    'lot_sizing_multiplier': 1.0,
+                                    'verdict': f"PROMOTED_FROM_RESERVE (Relevo de {sid})",
+                                    'trades_evaluated': 0,
+                                    'inside_mc_cone': True
+                                }
+                                guardian_light_by_id[promoted['strategy_id']] = 'GREEN'
+                                guardian_mult_by_id[promoted['strategy_id']] = 1.0
+                                for p_sym, p_cfg in PORTFOLIO_CONFIG.items():
+                                    if p_cfg.get('id') == sid:
+                                        p_cfg['id'] = promoted['strategy_id']
+                                        print(f"  [PORTFOLIO_CONFIG] Actualizada titular en activo {p_sym}: {promoted['strategy_id']}")
+
+                                if dispatch_telegram_message is not None:
+                                    dispatch_telegram_message(
+                                        "AlphaReporter",
+                                        f"🔄 <b>RELEVO DINÁMICO DE ESTRATEGIAS (STRATEGY VAULT SQLITE)</b>\n\n"
+                                        f"• <b>Al Banquillo (Semáforo ROJO):</b> <code>{sid}</code>\n"
+                                        f"• <b>Motivo:</b> {g_res.get('verdict')}\n"
+                                        f"• <b>Nueva Titular (Banco de Reserva):</b> <code>{promoted['strategy_id']}</code>\n"
+                                        f"• <b>Métricas:</b> DSR = {promoted.get('dsr_prob', 0.0):.4f} | PF = {promoted.get('profit_factor', 2.0)} | MC P95 DD = {promoted.get('mc_p95_dd', 3.0)}%\n\n"
+                                        f"Relevo 100% automático sin intervención manual."
+                                    )
+                        except Exception as re_err:
+                            print(f"  [WARN] Error en relevo autónomo de Strategy Vault para {sid}: {re_err}")
+
                     if g_res.get('ready_for_real_account') and not prev_ready and dispatch_telegram_message is not None:
                         dispatch_telegram_message(
                             "AlphaReporter",

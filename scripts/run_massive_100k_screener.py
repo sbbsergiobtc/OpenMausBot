@@ -539,12 +539,44 @@ for idx, c in enumerate(stage2_candidates, start=1):
 
 print(f"\n[FIN ETAPA 4] Aprobadas Unánimemente N4: {len(stage4_approved)} | Rechazadas: {len(stage4_rejected)}")
 
-# 6. ETAPA 5: Auto-Despliegue del 100% de Supervivientes a Forward Test
+# 6. ETAPA 5: Auto-Despliegue a Forward Test y Banco de Reserva SQLite (Strategy Vault)
 # ------------------------------------------------------------------------------
-print("\n[ETAPA 5/5] Auto-desplegando al 100% de las estrategias aprobadas en Forward Test...")
+print("\n[ETAPA 5/5] Conectando con Strategy Vault SQLite (Banco de Reserva) y Forward Test...")
 deployed_count = 0
+vault_deposited_count = 0
+
+try:
+    from jev.strategy_vault import deposit_candidate
+except Exception as ve:
+    deposit_candidate = None
+    print(f"[WARN] No se pudo importar deposit_candidate de jev.strategy_vault: {ve}")
 
 for a in stage4_approved:
+    # 5a. Depósito en el Banco de Reserva SQLite si cumple DSR >= 0.85
+    dsr_val = float(a.get("dsr_prob", 0.0))
+    if deposit_candidate is not None and dsr_val >= 0.85:
+        try:
+            dep_ok = deposit_candidate(
+                candidate=a,
+                audit_phase3={
+                    "dsr_prob": a["dsr_prob"],
+                    "mc_p95_dd": a["mc_p95_dd"],
+                    "mc_ruin_prob": a["mc_ruin_prob"],
+                    "robust_kurtosis": a["robust_kurtosis"],
+                    "wr_cushion_pct": a["wr_cushion_pct"],
+                },
+                skeptic_res={
+                    "parametric_plateau": {"survival_pct": a["plateau_survival_pct"]}
+                },
+                status="BENCH_RESERVE"
+            )
+            if dep_ok:
+                vault_deposited_count += 1
+                print(f"    [STRATEGY VAULT SQLITE] ✅ Depositada en Banco de Reserva (DSR={dsr_val:.4f} >= 0.85): {a['candidate_id']}")
+        except Exception as de:
+            print(f"    [WARN] Error depositando {a['candidate_id']} en Strategy Vault: {de}")
+
+    # 5b. Auto-despliegue en Forward Test
     try:
         ok = auto_deploy_strategy(
             candidate=a,
@@ -576,7 +608,7 @@ for a in stage4_approved:
         print(f"    [WARN] Despliegue de {a['candidate_id']} falló: {e}")
         a["deployed_forward_test"] = False
 
-print(f"[FIN ETAPA 5] Desplegadas con éxito en Forward Test: {deployed_count} de {len(stage4_approved)}")
+print(f"[FIN ETAPA 5] Desplegadas con éxito en Forward Test: {deployed_count} | Depositadas en Banco de Reserva (DSR >= 0.85): {vault_deposited_count}")
 
 # 7. Informe Oficial
 # ------------------------------------------------------------------------------

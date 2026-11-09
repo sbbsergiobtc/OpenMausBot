@@ -80,6 +80,17 @@ from .auto_deployer import (
     dispatch_governance_rejection_report,
     evaluate_forward_test_incubation_guardian
 )
+from .strategy_vault import (
+    init_vault,
+    deposit_candidate,
+    get_best_reserve,
+    demote_starter_to_bench,
+    promote_reserve_to_starter,
+    execute_autonomous_relay,
+    list_vault_strategies,
+    get_vault_summary,
+    seed_vault_initial_data
+)
 
 __all__ = [
     "Candle",
