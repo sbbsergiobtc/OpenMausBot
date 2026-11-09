@@ -275,27 +275,40 @@ def evaluate_eur_1h(df_1h: pd.DataFrame) -> dict:
     return {'signal': sig, 'last_price': last_c, 'sma': last_sma, 'lower': last_lower, 'atr': atr}
 
 
-def sync_broker_state(state: dict) -> float:
-    live_balance = 1000.0
+def sync_broker_state(state: dict) -> dict:
+    balances = {
+        'CAPITAL_PROPIO': 1000.0,
+        'PROP_FIRM': 50000.0
+    }
     if not mt5.is_healthy():
         print("  [MT5] Puente no responde en 127.0.0.1:8001.")
-        return live_balance
+        return balances
     try:
-        acc = mt5.get_health()
-        live_balance = float(acc.get('balance', 1000.0))
+        summary = mt5.get_accounts_summary()
+        cap_acc = summary.get('capital_propio') or {}
+        prop_acc = summary.get('prop_firm') or {}
+
+        cap_balance = float(cap_acc.get('balance', 1000.0))
+        prop_balance = float(prop_acc.get('balance', 50000.0))
+
+        balances['CAPITAL_PROPIO'] = cap_balance
+        balances['PROP_FIRM'] = prop_balance
+
         state['live_broker_sync'] = {
-            'account': acc.get('login'),
-            'server': acc.get('server'),
-            'broker_balance': live_balance,
-            'broker_equity': float(acc.get('equity', live_balance)),
-            'currency': acc.get('currency'),
-            'trade_allowed': acc.get('trade_allowed'),
+            'account': cap_acc.get('login', 53138338),
+            'server': cap_acc.get('server', 'ICMarketsSC-Demo'),
+            'broker_balance': cap_balance,
+            'broker_equity': float(cap_acc.get('equity', cap_balance)),
+            'currency': cap_acc.get('currency', 'USD'),
+            'trade_allowed': cap_acc.get('trade_allowed', True),
+            'capital_propio': cap_acc,
+            'prop_firm': prop_acc,
             'last_sync': datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
         }
-        print(f"  [MT5 SYNC] Cuenta {acc.get('login')} | Balance Vivo: ${live_balance:,.2f} USD (Interes Compuesto TradFi)")
+        print(f"  [MT5 SYNC MULTICUENTA] Capital Propio ({cap_acc.get('login')}): ${cap_balance:,.2f} USD | Prop Firm ({prop_acc.get('login')}): ${prop_balance:,.2f} USD")
     except Exception as e:
-        print(f"  [MT5] Error sincronizando cuenta: {e}")
-    return live_balance
+        print(f"  [MT5] Error sincronizando cuentas duales: {e}")
+    return balances
 
 
 def run_cycle():
@@ -304,7 +317,7 @@ def run_cycle():
     print(f"\n[{now_str}] Ciclo Multiactivo TradFi: Capital Propio (% Compuesto) & Prop Firms...")
 
     # 1. Sincronizar Balance Vivo con IC Markets MT5
-    current_live_balance = sync_broker_state(state)
+    live_balances = sync_broker_state(state)
 
     # 1a. Estado de Riesgo Macro y Calendario Económico (Regla Blackout ±5 min)
     if get_macro_risk_status is not None:
@@ -425,7 +438,7 @@ def run_cycle():
             ticket = pos.get('live_ticket')
             if ticket and mt5.is_healthy():
                 print(f"  [MT5] Cerrando en broker posicion viva Ticket {ticket} ({broker_sym})...")
-                mt5.close_position(ticket=ticket)
+                mt5.close_position(ticket=ticket, account=branch)
 
             # Cálculo de PnL Realizado y R-Múltiplo para Replay Memory
             exit_p = price - (cfg['spread_pts'] / 2.0)
@@ -693,11 +706,12 @@ def run_cycle():
                             details={'reason': consistency_note, 'clamped_tp': tp_price}
                         )
 
-            effective_balance = current_live_balance * effective_mult
+            branch_balance = live_balances.get(branch, 1000.0 if branch == 'CAPITAL_PROPIO' else 50000.0)
+            effective_balance = branch_balance * effective_mult
             dynamic_lots = calculate_dynamic_lots(sym, effective_balance, entry_p, sl_price)
             risk_usd = effective_balance * cfg['risk_pct']
 
-            print(f"  [Q-LEARNING %] Balance: ${current_live_balance:,.2f} | Régimen ({sub_regime_10}): {effective_mult:.2f}x | Riesgo: ${risk_usd:.2f} -> {dynamic_lots} lotes en {broker_sym} | TP={tp_price:.4f}")
+            print(f"  [Q-LEARNING %] {branch} Balance: ${branch_balance:,.2f} | Régimen ({sub_regime_10}): {effective_mult:.2f}x | Riesgo: ${risk_usd:.2f} -> {dynamic_lots} lotes en {broker_sym} | TP={tp_price:.4f}")
 
             ticket = None
             if mt5.is_healthy():
@@ -707,7 +721,8 @@ def run_cycle():
                     volume=dynamic_lots,
                     sl=sl_price,
                     tp=tp_price,
-                    comment=f"{strat_id} %Comp"
+                    comment=f"{strat_id} %Comp",
+                    account=branch
                 )
                 print(f"  [MT5 ORDER RESULT] {live_res}")
                 ticket = live_res.get('order') or live_res.get('deal')
@@ -738,7 +753,7 @@ def run_cycle():
                 'price': entry_p,
                 'sl': sl_price,
                 'live_ticket': ticket,
-                'notes': f"Sizing Q-Learning {effective_mult:.2f}x sobre ${current_live_balance:,.2f} ({sub_regime_10})"
+                'notes': f"Sizing Q-Learning {effective_mult:.2f}x sobre ${branch_balance:,.2f} ({sub_regime_10})"
             })
             print(f"  >>> NUEVA POSICION {branch}: {sym} {dynamic_lots} lotes | SL={sl_price:.4f} | Ticket={ticket} <<<")
 

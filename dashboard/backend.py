@@ -1945,22 +1945,42 @@ def get_forward_state(refresh: bool = False):
     })
     mt5_open_positions = []
     try:
-        r_acc = requests.get('http://127.0.0.1:8001/account', timeout=1.5)
-        if r_acc.status_code == 200:
-            acc_data = r_acc.json()
-            if acc_data.get('status') == 'ok' and 'account' in acc_data:
-                a = acc_data['account']
+        r_sum = requests.get('http://127.0.0.1:8001/accounts_summary', timeout=3.0)
+        if r_sum.status_code == 200:
+            sum_data = r_sum.json()
+            if sum_data.get('status') == 'ok':
+                cap_acc = sum_data.get('capital_propio') or {}
+                prop_acc = sum_data.get('prop_firm') or {}
                 live_broker_sync = {
-                    'account': a.get('login'),
-                    'server': a.get('server'),
-                    'broker_balance': float(a.get('balance', 984.57)),
-                    'broker_equity': float(a.get('equity', 984.57)),
-                    'currency': a.get('currency', 'USD'),
-                    'leverage': a.get('leverage', 30),
-                    'trade_allowed': a.get('trade_allowed', True),
+                    'account': cap_acc.get('login', 53138338),
+                    'server': cap_acc.get('server', 'ICMarketsSC-Demo'),
+                    'broker_balance': float(cap_acc.get('balance', 1000.0)),
+                    'broker_equity': float(cap_acc.get('equity', 1000.0)),
+                    'currency': cap_acc.get('currency', 'USD'),
+                    'leverage': cap_acc.get('leverage', 30),
+                    'trade_allowed': cap_acc.get('trade_allowed', True),
+                    'capital_propio': cap_acc,
+                    'prop_firm': prop_acc,
                     'open_positions_count': 0,
                     'last_sync': datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
                 }
+        else:
+            r_acc = requests.get('http://127.0.0.1:8001/account', timeout=1.5)
+            if r_acc.status_code == 200:
+                acc_data = r_acc.json()
+                if acc_data.get('status') == 'ok' and 'account' in acc_data:
+                    a = acc_data['account']
+                    live_broker_sync = {
+                        'account': a.get('login'),
+                        'server': a.get('server'),
+                        'broker_balance': float(a.get('balance', 1000.0)),
+                        'broker_equity': float(a.get('equity', 1000.0)),
+                        'currency': a.get('currency', 'USD'),
+                        'leverage': a.get('leverage', 30),
+                        'trade_allowed': a.get('trade_allowed', True),
+                        'open_positions_count': 0,
+                        'last_sync': datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
+                    }
         r_pos = requests.get('http://127.0.0.1:8001/positions', timeout=1.5)
         if r_pos.status_code == 200:
             pos_data = r_pos.json()
