@@ -1035,26 +1035,10 @@
     <!-- ==================== PESTAÑA 2: FASE 1 - BACKTESTS (CALIBRACIÓN 12M) ==================== -->
     <div id="tab-content-backtests" class="tab-pane hidden space-y-6">
 
-      <!-- Banner Institucional Fase 1: Backtests -->
-      <div class="rounded-2xl p-5 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <div>
-          <div class="flex items-center gap-2 mb-1">
-            <span class="badge-brand-indigo font-mono">FASE 1</span>
-            <span class="badge-neutral-soft font-mono">62 TRADES DE CALIBRACIÓN</span>
-          </div>
-          <h2 class="text-lg font-bold text-[#1D1D1F]">Validación Retrospectiva de Modelos Cuantitativos</h2>
-          <p class="text-xs text-[#6E6E73]">Simulación estadística de 12 meses con spreads, deslizamiento y comisiones de broker modeladas.</p>
-        </div>
-        <div class="text-left sm:text-right bg-[#FAFAFC] px-3.5 py-2 rounded-xl border border-[#E5E5EA]">
-          <div class="text-[10px] text-[#86868B] uppercase font-mono tracking-wider">Ventana de Calibración</div>
-          <div class="text-xs font-bold font-mono text-[#3C45A5]">22/10/2025 – 25/10/2026 (12 Meses)</div>
-        </div>
-      </div>
-
-            <!-- Selector de Lente Cuantitativa Bifásica: Evaluación (Reto Prop Firm) vs Fondeada (Alpha & Retiros) -->
-      <div class="rounded-xl p-3.5 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <!-- Selector de Lente Cuantitativa Bifásica: Evaluación (Reto Prop Firm) vs Fondeada (Alpha & Retiros) -->
+      <div id="bifocal-lens-box" class="rounded-xl p-3.5 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div class="flex items-center space-x-3">
-          <div class="h-8 w-8 rounded-lg bg-[#EEF2FF] flex items-center justify-center text-[#3C45A5]">
+          <div class="h-8 w-8 rounded-lg bg-[#EEF2FF] flex items-center justify-center text-[#1D1D1F]">
             <i class="fa-solid fa-code-compare text-sm"></i>
           </div>
           <div>
@@ -1065,50 +1049,57 @@
         <!-- Segmented Control Apple -->
         <div class="segmented-control w-full sm:w-auto">
           <button id="btn-lens-eval" onclick="switchBifocalLens('EVALUATION')" class="segmented-pill active flex-1 sm:flex-initial">
-            <i class="fa-solid fa-graduation-cap"></i> 1. Evaluación (40% Clamp & Pass Rate)
+            <i class="fa-solid fa-graduation-cap"></i> Evaluación (40% clamp)
           </button>
           <button id="btn-lens-funded" onclick="switchBifocalLens('FUNDED')" class="segmented-pill flex-1 sm:flex-initial">
-            <i class="fa-solid fa-gem"></i> 2. Fondeada (Full Alpha & Payouts)
+            <i class="fa-solid fa-gem"></i> Fondeada
           </button>
         </div>
       </div>
 
-      <!-- Banner Dinámico de Métricas Bifásicas -->
-      <div id="bifocal-metrics-hud" class="grid grid-cols-2 lg:grid-cols-4 gap-4 p-4 rounded-xl border border-[#E5E5EA] bg-[#FAFAFC] shadow-2xs">
-        <div class="border-r border-[#E5E5EA] pr-3">
-          <span class="text-[10px] uppercase font-bold text-[#6E6E73] tracking-wider block" id="bifocal-kpi1-label">Pass Rate Monte Carlo</span>
-          <div class="flex items-baseline gap-2 mt-0.5">
-            <span class="text-lg font-bold font-mono text-[#065F46]" id="bifocal-kpi1-val">78.4%</span>
-            <span class="badge-success-live text-[10px]" id="bifocal-kpi1-badge">Verde (>=70%)</span>
+      <!-- Banner Dinámico de Métricas Bifásicas (Prop Firm KPIs - Solo en Fondeo) -->
+      <div id="bifocal-metrics-hud" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- KPI 1: Pass Rate Monte Carlo -->
+        <div class="rounded-xl p-4 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between">
+          <div class="flex items-center gap-2 mb-1.5">
+            <i class="fa-solid fa-dice text-[#1D1D1F] text-xs"></i>
+            <span class="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider" id="bifocal-kpi1-label">Pass Rate Monte Carlo</span>
           </div>
+          <div class="text-xl font-bold font-mono text-[#065F46]" id="bifocal-kpi1-val">78.4%</div>
         </div>
-        <div class="border-r border-[#E5E5EA] pr-3">
-          <span class="text-[10px] uppercase font-bold text-[#6E6E73] tracking-wider block" id="bifocal-kpi2-label">Trades Clampeados (Tope 40%)</span>
-          <div class="flex items-baseline gap-2 mt-0.5">
-            <span class="text-lg font-bold font-mono text-[#1D1D1F]" id="bifocal-kpi2-val">0 Trades</span>
-            <span class="text-[10px] text-[#86868B] font-mono" id="bifocal-kpi2-sub">$0.00 penalización</span>
+
+        <!-- KPI 2: Trades Clampeados (tope 40%) -->
+        <div class="rounded-xl p-4 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between">
+          <div class="flex items-center gap-2 mb-1.5">
+            <i class="fa-solid fa-scissors text-[#1D1D1F] text-xs"></i>
+            <span class="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider" id="bifocal-kpi2-label">Trades Clampeados (tope 40%)</span>
           </div>
+          <div class="text-xl font-bold font-mono text-[#1D1D1F]" id="bifocal-kpi2-val">0 Trades</div>
         </div>
-        <div class="border-r border-[#E5E5EA] pr-3">
-          <span class="text-[10px] uppercase font-bold text-[#6E6E73] tracking-wider block" id="bifocal-kpi3-label">Drawdown Máximo Reto</span>
-          <div class="flex items-baseline gap-2 mt-0.5">
-            <span class="text-lg font-bold font-mono text-[#D70015]" id="bifocal-kpi3-val">-2.10%</span>
-            <span class="text-[10px] text-[#86868B] font-mono" id="bifocal-kpi3-sub">Límite: -4.0%</span>
+
+        <!-- KPI 3: Drawdown Máximo del Reto -->
+        <div class="rounded-xl p-4 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between">
+          <div class="flex items-center gap-2 mb-1.5">
+            <i class="fa-solid fa-shield-halved text-[#1D1D1F] text-xs"></i>
+            <span class="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider" id="bifocal-kpi3-label">Drawdown Máximo del Reto</span>
           </div>
+          <div class="text-xl font-bold font-mono text-[#D70015]" id="bifocal-kpi3-val">-2.10%</div>
         </div>
-        <div>
-          <span class="text-[10px] uppercase font-bold text-[#6E6E73] tracking-wider block" id="bifocal-kpi4-label">Target / Retorno Capped</span>
-          <div class="flex items-baseline gap-2 mt-0.5">
-            <span class="text-lg font-bold font-mono text-[#3C45A5]" id="bifocal-kpi4-val">+$7,800.98</span>
-            <span class="text-[10px] font-mono text-[#065F46] font-semibold" id="bifocal-kpi4-sub">Meta: $8,000 (97.5%)</span>
+
+        <!-- KPI 4: Target Retorno Reto -->
+        <div class="rounded-xl p-4 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between">
+          <div class="flex items-center gap-2 mb-1.5">
+            <i class="fa-solid fa-bullseye text-[#1D1D1F] text-xs"></i>
+            <span class="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider" id="bifocal-kpi4-label">Target Retorno Reto</span>
           </div>
+          <div class="text-xl font-bold font-mono text-[#3C45A5]" id="bifocal-kpi4-val">+$7,800.98</div>
         </div>
       </div>
 
       <!-- Selector de Horizonte Temporal: Segmented Control Apple -->
       <div class="rounded-xl p-3.5 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div class="flex items-center space-x-3">
-          <div class="h-8 w-8 rounded-lg bg-[#EEF2FF] flex items-center justify-center text-[#3C45A5]">
+          <div class="h-8 w-8 rounded-lg bg-[#EEF2FF] flex items-center justify-center text-[#1D1D1F]">
             <i class="fa-solid fa-clock-rotate-left text-sm"></i>
           </div>
           <div>
@@ -1119,28 +1110,28 @@
         <!-- Segmented Control Apple -->
         <div class="segmented-control w-full sm:w-auto">
           <button id="btn-backtest-12m" onclick="switchBacktestHorizon('12m')" class="segmented-pill active flex-1 sm:flex-initial">
-            <i class="fa-solid fa-bolt"></i> 1. Táctico (1-2 Años)
+            <i class="fa-solid fa-bolt"></i> Táctico (1-2 años)
           </button>
           <button id="btn-backtest-cyclic" onclick="switchBacktestHorizon('cyclic')" class="segmented-pill flex-1 sm:flex-initial">
-            <i class="fa-solid fa-arrows-spin"></i> 2. Cíclico (3-5 Años)
+            <i class="fa-solid fa-arrows-spin"></i> Cíclico (3-5 años)
           </button>
           <button id="btn-backtest-10y" onclick="switchBacktestHorizon('10y')" class="segmented-pill flex-1 sm:flex-initial">
-            <i class="fa-solid fa-layer-group"></i> 3. Macro Estructural (10A)
+            <i class="fa-solid fa-layer-group"></i> Macroestructural (10 años)
           </button>
         </div>
       </div>
 
-      <!-- CONTENEDOR 12 MESES -->
-      <div id="backtest-12m-container" class="space-y-6">
-      
+      <!-- CONTENEDOR UNIFICADO MULTIHORIZONTE -->
+      <div id="backtest-unified-container" class="space-y-6">
+
         <!-- Barra de Filtro de Cuentas / Estrategias -->
         <div class="rounded-xl p-4 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <div class="flex items-center space-x-3">
-            <div class="h-9 w-9 rounded-lg bg-[#EEF2FF] flex items-center justify-center text-[#3C45A5]">
+            <div class="h-9 w-9 rounded-lg bg-[#EEF2FF] flex items-center justify-center text-[#1D1D1F]">
               <i class="fa-solid fa-sliders"></i>
             </div>
             <div>
-              <h2 class="text-xs font-bold text-[#1D1D1F] uppercase tracking-wider">Filtro de Estrategia</h2>
+              <h2 class="text-xs font-bold text-[#1D1D1F] uppercase tracking-wider">Estrategia Cuantitativa</h2>
               <p class="text-xs text-[#6E6E73]">Rendimiento consolidado global o análisis desagregado por modelo</p>
             </div>
           </div>
@@ -1148,11 +1139,31 @@
           <div class="flex items-center space-x-2 w-full sm:w-auto">
             <label for="account-selector" class="text-xs text-[#6E6E73] font-medium whitespace-nowrap">Vista:</label>
             <select id="account-selector" onchange="onAccountFilterChange()" class="bg-[#FFFFFF] border border-[#E5E5EA] text-[#1D1D1F] text-xs font-mono rounded-lg px-3 py-2 w-full sm:w-96 focus:outline-none focus:border-[#3C45A5] font-semibold cursor-pointer transition hover:border-[#3C45A5]/60 shadow-2xs">
-              <option value="ALL_CAP">💼 Consolidado Capital Propio (TradFi + DEX · 945 Trades)</option>
-              <option value="CAP-SPX-006" selected>📊 S&P 500 4h Bollinger Dip (Capital Propio TradFi · 318 Trades)</option>
-              <option value="CAP-NDX-005">📈 Nasdaq 100 2h Bollinger Dip (Capital Propio TradFi · 365 Trades)</option>
-              <option value="STRAT-FAST-035">⚡ Bitcoin 1h Shannon Entropy (Capital Propio DEX · 262 Trades)</option>
-              <option value="CRYPTO-HL">⚡ Crypto Paper Hyperliquid (1.000 USDC · Testnet Activo)</option>
+              <optgroup label="💼 Consolidados Institucionales">
+                <option value="ALL_PROP">💼 Consolidado Fondeo (Todas las Cuentas Prop Firm · 460 Trades)</option>
+                <option value="ALL_CAP" selected>💼 Consolidado Capital Propio (TradFi + DEX · 945 Trades)</option>
+                <option value="PORT-NDX-SPX">⚡ Cartera Combinada Sprint (NDX-005 + SPX-005 · 62 Trades)</option>
+              </optgroup>
+              <optgroup label="🏆 Estrategias Titulares Activas">
+                <option value="CAP-SPX-006">📊 S&P 500 4h Bollinger Dip (CAP-SPX-006 · 318 Trades)</option>
+                <option value="CAP-NDX-005">📈 Nasdaq 100 2h Bollinger Dip (CAP-NDX-005 · 365 Trades)</option>
+                <option value="PROP-FX-EUR-001">💶 EUR/USD 1h London-NY Session (PROP-FX-EUR-001 · 120 Trades)</option>
+                <option value="PROP-NDX-005">🎯 Prop Firm Nasdaq 2h (PROP-NDX-005 · 30 Trades)</option>
+                <option value="PROP-SPX-005">🎯 Prop Firm S&P 500 1D (PROP-SPX-005 · 32 Trades)</option>
+                <option value="PROP-NDX-006">⚡ Nasdaq 100 15m Momentum (PROP-NDX-006 · 63 Trades)</option>
+                <option value="STRAT-FAST-035">⚡ Bitcoin 1h Shannon Entropy (STRAT-FAST-035 · 262 Trades)</option>
+                <option value="STRAT-20261024-028">🟣 SOL 15m VWAP Breakout Native (STRAT-20261024-028)</option>
+                <option value="CRYPTO-HL">⚡ Crypto Paper Hyperliquid (1.000 USDC · Testnet Activo)</option>
+              </optgroup>
+              <optgroup label="🛡️ Banco de Reserva (Vault DSR ≥ 0.85)">
+                <option value="RES-FUT-NQ-001">🛡️ E-mini Nasdaq 100 Futures 5m RTH (RES-FUT-NQ-001 · DSR 0.99)</option>
+                <option value="RES-FUT-ES-001">🛡️ E-mini S&P 500 Futures 5m RTH (RES-FUT-ES-001 · DSR 0.98)</option>
+                <option value="RES-EUR-002-LON">🛡️ EURUSD London Open Range Breakout (RES-EUR-002-LON · DSR 0.95)</option>
+                <option value="RES-SPX-007-REV">🛡️ S&P 500 Keltner Channel Dip (RES-SPX-007-REV · DSR 0.96)</option>
+                <option value="RES-NDX-008-REV">🛡️ Nasdaq 100 VWAP Institutional (RES-NDX-008-REV · DSR 0.98)</option>
+                <option value="RES-CRYPTO-BTC-001">🛡️ BTC Hourly Funding Rate Arbitrage (RES-CRYPTO-BTC-001 · DSR 0.95)</option>
+                <option value="RES-CRYPTO-ETH-001">🛡️ ETH Donchian Breakout 1h (RES-CRYPTO-ETH-001 · DSR 0.94)</option>
+              </optgroup>
             </select>
           </div>
         </div>
@@ -1161,11 +1172,11 @@
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           <!-- Balance Final -->
           <div class="rounded-xl p-4 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between min-w-0">
-            <div class="text-[11px] text-[#6E6E73] flex items-center justify-between font-medium">
-              <span>Balance Final</span>
-              <i class="fa-solid fa-vault text-[#3C45A5] text-xs"></i>
+            <div class="flex items-center gap-2 mb-1.5">
+              <i class="fa-solid fa-vault text-[#1D1D1F] text-xs"></i>
+              <span class="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider">Balance Final</span>
             </div>
-            <div class="text-lg xl:text-xl font-bold font-mono text-[#1D1D1F] mt-1.5 truncate" id="kpi-balance">$110,821.03</div>
+            <div class="text-lg xl:text-xl font-bold font-mono text-[#1D1D1F] mt-1 truncate" id="kpi-balance">$110,821.03</div>
             <div class="text-[11px] text-[#6E6E73] mt-1 flex items-center justify-between gap-1 font-mono">
               <span class="truncate">Base: <strong id="kpi-init-bal" class="text-[#1D1D1F]">$100k</strong></span>
               <span class="text-[#065F46] font-bold shrink-0 whitespace-nowrap" id="kpi-net-profit">+$10,821.03</span>
@@ -1174,74 +1185,112 @@
 
           <!-- Profit Factor -->
           <div class="rounded-xl p-4 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between min-w-0">
-            <div class="text-[11px] text-[#6E6E73] flex items-center justify-between font-medium">
-              <span>Profit Factor</span>
-              <i class="fa-solid fa-scale-balanced text-[#3C45A5] text-xs"></i>
+            <div class="flex items-center gap-2 mb-1.5">
+              <i class="fa-solid fa-scale-balanced text-[#1D1D1F] text-xs"></i>
+              <span class="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider">Profit Factor</span>
             </div>
-            <div class="text-lg xl:text-xl font-bold font-mono text-[#3C45A5] mt-1.5 truncate" id="kpi-pf">3.87</div>
+            <div class="text-lg xl:text-xl font-bold font-mono text-[#3C45A5] mt-1 truncate" id="kpi-pf">3.87</div>
             <div class="text-[11px] text-[#6E6E73] mt-1 font-mono">Mínimo: &ge; 1.30</div>
           </div>
 
           <!-- Tasa de Acierto (WR) -->
           <div class="rounded-xl p-4 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between min-w-0">
-            <div class="text-[11px] text-[#6E6E73] flex items-center justify-between font-medium">
-              <span>Tasa Acierto (WR)</span>
-              <i class="fa-solid fa-bullseye text-[#065F46] text-xs"></i>
+            <div class="flex items-center gap-2 mb-1.5">
+              <i class="fa-solid fa-bullseye text-[#1D1D1F] text-xs"></i>
+              <span class="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider">Tasa Acierto (WR)</span>
             </div>
-            <div class="text-lg xl:text-xl font-bold font-mono text-[#065F46] mt-1.5 truncate" id="kpi-wr">79.0%</div>
+            <div class="text-lg xl:text-xl font-bold font-mono text-[#065F46] mt-1 truncate" id="kpi-wr">79.0%</div>
             <div class="text-[11px] text-[#6E6E73] mt-1 font-mono truncate" id="kpi-trades-count">49W / 13L (62 total)</div>
           </div>
 
-                    <!-- Max Drawdown EOD -->
+          <!-- Max Drawdown -->
           <div class="rounded-xl p-4 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between min-w-0">
-            <div class="text-[11px] text-[#6E6E73] flex items-center justify-between font-medium">
-              <span id="kpi-dd-label">Max Drawdown EOD</span>
-              <i class="fa-solid fa-shield-halved text-[#D70015] text-xs"></i>
+            <div class="flex items-center gap-2 mb-1.5">
+              <i class="fa-solid fa-shield-halved text-[#1D1D1F] text-xs"></i>
+              <span class="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider" id="kpi-dd-label">Max Drawdown</span>
             </div>
-            <div class="text-lg xl:text-xl font-bold font-mono text-[#065F46] mt-1.5 truncate" id="kpi-dd">0.85%</div>
+            <div class="text-lg xl:text-xl font-bold font-mono text-[#065F46] mt-1 truncate" id="kpi-dd">0.85%</div>
             <div class="text-[11px] text-[#6E6E73] mt-1 font-mono" id="kpi-dd-sub">Límite Fondeo: -4.00%</div>
           </div>
 
           <!-- Sharpe Ratio -->
           <div class="rounded-xl p-4 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between min-w-0">
-            <div class="text-[11px] text-[#6E6E73] flex items-center justify-between font-medium">
-              <span>Sharpe Ratio</span>
-              <i class="fa-solid fa-chart-line text-[#3C45A5] text-xs"></i>
+            <div class="flex items-center gap-2 mb-1.5">
+              <i class="fa-solid fa-chart-line text-[#1D1D1F] text-xs"></i>
+              <span class="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider">Sharpe Ratio</span>
             </div>
-            <div class="text-lg xl:text-xl font-bold font-mono text-[#1D1D1F] mt-1.5 truncate" id="kpi-sharpe">3.98</div>
-            <div class="text-[11px] text-[#6E6E73] mt-1 font-mono">Objetivo: &ge; 1.0</div>
+            <div class="text-lg xl:text-xl font-bold font-mono text-[#1D1D1F] mt-1 truncate" id="kpi-sharpe">3.93</div>
+            <div class="text-[11px] text-[#6E6E73] mt-1 font-mono">Institucional &ge; 1.50</div>
           </div>
 
           <!-- Rentabilidad Neta -->
           <div class="rounded-xl p-4 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between min-w-0">
-            <div class="text-[11px] text-[#6E6E73] flex items-center justify-between font-medium">
-              <span>Rentabilidad Neta</span>
-              <i class="fa-solid fa-percent text-[#065F46] text-xs"></i>
+            <div class="flex items-center gap-2 mb-1.5">
+              <i class="fa-solid fa-arrow-trend-up text-[#1D1D1F] text-xs"></i>
+              <span class="text-[11px] font-bold text-[#6E6E73] uppercase tracking-wider">Rentabilidad Neta</span>
             </div>
-            <div class="text-lg xl:text-xl font-bold font-mono text-[#065F46] mt-1.5 truncate" id="kpi-return">+10.82%</div>
-            <div class="text-[11px] text-[#6E6E73] mt-1 font-mono">Target 6% Superado</div>
+            <div class="text-lg xl:text-xl font-bold font-mono text-[#065F46] mt-1 truncate" id="kpi-return">+10.82%</div>
+            <div class="text-[11px] text-[#6E6E73] mt-1 font-mono">Retorno del Periodo</div>
           </div>
         </div>
 
         <!-- Curva de Rentabilidad Principal -->
-        <div class="rounded-2xl p-6 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs space-y-4">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+        <div class="rounded-xl p-5 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-3 border-b border-[#E5E5EA] gap-2">
             <div>
-              <h3 class="text-base font-bold text-[#1D1D1F] flex items-center">
-                <i class="fa-solid fa-chart-area mr-2 text-[#3C45A5]"></i> Curva de Rentabilidad Acumulada ($ USD)
-              </h3>
-              <p class="text-xs text-[#6E6E73]" id="chart-subtitle">Evolución cerrada operación a operación con comisiones y deslizamiento real</p>
+              <div class="flex items-center space-x-2">
+                <h3 class="text-xs font-bold text-[#1D1D1F] uppercase tracking-wider">Curva de Rentabilidad Acumulada</h3>
+                <span class="badge-brand-indigo font-mono text-[10px]" id="yearly-badge-horizon">TÁCTICO (1-2 AÑOS)</span>
+              </div>
+              <p class="text-[11px] text-[#6E6E73] mt-0.5" id="chart-subtitle">Evolución progresiva de balance, tramos y control dinámico de drawdown</p>
             </div>
             <div class="flex items-center space-x-2">
-              <span class="badge-success-live font-mono font-bold" id="badge-chart-pnl">
-                +$10,821.03 USD
-              </span>
+              <span class="badge-success-live font-mono text-[11px]" id="badge-chart-pnl">+$10,821.03 USD</span>
             </div>
           </div>
-          <div id="main-equity-chart" class="w-full h-80"></div>
+          <div class="mt-4">
+            <div id="chart-main-equity" class="w-full h-80"></div>
+          </div>
         </div>
 
-      <!-- ==================== DESGLOSE DE RACHAS Y CICLOS DE FONDEO (PEAK-VALLEY SWING ANALYSIS) ==================== -->
+        <!-- Desglose de Rendimiento Anual (2016-2026) -->
+        <div class="rounded-xl p-5 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs" id="yearly-breakdown-card">
+          <div class="flex items-center justify-between pb-3 border-b border-[#E5E5EA]">
+            <div class="flex items-center space-x-3">
+              <div class="h-8 w-8 rounded-lg bg-[#EEF2FF] flex items-center justify-center text-[#1D1D1F]">
+                <i class="fa-solid fa-calendar-days text-sm"></i>
+              </div>
+              <div>
+                <h3 class="text-xs font-bold text-[#1D1D1F] uppercase tracking-wider">Desglose Año por Año</h3>
+                <p class="text-[11px] text-[#6E6E73]">Rendimiento desagregado por ejercicio anual, operaciones y control de drawdown</p>
+              </div>
+            </div>
+            <span class="badge-neutral-soft font-mono text-[10px]">MULTIANUAL CONSOLIDADO</span>
+          </div>
+
+          <!-- Tabla de Años -->
+          <div class="overflow-x-auto mt-4">
+            <table class="w-full text-left text-xs font-mono">
+              <thead class="bg-[#FAFAFC] text-[#6E6E73] border-b border-[#E5E5EA] uppercase tracking-wider text-[10px]">
+                <tr>
+                  <th class="py-2.5 px-3">Ejercicio (Año)</th>
+                  <th class="py-2.5 px-3 text-right">Beneficio Neto</th>
+                  <th class="py-2.5 px-3 text-right">Rentabilidad</th>
+                  <th class="py-2.5 px-3 text-center">Trades</th>
+                  <th class="py-2.5 px-3 text-right">Tasa Acierto (WR)</th>
+                  <th class="py-2.5 px-3 text-right">Profit Factor</th>
+                  <th class="py-2.5 px-3 text-right">Max Drawdown</th>
+                  <th class="py-2.5 px-3 text-center">Estado</th>
+                </tr>
+              </thead>
+              <tbody id="yearly-breakdown-tbody" class="divide-y divide-[#E5E5EA] text-[#1D1D1F]">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+<!-- ==================== DESGLOSE DE RACHAS Y CICLOS DE FONDEO (PEAK-VALLEY SWING ANALYSIS) ==================== -->
       <div id="streaks-analysis-section" class="rounded-2xl p-6 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs space-y-5 w-full">
         
         <!-- Encabezado con Badges y KPIs Resumen -->
@@ -1497,312 +1546,9 @@
         </div>
 
       </div>
-      </div> <!-- Fin #backtest-12m-container -->
+      
+      </div> <!-- Fin #backtest-unified-container -->
 
-      <!-- CONTENEDOR CÍCLICO INTERMEDIO (3 A 5 AÑOS · CRIPTO & SWING · LESSON-014) -->
-      <div id="backtest-cyclic-container" class="space-y-6 hidden">
-
-        <!-- Hero Card Cíclico 3-5 Años -->
-        <div class="glass-card rounded-xl p-5 border-l-4 border-amber-500 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 motion-sweep stagger-1 shimmer-active">
-          <div>
-            <div class="flex items-center space-x-2">
-              <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">HORIZONTE CÍCLICO (3 A 5 AÑOS)</span>
-              <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">HALVING · BULL · BEAR · CHOP</span>
-              <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">CAPITAL PROPIO (MAX DD 20%)</span>
-            </div>
-            <h2 class="text-lg font-bold text-white mt-1">Validación Cíclica Intermedia Multianual (2021 - 2026)</h2>
-            <p class="text-xs text-slate-400 mt-0.5">Evaluación obligatoria de modelos swing que atraviesan ciclos macro completos: euforia alcista, criptoinvierno de -75% y fases prolongadas de compresión lateral.</p>
-          </div>
-          <div class="text-left sm:text-right bg-dark-950/80 p-3 rounded-xl border border-slate-800">
-            <span class="text-[11px] text-slate-400 font-mono uppercase">Métrica Maestra MAR Ratio:</span>
-            <div class="text-base font-bold font-mono text-amber-400 mt-0.5">2.64 MAR (CAGR +48.6% / Max DD 18.4%)</div>
-            <span class="text-[11px] text-emerald-400 font-mono">Techo Max DD 20% respetado</span>
-          </div>
-        </div>
-
-        <!-- Cuadrícula de Fases y Resistencia de Régimen -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          
-          <!-- Fase 1: Bull Run -->
-          <div class="glass-card rounded-xl p-4 border border-emerald-900/40 relative overflow-hidden">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-800/80">
-              <div class="flex items-center space-x-2">
-                <span class="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span class="text-xs font-bold text-slate-200 uppercase tracking-wider">1. Expansión Parabólica (Bull)</span>
-              </div>
-              <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Alpha +74.2%</span>
-            </div>
-            <div class="mt-3 space-y-2 text-xs">
-              <div class="flex justify-between text-slate-300">
-                <span class="text-slate-400">Régimen:</span>
-                <span class="font-bold text-white">Trend Markup / Alta Convexidad</span>
-              </div>
-              <div class="flex justify-between text-slate-300">
-                <span class="text-slate-400">Regla Asimétrica Long:</span>
-                <span class="font-bold text-emerald-300">Trailing ATR ampliado (2.5x)</span>
-              </div>
-              <div class="flex justify-between text-slate-300">
-                <span class="text-slate-400">Win Rate en Ciclo:</span>
-                <span class="font-bold font-mono text-emerald-400">62.8% (Profit Factor 3.12)</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Fase 2: Bear Market & Crypto Winter -->
-          <div class="glass-card rounded-xl p-4 border border-rose-900/40 relative overflow-hidden">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-800/80">
-              <div class="flex items-center space-x-2">
-                <span class="h-2.5 w-2.5 rounded-full bg-rose-500"></span>
-                <span class="text-xs font-bold text-slate-200 uppercase tracking-wider">2. Capitulación (Bear Market)</span>
-              </div>
-              <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20">Max DD 18.4%</span>
-            </div>
-            <div class="mt-3 space-y-2 text-xs">
-              <div class="flex justify-between text-slate-300">
-                <span class="text-slate-400">Benchmark Spot:</span>
-                <span class="font-bold font-mono text-rose-400">-76.8% (Caída Spot)</span>
-              </div>
-              <div class="flex justify-between text-slate-300">
-                <span class="text-slate-400">Alpha Absoluto Estrategia:</span>
-                <span class="font-bold font-mono text-emerald-400">+18.2% Neto Positivo</span>
-              </div>
-              <div class="flex justify-between text-slate-300">
-                <span class="text-slate-400">Protección:</span>
-                <span class="font-bold text-cyan-300">Filtro Short asimétrico + Cash Drag</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Fase 3: Compresión Lateral & Chop -->
-          <div class="glass-card rounded-xl p-4 border border-amber-900/40 relative overflow-hidden">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-800/80">
-              <div class="flex items-center space-x-2">
-                <span class="h-2.5 w-2.5 rounded-full bg-amber-400"></span>
-                <span class="text-xs font-bold text-slate-200 uppercase tracking-wider">3. Compresión & Chop</span>
-              </div>
-              <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">Zero Whipsaw Churn</span>
-            </div>
-            <div class="mt-3 space-y-2 text-xs">
-              <div class="flex justify-between text-slate-300">
-                <span class="text-slate-400">Detección Régimen:</span>
-                <span class="font-bold text-white">Entropía Shannon &lt; 0.62</span>
-              </div>
-              <div class="flex justify-between text-slate-300">
-                <span class="text-slate-400">Comportamiento:</span>
-                <span class="font-bold text-amber-300">Inhibición de órdenes tendenciales</span>
-              </div>
-              <div class="flex justify-between text-slate-300">
-                <span class="text-slate-400">Tasa de Preservación:</span>
-                <span class="font-bold font-mono text-cyan-400">99.4% Capital Intacto</span>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Auditoría de Robustez Cíclica (Walk-Forward & Plateau) -->
-        <div class="glass-card rounded-xl p-5 border border-slate-800 space-y-4">
-          <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-            <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center space-x-2">
-              <i class="fa-solid fa-chart-line text-amber-400"></i>
-              <span>Parámetros de Robustez y Eficiencia Walk-Forward (WFO 5 Años)</span>
-            </h3>
-            <span class="text-xs font-mono text-slate-400">Ventanas Semestrales Rodantes IS (12M) / OOS (6M)</span>
-          </div>
-
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-            <div class="p-3 rounded-xl bg-dark-950/70 border border-slate-800">
-              <span class="text-[11px] text-slate-400 uppercase font-mono">Retorno Compuesto (CAGR)</span>
-              <div class="text-lg font-bold text-emerald-400 font-mono mt-1">+48.6% Anual</div>
-              <span class="text-[11px] text-slate-500 font-mono">Mínimo &ge; 30% cumplido</span>
-            </div>
-            <div class="p-3 rounded-xl bg-dark-950/70 border border-slate-800">
-              <span class="text-[11px] text-slate-400 uppercase font-mono">Max Drawdown Cíclico</span>
-              <div class="text-lg font-bold text-white font-mono mt-1">18.4%</div>
-              <span class="text-[11px] text-emerald-400 font-mono">&lt; 20.0% Techo Sergio</span>
-            </div>
-            <div class="p-3 rounded-xl bg-dark-950/70 border border-slate-800">
-              <span class="text-[11px] text-slate-400 uppercase font-mono">Sortino Ratio</span>
-              <div class="text-lg font-bold text-cyan-400 font-mono mt-1">2.88</div>
-              <span class="text-[11px] text-slate-500 font-mono">Downside vol penalizada</span>
-            </div>
-            <div class="p-3 rounded-xl bg-dark-950/70 border border-slate-800">
-              <span class="text-[11px] text-slate-400 uppercase font-mono">WFO Efficiency (WFE)</span>
-              <div class="text-lg font-bold text-amber-400 font-mono mt-1">78.2%</div>
-              <span class="text-[11px] text-slate-500 font-mono">Alta estabilidad OOS</span>
-            </div>
-          </div>
-        </div>
-
-      </div> <!-- Fin #backtest-cyclic-container -->
-
-      <!-- CONTENEDOR 10 AÑOS MULTI-CICLO (PARQUET & ENTROPÍA) -->
-      <div id="backtest-10y-container" class="space-y-6 hidden">
-
-        <!-- Hero Card 10 Años -->
-        <div class="glass-card rounded-xl p-5 border-l-4 border-indigo-500 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 motion-sweep stagger-1 shimmer-active">
-          <div>
-            <div class="flex items-center space-x-2">
-              <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">10 AÑOS COMPLETOS · 2016 AL 2026</span>
-              <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">74.904 VELAS PARQUET</span>
-              <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">ENTROPÍA DE SHANNON</span>
-            </div>
-            <h2 class="text-lg font-bold text-white mt-1">Validación Multi-Ciclo con Conmutación Dinámica de Régimen</h2>
-            <p class="text-xs text-slate-400 mt-0.5">Contraste empírico entre operativa tradicional a ciegas vs. gestión de cartera adaptativa gobernada por Entropía de Shannon.</p>
-          </div>
-          <div class="flex items-center space-x-2 bg-dark-950/80 p-1.5 rounded-lg border border-slate-800">
-            <button id="btn-asset-ndx" onclick="switch10YAsset('NDX')" class="px-3 py-1.5 rounded text-xs font-bold font-mono transition bg-indigo-500 text-white shadow-sm">
-              NDX (Nasdaq 100)
-            </button>
-            <button id="btn-asset-spx" onclick="switch10YAsset('SPX')" class="px-3 py-1.5 rounded text-xs font-bold font-mono transition text-slate-400 hover:text-white">
-              SPX (S&P 500)
-            </button>
-          </div>
-        </div>
-
-        <!-- Tarjetas Comparativas Lado a Lado (Estático vs Dinámico) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Tarjeta A: Estático Tradicional -->
-          <div class="glass-card rounded-xl p-4 border border-rose-900/40 relative overflow-hidden">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-800/80">
-              <div class="flex items-center space-x-2">
-                <span class="h-2.5 w-2.5 rounded-full bg-rose-500"></span>
-                <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">1. Sistema Estático Tradicional</span>
-              </div>
-              <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20">Sin Filtro de Régimen</span>
-            </div>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4">
-              <div>
-                <div class="text-[11px] text-slate-400">Beneficio Neto (10A)</div>
-                <div class="text-lg font-bold font-mono text-white mt-0.5" id="c10-static-profit">+6,000.00</div>
-                <div class="text-[11px] text-slate-500 font-mono">ROI: +46.0%</div>
-              </div>
-              <div>
-                <div class="text-[11px] text-slate-400">Profit Factor</div>
-                <div class="text-lg font-bold font-mono text-amber-400 mt-0.5" id="c10-static-pf">1.55</div>
-                <div class="text-[11px] text-slate-500 font-mono">Mínimo: 1.30</div>
-              </div>
-              <div>
-                <div class="text-[11px] text-slate-400">Tasa Acierto (WR)</div>
-                <div class="text-lg font-bold font-mono text-slate-300 mt-0.5" id="c10-static-wr">48.0%</div>
-                <div class="text-[11px] text-slate-500 font-mono" id="c10-static-trades">298 trades</div>
-              </div>
-              <div>
-                <div class="text-[11px] text-slate-400">Max Drawdown</div>
-                <div class="text-lg font-bold font-mono text-rose-400 mt-0.5" id="c10-static-dd">10.22%</div>
-                <div class="text-[11px] text-rose-500/80 font-mono">Riesgo elevado</div>
-              </div>
-              <div class="col-span-2">
-                <div class="text-[11px] text-slate-400">Pérdidas en Caídas (Bear Market)</div>
-                <div class="text-sm font-bold font-mono text-rose-400 mt-0.5" id="c10-static-bear">-7,000.00 (Fuga grave)</div>
-                <div class="text-[11px] text-slate-500">Compró suelos que siguieron cayendo (2018 y 2022).</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tarjeta B: Dinámico Portfolio Manager & Entropía -->
-          <div class="glass-card rounded-xl p-4 border border-emerald-500/40 relative overflow-hidden bg-gradient-to-br from-emerald-950/20 to-transparent">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-800/80">
-              <div class="flex items-center space-x-2">
-                <span class="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span class="text-xs font-bold text-emerald-300 uppercase tracking-wider">2. Portfolio Manager & Entropía</span>
-              </div>
-              <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Conmutación Automática</span>
-            </div>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4">
-              <div>
-                <div class="text-[11px] text-slate-400">Beneficio Neto (10A)</div>
-                <div class="text-lg font-bold font-mono text-emerald-400 mt-0.5" id="c10-dyn-profit">+0,200.00</div>
-                <div class="text-[11px] text-emerald-500 font-mono">ROI: +60.2% (+14.2% Alpha)</div>
-              </div>
-              <div>
-                <div class="text-[11px] text-slate-400">Profit Factor</div>
-                <div class="text-lg font-bold font-mono text-emerald-300 mt-0.5" id="c10-dyn-pf">2.37</div>
-                <div class="text-[11px] text-emerald-500 font-mono">+0.82 institucional</div>
-              </div>
-              <div>
-                <div class="text-[11px] text-slate-400">Tasa Acierto (WR)</div>
-                <div class="text-lg font-bold font-mono text-emerald-400 mt-0.5" id="c10-dyn-wr">56.9%</div>
-                <div class="text-[11px] text-slate-500 font-mono" id="c10-dyn-trades">197 trades (+8.9% WR)</div>
-              </div>
-              <div>
-                <div class="text-[11px] text-slate-400">Max Drawdown</div>
-                <div class="text-lg font-bold font-mono text-emerald-400 mt-0.5" id="c10-dyn-dd">4.88%</div>
-                <div class="text-[11px] text-emerald-400 font-mono">< 5% Calificado Prop Firm</div>
-              </div>
-              <div class="col-span-2">
-                <div class="text-[11px] text-slate-400">Pérdidas en Caídas (Bear Market)</div>
-                <div class="text-sm font-bold font-mono text-emerald-400 mt-0.5" id="c10-dyn-bear">bash.00 (Preservación 100%)</div>
-                <div class="text-[11px] text-slate-400">Nexus desconecta compras en mercados bajistas y caos.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Matriz de los 3 Regímenes Institucionales -->
-        <div class="glass-card rounded-xl p-4 border border-slate-800">
-          <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-3 flex items-center space-x-2">
-            <i class="fa-solid fa-shapes text-indigo-400"></i>
-            <span>Matriz Cuantitativa de los 3 Regímenes (Desglose 10 Años)</span>
-          </h3>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <!-- Régimen 1: BULL -->
-            <div class="p-3.5 rounded-lg bg-dark-950/60 border border-emerald-900/50">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-emerald-400">RÉGIMEN 1 · BULL TREND</span>
-                <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">45.0% del tiempo</span>
-              </div>
-              <div class="text-[11px] text-slate-300 mt-2">P > EMA200 · Entropía < 0.75 (Orden estructural alto).</div>
-              <div class="mt-3 pt-2 border-t border-slate-800 text-[11px] space-y-1 font-mono">
-                <div class="flex justify-between"><span class="text-slate-400">Asignación:</span> <span class="text-emerald-400 font-bold">100% Capital</span></div>
-                <div class="flex justify-between"><span class="text-slate-400">PnL Generado:</span> <span class="text-emerald-400 font-bold">+0,000 USD (124 tr)</span></div>
-                <div class="flex justify-between"><span class="text-slate-400">Estrategias:</span> <span class="text-slate-300">Momentum, Dip Buying (1:2 R/R)</span></div>
-              </div>
-            </div>
-
-            <!-- Régimen 2: CHOP -->
-            <div class="p-3.5 rounded-lg bg-dark-950/60 border border-amber-900/50">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-amber-400">RÉGIMEN 2 · RANGE / CHOP</span>
-                <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">21.7% del tiempo</span>
-              </div>
-              <div class="text-[11px] text-slate-300 mt-2">Entropía ≥ 0.75 o Rango estrecho (Ruido blanco).</div>
-              <div class="mt-3 pt-2 border-t border-slate-800 text-[11px] space-y-1 font-mono">
-                <div class="flex justify-between"><span class="text-slate-400">Asignación:</span> <span class="text-amber-400 font-bold">50% Riesgo (Scalping)</span></div>
-                <div class="flex justify-between"><span class="text-slate-400">PnL Generado:</span> <span class="text-amber-400 font-bold">+0,200 USD (73 tr)</span></div>
-                <div class="flex justify-between"><span class="text-slate-400">Estrategias:</span> <span class="text-slate-300">BB Reversión Rápida (1:1.2 R/R)</span></div>
-              </div>
-            </div>
-
-            <!-- Régimen 3: BEAR -->
-            <div class="p-3.5 rounded-lg bg-dark-950/60 border border-rose-900/50">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-rose-400">RÉGIMEN 3 · BEAR TREND</span>
-                <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-rose-500/20 text-rose-300">33.3% del tiempo</span>
-              </div>
-              <div class="text-[11px] text-slate-300 mt-2">P < EMA200 · Crisis o tendencia bajista estructural.</div>
-              <div class="mt-3 pt-2 border-t border-slate-800 text-[11px] space-y-1 font-mono">
-                <div class="flex justify-between"><span class="text-slate-400">Asignación:</span> <span class="text-rose-400 font-bold">0% Compras</span></div>
-                <div class="flex justify-between"><span class="text-slate-400">Pérdidas Evitadas:</span> <span class="text-emerald-400 font-bold">+7,000 USD protegidos</span></div>
-                <div class="flex justify-between"><span class="text-slate-400">Acción:</span> <span class="text-slate-300">100% Cash / USDC Líquido</span></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Desglose de Rendimiento Anual (2016-2026) -->
-        <div class="glass-card rounded-xl p-4 border border-slate-800">
-          <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-3 flex items-center space-x-2">
-            <i class="fa-solid fa-calendar-days text-cyan-400"></i>
-            <span>Desglose Año por Año (2016 al 2026) · Portfolio Manager Dinámico</span>
-          </h3>
-          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5" id="c10-yearly-grid">
-            <!-- Dynamically populated -->
-          </div>
-        </div>
-
-      </div> <!-- Fin #backtest-10y-container -->
-    
     </div>
 
     <!-- ==================== PESTAÑA 3: FASE 2 - FORWARD TESTS (SIMULACIÓN EN VIVO) ==================== -->
@@ -3823,7 +3569,7 @@
     // Conmutador de Tabs
     const tabTitles = {
       'dashboard': 'Cockpit General · AlgrokQuant',
-      'backtests': '1. Backtests (Multi-Horizonte 1-10A)',
+      'backtests': 'Backtests',
       'forward': '2. Forward Tests (Simulación en Vivo)',
       'orchestrator': 'Orquestador de Régimen en Vivo (Contraste Paralelo A/B)',
       'live': '3. Cuentas Live Real (Dinero Real)',
@@ -3867,6 +3613,9 @@
         closeSidebar();
       }
 
+      if (tabId === 'backtests') {
+        populateBacktestStrategiesDropdown();
+      }
       if (tabId === 'forward') {
         fetchForwardState();
         fetchFtTradesData();
@@ -4446,8 +4195,18 @@
     async function onAccountFilterChange() {
       const select = document.getElementById('account-selector');
       currentAccountFilter = select.value;
+
+      // Evaluar modo desk para visibilidad condicional de KPIs de Fondeo
+      const isProp = currentAccountFilter.startsWith('PROP') || currentAccountFilter === 'ALL_PROP' || currentAccountFilter === 'PORT-NDX-SPX' || currentAccountFilter.startsWith('RES-FUT') || currentAccountFilter.startsWith('RES-EUR');
+      const hud = document.getElementById('bifocal-metrics-hud');
+      if (hud) hud.style.display = isProp ? 'grid' : 'none';
+      const lensBox = document.getElementById('bifocal-lens-box');
+      if (lensBox) lensBox.style.display = isProp ? 'flex' : 'none';
+
       const backtestPane = document.getElementById('tab-content-backtests') || document.getElementById('tab-content-dashboard');
-      triggerMotionSweep(backtestPane);
+      if (typeof triggerMotionSweep === 'function') {
+        triggerMotionSweep(backtestPane);
+      }
       await fetchAnalyticsData(currentAccountFilter);
       await fetchTradesData(currentAccountFilter);
     }
@@ -4456,7 +4215,7 @@
     async function fetchAnalyticsData(filter) {
       let data = null;
       try {
-        const res = await fetch(`/api/analytics?filter=${encodeURIComponent(filter)}&lens=${encodeURIComponent(currentBifocalLens)}`);
+        const res = await fetch(`/api/analytics?filter=${encodeURIComponent(filter)}&lens=${encodeURIComponent(currentBifocalLens)}&horizon=${encodeURIComponent(currentBacktestHorizon)}`);
         if (res.ok) {
           data = await res.json();
         }
@@ -4467,9 +4226,22 @@
       if (!data) return;
 
       currentAnalyticsData = data;
+
+      // Control dinámico de visibilidad según modo (Fondeo vs Capital Propio)
+      const deskMode = data.desk_mode || (filter.startsWith('PROP') || filter === 'ALL_PROP' || filter === 'PORT-NDX-SPX' || filter.startsWith('RES-FUT') || filter.startsWith('RES-EUR') ? 'PROP_FIRM' : 'CAPITAL_PROPIO');
+      const hud = document.getElementById('bifocal-metrics-hud');
+      if (hud) hud.style.display = (deskMode === 'PROP_FIRM') ? 'grid' : 'none';
+      const lensBox = document.getElementById('bifocal-lens-box');
+      if (lensBox) lensBox.style.display = (deskMode === 'PROP_FIRM') ? 'flex' : 'none';
+
       renderBifocalUI();
 
-      // 1. Actualizar KPIs Principales según la Lente Activa
+      // Renderizar desglose año por año si viene en data
+      if (data.yearly_breakdown) {
+        renderYearlyBreakdown(data.yearly_breakdown);
+      }
+
+      // 1. Actualizar KPIs Principales
       const kpis = data.kpis;
       const isEval = currentBifocalLens === 'EVALUATION';
 
@@ -4482,33 +4254,18 @@
       if (document.getElementById('kpi-dd')) document.getElementById('kpi-dd').innerText = kpis.max_drawdown.toFixed(2) + '%';
       if (document.getElementById('kpi-sharpe')) document.getElementById('kpi-sharpe').innerText = kpis.sharpe_ratio;
       if (document.getElementById('kpi-return')) document.getElementById('kpi-return').innerText = (kpis.return_pct >= 0 ? '+' : '') + kpis.return_pct + '%';
-      
-      const kpiDdLabel = document.getElementById('kpi-dd-label');
-      if (kpiDdLabel) {
-        kpiDdLabel.innerText = isEval ? 'Max Drawdown EOD (Límite: -4.0%)' : 'Max Drawdown Real de Cartera';
-      }
+
       const kpiDdSub = document.getElementById('kpi-dd-sub');
       if (kpiDdSub) {
-        kpiDdSub.innerText = isEval ? `Límite Fondeo: -4.00% (Margen: +${(4.0 - kpis.max_drawdown).toFixed(2)}%)` : 'Drawdown Libre de Cartera';
+        kpiDdSub.innerText = (deskMode === 'PROP_FIRM') ? (isEval ? `Límite Reto: -4.00%` : `Fondeo Libre`) : 'Control de Riesgo TradFi';
       }
 
       if (document.getElementById('badge-chart-pnl')) {
-        if (isEval) {
-          document.getElementById('badge-chart-pnl').innerText = `${(kpis.net_profit >= 0 ? '+' : '')}$${kpis.net_profit.toLocaleString(undefined, {minimumFractionDigits: 2})} USD · EVAL`;
-          document.getElementById('badge-chart-pnl').className = 'px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 font-mono';
-        } else {
-          const payoutVal = (kpis.net_profit * 0.80).toLocaleString(undefined, {minimumFractionDigits: 0});
-          document.getElementById('badge-chart-pnl').innerText = `+$${payoutVal} RETIRO ESTIMADO (80%)`;
-          document.getElementById('badge-chart-pnl').className = 'px-2 py-0.5 rounded text-[11px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-mono';
-        }
+        document.getElementById('badge-chart-pnl').innerText = `${(kpis.net_profit >= 0 ? '+' : '')}$${kpis.net_profit.toLocaleString(undefined, {minimumFractionDigits: 2})} USD`;
       }
 
       if (document.getElementById('chart-subtitle')) {
-        if (isEval) {
-          document.getElementById('chart-subtitle').innerText = `${data.account_name} · [LENTE EVALUACIÓN PROP FIRM] Target Reto +8.0% ($108k), EOD DD -4.0% y Clamp 40%`;
-        } else {
-          document.getElementById('chart-subtitle').innerText = `${data.account_name} · [LENTE FONDEADA & CAPITAL PROPIO] Alpha 100% Libre, Split 80/20 Payouts`;
-        }
+        document.getElementById('chart-subtitle').innerText = `${data.account_name} · [${currentBacktestHorizon.toUpperCase()}] Balance y control progresivo de drawdown`;
       }
 
       // 2. Day & Time Edge Cards
@@ -4797,7 +4554,7 @@
 
     async function fetchTradesData(filter) {
       try {
-        const res = await fetch(`/api/trade_history?filter=${encodeURIComponent(filter)}&lens=${encodeURIComponent(currentBifocalLens)}`);
+        const res = await fetch(`/api/trade_history?filter=${encodeURIComponent(filter)}&lens=${encodeURIComponent(currentBifocalLens)}&horizon=${encodeURIComponent(currentBacktestHorizon)}`);
         if (res.ok) {
           const data = await res.json();
           allTrades = data.trades || [];
@@ -8094,37 +7851,39 @@
   
     // Selector dinámico de Horizontes de Backtest (Apple Segmented Control)
     function switchBacktestHorizon(horizon) {
-      const c12m = document.getElementById('backtest-12m-container');
-      const cCyclic = document.getElementById('backtest-cyclic-container');
-      const c10y = document.getElementById('backtest-10y-container');
-      
+      currentBacktestHorizon = horizon;
       const b12m = document.getElementById('btn-backtest-12m');
       const bCyclic = document.getElementById('btn-backtest-cyclic');
       const b10y = document.getElementById('btn-backtest-10y');
-      
-      [c12m, cCyclic, c10y].forEach(c => { if (c) c.classList.add('hidden'); });
+
       [b12m, bCyclic, b10y].forEach(b => {
-        if (b) {
-          b.className = 'segmented-pill flex-1 sm:flex-initial';
-        }
+        if (b) b.className = 'segmented-pill flex-1 sm:flex-initial';
       });
 
-      if (horizon === '12m') {
-        if (c12m) { c12m.classList.remove('hidden'); triggerMotionSweep(c12m); }
-        if (b12m) { b12m.className = 'segmented-pill active flex-1 sm:flex-initial'; }
-        setTimeout(() => {
-          if (mainEquityChart) mainEquityChart.render();
-          if (dowChart) dowChart.render();
-          if (hourlyChart) hourlyChart.render();
-        }, 100);
-      } else if (horizon === 'cyclic') {
-        if (cCyclic) { cCyclic.classList.remove('hidden'); triggerMotionSweep(cCyclic); }
-        if (bCyclic) { bCyclic.className = 'segmented-pill active flex-1 sm:flex-initial'; }
-      } else if (horizon === '10y') {
-        if (c10y) { c10y.classList.remove('hidden'); triggerMotionSweep(c10y); }
-        if (b10y) { b10y.className = 'segmented-pill active flex-1 sm:flex-initial'; }
-        if (typeof switch10YAsset === 'function') switch10YAsset('NDX');
+      if (horizon === '12m' && b12m) b12m.className = 'segmented-pill active flex-1 sm:flex-initial';
+      if (horizon === 'cyclic' && bCyclic) bCyclic.className = 'segmented-pill active flex-1 sm:flex-initial';
+      if (horizon === '10y' && b10y) b10y.className = 'segmented-pill active flex-1 sm:flex-initial';
+
+      const badgeEl = document.getElementById('yearly-badge-horizon');
+      if (badgeEl) {
+        if (horizon === '12m') badgeEl.innerText = 'TÁCTICO (1-2 AÑOS)';
+        else if (horizon === 'cyclic') badgeEl.innerText = 'CÍCLICO (3-5 AÑOS)';
+        else if (horizon === '10y') badgeEl.innerText = 'MACROESTRUCTURAL (10 AÑOS)';
       }
+
+      const container = document.getElementById('backtest-unified-container');
+      if (container && typeof triggerMotionSweep === 'function') {
+        triggerMotionSweep(container);
+      }
+
+      fetchAnalyticsData(currentAccountFilter);
+      fetchTradesData(currentAccountFilter);
+
+      setTimeout(() => {
+        if (mainEquityChart) mainEquityChart.render();
+        if (dowChart) dowChart.render();
+        if (hourlyChart) hourlyChart.render();
+      }, 100);
     }
 
     // ==============================================================================
