@@ -1,0 +1,50 @@
+{
+  "icmarkets_mt5": {
+    "platform": "MT5",
+    "login": 53138338,
+    "password": "Coy$4Kc35dapBp",
+    "server": "ICMarketsSC-Demo",
+    "type": "demo",
+    "leverage": 30,
+    "balance": 1000.0,
+    "desk": "CAPITAL_PROPIO",
+    "description": "Simulación capital real de 1000$ en CFDs (Apalancamiento 1:30)"
+  },
+  "icmarkets_mt5_cfd_50k": {
+    "platform": "MT5",
+    "login": 53138341,
+    "password": "Coy$4Kc35dapBp",
+    "server": "ICMarketsSC-Demo",
+    "type": "demo",
+    "leverage": 100,
+    "balance": 50000.0,
+    "desk": "PROP_FIRM",
+    "description": "Simulación capital real y/o fondeo de 50000$ en CFDs (Apalancamiento 1:100)"
+  },
+  "icmarkets_mt5_futures_50k": {
+    "platform": "MT5",
+    "login": 53138343,
+    "password": "@D688@eTkVEDAK",
+    "server": "ICMarketsSC-Demo",
+    "type": "demo",
+    "leverage": 100,
+    "balance": 50000.0,
+    "desk": "PROP_FIRM",
+    "description": "Simulación fondeo de 50000$ en futuros CME (Apalancamiento 1:100)"
+  },
+  "icmarkets_ctrader": {
+    "platform": "cTrader",
+    "login": 10130909,
+    "password": "6k9D&cNG$PS2IO",
+    "server": "ICMarketsSC-Demo",
+    "type": "demo"
+  },
+  "ctrader_the5ers_app": {
+    "client_id": "46139_JI2Ln2QqcfGVdXlJ2N9nrTXqItL9WyGBoLJJsGaaQdBamOWed8",
+    "client_secret": "CAPIThhpFAKO5H4DQArQgGFxgPn7jadFkMdBXJhWpFiKcoghtC",
+    "redirect_uri": "http://localhost:5000/callback",
+    "host_live": "live.ctraderapi.com",
+    "host_demo": "demo.ctraderapi.com",
+    "port": 5035
+  }
+}

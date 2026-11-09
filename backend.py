@@ -1026,7 +1026,7 @@ def get_telemetry():
         "total_realized_pnl_usd": total_pnl,
         "mt5": {
             "status": "ONLINE" if live_broker.get("trade_allowed", True) else "OFFLINE",
-            "account": live_broker.get("account", 53120791),
+            "account": live_broker.get("account", 53138338),
             "server": live_broker.get("server", "ICMarketsSC-Demo"),
             "balance": ic_bal,
             "equity": ic_eq,
@@ -1083,7 +1083,7 @@ def get_forward_state(refresh: bool = False):
 
     # Sincronización en directo con el puente MT5
     live_broker_sync = pf_state.get('live_broker_sync', {
-        'account': 53120791,
+        'account': 53138338,
         'server': 'ICMarketsSC-Demo',
         'broker_balance': 984.57,
         'broker_equity': 984.57,
@@ -1104,6 +1104,7 @@ def get_forward_state(refresh: bool = False):
                     'broker_balance': float(a.get('balance', 984.57)),
                     'broker_equity': float(a.get('equity', 984.57)),
                     'currency': a.get('currency', 'USD'),
+                    'leverage': a.get('leverage', 30),
                     'trade_allowed': a.get('trade_allowed', True),
                     'open_positions_count': 0,
                     'last_sync': datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')

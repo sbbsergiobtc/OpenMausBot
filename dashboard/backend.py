@@ -285,7 +285,7 @@ def get_accounts_catalog():
             pass
 
     mt5_sync = s.get('live_broker_sync', {})
-    mt5_acc = str(mt5_sync.get('account') or '53120791')
+    mt5_acc = str(mt5_sync.get('account') or '53138338')
     mt5_srv = str(mt5_sync.get('server') or 'ICMarketsSC-Demo')
     mt5_bal = float(mt5_sync.get('broker_balance') or 984.53)
     mt5_eq = float(mt5_sync.get('broker_equity') or 979.95)
@@ -1878,7 +1878,7 @@ def get_telemetry():
         },
         "mt5": {
             "status": "ONLINE" if live_broker.get("trade_allowed", True) else "OFFLINE",
-            "account": live_broker.get("account", 53120791),
+            "account": live_broker.get("account", 53138338),
             "server": live_broker.get("server", "ICMarketsSC-Demo"),
             "balance": ic_bal,
             "equity": ic_eq,
@@ -1935,7 +1935,7 @@ def get_forward_state(refresh: bool = False):
 
     # Sincronización en directo con el puente MT5
     live_broker_sync = pf_state.get('live_broker_sync', {
-        'account': 53120791,
+        'account': 53138338,
         'server': 'ICMarketsSC-Demo',
         'broker_balance': 984.57,
         'broker_equity': 984.57,
@@ -1956,6 +1956,7 @@ def get_forward_state(refresh: bool = False):
                     'broker_balance': float(a.get('balance', 984.57)),
                     'broker_equity': float(a.get('equity', 984.57)),
                     'currency': a.get('currency', 'USD'),
+                    'leverage': a.get('leverage', 30),
                     'trade_allowed': a.get('trade_allowed', True),
                     'open_positions_count': 0,
                     'last_sync': datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
