@@ -9,6 +9,36 @@ logger = logging.getLogger('mt5_server')
 
 app = Bottle()
 
+import time
+
+_ACCOUNTS_CACHE = {}
+_ACCOUNTS_CACHE_TIME = {}
+
+def get_cached_account(account_target, max_age_sec=120):
+    now = time.time()
+    cfg = get_account_cfg(account_target)
+    if not cfg:
+        return None
+    login = int(cfg['login'])
+
+    curr = mt5.account_info()
+    if curr is not None and curr.login == login:
+        _ACCOUNTS_CACHE[login] = curr._asdict()
+        _ACCOUNTS_CACHE_TIME[login] = now
+        return _ACCOUNTS_CACHE[login]
+
+    if login in _ACCOUNTS_CACHE and (now - _ACCOUNTS_CACHE_TIME.get(login, 0)) < max_age_sec:
+        return _ACCOUNTS_CACHE[login]
+
+    if ensure_account(account_target):
+        acc = mt5.account_info()
+        if acc:
+            _ACCOUNTS_CACHE[login] = acc._asdict()
+            _ACCOUNTS_CACHE_TIME[login] = now
+            return _ACCOUNTS_CACHE[login]
+    return _ACCOUNTS_CACHE.get(login)
+
+
 def get_brokers_cfg():
     try:
         with open('Z:/root/AlgrokQuant/config/brokers.json') as f:
@@ -22,12 +52,12 @@ def get_account_cfg(account_target=None):
     if not account_target:
         return brokers.get('icmarkets_mt5')
     tgt = str(account_target).strip().upper()
-    if tgt in ['53138338', 'CAPITAL_PROPIO', 'RETAIL', '1000']:
+    if tgt in ['53138338', 'CAPITAL_PROPIO', 'RETAIL', '1000', 'CAPITAL_PROPIO_1K']:
         return brokers.get('icmarkets_mt5')
-    if tgt in ['53138343', 'PROP_FIRM', 'FUTURES', 'PROP', '50000', '50K']:
-        return brokers.get('icmarkets_mt5_futures_50k')
-    if tgt in ['53138341', 'CFD_50K']:
+    if tgt in ['53138341', 'CFD_50K', 'PROP_FIRM_CFD', 'CFD', 'PROP_CFD']:
         return brokers.get('icmarkets_mt5_cfd_50k')
+    if tgt in ['53138343', 'PROP_FIRM', 'FUTURES', 'PROP', '50000', '50K', 'PROP_FIRM_FUTURES', 'PROP_FUTURES']:
+        return brokers.get('icmarkets_mt5_futures_50k')
     return brokers.get('icmarkets_mt5')
 
 def ensure_connected():
@@ -119,15 +149,15 @@ def get_account():
 @app.route('/accounts_summary', method='GET')
 def get_accounts_summary():
     ensure_connected()
-    summary = {'status': 'ok'}
-    # 1. Capital Propio (53138338)
-    if ensure_account('CAPITAL_PROPIO'):
-        acc_cap = mt5.account_info()
-        summary['capital_propio'] = acc_cap._asdict() if acc_cap else None
-    # 2. Prop Firm 50k (53138343)
-    if ensure_account('PROP_FIRM'):
-        acc_prop = mt5.account_info()
-        summary['prop_firm'] = acc_prop._asdict() if acc_prop else None
+    force_refresh = request.query.get('refresh', '').lower() in ['1', 'true']
+    max_age = 0 if force_refresh else 120
+    summary = {
+        'status': 'ok',
+        'capital_propio': get_cached_account('CAPITAL_PROPIO', max_age_sec=max_age),
+        'prop_firm_cfd': get_cached_account('PROP_FIRM_CFD', max_age_sec=max_age),
+        'prop_firm_futures': get_cached_account('PROP_FIRM_FUTURES', max_age_sec=max_age),
+    }
+    summary['prop_firm'] = summary.get('prop_firm_cfd') or summary.get('prop_firm_futures')
     curr = mt5.account_info()
     summary['current_login'] = curr.login if curr else None
     return summary

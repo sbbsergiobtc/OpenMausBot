@@ -13,7 +13,7 @@ logger = logging.getLogger("MT5Client")
 
 
 class MT5Client:
-    def __init__(self, base_url: str = "http://127.0.0.1:8001", timeout: float = 12.0):
+    def __init__(self, base_url: str = "http://127.0.0.1:8001", timeout: float = 25.0):
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
 

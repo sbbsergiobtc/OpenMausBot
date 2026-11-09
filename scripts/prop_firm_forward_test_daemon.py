@@ -278,7 +278,9 @@ def evaluate_eur_1h(df_1h: pd.DataFrame) -> dict:
 def sync_broker_state(state: dict) -> dict:
     balances = {
         'CAPITAL_PROPIO': 1000.0,
-        'PROP_FIRM': 50000.0
+        'PROP_FIRM': 50000.0,
+        'PROP_FIRM_CFD': 50000.0,
+        'PROP_FIRM_FUTURES': 50000.0
     }
     if not mt5.is_healthy():
         print("  [MT5] Puente no responde en 127.0.0.1:8001.")
@@ -286,13 +288,17 @@ def sync_broker_state(state: dict) -> dict:
     try:
         summary = mt5.get_accounts_summary()
         cap_acc = summary.get('capital_propio') or {}
-        prop_acc = summary.get('prop_firm') or {}
+        cfd_acc = summary.get('prop_firm_cfd') or {}
+        fut_acc = summary.get('prop_firm_futures') or {}
 
         cap_balance = float(cap_acc.get('balance', 1000.0))
-        prop_balance = float(prop_acc.get('balance', 50000.0))
+        cfd_balance = float(cfd_acc.get('balance', 50000.0))
+        fut_balance = float(fut_acc.get('balance', 50000.0))
 
         balances['CAPITAL_PROPIO'] = cap_balance
-        balances['PROP_FIRM'] = prop_balance
+        balances['PROP_FIRM_CFD'] = cfd_balance
+        balances['PROP_FIRM_FUTURES'] = fut_balance
+        balances['PROP_FIRM'] = cfd_balance
 
         state['live_broker_sync'] = {
             'account': cap_acc.get('login', 53138338),
@@ -302,12 +308,13 @@ def sync_broker_state(state: dict) -> dict:
             'currency': cap_acc.get('currency', 'USD'),
             'trade_allowed': cap_acc.get('trade_allowed', True),
             'capital_propio': cap_acc,
-            'prop_firm': prop_acc,
+            'prop_firm_cfd': cfd_acc,
+            'prop_firm_futures': fut_acc,
             'last_sync': datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
         }
-        print(f"  [MT5 SYNC MULTICUENTA] Capital Propio ({cap_acc.get('login')}): ${cap_balance:,.2f} USD | Prop Firm ({prop_acc.get('login')}): ${prop_balance:,.2f} USD")
+        print(f"  [MT5 SYNC TRIPLE CUENTA] Cap. Propio ({cap_acc.get('login')}): ${cap_balance:,.2f} | Fondeo CFDs ({cfd_acc.get('login')}): ${cfd_balance:,.2f} | Fondeo Futuros ({fut_acc.get('login')}): ${fut_balance:,.2f} USD")
     except Exception as e:
-        print(f"  [MT5] Error sincronizando cuentas duales: {e}")
+        print(f"  [MT5] Error sincronizando cuentas: {e}")
     return balances
 
 

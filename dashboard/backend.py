@@ -1945,12 +1945,13 @@ def get_forward_state(refresh: bool = False):
     })
     mt5_open_positions = []
     try:
-        r_sum = requests.get('http://127.0.0.1:8001/accounts_summary', timeout=3.0)
+        r_sum = requests.get('http://127.0.0.1:8001/accounts_summary', timeout=10.0)
         if r_sum.status_code == 200:
             sum_data = r_sum.json()
             if sum_data.get('status') == 'ok':
                 cap_acc = sum_data.get('capital_propio') or {}
-                prop_acc = sum_data.get('prop_firm') or {}
+                cfd_acc = sum_data.get('prop_firm_cfd') or {}
+                fut_acc = sum_data.get('prop_firm_futures') or {}
                 live_broker_sync = {
                     'account': cap_acc.get('login', 53138338),
                     'server': cap_acc.get('server', 'ICMarketsSC-Demo'),
@@ -1960,7 +1961,9 @@ def get_forward_state(refresh: bool = False):
                     'leverage': cap_acc.get('leverage', 30),
                     'trade_allowed': cap_acc.get('trade_allowed', True),
                     'capital_propio': cap_acc,
-                    'prop_firm': prop_acc,
+                    'prop_firm_cfd': cfd_acc,
+                    'prop_firm_futures': fut_acc,
+                    'prop_firm': cfd_acc,
                     'open_positions_count': 0,
                     'last_sync': datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
                 }

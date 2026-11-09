@@ -13,12 +13,12 @@
   "icmarkets_mt5_cfd_50k": {
     "platform": "MT5",
     "login": 53138341,
-    "password": "Coy$4Kc35dapBp",
+    "password": "6k9D&cNG$PS2IO",
     "server": "ICMarketsSC-Demo",
     "type": "demo",
     "leverage": 100,
     "balance": 50000.0,
-    "desk": "PROP_FIRM",
+    "desk": "PROP_FIRM_CFD",
     "description": "Simulación capital real y/o fondeo de 50000$ en CFDs (Apalancamiento 1:100)"
   },
   "icmarkets_mt5_futures_50k": {
@@ -29,7 +29,7 @@
     "type": "demo",
     "leverage": 100,
     "balance": 50000.0,
-    "desk": "PROP_FIRM",
+    "desk": "PROP_FIRM_FUTURES",
     "description": "Simulación fondeo de 50000$ en futuros CME (Apalancamiento 1:100)"
   },
   "icmarkets_ctrader": {
