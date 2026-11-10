@@ -3729,7 +3729,7 @@
       }
     }
 
-    function renderMainEquityChart(curveData) {
+    function renderMainEquityChart(curveData, deskModeParam) {
       if (!curveData || curveData.length === 0) return;
       const chartEl = document.getElementById('chart-main-equity') || document.querySelector('#chart-main-equity') || document.getElementById('main-equity-chart');
       if (!chartEl) {
@@ -3737,16 +3737,32 @@
         return;
       }
 
+      const activeDesk = deskModeParam || (currentAnalyticsData && currentAnalyticsData.desk_mode) || (typeof currentDeskMode !== 'undefined' ? currentDeskMode : 'CAPITAL_PROPIO');
+      const isPropDesk = (activeDesk === 'PROP_FIRM');
+
       // Formatear eje X en español DD/MM/AAAA (autoajustable por ApexCharts)
       const categories = curveData.map(d => formatSpanishDate(d.timestamp));
-      const balances = curveData.map(d => d.balance);
-      const isEval = currentBifocalLens === 'EVALUATION';
-      const initBal = Number(curveData[0].balance) || 100000;
+      const balances = curveData.map(d => Number(d.balance));
+      const isEval = isPropDesk && (currentBifocalLens === 'EVALUATION');
+      const kpiInitBal = currentAnalyticsData && currentAnalyticsData.kpis && Number(currentAnalyticsData.kpis.initial_balance);
+      const initBal = kpiInitBal || Number(curveData[0].balance) || (isPropDesk ? 100000 : 1000);
       const targetVal = initBal * 1.08;
       const eodDdLimitVal = initBal * 0.96;
+      const fundedMilestoneVal = initBal * 1.10;
+
+      // Garantizar que el eje Y incluya siempre los umbrales de referencia visibles (ej. Límite EOD -4%)
+      let minRef = Math.min(...balances, initBal);
+      let maxRef = Math.max(...balances, initBal);
+      if (isPropDesk) {
+        minRef = Math.min(minRef, eodDdLimitVal);
+        maxRef = Math.max(maxRef, isEval ? targetVal : fundedMilestoneVal);
+      }
+      const span = Math.max(maxRef - minRef, initBal * 0.04, 1);
+      const yAxisMin = Math.floor((minRef - span * 0.08) * 100) / 100;
+      const yAxisMax = Math.ceil((maxRef + span * 0.08) * 100) / 100;
 
       let annotationsConfig = {};
-      if (isEval) {
+      if (isPropDesk && isEval) {
         annotationsConfig = {
           yaxis: [
             {
@@ -3771,17 +3787,17 @@
             }
           ]
         };
-      } else {
+      } else if (isPropDesk) {
         annotationsConfig = {
           yaxis: [
             {
-              y: initBal * 1.10,
+              y: fundedMilestoneVal,
               borderColor: '#3C45A5',
               strokeDashArray: 4,
               label: {
                 borderColor: '#3C45A5',
                 style: { color: '#ffffff', background: '#3C45A5', fontSize: '10px', fontWeight: 'bold' },
-                text: `Hito Cosecha Retiro ($${(initBal * 1.10).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})})`
+                text: `Hito Cosecha Retiro ($${fundedMilestoneVal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})})`
               }
             },
             {
@@ -3793,10 +3809,40 @@
                 style: { color: '#ffffff', background: '#48484A', fontSize: '10px', fontWeight: 'bold' },
                 text: `Buffer Capital Base ($${initBal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})})`
               }
+            },
+            {
+              y: eodDdLimitVal,
+              borderColor: '#D70015',
+              strokeDashArray: 4,
+              label: {
+                borderColor: '#D70015',
+                style: { color: '#ffffff', background: '#DC2626', fontSize: '10px', fontWeight: 'bold' },
+                text: `Límite EOD (-4% / $${eodDdLimitVal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})})`
+              }
+            }
+          ]
+        };
+      } else {
+        annotationsConfig = {
+          yaxis: [
+            {
+              y: initBal,
+              borderColor: '#6E6E73',
+              strokeDashArray: 3,
+              label: {
+                borderColor: '#6E6E73',
+                style: { color: '#ffffff', background: '#48484A', fontSize: '10px', fontWeight: 'bold' },
+                text: `Capital Base ($${initBal.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})})`
+              }
             }
           ]
         };
       }
+
+      const seriesName = !isPropDesk
+        ? 'Balance Capital Propio ($)'
+        : (isEval ? 'Balance Reto Evaluación ($)' : 'Balance Cartera Fondeada ($)');
+      const lineColor = (isPropDesk && !isEval) ? '#3C45A5' : '#10B981';
 
       const options = {
         chart: {
@@ -3811,7 +3857,7 @@
         },
         theme: { mode: 'light' },
         stroke: { curve: 'smooth', width: 2.2 },
-        colors: isEval ? ['#10B981'] : ['#3C45A5'],
+        colors: [lineColor],
         fill: {
           type: 'gradient',
           gradient: {
@@ -3823,7 +3869,7 @@
         },
         dataLabels: { enabled: false },
         series: [{
-          name: isEval ? 'Balance Reto Evaluación ($)' : 'Balance Cartera Fondeada ($)',
+          name: seriesName,
           data: balances
         }],
         xaxis: {
@@ -3838,6 +3884,8 @@
           axisTicks: { show: false }
         },
         yaxis: {
+          min: yAxisMin,
+          max: yAxisMax,
           labels: {
             formatter: (val) => '$' + Number(val).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0}),
             style: { colors: '#6E6E73', fontSize: '11px', fontFamily: 'JetBrains Mono, monospace' }
@@ -3862,7 +3910,7 @@
             const pnlStr = sign + '$' + pnlFromStart.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' USD';
             
             let extraHtml = '';
-            if (isEval) {
+            if (isPropDesk && isEval) {
               const distToTarget = targetVal - Number(val);
               const targetStatus = distToTarget <= 0 
                 ? '<span class="text-[#065F46] font-bold">✓ ¡Reto Superado!</span>'
@@ -3873,12 +3921,20 @@
                   ${targetStatus}
                 </div>
               `;
-            } else {
+            } else if (isPropDesk) {
               const payoutAvailable = pnlFromStart > 0 ? (pnlFromStart * 0.80).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00';
               extraHtml = `
                 <div class="text-[11px] border-t border-[#E5E5EA] pt-1 mt-1 text-[#6E6E73] flex justify-between gap-2">
                   <span>Payout Retirable (80%):</span>
                   <span class="text-[#3C45A5] font-bold font-mono">+$${payoutAvailable} USD</span>
+                </div>
+              `;
+            } else {
+              const pctRet = initBal > 0 ? ((pnlFromStart / initBal) * 100).toFixed(2) : '0.00';
+              extraHtml = `
+                <div class="text-[11px] border-t border-[#E5E5EA] pt-1 mt-1 text-[#6E6E73] flex justify-between gap-2">
+                  <span>Retorno Acumulado:</span>
+                  <span class="${pnlFromStart >= 0 ? 'text-[#065F46]' : 'text-[#D70015]'} font-bold font-mono">${pnlFromStart >= 0 ? '+' : ''}${pctRet}%</span>
                 </div>
               `;
             }
@@ -4131,8 +4187,8 @@
       if (document.getElementById('stat-win-streak')) document.getElementById('stat-win-streak').innerText = data.max_win_streak || 0;
       if (document.getElementById('stat-loss-streak')) document.getElementById('stat-loss-streak').innerText = data.max_loss_streak || 0;
 
-      // 3. Renderizar Gráficos con Animaciones
-      if (data.balance_curve) renderMainEquityChart(data.balance_curve);
+      // 3. Renderizar Gráficos sin animaciones bloqueantes
+      if (data.balance_curve) renderMainEquityChart(data.balance_curve, deskMode);
       if (data.dow_distribution) renderDowChart(data.dow_distribution);
       if (data.hourly_distribution) renderHourlyChart(data.hourly_distribution);
       if (data.streaks_analysis) renderStreaksAnalysis(data.streaks_analysis, data.balance_curve);
@@ -4685,9 +4741,13 @@
     function renderTradesTable(trades) {
       currentFilteredTrades = trades || allTrades;
       const tbody = document.getElementById('trades-table-body');
+      const isPropDesk = (typeof currentAccountFilter === 'string' && (currentAccountFilter.startsWith('PROP') || currentAccountFilter === 'ALL_PROP' || currentAccountFilter === 'PORT-NDX-SPX' || currentAccountFilter.startsWith('RES-FUT') || currentAccountFilter.startsWith('RES-EUR')))
+        || (typeof currentDeskMode !== 'undefined' && currentDeskMode === 'PROP_FIRM');
       const thProfit = document.getElementById('th-trades-profit');
       if (thProfit) {
-        thProfit.innerText = currentBifocalLens === 'EVALUATION' ? 'Beneficio Neto (Consistencia 40%)' : 'Beneficio Neto (80% Payout)';
+        thProfit.innerText = isPropDesk
+          ? (currentBifocalLens === 'EVALUATION' ? 'Beneficio Neto (Consistencia 40%)' : 'Beneficio Neto (80% Payout)')
+          : 'Beneficio Neto';
       }
       if (!tbody) return;
       tbody.innerHTML = '';
@@ -4769,13 +4829,13 @@
               <span class="px-2 py-0.5 rounded ${isWin ? 'bg-emerald-500/10' : 'bg-rose-500/10'} font-semibold">
                 ${isWin ? '+' : ''}$${Number(t.net_pnl_usd).toFixed(2)}
               </span>
-              ${currentBifocalLens === 'EVALUATION' ? (
+              ${isPropDesk ? (currentBifocalLens === 'EVALUATION' ? (
                 t.clamped 
                   ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30" title="Tope del 40% aplicado: Original $${t.original_pnl_usd}">40% CLAMP</span>`
                   : (isWin ? `<span class="px-1 py-0.5 rounded text-[8px] font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" title="Consistencia OK individual (<40%)">PASS</span>` : '')
               ) : (
                 isWin ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-500/15 text-indigo-400 border border-indigo-500/25 font-mono" title="80% Retiro Trader">80% PAYOUT: +$${(Number(t.net_pnl_usd) * 0.8).toFixed(0)}</span>` : ''
-              )}
+              )) : ''}
             </div>
           </td>
           <td class="py-2.5 px-3 text-right text-cyan-300 font-bold">$${Number(t.running_balance).toLocaleString('es-ES', {minimumFractionDigits: 2})}</td>
