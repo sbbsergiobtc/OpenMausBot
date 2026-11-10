@@ -18,8 +18,8 @@ import pandas as pd
 import numpy as np
 import zoneinfo
 from datetime import datetime, timezone, timedelta
-from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import requests
@@ -3955,6 +3955,8 @@ TEXT_PREFS_FILE = BASE_DIR / 'data/text_preferences.json'
 class TextPreferencePayload(BaseModel):
     key: str
     text: str
+    oldText: Optional[str] = None
+    propagate: bool = True
 
 
 class TableColumnPreferencePayload(BaseModel):
@@ -4088,28 +4090,133 @@ def delete_nav_preference():
     return _delete_json_pref(NAV_PREFS_FILE, "tabs")
 
 
+_TEXT_PREFS_CACHE: Optional[dict] = None
+_PROTECTED_JSON_KEYS = {
+    "id", "strategy_id", "account_id", "symbol", "asset", "stage", "status",
+    "desk_mode", "desk_type", "branch", "timestamp", "timestamp_utc", "timestamp_es",
+    "date", "time", "timeframe", "key", "gridId", "tableId", "exchange", "vehicle"
+}
+
+
+def _normalize_text_prefs(raw: dict) -> dict:
+    if not isinstance(raw, dict):
+        return {"by_key": {}, "aliases": {}}
+    if "by_key" in raw or "aliases" in raw:
+        return {
+            "by_key": dict(raw.get("by_key") or {}),
+            "aliases": dict(raw.get("aliases") or {}),
+        }
+    return {"by_key": dict(raw), "aliases": {}}
+
+
+def _get_text_prefs_cached() -> dict:
+    global _TEXT_PREFS_CACHE
+    if _TEXT_PREFS_CACHE is None:
+        _TEXT_PREFS_CACHE = _normalize_text_prefs(_load_json_prefs(TEXT_PREFS_FILE))
+    return _TEXT_PREFS_CACHE
+
+
+def _save_text_prefs_cached(data: dict):
+    global _TEXT_PREFS_CACHE
+    _TEXT_PREFS_CACHE = data
+    TEXT_PREFS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(TEXT_PREFS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+
+def _apply_display_aliases(obj: Any, aliases: Dict[str, str], parent_key: str = "") -> Any:
+    if isinstance(obj, dict):
+        return {
+            k: (v if k in _PROTECTED_JSON_KEYS else _apply_display_aliases(v, aliases, k))
+            for k, v in obj.items()
+        }
+    if isinstance(obj, list):
+        return [_apply_display_aliases(item, aliases, parent_key) for item in obj]
+    if isinstance(obj, str) and obj in aliases and not obj.isupper():
+        return aliases[obj]
+    return obj
+
+
+@app.middleware("http")
+async def propagate_ui_text_aliases_middleware(request: Request, call_next):
+    response = await call_next(request)
+    path = request.url.path
+    if (
+        request.method != "GET"
+        or not path.startswith("/api/")
+        or path.startswith(("/api/text_preferences", "/api/nav_preferences", "/api/kpi_preferences", "/api/layout_preferences", "/api/table_column_preferences", "/api/chart", "/api/trade_history", "/api/ping"))
+    ):
+        return response
+
+    prefs = _get_text_prefs_cached()
+    aliases = prefs.get("aliases") or {}
+    if not aliases:
+        return response
+
+    ctype = response.headers.get("content-type", "")
+    if "application/json" not in ctype:
+        return response
+
+    body_chunks = []
+    async for chunk in response.body_iterator:
+        body_chunks.append(chunk)
+    raw_bytes = b"".join(body_chunks)
+    try:
+        parsed = json.loads(raw_bytes.decode("utf-8"))
+        patched = _apply_display_aliases(parsed, aliases)
+        new_body = json.dumps(patched, ensure_ascii=False).encode("utf-8")
+        headers = dict(response.headers)
+        headers.pop("content-length", None)
+        return Response(content=new_body, status_code=response.status_code, headers=headers, media_type="application/json")
+    except Exception:
+        return Response(content=raw_bytes, status_code=response.status_code, headers=dict(response.headers))
+
+
 @app.get("/api/text_preferences")
 def get_text_preferences():
-    return _load_json_prefs(TEXT_PREFS_FILE)
+    return _get_text_prefs_cached()
 
 
 @app.post("/api/text_preferences")
 def save_text_preference(payload: TextPreferencePayload):
-    _save_json_pref(TEXT_PREFS_FILE, payload.key, payload.text)
-    return {"status": "ok", "key": payload.key, "text": payload.text}
+    prefs = _get_text_prefs_cached()
+    by_key = dict(prefs.get("by_key") or {})
+    aliases = dict(prefs.get("aliases") or {})
+
+    by_key[payload.key] = payload.text
+    if payload.propagate and payload.oldText:
+        old_clean = payload.oldText.strip()
+        new_clean = payload.text.strip()
+        if len(old_clean) >= 2 and old_clean != new_clean and not old_clean.isupper():
+            # Actualizar cadenas encadenadas de alias existentes -> new_clean
+            for src, dst in list(aliases.items()):
+                if dst == old_clean:
+                    aliases[src] = new_clean
+            aliases[old_clean] = new_clean
+
+    updated = {"by_key": by_key, "aliases": aliases}
+    try:
+        _save_text_prefs_cached(updated)
+        return {"status": "ok", "key": payload.key, "text": payload.text, "aliases_count": len(aliases)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.delete("/api/text_preferences")
 def delete_text_preferences(key: str = Query(None)):
+    prefs = _get_text_prefs_cached()
     if key:
-        return _delete_json_pref(TEXT_PREFS_FILE, key)
-    if TEXT_PREFS_FILE.exists():
-        try:
-            with open(TEXT_PREFS_FILE, 'w', encoding='utf-8') as f:
-                json.dump({}, f, indent=2)
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
-    return {"status": "ok", "cleared": True}
+        by_key = dict(prefs.get("by_key") or {})
+        by_key.pop(key, None)
+        updated = {"by_key": by_key, "aliases": dict(prefs.get("aliases") or {})}
+        _save_text_prefs_cached(updated)
+        return {"status": "ok", "deleted": key}
+    updated = {"by_key": {}, "aliases": {}}
+    try:
+        _save_text_prefs_cached(updated)
+        return {"status": "ok", "cleared": True}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/api/strategy_vault")
