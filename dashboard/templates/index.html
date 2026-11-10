@@ -446,13 +446,13 @@
       position: fixed;
       pointer-events: none;
       z-index: 999999;
-      background: rgba(255, 255, 255, 0.96);
+      background: rgba(255, 255, 255, 0.98);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       border: 1.5px solid #3C45A5;
-      box-shadow: 0 16px 36px -4px rgba(60, 69, 165, 0.22), 0 6px 16px rgba(0, 0, 0, 0.08);
-      border-radius: 8px;
-      padding: 7px 14px;
+      box-shadow: 0 22px 44px -6px rgba(60, 69, 165, 0.28), 0 8px 18px rgba(0, 0, 0, 0.10);
+      border-radius: 10px;
+      padding: 8px 15px;
       font-size: 11px;
       font-weight: 700;
       color: #1D1D1F;
@@ -461,8 +461,9 @@
       align-items: center;
       gap: 6px;
       white-space: nowrap;
+      transform: scale(1.06);
       transform-origin: center center;
-      will-change: transform;
+      will-change: transform, left, top;
     }
     .col-drop-indicator {
       position: absolute;
@@ -483,7 +484,8 @@
       0% { background-color: rgba(60, 69, 165, 0.24); }
       100% { background-color: transparent; }
     }
-    .btn-reset-cols {
+    .btn-reset-cols,
+    .btn-reset-kpis {
       display: inline-flex;
       align-items: center;
       gap: 4px;
@@ -498,10 +500,85 @@
       transition: all 0.15s ease;
       white-space: nowrap;
     }
-    .btn-reset-cols:hover {
+    .btn-reset-cols:hover,
+    .btn-reset-kpis:hover {
       background: #E5E5EA;
       color: #181A20;
       border-color: #3C45A5;
+    }
+
+    /* =========================================================================
+       ALGROK INSTITUTIONAL - KPI & CARD LIVE FLIP DRAG & REORDER SYSTEM
+       ========================================================================= */
+    .algrok-kpi-grid {
+      position: relative;
+    }
+    .algrok-kpi-card {
+      position: relative;
+      cursor: grab;
+      user-select: none;
+      -webkit-user-select: none;
+      will-change: transform;
+    }
+    .algrok-kpi-card:active {
+      cursor: grabbing;
+    }
+    .kpi-drag-grip {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #8E8E93;
+      background: rgba(242, 242, 247, 0.85);
+      border: 1px solid rgba(229, 229, 234, 0.8);
+      font-size: 9px;
+      opacity: 0;
+      pointer-events: auto;
+      touch-action: none;
+      cursor: grab;
+      z-index: 15;
+      transition: opacity 0.16s ease, color 0.15s ease, background-color 0.15s ease;
+    }
+    .algrok-kpi-card:hover > .kpi-drag-grip {
+      opacity: 0.9;
+    }
+    .kpi-drag-grip:hover {
+      opacity: 1 !important;
+      color: #3C45A5;
+      background: #EEF2FF;
+      border-color: #C7D2FE;
+    }
+    .kpi-is-dragging {
+      opacity: 0.22 !important;
+      background: rgba(60, 69, 165, 0.06) !important;
+      border: 1.5px dashed #3C45A5 !important;
+      box-shadow: inset 0 0 0 1px rgba(60, 69, 165, 0.15) !important;
+      transform: scale(0.97);
+    }
+    .kpi-drag-ghost {
+      position: fixed;
+      pointer-events: none !important;
+      z-index: 999999;
+      margin: 0 !important;
+      background: #FFFFFF !important;
+      border: 1.5px solid #3C45A5 !important;
+      box-shadow: 0 24px 48px -8px rgba(60, 69, 165, 0.28), 0 10px 22px rgba(0, 0, 0, 0.12) !important;
+      transform: scale(1.055) rotate(0.4deg);
+      transform-origin: center center;
+      will-change: transform, left, top;
+      opacity: 0.98;
+    }
+    .kpi-reorder-flash {
+      animation: kpiFlashAnim 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes kpiFlashAnim {
+      0% { box-shadow: 0 0 0 3px rgba(60, 69, 165, 0.28); }
+      100% { box-shadow: none; }
     }
 
   
@@ -715,7 +792,7 @@
           </div>
 
           <!-- ==================== 6 TARJETAS DE KPI INDEPENDIENTES (APPLE / LINEAR STYLE) ==================== -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
+          <div data-kpi-grid="cockpit-kpi-main" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
             
             <!-- KPI 1: Balance Total en Forward Test -->
             <div class="p-4 sm:p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
@@ -792,7 +869,7 @@
           </div>
 
           <!-- ==================== CUENTAS ACTIVAS: MODO CAPITAL PROPIO ==================== -->
-          <div id="cockpit-accounts-cap-propio" class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div id="cockpit-accounts-cap-propio" data-kpi-grid="cockpit-accounts-cap-propio" class="grid grid-cols-1 lg:grid-cols-2 gap-5">
             
             <!-- TARJETA CUENTA 1: IC MARKETS MT5 DEMO (CAPITAL PROPIO TRADFI) -->
             <div class="p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs space-y-4 hover:border-[#D1D1D6] transition">
@@ -814,7 +891,7 @@
                 </button>
               </div>
 
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 bg-[#FAFAFC] p-3.5 rounded-xl border border-[#E5E5EA] text-xs font-mono">
+              <div data-kpi-grid="cockpit-cap-mt5-kpis" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 bg-[#FAFAFC] p-3.5 rounded-xl border border-[#E5E5EA] text-xs font-mono">
                 <div>
                   <span class="text-[10px] text-[#86868B] block uppercase tracking-wider mb-0.5">Balance</span>
                   <span id="cockpit-mt5-balance" class="font-bold text-[#1D1D1F] text-sm">$--.--</span>
@@ -854,7 +931,7 @@
                 </button>
               </div>
 
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 bg-[#FAFAFC] p-3.5 rounded-xl border border-[#E5E5EA] text-xs font-mono">
+              <div data-kpi-grid="cockpit-cap-hl-kpis" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 bg-[#FAFAFC] p-3.5 rounded-xl border border-[#E5E5EA] text-xs font-mono">
                 <div>
                   <span class="text-[10px] text-[#86868B] block uppercase tracking-wider mb-0.5">Balance</span>
                   <span id="cockpit-hl-balance" class="font-bold text-[#1D1D1F] text-sm">--.-- USDC</span>
@@ -877,7 +954,7 @@
           </div>
 
           <!-- ==================== CUENTAS ACTIVAS: MODO FONDEO (PROP FIRM) ==================== -->
-          <div id="cockpit-accounts-prop-firm" class="grid grid-cols-1 lg:grid-cols-2 gap-5 hidden">
+          <div id="cockpit-accounts-prop-firm" data-kpi-grid="cockpit-accounts-prop-firm" class="grid grid-cols-1 lg:grid-cols-2 gap-5 hidden">
             
             <!-- TARJETA CUENTA 1: PROP FIRM CFD (#53138341 · $50K LIVE MT5) -->
             <div class="p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs space-y-4 hover:border-[#D1D1D6] transition">
@@ -900,7 +977,7 @@
                 </button>
               </div>
 
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 bg-[#FAFAFC] p-3.5 rounded-xl border border-[#E5E5EA] text-xs font-mono">
+              <div data-kpi-grid="cockpit-pf-cfd-kpis" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 bg-[#FAFAFC] p-3.5 rounded-xl border border-[#E5E5EA] text-xs font-mono">
                 <div>
                   <span class="text-[10px] text-[#86868B] block uppercase tracking-wider mb-0.5">Balance</span>
                   <span id="cockpit-cfd-balance" class="font-bold text-[#1D1D1F] text-sm">$--.--</span>
@@ -949,7 +1026,7 @@
                 </button>
               </div>
 
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 bg-[#FAFAFC] p-3.5 rounded-xl border border-[#E5E5EA] text-xs font-mono">
+              <div data-kpi-grid="cockpit-pf-fut-kpis" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 bg-[#FAFAFC] p-3.5 rounded-xl border border-[#E5E5EA] text-xs font-mono">
                 <div>
                   <span class="text-[10px] text-[#86868B] block uppercase tracking-wider mb-0.5">Balance</span>
                   <span id="cockpit-fut-balance" class="font-bold text-[#1D1D1F] text-sm">$--.--</span>
@@ -1046,7 +1123,7 @@
       </div>
 
       <!-- Banner Dinámico de Métricas Bifásicas (Prop Firm KPIs - Solo en Fondeo) -->
-      <div id="bifocal-metrics-hud" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div id="bifocal-metrics-hud" data-kpi-grid="bifocal-metrics-hud" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- KPI 1: Pass Rate Monte Carlo -->
         <div class="rounded-xl p-4 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between">
           <div class="flex items-center gap-2 mb-1.5">
@@ -1157,7 +1234,7 @@
         </div>
 
         <!-- 6 Métricas y KPIs de la Estrategia Seleccionada -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div data-kpi-grid="backtests-kpi-main" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           <!-- Balance Final -->
           <div class="rounded-xl p-4 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between min-w-0">
             <div class="flex items-center gap-2 mb-1.5">
@@ -1297,7 +1374,7 @@
           </div>
           
           <!-- KPIs Resumen de Rachas -->
-          <div class="flex items-center gap-2 flex-wrap">
+          <div data-kpi-grid="backtests-streaks-kpis" class="flex items-center gap-2 flex-wrap">
             <div id="streak-kpi-passes-card" class="bg-[#FAFAFC] px-3.5 py-2 rounded-xl border border-[#E5E5EA] hidden">
               <div class="flex items-center gap-1.5 mb-1">
                 <i class="fa-solid fa-trophy text-[#1D1D1F] text-[10px]"></i>
@@ -1380,7 +1457,7 @@
         </div>
 
         <!-- 6 Tarjetas de Análisis Estadístico -->
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div data-kpi-grid="backtests-kpi-edge" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           
           <!-- 1. Mejor Día de la Semana -->
           <div class="rounded-xl p-4 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between min-w-0">
@@ -1548,7 +1625,7 @@
     <!-- ==================== PESTAÑA 3: FASE 2 - FORWARD TESTS (SIMULACIÓN EN VIVO) ==================== -->
     <div id="tab-content-forward" class="tab-pane hidden space-y-6">
       <!-- Monitor de Estado de Mercados (Estado Real por Horario UTC/ET) -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div data-kpi-grid="forward-markets-bar" class="grid grid-cols-1 md:grid-cols-3 gap-3">
         
         <div class="glass-card rounded-xl px-4 py-3 border border-[#E5E5EA] flex justify-between items-center" id="ft-cme-card">
           <div>
@@ -1577,7 +1654,7 @@
       </div>
 
       <!-- Cuentas en Forward Test (Tarjetas KPI Estilo Cockpit General) -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <div data-kpi-grid="forward-accounts-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-5">
         
         <!-- Tarjeta Cuenta 1: TradFi Broker MT5 / Prop Firm CFD (#53138341) -->
         <div id="ft-propfirm-card" class="glass-card rounded-2xl p-5 space-y-4 border-l-4 border-cyan-400" style="transition: all 0.3s ease;">
@@ -1599,7 +1676,7 @@
           </div>
 
           <!-- Grid de 6 KPIs en Estilo Apple/Linear Unificado -->
-          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+          <div data-kpi-grid="forward-card1-kpis" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
             <!-- KPI 1: Balance en Vivo -->
             <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
               <div class="flex items-center justify-between mb-1.5">
@@ -1729,7 +1806,7 @@
           </div>
 
           <!-- Grid de 6 KPIs en Estilo Apple/Linear Unificado -->
-          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+          <div data-kpi-grid="forward-card2-kpis" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
             <!-- KPI 1: Balance en Vivo -->
             <div class="p-3 rounded-xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
               <div class="flex items-center justify-between mb-1.5">
@@ -2032,7 +2109,7 @@
       </div>
 
       <!-- 4 KPIs Maestros de Contraste A/B (Libro A vs Libro B vs Alfa Orquestador) -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div data-kpi-grid="orchestrator-kpi-main" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Libro A: Individuales sin filtro -->
         <div class="glass-card rounded-2xl p-4 space-y-1.5">
           <div class="flex items-center justify-between">
@@ -2087,7 +2164,7 @@
       </div>
 
       <!-- Desglose A/B por las 3 Mesas Institucionales (Capital Propio vs Futuros CME vs CFDs) -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="orch-desk-breakdown-grid">
+      <div data-kpi-grid="orch-desk-breakdown-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4" id="orch-desk-breakdown-grid">
         <!-- Populado dinámicamente por renderRegimeOrchestratorUI() -->
       </div>
 
@@ -2368,7 +2445,7 @@
         </div>
 
         <!-- KPIs Resumen de la Matriz Tri-Faceta -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pt-4">
+        <div data-kpi-grid="trifacet-kpi-main" class="grid grid-cols-2 md:grid-cols-4 gap-3 pt-4">
           <div class="bg-[#FAFAFC] p-3 rounded-xl border border-[#E5E5EA]">
             <div class="text-[11px] text-[#6E6E73] font-mono uppercase">Modelos en Matriz</div>
             <div class="text-base font-bold text-[#1D1D1F] font-mono mt-0.5" id="tf-stat-total">-- Estrategias</div>
@@ -2576,7 +2653,7 @@
             <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center">
               <i class="fa-solid fa-gavel text-cyan-400 mr-2"></i> Umbrales Mandatorios de Aprobación (Reglas de Sergio)
             </h4>
-            <div class="grid grid-cols-2 gap-2 text-[11px] font-mono">
+            <div data-kpi-grid="lab-thresholds-grid" class="grid grid-cols-2 gap-2 text-[11px] font-mono">
               <div class="p-2 rounded bg-dark-950/60 border border-slate-800">
                 <span class="text-slate-400">Rentabilidad Mínima:</span>
                 <span class="block text-emerald-400 font-bold">&ge; 30% anual / +6% Prop</span>
@@ -2765,7 +2842,7 @@
         </div>
 
         <!-- Tira de Estado: Guardián de Incubación & Fundamentos Cuantitativos -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 bg-[#FAFAFC] border border-[#E5E5EA] rounded-xl text-xs font-mono">
+        <div data-kpi-grid="catalog-guardian-kpis" class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 bg-[#FAFAFC] border border-[#E5E5EA] rounded-xl text-xs font-mono">
           <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
             <div>
@@ -3160,7 +3237,7 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div data-kpi-grid="chart-trade-kpis" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div class="bg-[#FAF7F2] p-3 rounded-xl border border-borderWarm">
               <p class="overline-text text-[11px]">Precio Entrada</p>
               <p id="tv-inspect-entry" class="text-sm font-bold text-txtPrimary font-mono mt-0.5">$65,923.21</p>
@@ -9727,13 +9804,54 @@
 
 
   <!-- =========================================================================
-       ALGROK UNIVERSAL MOTION TABLE COLUMN DRAG & REORDER ENGINE (BULLETPROOF V3)
-       Impulsado por el motor de físicas de muelle (Motion / Framer Motion)
-       Grip dedicado, PointerCapture, Idempotencia por Map y Persistencia Local
+       ALGROK UNIVERSAL MOTION REORDER ENGINE (TABLES + KPI CARDS - FLIP V4)
+       Impulsado por FLIP WAAPI + Motion Spring
+       Arrastre fluido en vivo con clon ampliado y desplazamiento lateral real
        ========================================================================= -->
   <script>
   (function() {
     'use strict';
+
+    /**
+     * Captura rects iniciales y anima mediante FLIP (First-Last-Invert-Play)
+     * cada elemento que se haya desplazado para dejar hueco o reubicarse.
+     */
+    function captureRects(elements) {
+      const map = new Map();
+      elements.forEach(el => {
+        map.set(el, el.getBoundingClientRect());
+      });
+      return map;
+    }
+
+    function playFlipShift(elements, firstRects, skipEl, duration = 230) {
+      elements.forEach(el => {
+        if (el === skipEl) return;
+        const first = firstRects.get(el);
+        if (!first) return;
+        const last = el.getBoundingClientRect();
+        const dx = first.left - last.left;
+        const dy = first.top - last.top;
+        if (Math.abs(dx) < 0.8 && Math.abs(dy) < 0.8) return;
+
+        try {
+          if (el._algrokFlipAnim) {
+            el._algrokFlipAnim.cancel();
+          }
+          el._algrokFlipAnim = el.animate(
+            [
+              { transform: `translate3d(${dx}px, ${dy}px, 0)` },
+              { transform: 'translate3d(0, 0, 0)' }
+            ],
+            {
+              duration,
+              easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+            }
+          );
+          el._algrokFlipAnim.onfinish = () => { el._algrokFlipAnim = null; };
+        } catch (err) {}
+      });
+    }
 
     class AlgrokTableColumnReorderController {
       constructor() {
@@ -9747,7 +9865,6 @@
       }
 
       async init() {
-        // Cargar preferencias guardadas en el servidor para persistencia multi-dispositivo
         try {
           const res = await fetch('/api/table_column_preferences');
           if (res.ok) {
@@ -9775,13 +9892,11 @@
           runScan();
         }
 
-        // Re-escaneos preventivos tras carga asíncrona de módulos
         setTimeout(runScan, 300);
         setTimeout(runScan, 1000);
         setTimeout(runScan, 2500);
         setTimeout(runScan, 5000);
 
-        // Eventos globales de arrastre
         window.addEventListener('pointermove', (e) => this.onGlobalPointerMove(e), { passive: false });
         window.addEventListener('pointerup', (e) => this.onGlobalPointerUp(e), { passive: false });
         window.addEventListener('pointercancel', (e) => this.onGlobalPointerUp(e), { passive: false });
@@ -9805,7 +9920,6 @@
         const ths = Array.from(headerRow.querySelectorAll('th'));
         if (ths.length < 2) return;
 
-        // Asignar ID canónico si no lo tiene
         if (!table.id) {
           const tbId = tbody.id ? tbody.id.replace('-tbody', '').replace('-body', '') : '';
           table.id = tbId ? `table-${tbId}` : `table-auto-${fallbackIdx}`;
@@ -9813,7 +9927,6 @@
         const tableId = table.id;
 
         if (this.tables.has(tableId)) {
-          // Ya adjuntado, re-aplicar orden guardado a filas si se añadieron dinámicamente
           const state = this.tables.get(tableId);
           const savedOrder = this.getSavedOrder(tableId);
           if (savedOrder && !this.isDefaultOrder(state.originalKeys, savedOrder)) {
@@ -9822,13 +9935,11 @@
           return;
         }
 
-        // Asegurar que el contenedor padre soporte la guía de inserción absoluta
         const parentWrapper = table.parentElement;
         if (parentWrapper && getComputedStyle(parentWrapper).position === 'static') {
           parentWrapper.style.position = 'relative';
         }
 
-        // Definir claves originales fijas para cada columna
         const originalKeys = ths.map((th, colIdx) => {
           let key = th.dataset.colKey;
           if (!key) {
@@ -9853,8 +9964,7 @@
         };
         this.tables.set(tableId, tableState);
 
-        // Decorar th con grip handle y listener de pointerdown
-        ths.forEach((th, colIdx) => {
+        ths.forEach((th) => {
           th.classList.add('algrok-col-header');
           th.title = 'Arrastra para reordenar columna';
           
@@ -9869,7 +9979,6 @@
           th.onpointerdown = (e) => this.onHeaderPointerDown(e, tableId, th);
         });
 
-        // Configurar MutationObserver para sincronizar filas dinámicas (polling)
         const observer = new MutationObserver(() => {
           if (tableState.isPermuting) return;
           const savedOrder = this.getSavedOrder(tableId);
@@ -9886,14 +9995,13 @@
         observer.observe(tbody, { childList: true });
         tableState.observer = observer;
 
-        // Inyectar botón de restablecer orden
         this.injectResetControl(table, tableId);
 
-        // Restaurar orden previo si está guardado en localStorage
         const savedOrder = this.getSavedOrder(tableId);
         if (savedOrder && !this.isDefaultOrder(originalKeys, savedOrder) && savedOrder.length === originalKeys.length) {
           this.applyOrderToTable(tableId, savedOrder, false);
         }
+        this.updateResetButtonVisibility(tableId);
       }
 
       injectResetControl(table, tableId) {
@@ -9939,7 +10047,7 @@
       }
 
       onHeaderPointerDown(e, tableId, th) {
-        // Ignorar si el clic fue en un botón, enlace o input interno
+        if (e.button !== undefined && e.button !== 0) return;
         if (e.target.closest('button, input, select, a') && !e.target.closest('.col-drag-grip')) {
           return;
         }
@@ -9951,10 +10059,8 @@
         const fromIndex = currentThs.indexOf(th);
         if (fromIndex === -1) return;
 
-        // Prevenir selección de texto y native drag
         e.preventDefault();
 
-        // Capturar puntero en el th
         try {
           if (th.setPointerCapture) th.setPointerCapture(e.pointerId);
         } catch (err) {}
@@ -9966,13 +10072,14 @@
           tableState,
           th,
           fromIndex,
-          toIndex: fromIndex,
+          initialOrder: currentThs.map(h => h.dataset.colKey),
           startX: e.clientX,
           startY: e.clientY,
           offsetX: e.clientX - rect.left,
           offsetY: e.clientY - rect.top,
           width: rect.width,
           height: rect.height,
+          lastSwapTime: 0,
           isDragging: false
         };
       }
@@ -10005,7 +10112,7 @@
         ghost.className = 'col-drag-ghost';
         const labelText = (drag.th.innerText || drag.th.textContent || '').trim().replace(/\s+/g, ' ');
         ghost.innerHTML = `<i class="fa-solid fa-grip-vertical text-[#3C45A5] text-[10px]"></i> <span>${labelText}</span>`;
-        ghost.style.width = `${Math.min(drag.width, 240)}px`;
+        ghost.style.width = `${Math.min(Math.max(drag.width, 96), 260)}px`;
         ghost.style.left = `${e.clientX - drag.offsetX}px`;
         ghost.style.top = `${e.clientY - drag.offsetY}px`;
 
@@ -10015,11 +10122,11 @@
         if (window.Motion && Motion.animate) {
           try {
             Motion.animate(ghost, {
-              scale: [0.95, 1.04],
-              rotate: [0, 1.2],
-              opacity: [0.6, 0.98]
+              scale: [0.96, 1.07],
+              rotate: [0, 1.0],
+              opacity: [0.75, 0.99]
             }, {
-              easing: Motion.spring({ stiffness: 450, damping: 25 })
+              easing: Motion.spring({ stiffness: 420, damping: 24 })
             });
           } catch (err) {}
         }
@@ -10034,40 +10141,78 @@
         const wrapper = drag.tableState.table.parentElement;
         wrapper.appendChild(indicator);
         this.indicatorEl = indicator;
-        this.updateIndicatorPosition(drag.fromIndex);
+        const currentIdx = Array.from(drag.tableState.headerRow.querySelectorAll('th')).indexOf(drag.th);
+        this.updateIndicatorPosition(currentIdx);
       }
 
       updateGhostPosition(e) {
         if (!this.ghostEl || !this.activeDrag) return;
         const drag = this.activeDrag;
-        const x = e.clientX - drag.offsetX;
-        const y = e.clientY - drag.offsetY;
-
-        this.ghostEl.style.left = `${x}px`;
-        this.ghostEl.style.top = `${y}px`;
+        this.ghostEl.style.left = `${e.clientX - drag.offsetX}px`;
+        this.ghostEl.style.top = `${e.clientY - drag.offsetY}px`;
       }
 
       updateDropTarget(e) {
         if (!this.activeDrag) return;
         const drag = this.activeDrag;
+        const now = performance.now();
+        if (now - drag.lastSwapTime < 90) return;
+
         const ths = Array.from(drag.tableState.headerRow.querySelectorAll('th'));
+        const curIdx = ths.indexOf(drag.th);
+        if (curIdx === -1) return;
 
-        // Localizar qué encabezado está más cerca del cursor X
-        let closestIndex = drag.fromIndex;
-        let minDistance = Infinity;
-
-        ths.forEach((targetTh, idx) => {
+        let targetIdx = -1;
+        for (let idx = 0; idx < ths.length; idx++) {
+          const targetTh = ths[idx];
+          if (targetTh === drag.th) continue;
           const rect = targetTh.getBoundingClientRect();
-          const centerX = rect.left + rect.width / 2;
-          const dist = Math.abs(e.clientX - centerX);
-          if (dist < minDistance) {
-            minDistance = dist;
-            closestIndex = idx;
-          }
-        });
+          if (e.clientX < rect.left || e.clientX > rect.right) continue;
 
-        drag.toIndex = closestIndex;
-        this.updateIndicatorPosition(drag.toIndex);
+          // Umbral asimétrico para evitar oscilaciones con columnas de distinto ancho
+          const overlap = Math.min(drag.width, rect.width) * 0.65;
+          if (idx > curIdx && e.clientX > rect.right - overlap) {
+            targetIdx = idx;
+            break;
+          } else if (idx < curIdx && e.clientX < rect.left + overlap) {
+            targetIdx = idx;
+            break;
+          }
+        }
+
+        if (targetIdx !== -1 && targetIdx !== curIdx) {
+          this.liveMoveColumn(drag, ths, curIdx, targetIdx);
+          drag.lastSwapTime = now;
+        }
+        const updatedIdx = Array.from(drag.tableState.headerRow.querySelectorAll('th')).indexOf(drag.th);
+        this.updateIndicatorPosition(updatedIdx);
+      }
+
+      liveMoveColumn(drag, ths, fromIdx, toIdx) {
+        const { tableState } = drag;
+        const firstRects = captureRects(ths);
+
+        tableState.isPermuting = true;
+        try {
+          const targetTh = ths[toIdx];
+          if (toIdx > fromIdx) {
+            tableState.headerRow.insertBefore(drag.th, targetTh.nextSibling);
+          } else {
+            tableState.headerRow.insertBefore(drag.th, targetTh);
+          }
+
+          const newOrder = Array.from(tableState.headerRow.querySelectorAll('th')).map(h => h.dataset.colKey);
+          tableState.currentOrder = newOrder;
+
+          // Desplazar también las celdas del cuerpo en vivo si la tabla es manejable (<= 80 filas)
+          if (tableState.tbody.children.length <= 80) {
+            this.permuteTbodyRows(tableState, newOrder);
+          }
+
+          playFlipShift(ths, firstRects, drag.th, 220);
+        } finally {
+          setTimeout(() => { tableState.isPermuting = false; }, 0);
+        }
       }
 
       updateIndicatorPosition(targetIdx) {
@@ -10081,12 +10226,7 @@
         const thRect = targetTh.getBoundingClientRect();
         const wrapperRect = drag.tableState.table.parentElement.getBoundingClientRect();
 
-        let leftPos = thRect.left - wrapperRect.left;
-        if (targetIdx > drag.fromIndex) {
-          leftPos = (thRect.right - wrapperRect.left) - 2;
-        }
-
-        this.indicatorEl.style.left = `${leftPos}px`;
+        this.indicatorEl.style.left = `${thRect.left - wrapperRect.left}px`;
         this.indicatorEl.style.top = `0px`;
         this.indicatorEl.style.height = `${tableRect.height}px`;
       }
@@ -10106,7 +10246,6 @@
         if (drag.isDragging) {
           drag.th.classList.remove('col-is-dragging');
 
-          // Limpieza inmediata del ghost
           if (this.ghostEl) {
             this.ghostEl.remove();
             this.ghostEl = null;
@@ -10117,28 +10256,32 @@
             this.indicatorEl = null;
           }
 
-          // Ejecutar reordenamiento si la posición destino es diferente
-          if (drag.fromIndex !== drag.toIndex) {
-            this.reorderColumn(drag.tableId, drag.fromIndex, drag.toIndex);
+          const currentOrder = Array.from(drag.tableState.headerRow.querySelectorAll('th')).map(th => th.dataset.colKey);
+          const changed = !this.isDefaultOrder(drag.initialOrder, currentOrder);
+
+          // Asegurar sincronía completa del tbody (especialmente si > 80 filas)
+          drag.tableState.isPermuting = true;
+          try {
+            this.permuteTbodyRows(drag.tableState, currentOrder);
+            drag.tableState.currentOrder = [...currentOrder];
+          } finally {
+            setTimeout(() => { drag.tableState.isPermuting = false; }, 0);
           }
+
+          if (changed) {
+            drag.th.classList.add('col-reorder-flash');
+            setTimeout(() => drag.th.classList.remove('col-reorder-flash'), 750);
+            if (window.Motion && Motion.animate) {
+              try {
+                Motion.animate(drag.th, { scale: [0.96, 1.02, 1] }, {
+                  easing: Motion.spring({ stiffness: 450, damping: 25 })
+                });
+              } catch (err) {}
+            }
+            this.saveOrder(drag.tableId, currentOrder);
+          }
+          this.updateResetButtonVisibility(drag.tableId);
         }
-      }
-
-      reorderColumn(tableId, fromIdx, toIdx) {
-        const tableState = this.tables.get(tableId);
-        if (!tableState) return;
-
-        // Obtener el orden actual de claves desde los <th> del DOM
-        const currentThs = Array.from(tableState.headerRow.querySelectorAll('th'));
-        const currentOrder = currentThs.map(th => th.dataset.colKey);
-
-        const [movedKey] = currentOrder.splice(fromIdx, 1);
-        currentOrder.splice(toIdx, 0, movedKey);
-
-        // Aplicar orden al DOM (encabezados y celdas)
-        this.applyOrderToTable(tableId, currentOrder, true);
-        this.saveOrder(tableId, currentOrder);
-        this.updateResetButtonVisibility(tableId);
       }
 
       applyOrderToTable(tableId, newOrder, triggerAnimation = false) {
@@ -10147,7 +10290,6 @@
 
         tableState.isPermuting = true;
         try {
-          // 1. Reordenar encabezados (<th>)
           const thMap = new Map();
           Array.from(tableState.headerRow.querySelectorAll('th')).forEach(th => {
             thMap.set(th.dataset.colKey, th);
@@ -10160,20 +10302,10 @@
               if (triggerAnimation) {
                 th.classList.add('col-reorder-flash');
                 setTimeout(() => th.classList.remove('col-reorder-flash'), 750);
-                if (window.Motion && Motion.animate) {
-                  try {
-                    Motion.animate(th, {
-                      scale: [0.96, 1.02, 1]
-                    }, {
-                      easing: Motion.spring({ stiffness: 450, damping: 25 })
-                    });
-                  } catch (err) {}
-                }
               }
             }
           });
 
-          // 2. Reordenar celdas de las filas en tbody
           this.permuteTbodyRows(tableState, newOrder);
           tableState.currentOrder = [...newOrder];
         } finally {
@@ -10187,17 +10319,14 @@
 
         rows.forEach(tr => {
           const cells = Array.from(tr.children);
-          // Ignorar filas de mensaje vacío o colspan
           if (cells.length !== tableState.originalKeys.length) return;
 
-          // Asignar dataset.colKey a cada celda si no lo tiene (en orden canónico original)
           cells.forEach((td, idx) => {
             if (!td.dataset.colKey) {
               td.dataset.colKey = tableState.originalKeys[idx];
             }
           });
 
-          // Lookup map por clave para garantizar idempotencia total
           const cellMap = new Map();
           cells.forEach(td => cellMap.set(td.dataset.colKey, td));
 
@@ -10212,7 +10341,11 @@
         const tableState = this.tables.get(tableId);
         if (!tableState) return;
 
+        const currentThs = Array.from(tableState.headerRow.querySelectorAll('th'));
+        const firstRects = captureRects(currentThs);
         this.applyOrderToTable(tableId, tableState.originalKeys, true);
+        playFlipShift(currentThs, firstRects, null, 240);
+
         if (this.serverPreferences) delete this.serverPreferences[tableId];
         try {
           localStorage.removeItem(this.storagePrefix + tableId);
@@ -10243,7 +10376,6 @@
         } catch (e) {
           console.warn('Error saving table order locally:', e);
         }
-        // Persistir en servidor para cualquier dispositivo
         fetch('/api/table_column_preferences', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -10272,8 +10404,504 @@
       }
     }
 
-    // Inicializar controlador global único
+    /**
+     * =========================================================================
+     * ALGROK KPI & CARD LIVE FLIP REORDER CONTROLLER
+     * Permite arrastrar libremente cualquier tarjeta/KPI con clon ampliado y
+     * desplazamiento fluido en tiempo real del resto de tarjetas para abrir hueco.
+     * =========================================================================
+     */
+    class AlgrokKpiReorderController {
+      constructor() {
+        this.storagePrefix = 'algrok_kpi_order_v1_';
+        this.grids = new Map();
+        this.serverPreferences = {};
+        this.activeDrag = null;
+        this.ghostEl = null;
+        this.init();
+      }
+
+      async init() {
+        try {
+          const res = await fetch('/api/kpi_preferences');
+          if (res.ok) {
+            const data = await res.json();
+            if (data && typeof data === 'object') {
+              this.serverPreferences = data;
+              for (const [gId, ord] of Object.entries(data)) {
+                try {
+                  localStorage.setItem(this.storagePrefix + gId, JSON.stringify(ord));
+                } catch (e) {}
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('Error fetching server KPI preferences:', e);
+        }
+
+        const runScan = () => {
+          this.scanAndAttachAll();
+        };
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', runScan);
+        } else {
+          runScan();
+        }
+
+        setTimeout(runScan, 350);
+        setTimeout(runScan, 1200);
+        setTimeout(runScan, 3000);
+
+        window.addEventListener('pointermove', (e) => this.onGlobalPointerMove(e), { passive: false });
+        window.addEventListener('pointerup', (e) => this.onGlobalPointerUp(e), { passive: false });
+        window.addEventListener('pointercancel', (e) => this.onGlobalPointerUp(e), { passive: false });
+      }
+
+      scanAndAttachAll() {
+        document.querySelectorAll('[data-kpi-grid]').forEach((gridEl) => {
+          this.attachToGrid(gridEl);
+        });
+      }
+
+      getDirectCards(gridEl) {
+        return Array.from(gridEl.children).filter(el => el.nodeType === 1 && el.tagName === 'DIV');
+      }
+
+      attachToGrid(gridEl) {
+        if (!gridEl) return;
+        const gridId = gridEl.dataset.kpiGrid;
+        if (!gridId) return;
+
+        const cards = this.getDirectCards(gridEl);
+
+        if (this.grids.has(gridId)) {
+          const state = this.grids.get(gridId);
+          // Re-decorar si los hijos cambiaron dinámicamente (ej. orch-desk-breakdown-grid)
+          if (cards.length >= 2 && cards.some(c => !c.classList.contains('algrok-kpi-card'))) {
+            this.decorateCards(gridEl, gridId, cards, state);
+            const savedOrder = this.getSavedOrder(gridId);
+            if (savedOrder && savedOrder.length === state.originalKeys.length) {
+              this.applyOrderToGrid(gridId, savedOrder, false);
+            }
+          }
+          return;
+        }
+
+        gridEl.classList.add('algrok-kpi-grid');
+        const originalKeys = cards.map((card, idx) => {
+          const key = card.dataset.kpiKey || card.id || `kpi_${idx}`;
+          card.dataset.kpiKey = key;
+          return key;
+        });
+
+        const gridState = {
+          gridEl,
+          gridId,
+          originalKeys,
+          currentOrder: [...originalKeys],
+          isPermuting: false,
+          observer: null
+        };
+        this.grids.set(gridId, gridState);
+
+        if (cards.length >= 2) {
+          this.decorateCards(gridEl, gridId, cards, gridState);
+        }
+
+        this.injectResetControl(gridEl, gridId);
+
+        const observer = new MutationObserver(() => {
+          if (gridState.isPermuting) return;
+          const freshCards = this.getDirectCards(gridEl);
+          if (freshCards.length < 2) return;
+          gridState.isPermuting = true;
+          try {
+            if (gridState.originalKeys.length === 0) {
+              gridState.originalKeys = freshCards.map((c, idx) => c.dataset.kpiKey || c.id || `kpi_${idx}`);
+            }
+            this.decorateCards(gridEl, gridId, freshCards, gridState);
+            const savedOrder = this.getSavedOrder(gridId);
+            if (savedOrder && savedOrder.length === gridState.originalKeys.length) {
+              this.applyOrderToGrid(gridId, savedOrder, false);
+            }
+            this.updateResetButtonVisibility(gridId);
+          } finally {
+            setTimeout(() => { gridState.isPermuting = false; }, 0);
+          }
+        });
+        observer.observe(gridEl, { childList: true });
+        gridState.observer = observer;
+
+        const savedOrder = this.getSavedOrder(gridId);
+        if (savedOrder && savedOrder.length === originalKeys.length && !this.isDefaultOrder(originalKeys, savedOrder)) {
+          this.applyOrderToGrid(gridId, savedOrder, false);
+        }
+        this.updateResetButtonVisibility(gridId);
+      }
+
+      decorateCards(gridEl, gridId, cards, gridState) {
+        cards.forEach((card, idx) => {
+          if (!card.dataset.kpiKey) {
+            card.dataset.kpiKey = gridState.originalKeys[idx] || card.id || `kpi_${idx}`;
+          }
+          card.classList.add('algrok-kpi-card');
+          card.setAttribute('draggable', 'false');
+          if (!card._algrokDragPrevented) {
+            card.addEventListener('dragstart', (e) => e.preventDefault());
+            card._algrokDragPrevented = true;
+          }
+
+          if (!card.querySelector(':scope > .kpi-drag-grip')) {
+            const grip = document.createElement('span');
+            grip.className = 'kpi-drag-grip';
+            grip.title = 'Mantén pulsado y arrastra para mover este KPI/tarjeta';
+            grip.innerHTML = '<i class="fa-solid fa-grip-vertical"></i>';
+            card.appendChild(grip);
+          }
+
+          card.onpointerdown = (e) => this.onCardPointerDown(e, gridId, card);
+        });
+      }
+
+      injectResetControl(gridEl, gridId) {
+        if (!gridEl.parentElement) return;
+        let bar = gridEl.parentElement.querySelector(`.kpi-reset-bar[data-for="${gridId}"]`);
+        if (!bar) {
+          bar = document.createElement('div');
+          bar.className = 'kpi-reset-bar flex justify-end mb-1.5 hidden';
+          bar.dataset.for = gridId;
+
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'btn-reset-kpis';
+          btn.dataset.for = gridId;
+          btn.innerHTML = '<i class="fa-solid fa-arrow-rotate-left"></i> Restablecer KPIs';
+          btn.title = 'Restaurar el orden original de estas tarjetas/KPIs';
+          btn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.resetGridOrder(gridId);
+          };
+          bar.appendChild(btn);
+          gridEl.parentElement.insertBefore(bar, gridEl);
+        }
+      }
+
+      updateResetButtonVisibility(gridId) {
+        const state = this.grids.get(gridId);
+        if (!state || !state.gridEl.parentElement) return;
+        const bar = state.gridEl.parentElement.querySelector(`.kpi-reset-bar[data-for="${gridId}"]`);
+        if (!bar) return;
+
+        const isDefault = this.isDefaultOrder(state.originalKeys, state.currentOrder);
+        if (isDefault) {
+          bar.classList.add('hidden');
+        } else {
+          bar.classList.remove('hidden');
+        }
+      }
+
+      onCardPointerDown(e, gridId, card) {
+        if (e.button !== undefined && e.button !== 0) return;
+
+        // Respetar grids anidados: solo atiende el grid directo al que pertenece el punto pulsado
+        const closestGrid = e.target.closest('[data-kpi-grid]');
+        if (closestGrid && closestGrid.dataset.kpiGrid !== gridId) return;
+
+        // En táctil usar el grip para no interferir con el scroll vertical
+        if (e.pointerType === 'touch' && !e.target.closest('.kpi-drag-grip')) return;
+
+        // Respetar controles interactivos internos
+        if (e.target.closest('button, input, select, textarea, a, .apexcharts-canvas') && !e.target.closest('.kpi-drag-grip')) {
+          return;
+        }
+
+        const state = this.grids.get(gridId);
+        if (!state) return;
+
+        const cards = this.getDirectCards(state.gridEl);
+        if (cards.length < 2) return;
+
+        e.stopPropagation();
+        if (e.pointerType !== 'touch') {
+          e.preventDefault();
+        }
+
+        try {
+          if (card.setPointerCapture) card.setPointerCapture(e.pointerId);
+        } catch (err) {}
+
+        const rect = card.getBoundingClientRect();
+        this.activeDrag = {
+          pointerId: e.pointerId,
+          gridId,
+          state,
+          card,
+          initialOrder: cards.map(c => c.dataset.kpiKey),
+          startX: e.clientX,
+          startY: e.clientY,
+          offsetX: e.clientX - rect.left,
+          offsetY: e.clientY - rect.top,
+          width: rect.width,
+          height: rect.height,
+          lastSwapTime: 0,
+          isDragging: false
+        };
+      }
+
+      onGlobalPointerMove(e) {
+        if (!this.activeDrag) return;
+        const drag = this.activeDrag;
+
+        const dist = Math.hypot(e.clientX - drag.startX, e.clientY - drag.startY);
+        if (!drag.isDragging && dist > 5) {
+          drag.isDragging = true;
+          document.body.style.cursor = 'grabbing';
+          this.createCardGhost(drag, e);
+          drag.card.classList.add('kpi-is-dragging');
+        }
+
+        if (drag.isDragging) {
+          e.preventDefault();
+          this.updateGhostPosition(e);
+          this.updateCardDropTarget(e);
+        }
+      }
+
+      createCardGhost(drag, e) {
+        if (this.ghostEl) this.ghostEl.remove();
+
+        const ghost = drag.card.cloneNode(true);
+        // Eliminar IDs duplicados dentro del clon flotante para no interferir con el DOM vivo
+        ghost.removeAttribute('id');
+        ghost.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+        const gripInGhost = ghost.querySelector(':scope > .kpi-drag-grip');
+        if (gripInGhost) gripInGhost.style.opacity = '1';
+
+        ghost.classList.remove('kpi-is-dragging', 'algrok-kpi-card');
+        ghost.classList.add('kpi-drag-ghost');
+        ghost.style.width = `${drag.width}px`;
+        ghost.style.height = `${drag.height}px`;
+        ghost.style.left = `${e.clientX - drag.offsetX}px`;
+        ghost.style.top = `${e.clientY - drag.offsetY}px`;
+
+        document.body.appendChild(ghost);
+        this.ghostEl = ghost;
+
+        if (window.Motion && Motion.animate) {
+          try {
+            Motion.animate(ghost, {
+              scale: [0.98, 1.055],
+              rotate: [0, 0.5],
+              opacity: [0.85, 0.99]
+            }, {
+              easing: Motion.spring({ stiffness: 420, damping: 24 })
+            });
+          } catch (err) {}
+        }
+      }
+
+      updateGhostPosition(e) {
+        if (!this.ghostEl || !this.activeDrag) return;
+        const drag = this.activeDrag;
+        this.ghostEl.style.left = `${e.clientX - drag.offsetX}px`;
+        this.ghostEl.style.top = `${e.clientY - drag.offsetY}px`;
+      }
+
+      updateCardDropTarget(e) {
+        if (!this.activeDrag) return;
+        const drag = this.activeDrag;
+        const now = performance.now();
+        if (now - drag.lastSwapTime < 110) return;
+
+        const { gridEl } = drag.state;
+        const allCards = this.getDirectCards(gridEl);
+        const curIdx = allCards.indexOf(drag.card);
+        if (curIdx === -1) return;
+
+        const dragRect = drag.card.getBoundingClientRect();
+        let targetCard = null;
+        let targetIdx = -1;
+
+        for (let idx = 0; idx < allCards.length; idx++) {
+          const candidate = allCards[idx];
+          if (candidate === drag.card) continue;
+          if (candidate.offsetParent === null || candidate.classList.contains('hidden')) continue;
+
+          const rect = candidate.getBoundingClientRect();
+          if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) {
+            continue;
+          }
+
+          const sameRow = Math.abs((rect.top + rect.height / 2) - (dragRect.top + dragRect.height / 2)) < rect.height * 0.55;
+          if (sameRow) {
+            const overlap = Math.min(drag.width, rect.width) * 0.65;
+            if (idx > curIdx && e.clientX > rect.right - overlap) {
+              targetCard = candidate;
+              targetIdx = idx;
+              break;
+            } else if (idx < curIdx && e.clientX < rect.left + overlap) {
+              targetCard = candidate;
+              targetIdx = idx;
+              break;
+            }
+          } else {
+            // Cambio entre filas de un grid 2D
+            targetCard = candidate;
+            targetIdx = idx;
+            break;
+          }
+        }
+
+        if (targetCard && targetIdx !== -1 && targetIdx !== curIdx) {
+          this.liveMoveCard(drag, allCards, curIdx, targetIdx, targetCard);
+          drag.lastSwapTime = now;
+        }
+      }
+
+      liveMoveCard(drag, allCards, fromIdx, toIdx, targetCard) {
+        const { state } = drag;
+        const visibleCards = allCards.filter(c => c.offsetParent !== null && !c.classList.contains('hidden'));
+        const firstRects = captureRects(visibleCards);
+
+        state.isPermuting = true;
+        try {
+          if (toIdx > fromIdx) {
+            state.gridEl.insertBefore(drag.card, targetCard.nextSibling);
+          } else {
+            state.gridEl.insertBefore(drag.card, targetCard);
+          }
+
+          state.currentOrder = this.getDirectCards(state.gridEl).map(c => c.dataset.kpiKey);
+          playFlipShift(visibleCards, firstRects, drag.card, 240);
+        } finally {
+          setTimeout(() => { state.isPermuting = false; }, 0);
+        }
+      }
+
+      onGlobalPointerUp(e) {
+        if (!this.activeDrag) return;
+        const drag = this.activeDrag;
+        this.activeDrag = null;
+        document.body.style.cursor = '';
+
+        try {
+          if (drag.card.releasePointerCapture && drag.pointerId !== undefined) {
+            drag.card.releasePointerCapture(drag.pointerId);
+          }
+        } catch (err) {}
+
+        if (drag.isDragging) {
+          drag.card.classList.remove('kpi-is-dragging');
+          if (this.ghostEl) {
+            this.ghostEl.remove();
+            this.ghostEl = null;
+          }
+
+          const newOrder = this.getDirectCards(drag.state.gridEl).map(c => c.dataset.kpiKey);
+          drag.state.currentOrder = [...newOrder];
+
+          const changed = !this.isDefaultOrder(drag.initialOrder, newOrder);
+          if (changed) {
+            drag.card.classList.add('kpi-reorder-flash');
+            setTimeout(() => drag.card.classList.remove('kpi-reorder-flash'), 650);
+            if (window.Motion && Motion.animate) {
+              try {
+                Motion.animate(drag.card, { scale: [0.97, 1.02, 1] }, {
+                  easing: Motion.spring({ stiffness: 450, damping: 24 })
+                });
+              } catch (err) {}
+            }
+            this.saveOrder(drag.gridId, newOrder);
+          }
+          this.updateResetButtonVisibility(drag.gridId);
+        }
+      }
+
+      applyOrderToGrid(gridId, newOrder, animate = false) {
+        const state = this.grids.get(gridId);
+        if (!state) return;
+
+        const cards = this.getDirectCards(state.gridEl);
+        const firstRects = animate ? captureRects(cards) : null;
+
+        state.isPermuting = true;
+        try {
+          const cardMap = new Map();
+          cards.forEach(c => cardMap.set(c.dataset.kpiKey, c));
+
+          newOrder.forEach(key => {
+            const c = cardMap.get(key);
+            if (c) state.gridEl.appendChild(c);
+          });
+          // Añadir tarjetas nuevas que no estuvieran en el orden guardado
+          cards.forEach(c => {
+            if (!newOrder.includes(c.dataset.kpiKey)) {
+              state.gridEl.appendChild(c);
+            }
+          });
+
+          state.currentOrder = this.getDirectCards(state.gridEl).map(c => c.dataset.kpiKey);
+          if (animate && firstRects) {
+            playFlipShift(cards, firstRects, null, 240);
+          }
+        } finally {
+          setTimeout(() => { state.isPermuting = false; }, 0);
+        }
+      }
+
+      resetGridOrder(gridId) {
+        const state = this.grids.get(gridId);
+        if (!state) return;
+
+        this.applyOrderToGrid(gridId, state.originalKeys, true);
+        if (this.serverPreferences) delete this.serverPreferences[gridId];
+        try {
+          localStorage.removeItem(this.storagePrefix + gridId);
+        } catch (e) {}
+        fetch(`/api/kpi_preferences?gridId=${encodeURIComponent(gridId)}`, {
+          method: 'DELETE'
+        }).catch(err => console.warn('Error deleting KPI order from server:', err));
+        this.updateResetButtonVisibility(gridId);
+      }
+
+      getSavedOrder(gridId) {
+        if (this.serverPreferences && this.serverPreferences[gridId]) {
+          return this.serverPreferences[gridId];
+        }
+        try {
+          const raw = localStorage.getItem(this.storagePrefix + gridId);
+          return raw ? JSON.parse(raw) : null;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      saveOrder(gridId, order) {
+        if (!this.serverPreferences) this.serverPreferences = {};
+        this.serverPreferences[gridId] = order;
+        try {
+          localStorage.setItem(this.storagePrefix + gridId, JSON.stringify(order));
+        } catch (e) {
+          console.warn('Error saving KPI order locally:', e);
+        }
+        fetch('/api/kpi_preferences', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ gridId, order })
+        }).catch(err => console.warn('Error syncing KPI order to server:', err));
+      }
+
+      isDefaultOrder(orig, curr) {
+        if (!curr || orig.length !== curr.length) return true;
+        return orig.every((key, i) => key === curr[i]);
+      }
+    }
+
+    // Inicializar controladores globales únicos (Tablas + KPIs/Tarjetas)
     window.AlgrokTables = new AlgrokTableColumnReorderController();
+    window.AlgrokKpis = new AlgrokKpiReorderController();
   })();
   </script>
 

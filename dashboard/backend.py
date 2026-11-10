@@ -3946,6 +3946,7 @@ def get_forward_trades(branch: Optional[str] = None):
 
 
 TABLE_PREFS_FILE = BASE_DIR / 'data/table_column_preferences.json'
+KPI_PREFS_FILE = BASE_DIR / 'data/kpi_preferences.json'
 
 
 class TableColumnPreferencePayload(BaseModel):
@@ -3953,50 +3954,81 @@ class TableColumnPreferencePayload(BaseModel):
     order: List[str]
 
 
-@app.get("/api/table_column_preferences")
-def get_table_column_preferences():
-    if TABLE_PREFS_FILE.exists():
+class KpiPreferencePayload(BaseModel):
+    gridId: str
+    order: List[str]
+
+
+def _load_json_prefs(prefs_file: Path) -> dict:
+    """Lee un archivo JSON de preferencias de interfaz devolviendo dict vacío si falla."""
+    if prefs_file.exists():
         try:
-            with open(TABLE_PREFS_FILE, 'r', encoding='utf-8') as f:
-                return json.load(f)
+            with open(prefs_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                return data if isinstance(data, dict) else {}
         except Exception:
             return {}
     return {}
 
 
-@app.post("/api/table_column_preferences")
-def save_table_column_preference(payload: TableColumnPreferencePayload):
-    data = {}
-    if TABLE_PREFS_FILE.exists():
-        try:
-            with open(TABLE_PREFS_FILE, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-        except Exception:
-            data = {}
-    data[payload.tableId] = payload.order
+def _save_json_pref(prefs_file: Path, key: str, order: List[str]) -> dict:
+    """Guarda el orden personalizado de un componente (tabla o grid de KPIs) en disco."""
+    data = _load_json_prefs(prefs_file)
+    data[key] = order
     try:
-        TABLE_PREFS_FILE.parent.mkdir(parents=True, exist_ok=True)
-        with open(TABLE_PREFS_FILE, 'w', encoding='utf-8') as f:
+        prefs_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(prefs_file, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
-        return {"status": "ok", "tableId": payload.tableId, "order": payload.order}
+        return data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.delete("/api/table_column_preferences")
-def delete_table_column_preference(tableId: str = Query(...)):
-    if TABLE_PREFS_FILE.exists():
+def _delete_json_pref(prefs_file: Path, key: str) -> dict:
+    """Elimina la preferencia guardada para restablecer el orden por defecto."""
+    if prefs_file.exists():
         try:
-            with open(TABLE_PREFS_FILE, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-            if tableId in data:
-                del data[tableId]
-                with open(TABLE_PREFS_FILE, 'w', encoding='utf-8') as f:
+            data = _load_json_prefs(prefs_file)
+            if key in data:
+                del data[key]
+                with open(prefs_file, 'w', encoding='utf-8') as f:
                     json.dump(data, f, indent=2, ensure_ascii=False)
-            return {"status": "ok", "deleted": tableId}
+            return {"status": "ok", "deleted": key}
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
     return {"status": "ok"}
+
+
+@app.get("/api/table_column_preferences")
+def get_table_column_preferences():
+    return _load_json_prefs(TABLE_PREFS_FILE)
+
+
+@app.post("/api/table_column_preferences")
+def save_table_column_preference(payload: TableColumnPreferencePayload):
+    _save_json_pref(TABLE_PREFS_FILE, payload.tableId, payload.order)
+    return {"status": "ok", "tableId": payload.tableId, "order": payload.order}
+
+
+@app.delete("/api/table_column_preferences")
+def delete_table_column_preference(tableId: str = Query(...)):
+    return _delete_json_pref(TABLE_PREFS_FILE, tableId)
+
+
+@app.get("/api/kpi_preferences")
+def get_kpi_preferences():
+    return _load_json_prefs(KPI_PREFS_FILE)
+
+
+@app.post("/api/kpi_preferences")
+def save_kpi_preference(payload: KpiPreferencePayload):
+    _save_json_pref(KPI_PREFS_FILE, payload.gridId, payload.order)
+    return {"status": "ok", "gridId": payload.gridId, "order": payload.order}
+
+
+@app.delete("/api/kpi_preferences")
+def delete_kpi_preference(gridId: str = Query(...)):
+    return _delete_json_pref(KPI_PREFS_FILE, gridId)
 
 
 @app.get("/api/strategy_vault")
