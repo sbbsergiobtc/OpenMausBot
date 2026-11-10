@@ -581,6 +581,216 @@
       100% { box-shadow: none; }
     }
 
+    /* =========================================================================
+       ALGROK INSTITUTIONAL - SECTION / CARD GLOBAL FLIP REORDER + MENU EDITOR
+       ========================================================================= */
+    .algrok-section-card {
+      position: relative;
+      will-change: transform;
+    }
+    .algrok-section-card.section-draggable-surface {
+      cursor: grab;
+    }
+    .section-drag-grip {
+      position: absolute;
+      top: 7px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 9px;
+      border-radius: 9999px;
+      font-size: 9px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: #6E6E73;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(8px);
+      border: 1px solid #E5E5EA;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      opacity: 0;
+      pointer-events: auto;
+      touch-action: none;
+      cursor: grab;
+      z-index: 20;
+      transition: opacity 0.16s ease, color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+    }
+    .algrok-section-card:hover > .section-drag-grip {
+      opacity: 0.92;
+    }
+    .section-drag-grip:hover {
+      opacity: 1 !important;
+      color: #3C45A5;
+      border-color: #3C45A5;
+      background: #EEF2FF;
+    }
+    .section-is-dragging {
+      opacity: 0.24 !important;
+      outline: 2px dashed #3C45A5 !important;
+      outline-offset: -3px !important;
+      background: rgba(60, 69, 165, 0.04) !important;
+      border-radius: 16px;
+    }
+    .section-drag-ghost {
+      position: fixed;
+      pointer-events: none !important;
+      z-index: 999999;
+      margin: 0 !important;
+      background: rgba(255, 255, 255, 0.97) !important;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1.5px solid #3C45A5 !important;
+      border-radius: 16px !important;
+      box-shadow: 0 26px 52px -10px rgba(60, 69, 165, 0.30), 0 12px 24px rgba(0, 0, 0, 0.12) !important;
+      transform: scale(1.045);
+      transform-origin: center center;
+      will-change: transform, left, top;
+      opacity: 0.98;
+    }
+    .btn-reset-sections {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      color: #6E6D68;
+      background: #F2F2F7;
+      border: 1px solid #E5E5EA;
+      border-radius: 6px;
+      padding: 3px 9px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-reset-sections:hover {
+      background: #E5E5EA;
+      color: #181A20;
+      border-color: #3C45A5;
+    }
+
+    /* Sidebar Navigation Customizer */
+    .sidebar-link {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+    .sidebar-drag-grip {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 14px;
+      margin-right: 4px;
+      color: #8E8E93;
+      cursor: grab;
+      flex-shrink: 0;
+      touch-action: none;
+    }
+    #sidebar-nav.sidebar-editing .sidebar-drag-grip {
+      display: inline-flex;
+    }
+    #sidebar-nav.sidebar-editing .sidebar-link {
+      padding-right: 48px !important;
+    }
+    .sidebar-item-actions {
+      display: none;
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      align-items: center;
+      gap: 2px;
+      z-index: 5;
+    }
+    #sidebar-nav.sidebar-editing .sidebar-item-actions {
+      display: inline-flex;
+    }
+    .sidebar-act-btn {
+      width: 20px;
+      height: 20px;
+      border-radius: 5px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: #6E6E73;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: all 0.12s ease;
+    }
+    .sidebar-act-btn:hover {
+      background: rgba(60, 69, 165, 0.12);
+      color: #3C45A5;
+    }
+    .sidebar-link.sidebar-nav-hidden-in-edit {
+      opacity: 0.45 !important;
+      border: 1px dashed #D6D1C7 !important;
+    }
+    .sidebar-is-dragging {
+      opacity: 0.25 !important;
+      outline: 1.5px dashed #3C45A5 !important;
+      background: rgba(60, 69, 165, 0.08) !important;
+    }
+    .sidebar-drag-ghost {
+      position: fixed;
+      pointer-events: none !important;
+      z-index: 999999;
+      background: #FFFFFF !important;
+      color: #1D1D1F !important;
+      border: 1.5px solid #3C45A5 !important;
+      border-radius: 10px !important;
+      padding: 8px 12px !important;
+      box-shadow: 0 20px 40px -6px rgba(60, 69, 165, 0.28), 0 8px 16px rgba(0, 0, 0, 0.10) !important;
+      transform: scale(1.055);
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 700;
+      will-change: transform, left, top;
+    }
+    .sidebar-inline-input {
+      background: #FFFFFF;
+      color: #1D1D1F;
+      border: 1px solid #3C45A5;
+      border-radius: 5px;
+      padding: 1px 6px;
+      font-size: 12px;
+      font-weight: 600;
+      width: 118px;
+      outline: none;
+    }
+    .sidebar-icon-popover {
+      position: fixed;
+      z-index: 999998;
+      background: #FFFFFF;
+      border: 1px solid #E5E5EA;
+      border-radius: 12px;
+      padding: 8px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.14);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+    }
+    .sidebar-icon-choice {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      border: 1px solid transparent;
+      background: #FAFAFC;
+      color: #1D1D1F;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.12s ease;
+    }
+    .sidebar-icon-choice:hover {
+      border-color: #3C45A5;
+      color: #3C45A5;
+      background: #EEF2FF;
+    }
+
   
     /* Filtros de Notificaciones en Popover (Fix texto blanco sobre oscuro) */
     .notif-filter-btn {
@@ -642,65 +852,84 @@
         </div>
 
         <!-- Menú Lateral: ÚNICA navegación de toda la plataforma -->
-        <div class="overline-text px-1 mb-2">MÓDULOS DE OPERACIÓN</div>
+        <div class="flex items-center justify-between px-1 mb-2">
+          <div class="overline-text">MÓDULOS DE OPERACIÓN</div>
+          <button id="btn-edit-sidebar-nav" type="button" onclick="window.AlgrokSidebar && window.AlgrokSidebar.toggleEditMode()" class="text-[10px] font-mono font-semibold text-[#6E6E73] hover:text-[#3C45A5] px-1.5 py-0.5 rounded border border-transparent hover:border-[#D6D1C7] hover:bg-[#FAF7F2] transition flex items-center gap-1 cursor-pointer" title="Editar orden, nombres, iconos y visibilidad del menú">
+            <i class="fa-solid fa-sliders text-[9px]"></i>
+            <span id="btn-edit-sidebar-label">Editar</span>
+          </button>
+        </div>
         <nav class="space-y-1" id="sidebar-nav">
           
-          <button onclick="switchTab('dashboard')" id="side-tab-dashboard" class="sidebar-link active">
+          <button onclick="switchTab('dashboard')" id="side-tab-dashboard" data-nav-id="dashboard" class="sidebar-link active">
             <i class="fa-solid fa-gauge-high text-xs text-[#3C45A5] mr-2.5 w-4 text-center"></i>
             <span>Cockpit General</span>
           </button>
 
-          <button onclick="switchTab('backtests')" id="side-tab-backtests" class="sidebar-link">
+          <button onclick="switchTab('backtests')" id="side-tab-backtests" data-nav-id="backtests" class="sidebar-link">
             <i class="fa-solid fa-chart-line text-xs text-[#3C45A5] mr-2.5 w-4 text-center"></i>
             <span>Backtests</span>
           </button>
 
-          <button onclick="switchTab('forward')" id="side-tab-forward" class="sidebar-link">
+          <button onclick="switchTab('forward')" id="side-tab-forward" data-nav-id="forward" class="sidebar-link">
             <i class="fa-solid fa-satellite-dish text-xs text-[#3C45A5] mr-2.5 w-4 text-center"></i>
             <span>2. Forward Tests</span>
           </button>
 
-          <button onclick="switchTab('orchestrator')" id="side-tab-orchestrator" class="sidebar-link">
+          <button onclick="switchTab('orchestrator')" id="side-tab-orchestrator" data-nav-id="orchestrator" class="sidebar-link">
             <i class="fa-solid fa-compass-drafting text-xs text-[#3C45A5] mr-2.5 w-4 text-center"></i>
             <span>Orquestador Régimen (A/B)</span>
           </button>
 
-          <button onclick="switchTab('tri_facet')" id="side-tab-tri_facet" class="sidebar-link">
+          <button onclick="switchTab('tri_facet')" id="side-tab-tri_facet" data-nav-id="tri_facet" class="sidebar-link">
             <i class="fa-solid fa-scale-balanced text-xs text-[#3C45A5] mr-2.5 w-4 text-center"></i>
             <span>3. Contraste Tri-Faceta</span>
           </button>
 
-          <button onclick="switchTab('roster')" id="side-tab-roster" class="sidebar-link">
+          <button onclick="switchTab('roster')" id="side-tab-roster" data-nav-id="roster" class="sidebar-link">
             <i class="fa-solid fa-users-gear text-xs text-[#3C45A5] mr-2.5 w-4 text-center"></i>
             <span>Enjambre</span>
           </button>
 
-          <button onclick="switchTab('lab')" id="side-tab-lab" class="sidebar-link">
+          <button onclick="switchTab('lab')" id="side-tab-lab" data-nav-id="lab" class="sidebar-link">
             <i class="fa-solid fa-flask-vial text-xs text-[#3C45A5] mr-2.5 w-4 text-center"></i>
             <span>Creación & Lab</span>
           </button>
 
-          <button onclick="switchTab('chart')" id="side-tab-chart" class="sidebar-link">
+          <button onclick="switchTab('chart')" id="side-tab-chart" data-nav-id="chart" class="sidebar-link">
             <i class="fa-solid fa-chart-simple text-xs text-[#3C45A5] mr-2.5 w-4 text-center"></i>
             <span>Gráficos TradingView</span>
           </button>
 
-          <button onclick="switchTab('strategies')" id="side-tab-strategies" class="sidebar-link">
+          <button onclick="switchTab('strategies')" id="side-tab-strategies" data-nav-id="strategies" class="sidebar-link">
             <i class="fa-solid fa-book-bookmark text-xs text-[#3C45A5] mr-2.5 w-4 text-center"></i>
             <span>Catálogo de Modelos</span>
           </button>
 
-          <button onclick="switchTab('config')" id="side-tab-config" class="sidebar-link">
+          <button onclick="switchTab('config')" id="side-tab-config" data-nav-id="config" class="sidebar-link">
             <i class="fa-solid fa-shield-halved text-xs text-[#3C45A5] mr-2.5 w-4 text-center"></i>
             <span>Reglas de Riesgo</span>
           </button>
 
-          <button onclick="switchTab('journal')" id="side-tab-journal" class="sidebar-link">
+          <button onclick="switchTab('journal')" id="side-tab-journal" data-nav-id="journal" class="sidebar-link">
             <i class="fa-solid fa-file-lines text-xs text-[#3C45A5] mr-2.5 w-4 text-center"></i>
             <span>Bitácora & Informes</span>
           </button>
 
         </nav>
+        <div id="sidebar-edit-toolbar" class="hidden mt-3 pt-2.5 border-t border-[#E0DBD0] space-y-2">
+          <div class="text-[10px] text-[#6E6E73] font-mono leading-snug">
+            Arrastra para reordenar, pulsa <i class="fa-solid fa-pen"></i> para renombrar, el icono para cambiarlo u <i class="fa-solid fa-eye"></i> para ocultar.
+          </div>
+          <div class="flex items-center justify-between gap-2">
+            <button type="button" onclick="window.AlgrokSidebar && window.AlgrokSidebar.resetNav()" class="btn-reset-sections text-[10px] py-1 px-2">
+              <i class="fa-solid fa-arrow-rotate-left"></i> Restablecer menú
+            </button>
+            <button type="button" onclick="window.AlgrokSidebar && window.AlgrokSidebar.toggleEditMode(false)" class="px-2.5 py-1 rounded-md bg-[#3C45A5] text-white text-[10px] font-bold font-mono cursor-pointer hover:bg-[#313991] transition">
+              Listo
+            </button>
+          </div>
+        </div>
       </div>
 
       </aside>
@@ -1187,7 +1416,7 @@
       </div>
 
       <!-- CONTENEDOR UNIFICADO MULTIHORIZONTE -->
-      <div id="backtest-unified-container" class="space-y-6">
+      <div id="backtest-unified-container" data-section-grid="sec-backtest-unified" class="space-y-6">
 
         <!-- Barra de Filtro de Cuentas / Estrategias -->
         <div class="rounded-xl p-4 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -1522,7 +1751,7 @@
         </div>
 
         <!-- Gráficos de Distribución Semanal y Horaria -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div data-section-grid="sec-backtest-edge-charts" class="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <div class="rounded-2xl p-5 border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs space-y-3">
             <h4 class="text-xs font-bold text-[#1D1D1F] uppercase tracking-wider flex items-center">
               <i class="fa-solid fa-calendar-days mr-2 text-[#1D1D1F]"></i> Rendimiento por Día de la Semana (Lunes a Domingo)
@@ -2523,7 +2752,7 @@
         <span id="roster-active-count-badge" class="text-xs font-mono px-3 py-1 rounded-full bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] font-bold">Cargando...</span>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="roster-grid">
+      <div data-section-grid="sec-roster-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="roster-grid">
         <!-- Dynamically populated from /api/roster -->
       </div>
     </div>
@@ -2531,7 +2760,7 @@
     <!-- ==================== PESTAÑA 4: CREACIÓN & ROBUSTEZ ==================== -->
     <div id="tab-content-lab" class="tab-pane hidden space-y-6">
       
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div data-section-grid="sec-lab-columns" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         <!-- Formulario de Creación de Estrategia -->
         <div class="lg:col-span-6 glass-card rounded-xl p-5 space-y-4 motion-sweep stagger-1 shimmer-active">
@@ -2939,7 +3168,7 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div data-section-grid="sec-config-profiles" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         <!-- Perfil 1: Capital Propio -->
         <div class="rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs p-5 border-t-4 border-t-[#065F46] space-y-4">
@@ -10899,9 +11128,1111 @@
       }
     }
 
-    // Inicializar controladores globales únicos (Tablas + KPIs/Tarjetas)
+    /**
+     * =========================================================================
+     * ALGROK GLOBAL SECTION / CARD REORDER CONTROLLER (FLIP V4)
+     * Permite arrastrar y reordenar CUALQUIER tarjeta o sección completa del
+     * dashboard (Curva de Rentabilidad, Tablas, Rachas, Bloques, Gráficos).
+     * =========================================================================
+     */
+    class AlgrokSectionReorderController {
+      constructor() {
+        this.storagePrefix = 'algrok_section_order_v1_';
+        this.containers = new Map();
+        this.serverPreferences = {};
+        this.activeDrag = null;
+        this.ghostEl = null;
+        this.init();
+      }
+
+      async init() {
+        try {
+          const res = await fetch('/api/layout_preferences');
+          if (res.ok) {
+            const data = await res.json();
+            if (data && typeof data === 'object') {
+              this.serverPreferences = data;
+              for (const [gId, ord] of Object.entries(data)) {
+                try {
+                  localStorage.setItem(this.storagePrefix + gId, JSON.stringify(ord));
+                } catch (e) {}
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('Error fetching server layout preferences:', e);
+        }
+
+        const runScan = () => {
+          this.scanAndAttachAll();
+        };
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', runScan);
+        } else {
+          runScan();
+        }
+
+        setTimeout(runScan, 400);
+        setTimeout(runScan, 1400);
+        setTimeout(runScan, 3500);
+
+        window.addEventListener('pointermove', (e) => this.onGlobalPointerMove(e), { passive: false });
+        window.addEventListener('pointerup', (e) => this.onGlobalPointerUp(e), { passive: false });
+        window.addEventListener('pointercancel', (e) => this.onGlobalPointerUp(e), { passive: false });
+      }
+
+      scanAndAttachAll() {
+        document.querySelectorAll('.tab-pane, [data-section-grid]').forEach((el) => {
+          this.attachToContainer(el);
+        });
+      }
+
+      getContainerId(el) {
+        if (el.dataset.sectionGrid) return el.dataset.sectionGrid;
+        if (el.classList.contains('tab-pane') && el.id) {
+          return 'sec-tab-' + el.id.replace('tab-content-', '');
+        }
+        return null;
+      }
+
+      getDirectSections(containerEl) {
+        return Array.from(containerEl.children).filter(el =>
+          el.nodeType === 1 &&
+          el.tagName === 'DIV' &&
+          !el.classList.contains('kpi-reset-bar') &&
+          !el.classList.contains('section-reset-bar')
+        );
+      }
+
+      attachToContainer(containerEl) {
+        if (!containerEl) return;
+        const gridId = this.getContainerId(containerEl);
+        if (!gridId) return;
+
+        const sections = this.getDirectSections(containerEl);
+
+        if (this.containers.has(gridId)) {
+          const state = this.containers.get(gridId);
+          if (sections.length >= 2 && sections.some(s => !s.classList.contains('algrok-section-card'))) {
+            this.decorateSections(containerEl, gridId, sections, state);
+            const savedOrder = this.getSavedOrder(gridId);
+            if (savedOrder && savedOrder.length >= state.originalKeys.length) {
+              this.applyOrderToContainer(gridId, savedOrder, false);
+            }
+          }
+          return;
+        }
+
+        const originalKeys = sections.map((sec, idx) => {
+          const key = sec.dataset.sectionKey || sec.id || `sec_${idx}`;
+          sec.dataset.sectionKey = key;
+          return key;
+        });
+
+        const state = {
+          containerEl,
+          gridId,
+          originalKeys,
+          currentOrder: [...originalKeys],
+          isPermuting: false,
+          observer: null
+        };
+        this.containers.set(gridId, state);
+
+        if (sections.length >= 2) {
+          this.decorateSections(containerEl, gridId, sections, state);
+        }
+
+        this.injectResetControl(containerEl, gridId);
+
+        const observer = new MutationObserver(() => {
+          if (state.isPermuting) return;
+          const fresh = this.getDirectSections(containerEl);
+          if (fresh.length < 2) return;
+          state.isPermuting = true;
+          try {
+            if (state.originalKeys.length === 0) {
+              state.originalKeys = fresh.map((s, idx) => s.dataset.sectionKey || s.id || `sec_${idx}`);
+            }
+            this.decorateSections(containerEl, gridId, fresh, state);
+            const savedOrder = this.getSavedOrder(gridId);
+            if (savedOrder && !this.isDefaultOrder(state.originalKeys, savedOrder)) {
+              this.applyOrderToContainer(gridId, savedOrder, false);
+            }
+            this.updateResetButtonVisibility(gridId);
+          } finally {
+            setTimeout(() => { state.isPermuting = false; }, 0);
+          }
+        });
+        observer.observe(containerEl, { childList: true });
+        state.observer = observer;
+
+        const savedOrder = this.getSavedOrder(gridId);
+        if (savedOrder && !this.isDefaultOrder(originalKeys, savedOrder)) {
+          this.applyOrderToContainer(gridId, savedOrder, false);
+        }
+        this.updateResetButtonVisibility(gridId);
+      }
+
+      decorateSections(containerEl, gridId, sections, state) {
+        sections.forEach((sec, idx) => {
+          if (!sec.dataset.sectionKey) {
+            sec.dataset.sectionKey = state.originalKeys[idx] || sec.id || `sec_${idx}`;
+          }
+          sec.classList.add('algrok-section-card');
+          // Si no es contenedor puro de otros KPIs, marcar cursor grab en cabeceras/superficie
+          if (!sec.dataset.kpiGrid && !sec.dataset.sectionGrid) {
+            sec.classList.add('section-draggable-surface');
+          }
+
+          if (!sec.querySelector(':scope > .section-drag-grip')) {
+            const grip = document.createElement('span');
+            grip.className = 'section-drag-grip';
+            grip.title = 'Mantén pulsado y arrastra para mover esta tarjeta/sección';
+            grip.innerHTML = '<i class="fa-solid fa-grip-vertical"></i> Mover';
+            sec.appendChild(grip);
+          }
+
+          sec.onpointerdown = (e) => this.onSectionPointerDown(e, gridId, sec);
+        });
+      }
+
+      injectResetControl(containerEl, gridId) {
+        const host = containerEl.parentElement;
+        if (!host) return;
+        let bar = containerEl.querySelector(`:scope > .section-reset-bar[data-for="${gridId}"]`);
+        if (!bar) {
+          bar = document.createElement('div');
+          bar.className = 'section-reset-bar flex justify-end mb-1 hidden';
+          bar.dataset.for = gridId;
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'btn-reset-sections';
+          btn.innerHTML = '<i class="fa-solid fa-arrow-rotate-left"></i> Restablecer Diseño';
+          btn.title = 'Restaurar orden original de tarjetas y gráficos';
+          btn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.resetContainerOrder(gridId);
+          };
+          bar.appendChild(btn);
+          containerEl.insertBefore(bar, containerEl.firstChild);
+        }
+      }
+
+      updateResetButtonVisibility(gridId) {
+        const state = this.containers.get(gridId);
+        if (!state) return;
+        const bar = state.containerEl.querySelector(`:scope > .section-reset-bar[data-for="${gridId}"]`);
+        if (!bar) return;
+
+        if (this.isDefaultOrder(state.originalKeys, state.currentOrder)) {
+          bar.classList.add('hidden');
+        } else {
+          bar.classList.remove('hidden');
+        }
+      }
+
+      getSectionTitle(sec) {
+        const h = sec.querySelector('h2, h3, h4, .overline-text');
+        const txt = h ? (h.innerText || h.textContent || '').trim().replace(/\s+/g, ' ') : '';
+        if (txt) return txt.slice(0, 64);
+        const raw = (sec.innerText || sec.textContent || '').trim().replace(/\s+/g, ' ');
+        return (raw || 'Sección del Dashboard').slice(0, 54);
+      }
+
+      onSectionPointerDown(e, gridId, sec) {
+        if (e.button !== undefined && e.button !== 0) return;
+
+        const state = this.containers.get(gridId);
+        if (!state) return;
+
+        const gripClicked = e.target.closest('.section-drag-grip');
+        if (gripClicked) {
+          if (gripClicked.parentElement !== sec) return;
+        } else {
+          // Respetar contenedores anidados más específicos
+          const directContainer = e.target.closest('[data-section-grid], .tab-pane');
+          if (directContainer && directContainer !== state.containerEl) return;
+
+          if (e.pointerType === 'touch') return; // En táctil usar el grip central
+
+          // Respetar tarjetas KPI internas, tablas, gráficos y controles interactivos
+          if (e.target.closest('button, input, select, textarea, a, table, .apexcharts-canvas, .tv-lightweight-charts, canvas, [data-kpi-grid], [onclick], .overflow-x-auto, .overflow-y-auto, [id^="chart-"]')) {
+            return;
+          }
+        }
+
+        const sections = this.getDirectSections(state.containerEl);
+        if (sections.length < 2) return;
+
+        e.stopPropagation();
+        if (e.pointerType !== 'touch') {
+          e.preventDefault();
+        }
+
+        try {
+          if (sec.setPointerCapture) sec.setPointerCapture(e.pointerId);
+        } catch (err) {}
+
+        const rect = sec.getBoundingClientRect();
+        this.activeDrag = {
+          pointerId: e.pointerId,
+          gridId,
+          state,
+          sec,
+          initialOrder: sections.map(s => s.dataset.sectionKey),
+          startX: e.clientX,
+          startY: e.clientY,
+          offsetX: Math.min(Math.max(e.clientX - rect.left, 24), 220),
+          offsetY: Math.min(Math.max(e.clientY - rect.top, 16), 44),
+          width: rect.width,
+          height: rect.height,
+          lastSwapTime: 0,
+          isDragging: false
+        };
+      }
+
+      onGlobalPointerMove(e) {
+        if (!this.activeDrag) return;
+        const drag = this.activeDrag;
+
+        const dist = Math.hypot(e.clientX - drag.startX, e.clientY - drag.startY);
+        if (!drag.isDragging && dist > 6) {
+          drag.isDragging = true;
+          document.body.style.cursor = 'grabbing';
+          this.createSectionGhost(drag, e);
+          drag.sec.classList.add('section-is-dragging');
+        }
+
+        if (drag.isDragging) {
+          e.preventDefault();
+          this.updateGhostPosition(e);
+          this.updateSectionDropTarget(e);
+        }
+      }
+
+      createSectionGhost(drag, e) {
+        if (this.ghostEl) this.ghostEl.remove();
+
+        const hasHeavyVisuals = drag.height > 230 || Boolean(drag.sec.querySelector('canvas, table, .apexcharts-canvas, .tv-lightweight-charts'));
+        let ghost;
+
+        if (!hasHeavyVisuals) {
+          ghost = drag.sec.cloneNode(true);
+          ghost.removeAttribute('id');
+          ghost.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+          const grip = ghost.querySelector(':scope > .section-drag-grip');
+          if (grip) grip.style.opacity = '1';
+          ghost.classList.remove('section-is-dragging', 'algrok-section-card');
+          ghost.classList.add('section-drag-ghost');
+          ghost.style.width = `${drag.width}px`;
+          ghost.style.height = `${drag.height}px`;
+        } else {
+          // Para gráficos grandes y tablas largas: tarjeta flotante compacta ampliada al 104.5%
+          ghost = document.createElement('div');
+          ghost.className = 'section-drag-ghost p-4 flex items-center justify-between gap-3';
+          ghost.style.width = `${Math.min(drag.width, 460)}px`;
+          const title = this.getSectionTitle(drag.sec);
+          ghost.innerHTML = `
+            <div class="flex items-center gap-2.5 min-w-0">
+              <div class="w-8 h-8 rounded-lg bg-[#EEF2FF] border border-[#C7D2FE] flex items-center justify-center text-[#3C45A5] shrink-0">
+                <i class="fa-solid fa-layer-group text-xs"></i>
+              </div>
+              <div class="min-w-0">
+                <div class="text-[10px] font-mono font-bold uppercase text-[#3C45A5]">Moviendo sección</div>
+                <div class="text-xs font-bold text-[#1D1D1F] truncate">${title}</div>
+              </div>
+            </div>
+            <i class="fa-solid fa-grip-vertical text-[#3C45A5] text-xs shrink-0"></i>
+          `;
+        }
+
+        ghost.style.left = `${e.clientX - drag.offsetX}px`;
+        ghost.style.top = `${e.clientY - drag.offsetY}px`;
+        document.body.appendChild(ghost);
+        this.ghostEl = ghost;
+
+        if (window.Motion && Motion.animate) {
+          try {
+            Motion.animate(ghost, {
+              scale: [0.97, 1.045],
+              opacity: [0.85, 0.99]
+            }, {
+              easing: Motion.spring({ stiffness: 420, damping: 25 })
+            });
+          } catch (err) {}
+        }
+      }
+
+      updateGhostPosition(e) {
+        if (!this.ghostEl || !this.activeDrag) return;
+        const drag = this.activeDrag;
+        this.ghostEl.style.left = `${e.clientX - drag.offsetX}px`;
+        this.ghostEl.style.top = `${e.clientY - drag.offsetY}px`;
+      }
+
+      updateSectionDropTarget(e) {
+        if (!this.activeDrag) return;
+        const drag = this.activeDrag;
+        const now = performance.now();
+        if (now - drag.lastSwapTime < 130) return;
+
+        const { containerEl } = drag.state;
+        const allSecs = this.getDirectSections(containerEl);
+        const curIdx = allSecs.indexOf(drag.sec);
+        if (curIdx === -1) return;
+
+        const dragRect = drag.sec.getBoundingClientRect();
+        let targetSec = null;
+        let targetIdx = -1;
+
+        for (let idx = 0; idx < allSecs.length; idx++) {
+          const cand = allSecs[idx];
+          if (cand === drag.sec) continue;
+          if (cand.offsetParent === null || cand.classList.contains('hidden')) continue;
+
+          const rect = cand.getBoundingClientRect();
+          const sameRow = Math.abs((rect.top + rect.height / 2) - (dragRect.top + dragRect.height / 2)) < Math.min(rect.height, dragRect.height) * 0.45;
+
+          if (sameRow) {
+            if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) continue;
+            const overlapX = Math.min(drag.width, rect.width) * 0.65;
+            if (idx > curIdx && e.clientX > rect.right - overlapX) {
+              targetSec = cand; targetIdx = idx; break;
+            } else if (idx < curIdx && e.clientX < rect.left + overlapX) {
+              targetSec = cand; targetIdx = idx; break;
+            }
+          } else {
+            if (e.clientY < rect.top || e.clientY > rect.bottom) continue;
+            // Guardia vertical asimétrica para tarjetas de distinta altura (ej. KPIs vs Gráficos)
+            const overlapY = Math.min(dragRect.height, rect.height) * 0.65;
+            if (idx > curIdx && e.clientY > rect.bottom - overlapY) {
+              targetSec = cand; targetIdx = idx; break;
+            } else if (idx < curIdx && e.clientY < rect.top + overlapY) {
+              targetSec = cand; targetIdx = idx; break;
+            }
+          }
+        }
+
+        if (targetSec && targetIdx !== -1 && targetIdx !== curIdx) {
+          this.liveMoveSection(drag, allSecs, curIdx, targetIdx, targetSec);
+          drag.lastSwapTime = now;
+        }
+      }
+
+      insertSectionKeepingKpiBar(containerEl, secToMove, refNode, insertAfter) {
+        const kpiBar = secToMove.dataset.kpiGrid
+          ? containerEl.querySelector(`:scope > .kpi-reset-bar[data-for="${secToMove.dataset.kpiGrid}"]`)
+          : null;
+
+        if (insertAfter) {
+          containerEl.insertBefore(secToMove, refNode ? refNode.nextSibling : null);
+          if (kpiBar) containerEl.insertBefore(kpiBar, secToMove);
+        } else {
+          // Si refNode tiene kpi-reset-bar inmediatamente encima, insertar antes de su bar
+          const refBar = (refNode && refNode.dataset && refNode.dataset.kpiGrid)
+            ? containerEl.querySelector(`:scope > .kpi-reset-bar[data-for="${refNode.dataset.kpiGrid}"]`)
+            : null;
+          const anchor = (refBar && refBar.nextElementSibling === refNode) ? refBar : refNode;
+          containerEl.insertBefore(secToMove, anchor || null);
+          if (kpiBar) containerEl.insertBefore(kpiBar, secToMove);
+        }
+      }
+
+      liveMoveSection(drag, allSecs, fromIdx, toIdx, targetSec) {
+        const { state } = drag;
+        const visibleSecs = allSecs.filter(s => s.offsetParent !== null && !s.classList.contains('hidden'));
+        const firstRects = captureRects(visibleSecs);
+
+        state.isPermuting = true;
+        try {
+          this.insertSectionKeepingKpiBar(state.containerEl, drag.sec, targetSec, toIdx > fromIdx);
+          state.currentOrder = this.getDirectSections(state.containerEl).map(s => s.dataset.sectionKey);
+          playFlipShift(visibleSecs, firstRects, drag.sec, 250);
+        } finally {
+          setTimeout(() => { state.isPermuting = false; }, 0);
+        }
+      }
+
+      onGlobalPointerUp(e) {
+        if (!this.activeDrag) return;
+        const drag = this.activeDrag;
+        this.activeDrag = null;
+        document.body.style.cursor = '';
+
+        try {
+          if (drag.sec.releasePointerCapture && drag.pointerId !== undefined) {
+            drag.sec.releasePointerCapture(drag.pointerId);
+          }
+        } catch (err) {}
+
+        if (drag.isDragging) {
+          drag.sec.classList.remove('section-is-dragging');
+          if (this.ghostEl) {
+            this.ghostEl.remove();
+            this.ghostEl = null;
+          }
+
+          const newOrder = this.getDirectSections(drag.state.containerEl).map(s => s.dataset.sectionKey);
+          drag.state.currentOrder = [...newOrder];
+
+          if (!this.isDefaultOrder(drag.initialOrder, newOrder)) {
+            drag.sec.classList.add('kpi-reorder-flash');
+            setTimeout(() => drag.sec.classList.remove('kpi-reorder-flash'), 650);
+            if (window.Motion && Motion.animate) {
+              try {
+                Motion.animate(drag.sec, { scale: [0.985, 1.012, 1] }, {
+                  easing: Motion.spring({ stiffness: 420, damping: 24 })
+                });
+              } catch (err) {}
+            }
+            this.saveOrder(drag.gridId, newOrder);
+            window.dispatchEvent(new Event('resize'));
+          }
+          this.updateResetButtonVisibility(drag.gridId);
+        }
+      }
+
+      applyOrderToContainer(gridId, newOrder, animate = false) {
+        const state = this.containers.get(gridId);
+        if (!state) return;
+
+        const secs = this.getDirectSections(state.containerEl);
+        const firstRects = animate ? captureRects(secs) : null;
+
+        state.isPermuting = true;
+        try {
+          const secMap = new Map();
+          secs.forEach(s => secMap.set(s.dataset.sectionKey, s));
+
+          const appendSec = (sec) => {
+            const kpiBar = sec.dataset.kpiGrid
+              ? state.containerEl.querySelector(`:scope > .kpi-reset-bar[data-for="${sec.dataset.kpiGrid}"]`)
+              : null;
+            if (kpiBar) state.containerEl.appendChild(kpiBar);
+            state.containerEl.appendChild(sec);
+          };
+
+          newOrder.forEach(key => {
+            const s = secMap.get(key);
+            if (s) appendSec(s);
+          });
+          secs.forEach(s => {
+            if (!newOrder.includes(s.dataset.sectionKey)) appendSec(s);
+          });
+
+          state.currentOrder = this.getDirectSections(state.containerEl).map(s => s.dataset.sectionKey);
+          if (animate && firstRects) {
+            playFlipShift(secs, firstRects, null, 250);
+          }
+        } finally {
+          setTimeout(() => { state.isPermuting = false; }, 0);
+        }
+      }
+
+      resetContainerOrder(gridId) {
+        const state = this.containers.get(gridId);
+        if (!state) return;
+
+        this.applyOrderToContainer(gridId, state.originalKeys, true);
+        if (this.serverPreferences) delete this.serverPreferences[gridId];
+        try {
+          localStorage.removeItem(this.storagePrefix + gridId);
+        } catch (e) {}
+        fetch(`/api/layout_preferences?gridId=${encodeURIComponent(gridId)}`, {
+          method: 'DELETE'
+        }).catch(err => console.warn('Error deleting layout order from server:', err));
+        this.updateResetButtonVisibility(gridId);
+      }
+
+      getSavedOrder(gridId) {
+        if (this.serverPreferences && this.serverPreferences[gridId]) {
+          return this.serverPreferences[gridId];
+        }
+        try {
+          const raw = localStorage.getItem(this.storagePrefix + gridId);
+          return raw ? JSON.parse(raw) : null;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      saveOrder(gridId, order) {
+        if (!this.serverPreferences) this.serverPreferences = {};
+        this.serverPreferences[gridId] = order;
+        try {
+          localStorage.setItem(this.storagePrefix + gridId, JSON.stringify(order));
+        } catch (e) {}
+        fetch('/api/layout_preferences', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ gridId, order })
+        }).catch(err => console.warn('Error syncing layout order to server:', err));
+      }
+
+      isDefaultOrder(orig, curr) {
+        if (!curr || orig.length !== curr.length) return true;
+        return orig.every((key, i) => key === curr[i]);
+      }
+    }
+
+    /**
+     * =========================================================================
+     * ALGROK SIDEBAR NAVIGATION EDITOR CONTROLLER
+     * Editar pestañas del menú lateral: reordenar (FLIP), renombrar, cambiar icono y ocultar/mostrar.
+     * =========================================================================
+     */
+    class AlgrokSidebarEditorController {
+      constructor() {
+        this.storageKey = 'algrok_nav_prefs_v1';
+        this.navEl = document.getElementById('sidebar-nav');
+        this.isEditMode = false;
+        this.defaultTabs = [];
+        this.tabsConfig = [];
+        this.activeDrag = null;
+        this.ghostEl = null;
+        this.iconPopoverEl = null;
+        this.suppressClickUntil = 0;
+        this.availableIcons = [
+          'fa-gauge-high', 'fa-chart-line', 'fa-satellite-dish', 'fa-compass-drafting',
+          'fa-scale-balanced', 'fa-users-gear', 'fa-flask-vial', 'fa-chart-simple',
+          'fa-book-bookmark', 'fa-shield-halved', 'fa-file-lines', 'fa-bolt',
+          'fa-layer-group', 'fa-coins', 'fa-robot', 'fa-bullseye'
+        ];
+        if (this.navEl) this.init();
+      }
+
+      async init() {
+        this.captureDefaultTabs();
+        this.loadLocalPrefs();
+
+        try {
+          const res = await fetch('/api/nav_preferences');
+          if (res.ok) {
+            const data = await res.json();
+            if (data && Array.isArray(data.tabs) && data.tabs.length > 0) {
+              this.applyMergedConfig(data.tabs);
+              this.saveLocalPrefs();
+            }
+          }
+        } catch (e) {
+          console.warn('Error fetching nav preferences:', e);
+        }
+
+        this.renderMenuFromConfig(false);
+        this.bindGlobalEvents();
+      }
+
+      captureDefaultTabs() {
+        const btns = Array.from(this.navEl.querySelectorAll('button[data-nav-id]'));
+        this.defaultTabs = btns.map(btn => {
+          const id = btn.dataset.navId;
+          const span = btn.querySelector('span');
+          const iconEl = btn.querySelector('i');
+          let iconClass = 'fa-circle';
+          if (iconEl) {
+            const match = Array.from(iconEl.classList).find(c => c.startsWith('fa-') && c !== 'fa-solid' && c !== 'fa-regular');
+            if (match) iconClass = match;
+          }
+          return {
+            id,
+            label: span ? span.textContent.trim() : id,
+            icon: iconClass,
+            hidden: false
+          };
+        });
+        this.tabsConfig = this.defaultTabs.map(t => ({ ...t }));
+      }
+
+      loadLocalPrefs() {
+        try {
+          const raw = localStorage.getItem(this.storageKey);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              this.applyMergedConfig(parsed);
+            }
+          }
+        } catch (e) {}
+      }
+
+      saveLocalPrefs() {
+        try {
+          localStorage.setItem(this.storageKey, JSON.stringify(this.tabsConfig));
+        } catch (e) {}
+      }
+
+      saveServerPrefs() {
+        this.saveLocalPrefs();
+        fetch('/api/nav_preferences', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tabs: this.tabsConfig })
+        }).catch(err => console.warn('Error syncing nav preferences:', err));
+      }
+
+      applyMergedConfig(savedTabs) {
+        const defMap = new Map(this.defaultTabs.map(t => [t.id, t]));
+        const seen = new Set();
+        const merged = [];
+
+        savedTabs.forEach(item => {
+          if (!item || !item.id || !defMap.has(item.id) || seen.has(item.id)) return;
+          seen.add(item.id);
+          const def = defMap.get(item.id);
+          merged.push({
+            id: item.id,
+            label: (item.label && String(item.label).trim()) || def.label,
+            icon: item.icon || def.icon,
+            hidden: Boolean(item.hidden)
+          });
+        });
+
+        // Añadir pestañas nuevas que no existieran en la config guardada
+        this.defaultTabs.forEach(def => {
+          if (!seen.has(def.id)) merged.push({ ...def });
+        });
+
+        // Garantizar al menos 1 pestaña visible
+        if (merged.length > 0 && merged.every(t => t.hidden)) {
+          merged[0].hidden = false;
+        }
+        this.tabsConfig = merged;
+      }
+
+      bindGlobalEvents() {
+        // Bloquear clic fantasma tras arrastre o acciones de edición interna
+        this.navEl.addEventListener('click', (e) => {
+          if (performance.now() < this.suppressClickUntil) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+          }
+          if (this.isEditMode && e.target.closest('.sidebar-item-actions, .sidebar-inline-input, .sidebar-drag-grip')) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }, true);
+
+        document.addEventListener('pointerdown', (e) => {
+          if (this.iconPopoverEl && !this.iconPopoverEl.contains(e.target) && !e.target.closest('.sidebar-tab-icon')) {
+            this.closeIconPopover();
+          }
+        });
+
+        window.addEventListener('pointermove', (e) => this.onGlobalPointerMove(e), { passive: false });
+        window.addEventListener('pointerup', (e) => this.onGlobalPointerUp(e), { passive: false });
+        window.addEventListener('pointercancel', (e) => this.onGlobalPointerUp(e), { passive: false });
+      }
+
+      toggleEditMode(forceState) {
+        this.isEditMode = typeof forceState === 'boolean' ? forceState : !this.isEditMode;
+        const btnLabel = document.getElementById('btn-edit-sidebar-label');
+        const btnEdit = document.getElementById('btn-edit-sidebar-nav');
+        const toolbar = document.getElementById('sidebar-edit-toolbar');
+
+        if (this.isEditMode) {
+          this.navEl.classList.add('sidebar-editing');
+          if (toolbar) toolbar.classList.remove('hidden');
+          if (btnLabel) btnLabel.innerText = 'Listo';
+          if (btnEdit) btnEdit.classList.add('text-[#3C45A5]', 'bg-[#FAF7F2]', 'border-[#D6D1C7]');
+        } else {
+          this.closeIconPopover();
+          this.navEl.classList.remove('sidebar-editing');
+          if (toolbar) toolbar.classList.add('hidden');
+          if (btnLabel) btnLabel.innerText = 'Editar';
+          if (btnEdit) btnEdit.classList.remove('text-[#3C45A5]', 'bg-[#FAF7F2]', 'border-[#D6D1C7]');
+
+          // Si la pestaña actualmente abierta quedó oculta, saltar a la primera visible
+          const activeCfg = this.tabsConfig.find(t => t.id === window.currentActiveTab);
+          if (activeCfg && activeCfg.hidden) {
+            const firstVisible = this.tabsConfig.find(t => !t.hidden);
+            if (firstVisible && typeof switchTab === 'function') {
+              switchTab(firstVisible.id);
+            }
+          }
+        }
+        this.renderMenuFromConfig(false);
+      }
+
+      syncHeaderTitles() {
+        if (typeof tabTitles !== 'object') return;
+        this.tabsConfig.forEach(cfg => {
+          tabTitles[cfg.id] = `${cfg.label} · AlgrokQuant`;
+        });
+        if (window.currentActiveTab && tabTitles[window.currentActiveTab]) {
+          const titleEl = document.getElementById('current-tab-title');
+          if (titleEl) titleEl.innerText = tabTitles[window.currentActiveTab];
+        }
+      }
+
+      renderMenuFromConfig(animate = false) {
+        const existingBtns = new Map();
+        Array.from(this.navEl.querySelectorAll('button[data-nav-id]')).forEach(btn => {
+          existingBtns.set(btn.dataset.navId, btn);
+        });
+
+        const firstRects = animate ? captureRects(Array.from(existingBtns.values())) : null;
+
+        this.tabsConfig.forEach(cfg => {
+          const btn = existingBtns.get(cfg.id);
+          if (!btn) return;
+
+          this.decorateTabButton(btn, cfg);
+          this.navEl.appendChild(btn);
+
+          // Visibilidad según modo edición vs normal
+          btn.classList.remove('hidden', 'sidebar-nav-hidden-in-edit');
+          if (cfg.hidden) {
+            if (this.isEditMode) {
+              btn.classList.add('sidebar-nav-hidden-in-edit');
+            } else {
+              btn.classList.add('hidden');
+            }
+          }
+        });
+
+        if (animate && firstRects) {
+          playFlipShift(Array.from(existingBtns.values()), firstRects, null, 220);
+        }
+        this.syncHeaderTitles();
+      }
+
+      decorateTabButton(btn, cfg) {
+        if (!btn.querySelector(':scope > .sidebar-drag-grip')) {
+          const grip = document.createElement('span');
+          grip.className = 'sidebar-drag-grip';
+          grip.title = 'Arrastra para mover pestaña';
+          grip.innerHTML = '<i class="fa-solid fa-grip-vertical text-[10px]"></i>';
+          btn.insertBefore(grip, btn.firstChild);
+        }
+
+        const iconEl = btn.querySelector('i.fa-solid:not(.fa-grip-vertical), i.fa-regular, i.fa-brands');
+        if (iconEl) {
+          const preserved = ['text-xs', 'text-[#3C45A5]', 'mr-2.5', 'w-4', 'text-center', 'sidebar-tab-icon'];
+          iconEl.className = `fa-solid ${cfg.icon} ${preserved.join(' ')}`;
+          iconEl.title = this.isEditMode ? 'Cambiar icono' : '';
+          iconEl.onclick = (e) => {
+            if (!this.isEditMode) return;
+            e.preventDefault();
+            e.stopPropagation();
+            this.suppressClickUntil = performance.now() + 200;
+            this.openIconPopover(btn, cfg, iconEl);
+          };
+        }
+
+        const labelSpan = btn.querySelector(':scope > span:not(.sidebar-drag-grip):not(.sidebar-item-actions)');
+        if (labelSpan) {
+          labelSpan.classList.add('sidebar-tab-label', 'truncate');
+          if (!labelSpan.querySelector('input')) {
+            labelSpan.textContent = cfg.label;
+          }
+        }
+
+        let actions = btn.querySelector(':scope > .sidebar-item-actions');
+        if (!actions) {
+          actions = document.createElement('span');
+          actions.className = 'sidebar-item-actions';
+
+          const renameBtn = document.createElement('button');
+          renameBtn.type = 'button';
+          renameBtn.className = 'sidebar-act-btn sidebar-btn-rename';
+          renameBtn.title = 'Renombrar pestaña';
+          renameBtn.innerHTML = '<i class="fa-solid fa-pen"></i>';
+          renameBtn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.suppressClickUntil = performance.now() + 250;
+            this.startInlineRename(btn, cfg);
+          };
+
+          const eyeBtn = document.createElement('button');
+          eyeBtn.type = 'button';
+          eyeBtn.className = 'sidebar-act-btn sidebar-btn-eye';
+          eyeBtn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.suppressClickUntil = performance.now() + 250;
+            this.toggleTabVisibility(cfg.id);
+          };
+
+          actions.appendChild(renameBtn);
+          actions.appendChild(eyeBtn);
+          btn.appendChild(actions);
+        }
+
+        const eyeBtn = actions.querySelector('.sidebar-btn-eye');
+        if (eyeBtn) {
+          eyeBtn.title = cfg.hidden ? 'Mostrar pestaña en el menú' : 'Ocultar pestaña del menú';
+          eyeBtn.innerHTML = cfg.hidden
+            ? '<i class="fa-solid fa-eye-slash text-[#D70015]"></i>'
+            : '<i class="fa-solid fa-eye"></i>';
+        }
+
+        btn.setAttribute('draggable', 'false');
+        btn.onpointerdown = (e) => this.onTabPointerDown(e, btn, cfg);
+      }
+
+      startInlineRename(btn, cfg) {
+        const labelSpan = btn.querySelector('.sidebar-tab-label');
+        if (!labelSpan || labelSpan.querySelector('input')) return;
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = cfg.label;
+        input.maxLength = 32;
+        input.className = 'sidebar-inline-input';
+
+        const commit = () => {
+          const next = input.value.trim();
+          if (next) {
+            cfg.label = next;
+            this.saveServerPrefs();
+            this.syncHeaderTitles();
+          }
+          labelSpan.textContent = cfg.label;
+        };
+
+        input.onclick = (e) => { e.stopPropagation(); };
+        input.onpointerdown = (e) => { e.stopPropagation(); };
+        input.onkeydown = (e) => {
+          e.stopPropagation();
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            commit();
+          } else if (e.key === 'Escape') {
+            labelSpan.textContent = cfg.label;
+          }
+        };
+        input.onblur = commit;
+
+        labelSpan.textContent = '';
+        labelSpan.appendChild(input);
+        input.focus();
+        input.select();
+      }
+
+      openIconPopover(btn, cfg, anchorEl) {
+        this.closeIconPopover();
+        const pop = document.createElement('div');
+        pop.className = 'sidebar-icon-popover';
+
+        this.availableIcons.forEach(ic => {
+          const choice = document.createElement('button');
+          choice.type = 'button';
+          choice.className = 'sidebar-icon-choice';
+          if (cfg.icon === ic) {
+            choice.classList.add('border-[#3C45A5]', 'bg-[#EEF2FF]', 'text-[#3C45A5]');
+          }
+          choice.innerHTML = `<i class="fa-solid ${ic} text-xs"></i>`;
+          choice.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            cfg.icon = ic;
+            this.saveServerPrefs();
+            this.renderMenuFromConfig(false);
+            this.closeIconPopover();
+          };
+          pop.appendChild(choice);
+        });
+
+        const rect = anchorEl.getBoundingClientRect();
+        pop.style.left = `${Math.max(12, rect.left)}px`;
+        pop.style.top = `${Math.min(window.innerHeight - 160, rect.bottom + 6)}px`;
+        document.body.appendChild(pop);
+        this.iconPopoverEl = pop;
+      }
+
+      closeIconPopover() {
+        if (this.iconPopoverEl) {
+          this.iconPopoverEl.remove();
+          this.iconPopoverEl = null;
+        }
+      }
+
+      toggleTabVisibility(tabId) {
+        const target = this.tabsConfig.find(t => t.id === tabId);
+        if (!target) return;
+
+        const visibleCount = this.tabsConfig.filter(t => !t.hidden).length;
+        if (!target.hidden && visibleCount <= 1) return; // Siempre dejar al menos 1 visible
+
+        target.hidden = !target.hidden;
+        this.saveServerPrefs();
+        this.renderMenuFromConfig(false);
+      }
+
+      onTabPointerDown(e, btn, cfg) {
+        if (e.button !== undefined && e.button !== 0) return;
+        if (e.target.closest('.sidebar-item-actions, .sidebar-inline-input')) return;
+        if (e.pointerType === 'touch' && !e.target.closest('.sidebar-drag-grip')) return;
+
+        try {
+          if (btn.setPointerCapture) btn.setPointerCapture(e.pointerId);
+        } catch (err) {}
+
+        const rect = btn.getBoundingClientRect();
+        this.activeDrag = {
+          pointerId: e.pointerId,
+          btn,
+          cfg,
+          initialOrder: this.tabsConfig.map(t => t.id),
+          startX: e.clientX,
+          startY: e.clientY,
+          offsetX: e.clientX - rect.left,
+          offsetY: e.clientY - rect.top,
+          width: rect.width,
+          height: rect.height,
+          lastSwapTime: 0,
+          isDragging: false
+        };
+      }
+
+      onGlobalPointerMove(e) {
+        if (!this.activeDrag) return;
+        const drag = this.activeDrag;
+
+        const dist = Math.hypot(e.clientX - drag.startX, e.clientY - drag.startY);
+        if (!drag.isDragging && dist > 6) {
+          drag.isDragging = true;
+          this.closeIconPopover();
+          document.body.style.cursor = 'grabbing';
+          this.createGhost(drag, e);
+          drag.btn.classList.add('sidebar-is-dragging');
+        }
+
+        if (drag.isDragging) {
+          e.preventDefault();
+          if (this.ghostEl) {
+            this.ghostEl.style.left = `${e.clientX - drag.offsetX}px`;
+            this.ghostEl.style.top = `${e.clientY - drag.offsetY}px`;
+          }
+          this.updateTabDropTarget(e);
+        }
+      }
+
+      createGhost(drag, e) {
+        if (this.ghostEl) this.ghostEl.remove();
+
+        const ghost = document.createElement('div');
+        ghost.className = 'sidebar-drag-ghost';
+        ghost.style.width = `${drag.width}px`;
+        ghost.style.left = `${e.clientX - drag.offsetX}px`;
+        ghost.style.top = `${e.clientY - drag.offsetY}px`;
+        ghost.innerHTML = `
+          <i class="fa-solid ${drag.cfg.icon} text-xs text-[#3C45A5] mr-2.5 w-4 text-center"></i>
+          <span class="truncate">${drag.cfg.label}</span>
+        `;
+        document.body.appendChild(ghost);
+        this.ghostEl = ghost;
+
+        if (window.Motion && Motion.animate) {
+          try {
+            Motion.animate(ghost, { scale: [0.97, 1.055], opacity: [0.85, 0.99] }, {
+              easing: Motion.spring({ stiffness: 450, damping: 25 })
+            });
+          } catch (err) {}
+        }
+      }
+
+      updateTabDropTarget(e) {
+        if (!this.activeDrag) return;
+        const drag = this.activeDrag;
+        const now = performance.now();
+        if (now - drag.lastSwapTime < 90) return;
+
+        const btns = Array.from(this.navEl.querySelectorAll('button[data-nav-id]'));
+        const curIdx = btns.indexOf(drag.btn);
+        if (curIdx === -1) return;
+
+        let targetIdx = -1;
+        for (let idx = 0; idx < btns.length; idx++) {
+          const cand = btns[idx];
+          if (cand === drag.btn || cand.classList.contains('hidden')) continue;
+          const rect = cand.getBoundingClientRect();
+          if (e.clientY < rect.top || e.clientY > rect.bottom) continue;
+
+          const overlapY = Math.min(drag.height, rect.height) * 0.65;
+          if (idx > curIdx && e.clientY > rect.bottom - overlapY) {
+            targetIdx = idx; break;
+          } else if (idx < curIdx && e.clientY < rect.top + overlapY) {
+            targetIdx = idx; break;
+          }
+        }
+
+        if (targetIdx !== -1 && targetIdx !== curIdx) {
+          const firstRects = captureRects(btns);
+          const targetBtn = btns[targetIdx];
+          if (targetIdx > curIdx) {
+            this.navEl.insertBefore(drag.btn, targetBtn.nextSibling);
+          } else {
+            this.navEl.insertBefore(drag.btn, targetBtn);
+          }
+
+          // Sincronizar orden de this.tabsConfig
+          const newIds = Array.from(this.navEl.querySelectorAll('button[data-nav-id]')).map(b => b.dataset.navId);
+          const cfgMap = new Map(this.tabsConfig.map(c => [c.id, c]));
+          this.tabsConfig = newIds.map(id => cfgMap.get(id)).filter(Boolean);
+
+          playFlipShift(btns, firstRects, drag.btn, 200);
+          drag.lastSwapTime = now;
+        }
+      }
+
+      onGlobalPointerUp(e) {
+        if (!this.activeDrag) return;
+        const drag = this.activeDrag;
+        this.activeDrag = null;
+        document.body.style.cursor = '';
+
+        try {
+          if (drag.btn.releasePointerCapture && drag.pointerId !== undefined) {
+            drag.btn.releasePointerCapture(drag.pointerId);
+          }
+        } catch (err) {}
+
+        if (drag.isDragging) {
+          this.suppressClickUntil = performance.now() + 300;
+          drag.btn.classList.remove('sidebar-is-dragging');
+          if (this.ghostEl) {
+            this.ghostEl.remove();
+            this.ghostEl = null;
+          }
+
+          const newIds = this.tabsConfig.map(t => t.id);
+          const changed = newIds.some((id, idx) => drag.initialOrder[idx] !== id);
+          if (changed) {
+            if (window.Motion && Motion.animate) {
+              try {
+                Motion.animate(drag.btn, { scale: [0.97, 1.02, 1] }, {
+                  easing: Motion.spring({ stiffness: 450, damping: 24 })
+                });
+              } catch (err) {}
+            }
+            this.saveServerPrefs();
+          }
+        }
+      }
+
+      resetNav() {
+        this.closeIconPopover();
+        this.tabsConfig = this.defaultTabs.map(t => ({ ...t }));
+        try {
+          localStorage.removeItem(this.storageKey);
+        } catch (e) {}
+        fetch('/api/nav_preferences', { method: 'DELETE' })
+          .catch(err => console.warn('Error resetting nav preferences:', err));
+        this.renderMenuFromConfig(true);
+      }
+    }
+
+    // Inicializar controladores globales únicos (Tablas + KPIs + Secciones/Tarjetas + Menú Lateral)
     window.AlgrokTables = new AlgrokTableColumnReorderController();
     window.AlgrokKpis = new AlgrokKpiReorderController();
+    window.AlgrokSections = new AlgrokSectionReorderController();
+    window.AlgrokSidebar = new AlgrokSidebarEditorController();
   })();
   </script>
 

@@ -3947,6 +3947,8 @@ def get_forward_trades(branch: Optional[str] = None):
 
 TABLE_PREFS_FILE = BASE_DIR / 'data/table_column_preferences.json'
 KPI_PREFS_FILE = BASE_DIR / 'data/kpi_preferences.json'
+LAYOUT_PREFS_FILE = BASE_DIR / 'data/layout_preferences.json'
+NAV_PREFS_FILE = BASE_DIR / 'data/nav_preferences.json'
 
 
 class TableColumnPreferencePayload(BaseModel):
@@ -3957,6 +3959,22 @@ class TableColumnPreferencePayload(BaseModel):
 class KpiPreferencePayload(BaseModel):
     gridId: str
     order: List[str]
+
+
+class LayoutPreferencePayload(BaseModel):
+    gridId: str
+    order: List[str]
+
+
+class NavTabItemPayload(BaseModel):
+    id: str
+    label: str
+    icon: str
+    hidden: bool = False
+
+
+class NavPreferencePayload(BaseModel):
+    tabs: List[NavTabItemPayload]
 
 
 def _load_json_prefs(prefs_file: Path) -> dict:
@@ -3971,10 +3989,10 @@ def _load_json_prefs(prefs_file: Path) -> dict:
     return {}
 
 
-def _save_json_pref(prefs_file: Path, key: str, order: List[str]) -> dict:
-    """Guarda el orden personalizado de un componente (tabla o grid de KPIs) en disco."""
+def _save_json_pref(prefs_file: Path, key: str, value) -> dict:
+    """Guarda una preferencia personalizada de interfaz (tabla, KPIs, secciones o menú) en disco."""
     data = _load_json_prefs(prefs_file)
-    data[key] = order
+    data[key] = value
     try:
         prefs_file.parent.mkdir(parents=True, exist_ok=True)
         with open(prefs_file, 'w', encoding='utf-8') as f:
@@ -4029,6 +4047,39 @@ def save_kpi_preference(payload: KpiPreferencePayload):
 @app.delete("/api/kpi_preferences")
 def delete_kpi_preference(gridId: str = Query(...)):
     return _delete_json_pref(KPI_PREFS_FILE, gridId)
+
+
+@app.get("/api/layout_preferences")
+def get_layout_preferences():
+    return _load_json_prefs(LAYOUT_PREFS_FILE)
+
+
+@app.post("/api/layout_preferences")
+def save_layout_preference(payload: LayoutPreferencePayload):
+    _save_json_pref(LAYOUT_PREFS_FILE, payload.gridId, payload.order)
+    return {"status": "ok", "gridId": payload.gridId, "order": payload.order}
+
+
+@app.delete("/api/layout_preferences")
+def delete_layout_preference(gridId: str = Query(...)):
+    return _delete_json_pref(LAYOUT_PREFS_FILE, gridId)
+
+
+@app.get("/api/nav_preferences")
+def get_nav_preferences():
+    return _load_json_prefs(NAV_PREFS_FILE)
+
+
+@app.post("/api/nav_preferences")
+def save_nav_preference(payload: NavPreferencePayload):
+    tabs_data = [t.model_dump() for t in payload.tabs]
+    _save_json_pref(NAV_PREFS_FILE, "tabs", tabs_data)
+    return {"status": "ok", "tabs": tabs_data}
+
+
+@app.delete("/api/nav_preferences")
+def delete_nav_preference():
+    return _delete_json_pref(NAV_PREFS_FILE, "tabs")
 
 
 @app.get("/api/strategy_vault")
