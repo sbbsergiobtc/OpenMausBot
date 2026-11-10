@@ -488,6 +488,7 @@ def update_single_account_stage(data: dict):
 
         target_acc["stage"] = new_stage
         target_acc["consistency_rule_enabled"] = (new_stage == "EVALUATION")
+        target_acc["max_single_trade_profit_pct"] = 40.0 if new_stage == "EVALUATION" else None
 
         if "firm_name" in data:
             target_acc["firm_name"] = str(data["firm_name"])
@@ -509,7 +510,8 @@ def update_single_account_stage(data: dict):
         with open(state_file, 'w', encoding='utf-8') as f:
             json.dump(s, f, indent=2)
 
-        return {"status": "SUCCESS", "updated_account": target_acc}
+        refreshed = next((a for a in get_accounts_catalog().get("accounts", []) if str(a.get("account_id")) == account_id), target_acc)
+        return {"status": "SUCCESS", "updated_account": refreshed}
     except Exception as e:
         return {"error": str(e)}
 
@@ -1449,23 +1451,35 @@ def get_strategy_detail(strat_id: str):
     }
 
 
+_TZ_MADRID = zoneinfo.ZoneInfo('Europe/Madrid')
+_DAY_NUM_ES = ('Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo')
+
+
+def _fast_parse_utc(ts_val) -> datetime:
+    s = str(ts_val or '').strip()
+    if not s:
+        return datetime.now(timezone.utc)
+    try:
+        if s.endswith('Z'):
+            s = s[:-1] + '+00:00'
+        elif ' ' in s and 'T' not in s:
+            s = s.replace(' ', 'T', 1)
+        dt = datetime.fromisoformat(s)
+        return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+    except Exception:
+        return pd.to_datetime(ts_val, utc=True).to_pydatetime()
+
+
 def enrich_trades_data(trades: list) -> list:
     enriched = []
-    bal = 100000.0
     for t in trades:
-        entry_dt = pd.to_datetime(t.get('entry_time'), utc=True)
-        exit_dt = pd.to_datetime(t.get('exit_time'), utc=True)
-        
-        # Conversión dinámica precisa a zona horaria de España (Europe/Madrid)
-        # Respeta el cambio de hora automático (CEST UTC+2 en verano, CET UTC+1 en invierno)
-        entry_es = entry_dt.tz_convert('Europe/Madrid')
-        exit_es = exit_dt.tz_convert('Europe/Madrid')
+        entry_dt = _fast_parse_utc(t.get('entry_time'))
+        exit_dt = _fast_parse_utc(t.get('exit_time'))
+        entry_es = entry_dt.astimezone(_TZ_MADRID)
+        exit_es = exit_dt.astimezone(_TZ_MADRID)
+        day_es = _DAY_NUM_ES[exit_es.weekday()]
 
-        day_en = exit_es.day_name()
-        day_es = DIAS_ES.get(day_en, day_en)
-        
         pnl = float(t.get('net_pnl_usd', 0.0))
-        # Sparkline real del movimiento de mercado del trade
         if 'sparkline' in t and isinstance(t['sparkline'], list) and len(t['sparkline']) >= 2:
             sparkline = t['sparkline']
         elif pnl > 0:
