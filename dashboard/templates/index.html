@@ -409,14 +409,19 @@
        ALGROK INSTITUTIONAL - FRAMER MOTION TABLE DRAG & REORDER SYSTEM
        ========================================================================= */
     .algrok-col-header {
+      position: relative !important;
+      transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s ease !important;
+    }
+    body.algrok-edit-mode .algrok-col-header {
       user-select: none !important;
       -webkit-user-select: none !important;
       touch-action: none !important;
       cursor: grab !important;
-      position: relative !important;
-      transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s ease !important;
     }
-    .algrok-col-header:active {
+    body.algrok-edit-mode .algrok-col-header:hover {
+      background-color: rgba(60, 69, 165, 0.06) !important;
+    }
+    body.algrok-edit-mode .algrok-col-header:active {
       cursor: grabbing !important;
     }
     .col-drag-grip {
@@ -515,12 +520,17 @@
     }
     .algrok-kpi-card {
       position: relative;
+      will-change: transform;
+    }
+    body.algrok-edit-mode .algrok-kpi-card {
       cursor: grab;
       user-select: none;
       -webkit-user-select: none;
-      will-change: transform;
     }
-    .algrok-kpi-card:active {
+    body.algrok-edit-mode .algrok-kpi-card:hover {
+      box-shadow: 0 0 0 1.5px rgba(60, 69, 165, 0.25) !important;
+    }
+    body.algrok-edit-mode .algrok-kpi-card:active {
       cursor: grabbing;
     }
     .kpi-drag-grip {
@@ -588,8 +598,11 @@
       position: relative;
       will-change: transform;
     }
-    .algrok-section-card.section-draggable-surface {
+    body.algrok-edit-mode .algrok-section-card.section-draggable-surface {
       cursor: grab;
+    }
+    body.algrok-edit-mode .algrok-section-card.section-draggable-surface:hover {
+      box-shadow: 0 0 0 1.5px rgba(60, 69, 165, 0.22) !important;
     }
     .section-drag-grip {
       position: absolute;
@@ -691,6 +704,7 @@
     }
     #sidebar-nav.sidebar-editing .sidebar-link {
       padding-right: 48px !important;
+      cursor: grab;
     }
     .sidebar-item-actions {
       display: none;
@@ -722,6 +736,13 @@
     .sidebar-act-btn:hover {
       background: rgba(60, 69, 165, 0.12);
       color: #3C45A5;
+    }
+    .sidebar-link.active .sidebar-act-btn {
+      color: rgba(255, 255, 255, 0.85);
+    }
+    .sidebar-link.active .sidebar-act-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: #FFFFFF;
     }
     .sidebar-link.sidebar-nav-hidden-in-edit {
       opacity: 0.45 !important;
@@ -789,6 +810,25 @@
       border-color: #3C45A5;
       color: #3C45A5;
       background: #EEF2FF;
+    }
+    body.algrok-edit-mode .algrok-editable-text[contenteditable="true"] {
+      user-select: text !important;
+      -webkit-user-select: text !important;
+      cursor: text !important;
+      border-radius: 4px;
+      transition: background-color 0.15s ease, outline-color 0.15s ease;
+    }
+    body.algrok-edit-mode .algrok-editable-text[contenteditable="true"]:hover {
+      outline: 1px dashed rgba(60, 69, 165, 0.45);
+      outline-offset: 2px;
+      background-color: rgba(238, 242, 255, 0.45);
+    }
+    body.algrok-edit-mode .algrok-editable-text[contenteditable="true"]:focus {
+      outline: 1.5px solid #3C45A5 !important;
+      outline-offset: 2px;
+      background-color: #FFFFFF !important;
+      color: #1D1D1F !important;
+      padding: 0 3px;
     }
 
   
@@ -974,42 +1014,15 @@
             </div>
           </div>
 
-          <!-- Personalizador Global de Menú y Diseño (junto a la campanita) -->
-          <div class="relative" id="ui-customizer-wrapper">
-            <button id="btn-ui-customizer" type="button" onclick="window.AlgrokUiPopover && window.AlgrokUiPopover.toggle()" class="relative p-2 text-[#181A20] hover:bg-[#EAE5DC] rounded-lg transition border border-[#E6E2D8] flex items-center justify-center cursor-pointer" title="Personalizar Menú y Diseño del Dashboard">
+          <!-- Botón de Edición Directa de Menú y Diseño (junto a la campanita, sin desplegable) -->
+          <div class="flex items-center gap-1.5" id="ui-customizer-wrapper">
+            <button id="btn-ui-customizer" type="button" onclick="window.AlgrokSidebar && window.AlgrokSidebar.toggleEditMode()" class="relative p-2 text-[#181A20] hover:bg-[#EAE5DC] rounded-lg transition border border-[#E6E2D8] flex items-center justify-center cursor-pointer" title="Activar/Desactivar Edición Directa del Menú y Dashboard">
               <i class="fa-solid fa-sliders text-sm"></i>
             </button>
-
-            <div id="ui-customizer-dropdown" class="hidden absolute right-0 mt-2 w-80 sm:w-96 max-h-[540px] bg-[#FFFFFF] border border-[#E5E5EA] rounded-2xl shadow-2xl z-50 overflow-hidden flex flex-col text-left">
-              <div class="p-3.5 border-b border-[#F2F2F7] bg-[#FAFAFC] flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <i class="fa-solid fa-sliders text-[#3C45A5] text-xs"></i>
-                  <span class="text-xs font-bold text-[#1D1D1F] tracking-tight">Personalizar Menú y Diseño</span>
-                </div>
-                <span class="text-[10px] font-mono text-[#6E6E73]">Arrastre libre activo</span>
-              </div>
-
-              <div class="px-3.5 py-2 border-b border-[#F2F2F7] bg-[#FFFFFF] text-[10px] text-[#6E6E73] font-mono">
-                Arrastra tarjetas, KPIs, columnas o pestañas directamente. Edita aquí nombres, iconos y visibilidad del menú:
-              </div>
-
-              <div id="ui-customizer-tabs-list" class="flex-1 overflow-y-auto divide-y divide-[#F2F2F7] max-h-72 p-1.5">
-                <!-- Populado dinámicamente por AlgrokUiPopoverController -->
-              </div>
-
-              <div class="p-3 border-t border-[#F2F2F7] bg-[#FAFAFC] space-y-2">
-                <div class="text-[10px] font-mono font-bold text-[#6E6E73] uppercase tracking-wider">Restablecer por Defecto</div>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-[10px] font-mono">
-                  <button type="button" onclick="window.AlgrokUiPopover && window.AlgrokUiPopover.resetTarget('nav')" class="px-2 py-1.5 rounded-lg border border-[#E5E5EA] bg-[#FFFFFF] hover:border-[#3C45A5] text-[#1D1D1F] font-semibold cursor-pointer transition">Menú</button>
-                  <button type="button" onclick="window.AlgrokUiPopover && window.AlgrokUiPopover.resetTarget('kpis')" class="px-2 py-1.5 rounded-lg border border-[#E5E5EA] bg-[#FFFFFF] hover:border-[#3C45A5] text-[#1D1D1F] font-semibold cursor-pointer transition">KPIs</button>
-                  <button type="button" onclick="window.AlgrokUiPopover && window.AlgrokUiPopover.resetTarget('sections')" class="px-2 py-1.5 rounded-lg border border-[#E5E5EA] bg-[#FFFFFF] hover:border-[#3C45A5] text-[#1D1D1F] font-semibold cursor-pointer transition">Tarjetas</button>
-                  <button type="button" onclick="window.AlgrokUiPopover && window.AlgrokUiPopover.resetTarget('tables')" class="px-2 py-1.5 rounded-lg border border-[#E5E5EA] bg-[#FFFFFF] hover:border-[#3C45A5] text-[#1D1D1F] font-semibold cursor-pointer transition">Tablas</button>
-                </div>
-                <button type="button" onclick="window.AlgrokUiPopover && window.AlgrokUiPopover.resetTarget('all')" class="w-full py-1.5 rounded-lg bg-[#1D1D1F] hover:bg-[#3C45A5] text-white text-[10px] font-mono font-bold cursor-pointer transition">
-                  <i class="fa-solid fa-arrow-rotate-left mr-1"></i> Restablecer Todo el Dashboard
-                </button>
-              </div>
-            </div>
+            <button id="btn-ui-reset-all" type="button" onclick="window.AlgrokResetAll && window.AlgrokResetAll()" class="hidden px-2.5 py-1.5 rounded-lg border border-[#D6D1C7] bg-[#FAF7F2] hover:bg-[#EAE5DC] text-[10px] font-mono font-bold text-[#1D1D1F] items-center gap-1 cursor-pointer transition" title="Restablecer orden y nombres originales de menú, tarjetas, KPIs y columnas">
+              <i class="fa-solid fa-arrow-rotate-left text-[10px]"></i>
+              <span>Restablecer</span>
+            </button>
           </div>
 
           <button onclick="fetchCurrentDashboard()" class="p-2 text-[#181A20] hover:bg-[#EAE5DC] rounded-lg transition border border-[#E6E2D8]" title="Refrescar datos">
@@ -10102,6 +10115,8 @@
       });
     }
 
+    window.algrokEditMode = false;
+
     class AlgrokTableColumnReorderController {
       constructor() {
         this.storagePrefix = 'algrok_col_order_v3_';
@@ -10245,8 +10260,9 @@
       updateResetButtonVisibility() {}
 
       onHeaderPointerDown(e, tableId, th) {
+        if (!window.algrokEditMode) return;
         if (e.button !== undefined && e.button !== 0) return;
-        if (e.target.closest('button, input, select, a')) {
+        if (e.target.closest('button, input, select, a, .algrok-editable-text[contenteditable="true"]') || th.isContentEditable) {
           return;
         }
 
@@ -10759,6 +10775,7 @@
       updateResetButtonVisibility() {}
 
       onCardPointerDown(e, gridId, card) {
+        if (!window.algrokEditMode) return;
         if (e.button !== undefined && e.button !== 0) return;
 
         // Respetar grids anidados: solo atiende el grid directo al que pertenece el punto pulsado
@@ -10767,8 +10784,8 @@
 
         if (e.pointerType === 'touch') return;
 
-        // Respetar controles interactivos internos
-        if (e.target.closest('button, input, select, textarea, a, .apexcharts-canvas')) {
+        // Respetar edición de texto inline y controles interactivos internos
+        if (e.target.closest('button, input, select, textarea, a, .apexcharts-canvas, .algrok-editable-text[contenteditable="true"]')) {
           return;
         }
 
@@ -11228,6 +11245,7 @@
       }
 
       onSectionPointerDown(e, gridId, sec) {
+        if (!window.algrokEditMode) return;
         if (e.button !== undefined && e.button !== 0) return;
 
         const state = this.containers.get(gridId);
@@ -11239,8 +11257,8 @@
 
         if (e.pointerType === 'touch') return;
 
-        // Respetar tarjetas KPI internas, tablas, gráficos y controles interactivos
-        if (e.target.closest('button, input, select, textarea, a, table, .apexcharts-canvas, .tv-lightweight-charts, canvas, [data-kpi-grid], [onclick], .overflow-x-auto, .overflow-y-auto, [id^="chart-"]')) {
+        // Respetar edición de texto inline, tarjetas KPI internas, tablas, gráficos y controles interactivos
+        if (e.target.closest('button, input, select, textarea, a, table, .apexcharts-canvas, .tv-lightweight-charts, canvas, [data-kpi-grid], [onclick], .overflow-x-auto, .overflow-y-auto, [id^="chart-"], .algrok-editable-text[contenteditable="true"]')) {
           return;
         }
 
@@ -11566,18 +11584,22 @@
 
     /**
      * =========================================================================
-     * ALGROK SIDEBAR NAVIGATION EDITOR CONTROLLER
-     * Editar pestañas del menú lateral: reordenar (FLIP), renombrar, cambiar icono y ocultar/mostrar.
+     * ALGROK SIDEBAR NAVIGATION EDITOR & GLOBAL EDIT MODE CONTROLLER
+     * Toggled by #btn-ui-customizer (junto a la campanita, SIN desplegable).
+     * Permite reordenar pestañas, renombrar inline (lápiz), cambiar icono y
+     * ocultar/mostrar directamente sobre el menú lateral cuando está activo.
      * =========================================================================
      */
     class AlgrokSidebarEditorController {
       constructor() {
         this.storageKey = 'algrok_nav_prefs_v1';
         this.navEl = document.getElementById('sidebar-nav');
+        this.isEditMode = false;
         this.defaultTabs = [];
         this.tabsConfig = [];
         this.activeDrag = null;
         this.ghostEl = null;
+        this.iconPopoverEl = null;
         this.suppressClickUntil = 0;
         this.availableIcons = [
           'fa-gauge-high', 'fa-chart-line', 'fa-satellite-dish', 'fa-compass-drafting',
@@ -11607,7 +11629,6 @@
 
         this.renderMenuFromConfig(false);
         this.bindGlobalEvents();
-        if (window.AlgrokUiPopover) window.AlgrokUiPopover.render();
       }
 
       captureDefaultTabs() {
@@ -11686,17 +11707,72 @@
       }
 
       bindGlobalEvents() {
-        // Bloquear clic fantasma exclusivamente tras terminar un arrastre en el menú lateral
         this.navEl.addEventListener('click', (e) => {
-          if (performance.now() < this.suppressClickUntil) {
+          if (performance.now() < this.suppressClickUntil && !e.target.closest('.sidebar-item-actions, .sidebar-tab-icon')) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+          }
+          if (this.isEditMode && e.target.closest('.sidebar-inline-input, .sidebar-drag-grip')) {
             e.preventDefault();
             e.stopPropagation();
           }
         }, true);
 
+        document.addEventListener('pointerdown', (e) => {
+          if (this.iconPopoverEl && !this.iconPopoverEl.contains(e.target) && !e.target.closest('.sidebar-tab-icon')) {
+            this.closeIconPopover();
+          }
+        });
+
         window.addEventListener('pointermove', (e) => this.onGlobalPointerMove(e), { passive: false });
         window.addEventListener('pointerup', (e) => this.onGlobalPointerUp(e), { passive: false });
         window.addEventListener('pointercancel', (e) => this.onGlobalPointerUp(e), { passive: false });
+      }
+
+      toggleEditMode(forceState) {
+        this.isEditMode = typeof forceState === 'boolean' ? forceState : !this.isEditMode;
+        window.algrokEditMode = this.isEditMode;
+        document.body.classList.toggle('algrok-edit-mode', this.isEditMode);
+
+        const btnCustom = document.getElementById('btn-ui-customizer');
+        const btnReset = document.getElementById('btn-ui-reset-all');
+
+        if (btnCustom) {
+          if (this.isEditMode) {
+            btnCustom.classList.add('bg-[#3C45A5]', 'text-white', 'border-[#3C45A5]');
+            btnCustom.classList.remove('text-[#181A20]', 'hover:bg-[#EAE5DC]', 'border-[#E6E2D8]');
+            btnCustom.title = 'Salir del Modo Edición (bloquear diseño)';
+          } else {
+            btnCustom.classList.remove('bg-[#3C45A5]', 'text-white', 'border-[#3C45A5]');
+            btnCustom.classList.add('text-[#181A20]', 'hover:bg-[#EAE5DC]', 'border-[#E6E2D8]');
+            btnCustom.title = 'Activar Edición Directa del Menú y Dashboard';
+          }
+        }
+        if (btnReset) {
+          btnReset.classList.toggle('hidden', !this.isEditMode);
+          btnReset.classList.toggle('inline-flex', this.isEditMode);
+        }
+
+        if (this.isEditMode) {
+          this.navEl.classList.add('sidebar-editing');
+        } else {
+          this.closeIconPopover();
+          this.navEl.classList.remove('sidebar-editing');
+
+          const activeCfg = this.tabsConfig.find(t => t.id === window.currentActiveTab);
+          if (activeCfg && activeCfg.hidden) {
+            const firstVisible = this.tabsConfig.find(t => !t.hidden);
+            if (firstVisible && typeof switchTab === 'function') {
+              switchTab(firstVisible.id);
+            }
+          }
+        }
+
+        if (window.AlgrokTextEditor) {
+          window.AlgrokTextEditor.setEditMode(this.isEditMode);
+        }
+        this.renderMenuFromConfig(false);
       }
 
       syncHeaderTitles() {
@@ -11722,50 +11798,205 @@
           const btn = existingBtns.get(cfg.id);
           if (!btn) return;
 
-          // Limpiar restos antiguos si los hubiera y dejar el botón limpio
-          btn.querySelectorAll('.sidebar-drag-grip, .sidebar-item-actions').forEach(el => el.remove());
-
-          const iconEl = btn.querySelector('i');
-          if (iconEl) {
-            iconEl.className = `fa-solid ${cfg.icon} text-xs text-[#3C45A5] mr-2.5 w-4 text-center`;
-          }
-
-          const labelSpan = btn.querySelector('span');
-          if (labelSpan) {
-            labelSpan.className = 'truncate';
-            labelSpan.textContent = cfg.label;
-          }
-
-          btn.setAttribute('draggable', 'false');
-          btn.onpointerdown = (e) => this.onTabPointerDown(e, btn, cfg);
-
+          this.decorateTabButton(btn, cfg);
           this.navEl.appendChild(btn);
-          btn.classList.toggle('hidden', Boolean(cfg.hidden));
+
+          btn.classList.remove('hidden', 'sidebar-nav-hidden-in-edit');
+          if (cfg.hidden) {
+            if (this.isEditMode) {
+              btn.classList.add('sidebar-nav-hidden-in-edit');
+            } else {
+              btn.classList.add('hidden');
+            }
+          }
         });
 
         if (animate && firstRects) {
           playFlipShift(Array.from(existingBtns.values()), firstRects, null, 220);
         }
         this.syncHeaderTitles();
-        if (window.AlgrokUiPopover) window.AlgrokUiPopover.render();
       }
 
-      renameTab(tabId, newLabel) {
-        const cfg = this.tabsConfig.find(t => t.id === tabId);
-        if (!cfg) return;
-        const clean = String(newLabel || '').trim();
-        if (!clean || clean === cfg.label) return;
-        cfg.label = clean;
-        this.saveServerPrefs();
-        this.renderMenuFromConfig(false);
+      decorateTabButton(btn, cfg) {
+        if (this.isEditMode) {
+          if (!btn.querySelector(':scope > .sidebar-drag-grip')) {
+            const grip = document.createElement('span');
+            grip.className = 'sidebar-drag-grip';
+            grip.title = 'Arrastra para mover pestaña';
+            grip.innerHTML = '<i class="fa-solid fa-grip-vertical text-[10px]"></i>';
+            btn.insertBefore(grip, btn.firstChild);
+          }
+        } else {
+          btn.querySelectorAll(':scope > .sidebar-drag-grip, :scope > .sidebar-item-actions').forEach(el => el.remove());
+        }
+
+        const iconEl = btn.querySelector('i.fa-solid:not(.fa-grip-vertical), i.fa-regular, i.fa-brands');
+        if (iconEl) {
+          const preserved = ['text-xs', 'text-[#3C45A5]', 'mr-2.5', 'w-4', 'text-center', 'sidebar-tab-icon'];
+          iconEl.className = `fa-solid ${cfg.icon} ${preserved.join(' ')}`;
+          iconEl.title = this.isEditMode ? 'Cambiar icono' : '';
+          iconEl.onpointerdown = (e) => {
+            if (this.isEditMode) e.stopPropagation();
+          };
+          iconEl.onclick = (e) => {
+            if (!this.isEditMode) return;
+            e.preventDefault();
+            e.stopPropagation();
+            this.openIconPopover(btn, cfg, iconEl);
+          };
+        }
+
+        const labelSpan = btn.querySelector(':scope > span:not(.sidebar-drag-grip):not(.sidebar-item-actions)');
+        if (labelSpan) {
+          labelSpan.classList.add('sidebar-tab-label', 'truncate');
+          if (!labelSpan.querySelector('input')) {
+            labelSpan.textContent = cfg.label;
+          }
+        }
+
+        if (this.isEditMode) {
+          let actions = btn.querySelector(':scope > .sidebar-item-actions');
+          if (!actions) {
+            actions = document.createElement('span');
+            actions.className = 'sidebar-item-actions';
+
+            const renameBtn = document.createElement('span');
+            renameBtn.setAttribute('role', 'button');
+            renameBtn.setAttribute('tabindex', '0');
+            renameBtn.className = 'sidebar-act-btn sidebar-btn-rename';
+            renameBtn.title = 'Renombrar pestaña';
+            renameBtn.innerHTML = '<i class="fa-solid fa-pen"></i>';
+            renameBtn.onpointerdown = (e) => { e.stopPropagation(); };
+            renameBtn.onclick = (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              this.startInlineRename(btn, cfg);
+            };
+            renameBtn.onkeydown = (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                e.stopPropagation();
+                this.startInlineRename(btn, cfg);
+              }
+            };
+
+            const eyeBtn = document.createElement('span');
+            eyeBtn.setAttribute('role', 'button');
+            eyeBtn.setAttribute('tabindex', '0');
+            eyeBtn.className = 'sidebar-act-btn sidebar-btn-eye';
+            eyeBtn.onpointerdown = (e) => { e.stopPropagation(); };
+            eyeBtn.onclick = (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              this.toggleTabVisibility(cfg.id);
+            };
+            eyeBtn.onkeydown = (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                e.stopPropagation();
+                this.toggleTabVisibility(cfg.id);
+              }
+            };
+
+            actions.appendChild(renameBtn);
+            actions.appendChild(eyeBtn);
+            btn.appendChild(actions);
+          }
+
+          const eyeBtn = actions.querySelector('.sidebar-btn-eye');
+          if (eyeBtn) {
+            eyeBtn.title = cfg.hidden ? 'Mostrar pestaña' : 'Ocultar pestaña';
+            eyeBtn.innerHTML = cfg.hidden
+              ? '<i class="fa-solid fa-eye-slash text-[#D70015]"></i>'
+              : '<i class="fa-solid fa-eye"></i>';
+          }
+        }
+
+        btn.setAttribute('draggable', 'false');
+        btn.onpointerdown = (e) => this.onTabPointerDown(e, btn, cfg);
       }
 
-      setTabIcon(tabId, iconClass) {
-        const cfg = this.tabsConfig.find(t => t.id === tabId);
-        if (!cfg || !iconClass) return;
-        cfg.icon = iconClass;
-        this.saveServerPrefs();
-        this.renderMenuFromConfig(false);
+      startInlineRename(btn, cfg) {
+        const labelSpan = btn.querySelector('.sidebar-tab-label');
+        if (!labelSpan || labelSpan.querySelector('input')) return;
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = cfg.label;
+        input.maxLength = 32;
+        input.className = 'sidebar-inline-input';
+
+        let done = false;
+        const commit = () => {
+          if (done) return;
+          done = true;
+          const next = input.value.trim();
+          if (next) {
+            cfg.label = next;
+            this.saveServerPrefs();
+            this.syncHeaderTitles();
+          }
+          labelSpan.textContent = cfg.label;
+        };
+
+        input.onclick = (e) => { e.preventDefault(); e.stopPropagation(); };
+        input.onpointerdown = (e) => { e.stopPropagation(); };
+        input.onkeydown = (e) => {
+          e.stopPropagation();
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            commit();
+          } else if (e.key === 'Escape') {
+            done = true;
+            labelSpan.textContent = cfg.label;
+          }
+        };
+        input.onblur = commit;
+
+        labelSpan.textContent = '';
+        labelSpan.appendChild(input);
+        setTimeout(() => {
+          input.focus();
+          input.select();
+        }, 0);
+      }
+
+      openIconPopover(btn, cfg, anchorEl) {
+        this.closeIconPopover();
+        const pop = document.createElement('div');
+        pop.className = 'sidebar-icon-popover';
+
+        this.availableIcons.forEach(ic => {
+          const choice = document.createElement('button');
+          choice.type = 'button';
+          choice.className = 'sidebar-icon-choice';
+          if (cfg.icon === ic) {
+            choice.classList.add('border-[#3C45A5]', 'bg-[#EEF2FF]', 'text-[#3C45A5]');
+          }
+          choice.innerHTML = `<i class="fa-solid ${ic} text-xs"></i>`;
+          choice.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            cfg.icon = ic;
+            this.saveServerPrefs();
+            this.renderMenuFromConfig(false);
+            this.closeIconPopover();
+          };
+          pop.appendChild(choice);
+        });
+
+        const rect = anchorEl.getBoundingClientRect();
+        pop.style.left = `${Math.max(12, rect.left)}px`;
+        pop.style.top = `${Math.min(window.innerHeight - 160, rect.bottom + 6)}px`;
+        document.body.appendChild(pop);
+        this.iconPopoverEl = pop;
+      }
+
+      closeIconPopover() {
+        if (this.iconPopoverEl) {
+          this.iconPopoverEl.remove();
+          this.iconPopoverEl = null;
+        }
       }
 
       toggleTabVisibility(tabId) {
@@ -11778,29 +12009,14 @@
         target.hidden = !target.hidden;
         this.saveServerPrefs();
         this.renderMenuFromConfig(false);
-
-        if (target.hidden && window.currentActiveTab === tabId) {
-          const firstVisible = this.tabsConfig.find(t => !t.hidden);
-          if (firstVisible && typeof switchTab === 'function') {
-            switchTab(firstVisible.id);
-          }
-        }
         return true;
       }
 
-      moveTab(tabId, delta) {
-        const idx = this.tabsConfig.findIndex(t => t.id === tabId);
-        const nextIdx = idx + delta;
-        if (idx === -1 || nextIdx < 0 || nextIdx >= this.tabsConfig.length) return;
-        const [item] = this.tabsConfig.splice(idx, 1);
-        this.tabsConfig.splice(nextIdx, 0, item);
-        this.saveServerPrefs();
-        this.renderMenuFromConfig(true);
-      }
-
       onTabPointerDown(e, btn, cfg) {
+        if (!this.isEditMode) return;
         if (e.button !== undefined && e.button !== 0) return;
-        if (e.pointerType === 'touch') return;
+        if (e.target.closest('.sidebar-item-actions, .sidebar-inline-input, .sidebar-tab-icon')) return;
+        if (e.pointerType === 'touch' && !e.target.closest('.sidebar-drag-grip')) return;
 
         try {
           if (btn.setPointerCapture) btn.setPointerCapture(e.pointerId);
@@ -11830,6 +12046,7 @@
         const dist = Math.hypot(e.clientX - drag.startX, e.clientY - drag.startY);
         if (!drag.isDragging && dist > 6) {
           drag.isDragging = true;
+          this.closeIconPopover();
           document.body.style.cursor = 'grabbing';
           this.createGhost(drag, e);
           drag.btn.classList.add('sidebar-is-dragging');
@@ -11943,12 +12160,12 @@
               } catch (err) {}
             }
             this.saveServerPrefs();
-            if (window.AlgrokUiPopover) window.AlgrokUiPopover.render();
           }
         }
       }
 
       resetNav() {
+        this.closeIconPopover();
         this.tabsConfig = this.defaultTabs.map(t => ({ ...t }));
         try {
           localStorage.removeItem(this.storageKey);
@@ -11961,206 +12178,225 @@
 
     /**
      * =========================================================================
-     * ALGROK TOP-RIGHT UI CUSTOMIZER POPOVER (JUNTO A LA CAMPANITA)
-     * Centraliza la edición de pestañas (nombre, icono, visibilidad, orden)
-     * y los botones de restablecimiento para mantener las tarjetas limpias.
+     * ALGROK INLINE TEXT EDITOR CONTROLLER (CONTENTEDITABLE EN MODO EDICIÓN)
+     * Permite hacer clic o subrayar cualquier título/etiqueta estática del
+     * dashboard cuando el Modo Edición está activo para modificarlo y guardarlo.
+     * Protege métricas numéricas en vivo (#kpi-balance, #live-clock, etc.).
      * =========================================================================
      */
-    class AlgrokUiPopoverController {
+    class AlgrokInlineTextEditorController {
       constructor() {
-        this.dropdownEl = document.getElementById('ui-customizer-dropdown');
-        this.wrapperEl = document.getElementById('ui-customizer-wrapper');
-        this.listEl = document.getElementById('ui-customizer-tabs-list');
-        this.iconPopoverEl = null;
+        this.storageKey = 'algrok_text_prefs_v1';
+        this.customTexts = {};
+        this.elements = [];
+        this.isEditMode = false;
         this.init();
       }
 
-      init() {
-        document.addEventListener('pointerdown', (e) => {
-          if (this.iconPopoverEl && !this.iconPopoverEl.contains(e.target) && !e.target.closest('.ui-pop-icon-btn')) {
-            this.closeIconPopover();
-          }
-          if (this.dropdownEl && !this.dropdownEl.classList.contains('hidden')) {
-            if (this.wrapperEl && !this.wrapperEl.contains(e.target) && (!this.iconPopoverEl || !this.iconPopoverEl.contains(e.target))) {
-              this.close();
+      async init() {
+        this.loadLocal();
+        this.scanEligibleElements();
+        this.applySavedTexts();
+
+        try {
+          const res = await fetch('/api/text_preferences');
+          if (res.ok) {
+            const data = await res.json();
+            if (data && typeof data === 'object') {
+              this.customTexts = { ...this.customTexts, ...data };
+              this.saveLocal();
+              this.applySavedTexts();
             }
           }
-        });
-        document.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape') {
-            this.closeIconPopover();
-            this.close();
-          }
-        });
-        this.render();
-      }
-
-      toggle() {
-        if (!this.dropdownEl) return;
-        const notifDrop = document.getElementById('notifications-dropdown');
-        if (notifDrop) notifDrop.classList.add('hidden');
-        this.dropdownEl.classList.toggle('hidden');
-        if (!this.dropdownEl.classList.contains('hidden')) {
-          this.render();
-        } else {
-          this.closeIconPopover();
+        } catch (e) {
+          console.warn('Error fetching text preferences:', e);
         }
       }
 
-      close() {
-        this.closeIconPopover();
-        if (this.dropdownEl) this.dropdownEl.classList.add('hidden');
-      }
-
-      closeIconPopover() {
-        if (this.iconPopoverEl) {
-          this.iconPopoverEl.remove();
-          this.iconPopoverEl = null;
-        }
-      }
-
-      openIconPopover(cfg, anchorEl) {
-        this.closeIconPopover();
-        const sidebar = window.AlgrokSidebar;
-        if (!sidebar) return;
-
-        const pop = document.createElement('div');
-        pop.className = 'sidebar-icon-popover';
-        sidebar.availableIcons.forEach(ic => {
-          const choice = document.createElement('button');
-          choice.type = 'button';
-          choice.className = 'sidebar-icon-choice';
-          if (cfg.icon === ic) {
-            choice.classList.add('border-[#3C45A5]', 'bg-[#EEF2FF]', 'text-[#3C45A5]');
+      loadLocal() {
+        try {
+          const raw = localStorage.getItem(this.storageKey);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && typeof parsed === 'object') this.customTexts = parsed;
           }
-          choice.innerHTML = `<i class="fa-solid ${ic} text-xs"></i>`;
-          choice.onclick = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            sidebar.setTabIcon(cfg.id, ic);
-            this.closeIconPopover();
-          };
-          pop.appendChild(choice);
+        } catch (e) {}
+      }
+
+      saveLocal() {
+        try {
+          localStorage.setItem(this.storageKey, JSON.stringify(this.customTexts));
+        } catch (e) {}
+      }
+
+      isDynamicMetricElement(el) {
+        if (!el.id) return false;
+        if (/-(label|title|header|subtitle|desc)$/i.test(el.id)) return false;
+        if (/^(live-clock|daemon-health|kpi-|cockpit-mt5-|cockpit-hl-|cockpit-cfd-|cockpit-fut-|ft-|stat-|orch-kpi-|tf-stat-|guard-chip-|tv-inspect-|bifocal-kpi\d+-(val|badge)|streak-kpi-(passes|worstdowndd|maxup|totaltramos)$)/i.test(el.id)) {
+          return true;
+        }
+        return false;
+      }
+
+      scanEligibleElements() {
+        const root = document.getElementById('tabs-wrapper');
+        const mainHeader = document.querySelector('main > header');
+        const roots = [mainHeader, root].filter(Boolean);
+        const found = [];
+        let seq = 0;
+
+        roots.forEach(scope => {
+          const candidates = scope.querySelectorAll('h1, h2, h3, h4, p, span, label, div.overline-text');
+          candidates.forEach(el => {
+            if (el.dataset.textKey) {
+              found.push(el);
+              return;
+            }
+            if (el.closest('button, select, option, input, textarea, table, canvas, svg, .apexcharts-canvas, .tv-lightweight-charts, #notifications-dropdown, #ui-customizer-wrapper, #sidebar-nav, [id^="chart-"]')) {
+              return;
+            }
+            if (this.isDynamicMetricElement(el)) return;
+
+            const badChildren = Array.from(el.children).some(ch => ch.tagName !== 'I');
+            if (badChildren) return;
+
+            const txt = (el.textContent || '').trim();
+            if (!txt || txt.length < 2) return;
+            if (/^[-+$€£%]?[\d.,\s/%]+(USD|USDC|Trades|ms|%)?$/i.test(txt) || txt.startsWith('--')) return;
+
+            const pane = el.closest('.tab-pane');
+            const scopeId = pane ? pane.id.replace('tab-content-', '') : 'header';
+            const key = el.id ? `id:${el.id}` : `txt:${scopeId}:${el.tagName.toLowerCase()}:${seq++}`;
+
+            el.dataset.textKey = key;
+            el.dataset.defaultText = txt;
+            el.classList.add('algrok-editable-text');
+            this.bindElementEvents(el);
+            found.push(el);
+          });
         });
 
-        const rect = anchorEl.getBoundingClientRect();
-        pop.style.left = `${Math.min(window.innerWidth - 150, Math.max(12, rect.left))}px`;
-        pop.style.top = `${Math.min(window.innerHeight - 160, rect.bottom + 6)}px`;
-        document.body.appendChild(pop);
-        this.iconPopoverEl = pop;
+        this.elements = found;
       }
 
-      render() {
-        if (!this.listEl || !window.AlgrokSidebar) return;
-        const tabs = window.AlgrokSidebar.tabsConfig || [];
-        this.listEl.innerHTML = '';
+      bindElementEvents(el) {
+        if (el._algrokTextBound) return;
+        el._algrokTextBound = true;
 
-        tabs.forEach((cfg, idx) => {
-          const row = document.createElement('div');
-          row.className = `flex items-center gap-1.5 px-2 py-1.5 rounded-lg hover:bg-[#FAFAFC] transition ${cfg.hidden ? 'opacity-50' : ''}`;
-
-          const iconBtn = document.createElement('button');
-          iconBtn.type = 'button';
-          iconBtn.className = 'ui-pop-icon-btn w-7 h-7 rounded-md bg-[#F2F2F7] hover:bg-[#EEF2FF] text-[#3C45A5] flex items-center justify-center shrink-0 cursor-pointer transition';
-          iconBtn.title = 'Cambiar icono';
-          iconBtn.innerHTML = `<i class="fa-solid ${cfg.icon} text-xs"></i>`;
-          iconBtn.onclick = (e) => {
-            e.preventDefault();
+        let preFocusText = '';
+        el.addEventListener('focus', () => {
+          preFocusText = el.textContent.trim();
+        });
+        el.addEventListener('pointerdown', (e) => {
+          if (this.isEditMode) {
             e.stopPropagation();
-            this.openIconPopover(cfg, iconBtn);
-          };
+          }
+        });
+        el.addEventListener('keydown', (e) => {
+          if (!this.isEditMode) return;
+          e.stopPropagation();
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            el.blur();
+          } else if (e.key === 'Escape') {
+            el.textContent = preFocusText || el.dataset.defaultText || '';
+            el.blur();
+          }
+        });
+        el.addEventListener('paste', (e) => {
+          if (!this.isEditMode) return;
+          e.preventDefault();
+          const plain = (e.clipboardData || window.clipboardData).getData('text/plain');
+          document.execCommand('insertText', false, plain);
+        });
+        el.addEventListener('blur', () => {
+          if (!this.isEditMode) return;
+          const clean = (el.textContent || '').trim();
+          const key = el.dataset.textKey;
+          if (!key) return;
+          if (!clean) {
+            el.textContent = preFocusText || el.dataset.defaultText || '';
+            return;
+          }
+          if (clean !== preFocusText) {
+            this.customTexts[key] = clean;
+            this.saveLocal();
+            fetch('/api/text_preferences', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ key, text: clean })
+            }).catch(err => console.warn('Error saving custom text:', err));
+          }
+        });
+      }
 
-          const input = document.createElement('input');
-          input.type = 'text';
-          input.value = cfg.label;
-          input.maxLength = 32;
-          input.className = 'flex-1 min-w-0 bg-transparent hover:bg-[#FFFFFF] focus:bg-[#FFFFFF] border border-transparent focus:border-[#3C45A5] rounded-md px-2 py-1 text-xs font-semibold text-[#1D1D1F] outline-none transition';
-          const commit = () => {
-            const val = input.value.trim();
-            if (val) {
-              window.AlgrokSidebar.renameTab(cfg.id, val);
+      applySavedTexts() {
+        this.elements.forEach(el => {
+          const key = el.dataset.textKey;
+          if (key && Object.prototype.hasOwnProperty.call(this.customTexts, key)) {
+            const val = this.customTexts[key];
+            if (el.children.length === 0) {
+              el.textContent = val;
             } else {
-              input.value = cfg.label;
+              const textNodes = Array.from(el.childNodes).filter(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim().length > 0);
+              if (textNodes.length > 0) textNodes[0].textContent = ' ' + val;
             }
-          };
-          input.onchange = commit;
-          input.onblur = commit;
-          input.onkeydown = (e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              commit();
-              input.blur();
-            } else if (e.key === 'Escape') {
-              input.value = cfg.label;
-              input.blur();
-            }
-          };
-
-          const pencilBtn = document.createElement('button');
-          pencilBtn.type = 'button';
-          pencilBtn.className = 'w-6 h-6 rounded-md hover:bg-[#EEF2FF] text-[#6E6E73] hover:text-[#3C45A5] flex items-center justify-center shrink-0 cursor-pointer transition';
-          pencilBtn.title = 'Renombrar pestaña';
-          pencilBtn.innerHTML = '<i class="fa-solid fa-pen text-[10px]"></i>';
-          pencilBtn.onclick = () => {
-            input.focus();
-            input.select();
-          };
-
-          const upBtn = document.createElement('button');
-          upBtn.type = 'button';
-          upBtn.className = `w-5 h-6 rounded hover:bg-[#EAE5DC] text-[#6E6E73] flex items-center justify-center shrink-0 cursor-pointer ${idx === 0 ? 'opacity-25 pointer-events-none' : ''}`;
-          upBtn.title = 'Subir';
-          upBtn.innerHTML = '<i class="fa-solid fa-chevron-up text-[9px]"></i>';
-          upBtn.onclick = () => window.AlgrokSidebar.moveTab(cfg.id, -1);
-
-          const downBtn = document.createElement('button');
-          downBtn.type = 'button';
-          downBtn.className = `w-5 h-6 rounded hover:bg-[#EAE5DC] text-[#6E6E73] flex items-center justify-center shrink-0 cursor-pointer ${idx === tabs.length - 1 ? 'opacity-25 pointer-events-none' : ''}`;
-          downBtn.title = 'Bajar';
-          downBtn.innerHTML = '<i class="fa-solid fa-chevron-down text-[9px]"></i>';
-          downBtn.onclick = () => window.AlgrokSidebar.moveTab(cfg.id, 1);
-
-          const eyeBtn = document.createElement('button');
-          eyeBtn.type = 'button';
-          eyeBtn.className = 'w-6 h-6 rounded-md hover:bg-[#F2F2F7] flex items-center justify-center shrink-0 cursor-pointer transition';
-          eyeBtn.title = cfg.hidden ? 'Mostrar pestaña' : 'Ocultar pestaña';
-          eyeBtn.innerHTML = cfg.hidden
-            ? '<i class="fa-solid fa-eye-slash text-[#D70015] text-[11px]"></i>'
-            : '<i class="fa-solid fa-eye text-[#1D1D1F] text-[11px]"></i>';
-          eyeBtn.onclick = () => window.AlgrokSidebar.toggleTabVisibility(cfg.id);
-
-          row.appendChild(iconBtn);
-          row.appendChild(input);
-          row.appendChild(pencilBtn);
-          row.appendChild(upBtn);
-          row.appendChild(downBtn);
-          row.appendChild(eyeBtn);
-          this.listEl.appendChild(row);
+          }
         });
       }
 
-      resetTarget(kind) {
-        if (kind === 'nav' || kind === 'all') {
-          if (window.AlgrokSidebar) window.AlgrokSidebar.resetNav();
-        }
-        if (kind === 'kpis' || kind === 'all') {
-          if (window.AlgrokKpis) window.AlgrokKpis.resetAll();
-        }
-        if (kind === 'sections' || kind === 'all') {
-          if (window.AlgrokSections) window.AlgrokSections.resetAll();
-        }
-        if (kind === 'tables' || kind === 'all') {
-          if (window.AlgrokTables) window.AlgrokTables.resetAll();
-        }
+      setEditMode(enabled) {
+        this.isEditMode = Boolean(enabled);
+        if (this.isEditMode) this.scanEligibleElements();
+
+        this.elements.forEach(el => {
+          if (this.isEditMode) {
+            el.setAttribute('contenteditable', 'true');
+            el.setAttribute('spellcheck', 'false');
+          } else {
+            if (document.activeElement === el) el.blur();
+            el.removeAttribute('contenteditable');
+            el.removeAttribute('spellcheck');
+          }
+        });
+      }
+
+      resetAll() {
+        this.customTexts = {};
+        try {
+          localStorage.removeItem(this.storageKey);
+        } catch (e) {}
+        fetch('/api/text_preferences', { method: 'DELETE' })
+          .catch(err => console.warn('Error resetting custom texts:', err));
+
+        this.elements.forEach(el => {
+          const def = el.dataset.defaultText;
+          if (def !== undefined) {
+            if (el.children.length === 0) {
+              el.textContent = def;
+            } else {
+              const textNodes = Array.from(el.childNodes).filter(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim().length > 0);
+              if (textNodes.length > 0) textNodes[0].textContent = ' ' + def;
+            }
+          }
+        });
       }
     }
 
-    // Inicializar controladores globales únicos (Tablas + KPIs + Secciones/Tarjetas + Menú + Popover UI)
+    // Inicializar controladores globales únicos
     window.AlgrokTables = new AlgrokTableColumnReorderController();
     window.AlgrokKpis = new AlgrokKpiReorderController();
     window.AlgrokSections = new AlgrokSectionReorderController();
     window.AlgrokSidebar = new AlgrokSidebarEditorController();
-    window.AlgrokUiPopover = new AlgrokUiPopoverController();
+    window.AlgrokTextEditor = new AlgrokInlineTextEditorController();
+
+    window.AlgrokResetAll = function() {
+      if (window.AlgrokSidebar) window.AlgrokSidebar.resetNav();
+      if (window.AlgrokKpis) window.AlgrokKpis.resetAll();
+      if (window.AlgrokSections) window.AlgrokSections.resetAll();
+      if (window.AlgrokTables) window.AlgrokTables.resetAll();
+      if (window.AlgrokTextEditor) window.AlgrokTextEditor.resetAll();
+    };
   })();
   </script>
 

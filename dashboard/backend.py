@@ -3949,6 +3949,12 @@ TABLE_PREFS_FILE = BASE_DIR / 'data/table_column_preferences.json'
 KPI_PREFS_FILE = BASE_DIR / 'data/kpi_preferences.json'
 LAYOUT_PREFS_FILE = BASE_DIR / 'data/layout_preferences.json'
 NAV_PREFS_FILE = BASE_DIR / 'data/nav_preferences.json'
+TEXT_PREFS_FILE = BASE_DIR / 'data/text_preferences.json'
+
+
+class TextPreferencePayload(BaseModel):
+    key: str
+    text: str
 
 
 class TableColumnPreferencePayload(BaseModel):
@@ -4080,6 +4086,30 @@ def save_nav_preference(payload: NavPreferencePayload):
 @app.delete("/api/nav_preferences")
 def delete_nav_preference():
     return _delete_json_pref(NAV_PREFS_FILE, "tabs")
+
+
+@app.get("/api/text_preferences")
+def get_text_preferences():
+    return _load_json_prefs(TEXT_PREFS_FILE)
+
+
+@app.post("/api/text_preferences")
+def save_text_preference(payload: TextPreferencePayload):
+    _save_json_pref(TEXT_PREFS_FILE, payload.key, payload.text)
+    return {"status": "ok", "key": payload.key, "text": payload.text}
+
+
+@app.delete("/api/text_preferences")
+def delete_text_preferences(key: str = Query(None)):
+    if key:
+        return _delete_json_pref(TEXT_PREFS_FILE, key)
+    if TEXT_PREFS_FILE.exists():
+        try:
+            with open(TEXT_PREFS_FILE, 'w', encoding='utf-8') as f:
+                json.dump({}, f, indent=2)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+    return {"status": "ok", "cleared": True}
 
 
 @app.get("/api/strategy_vault")
