@@ -852,13 +852,7 @@
         </div>
 
         <!-- Menú Lateral: ÚNICA navegación de toda la plataforma -->
-        <div class="flex items-center justify-between px-1 mb-2">
-          <div class="overline-text">MÓDULOS DE OPERACIÓN</div>
-          <button id="btn-edit-sidebar-nav" type="button" onclick="window.AlgrokSidebar && window.AlgrokSidebar.toggleEditMode()" class="text-[10px] font-mono font-semibold text-[#6E6E73] hover:text-[#3C45A5] px-1.5 py-0.5 rounded border border-transparent hover:border-[#D6D1C7] hover:bg-[#FAF7F2] transition flex items-center gap-1 cursor-pointer" title="Editar orden, nombres, iconos y visibilidad del menú">
-            <i class="fa-solid fa-sliders text-[9px]"></i>
-            <span id="btn-edit-sidebar-label">Editar</span>
-          </button>
-        </div>
+        <div class="overline-text px-1 mb-2">MÓDULOS DE OPERACIÓN</div>
         <nav class="space-y-1" id="sidebar-nav">
           
           <button onclick="switchTab('dashboard')" id="side-tab-dashboard" data-nav-id="dashboard" class="sidebar-link active">
@@ -917,19 +911,6 @@
           </button>
 
         </nav>
-        <div id="sidebar-edit-toolbar" class="hidden mt-3 pt-2.5 border-t border-[#E0DBD0] space-y-2">
-          <div class="text-[10px] text-[#6E6E73] font-mono leading-snug">
-            Arrastra para reordenar, pulsa <i class="fa-solid fa-pen"></i> para renombrar, el icono para cambiarlo u <i class="fa-solid fa-eye"></i> para ocultar.
-          </div>
-          <div class="flex items-center justify-between gap-2">
-            <button type="button" onclick="window.AlgrokSidebar && window.AlgrokSidebar.resetNav()" class="btn-reset-sections text-[10px] py-1 px-2">
-              <i class="fa-solid fa-arrow-rotate-left"></i> Restablecer menú
-            </button>
-            <button type="button" onclick="window.AlgrokSidebar && window.AlgrokSidebar.toggleEditMode(false)" class="px-2.5 py-1 rounded-md bg-[#3C45A5] text-white text-[10px] font-bold font-mono cursor-pointer hover:bg-[#313991] transition">
-              Listo
-            </button>
-          </div>
-        </div>
       </div>
 
       </aside>
@@ -944,8 +925,8 @@
           <h2 class="text-lg sm:text-xl font-bold text-[#181A20] tracking-tight" id="current-tab-title">Cockpit General · AlgrokQuant</h2>
         </div>
 
-        <div class="flex items-center space-x-3">
-          <div class="text-right hidden sm:block">
+        <div class="flex items-center space-x-2.5">
+          <div class="text-right hidden sm:block mr-0.5">
             <p class="text-xs text-[#181A20] font-bold font-mono" id="live-clock">--:--:-- UTC</p>
             <p class="text-[11px] text-[#065F46] font-semibold flex items-center justify-end transition-colors" id="daemon-health-container">
               <span class="w-1.5 h-1.5 rounded-full bg-[#065F46] mr-1 inline-block" id="daemon-health-dot"></span> <span id="daemon-health-text">Feed Activo (12ms)</span>
@@ -989,6 +970,44 @@
               <div class="p-2.5 border-t border-[#F2F2F7] bg-[#FAFAFC] flex items-center justify-between text-[11px] text-[#6E6E73] font-mono">
                 <span class="flex items-center gap-1"><i class="fa-solid fa-satellite-dish text-[#107C41]"></i> Polling 30s</span>
                 <span class="text-[10px]">Daemon & Libro C Feed</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Personalizador Global de Menú y Diseño (junto a la campanita) -->
+          <div class="relative" id="ui-customizer-wrapper">
+            <button id="btn-ui-customizer" type="button" onclick="window.AlgrokUiPopover && window.AlgrokUiPopover.toggle()" class="relative p-2 text-[#181A20] hover:bg-[#EAE5DC] rounded-lg transition border border-[#E6E2D8] flex items-center justify-center cursor-pointer" title="Personalizar Menú y Diseño del Dashboard">
+              <i class="fa-solid fa-sliders text-sm"></i>
+            </button>
+
+            <div id="ui-customizer-dropdown" class="hidden absolute right-0 mt-2 w-80 sm:w-96 max-h-[540px] bg-[#FFFFFF] border border-[#E5E5EA] rounded-2xl shadow-2xl z-50 overflow-hidden flex flex-col text-left">
+              <div class="p-3.5 border-b border-[#F2F2F7] bg-[#FAFAFC] flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <i class="fa-solid fa-sliders text-[#3C45A5] text-xs"></i>
+                  <span class="text-xs font-bold text-[#1D1D1F] tracking-tight">Personalizar Menú y Diseño</span>
+                </div>
+                <span class="text-[10px] font-mono text-[#6E6E73]">Arrastre libre activo</span>
+              </div>
+
+              <div class="px-3.5 py-2 border-b border-[#F2F2F7] bg-[#FFFFFF] text-[10px] text-[#6E6E73] font-mono">
+                Arrastra tarjetas, KPIs, columnas o pestañas directamente. Edita aquí nombres, iconos y visibilidad del menú:
+              </div>
+
+              <div id="ui-customizer-tabs-list" class="flex-1 overflow-y-auto divide-y divide-[#F2F2F7] max-h-72 p-1.5">
+                <!-- Populado dinámicamente por AlgrokUiPopoverController -->
+              </div>
+
+              <div class="p-3 border-t border-[#F2F2F7] bg-[#FAFAFC] space-y-2">
+                <div class="text-[10px] font-mono font-bold text-[#6E6E73] uppercase tracking-wider">Restablecer por Defecto</div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-[10px] font-mono">
+                  <button type="button" onclick="window.AlgrokUiPopover && window.AlgrokUiPopover.resetTarget('nav')" class="px-2 py-1.5 rounded-lg border border-[#E5E5EA] bg-[#FFFFFF] hover:border-[#3C45A5] text-[#1D1D1F] font-semibold cursor-pointer transition">Menú</button>
+                  <button type="button" onclick="window.AlgrokUiPopover && window.AlgrokUiPopover.resetTarget('kpis')" class="px-2 py-1.5 rounded-lg border border-[#E5E5EA] bg-[#FFFFFF] hover:border-[#3C45A5] text-[#1D1D1F] font-semibold cursor-pointer transition">KPIs</button>
+                  <button type="button" onclick="window.AlgrokUiPopover && window.AlgrokUiPopover.resetTarget('sections')" class="px-2 py-1.5 rounded-lg border border-[#E5E5EA] bg-[#FFFFFF] hover:border-[#3C45A5] text-[#1D1D1F] font-semibold cursor-pointer transition">Tarjetas</button>
+                  <button type="button" onclick="window.AlgrokUiPopover && window.AlgrokUiPopover.resetTarget('tables')" class="px-2 py-1.5 rounded-lg border border-[#E5E5EA] bg-[#FFFFFF] hover:border-[#3C45A5] text-[#1D1D1F] font-semibold cursor-pointer transition">Tablas</button>
+                </div>
+                <button type="button" onclick="window.AlgrokUiPopover && window.AlgrokUiPopover.resetTarget('all')" class="w-full py-1.5 rounded-lg bg-[#1D1D1F] hover:bg-[#3C45A5] text-white text-[10px] font-mono font-bold cursor-pointer transition">
+                  <i class="fa-solid fa-arrow-rotate-left mr-1"></i> Restablecer Todo el Dashboard
+                </button>
               </div>
             </div>
           </div>
@@ -8021,6 +8040,7 @@
     let currentNotifFilter = 'ALL';
 
     function toggleNotificationsCenter() {
+      if (window.AlgrokUiPopover) window.AlgrokUiPopover.close();
       const dropdown = document.getElementById('notifications-dropdown');
       if (!dropdown) return;
       dropdown.classList.toggle('hidden');
@@ -10196,15 +10216,6 @@
         ths.forEach((th) => {
           th.classList.add('algrok-col-header');
           th.title = 'Arrastra para reordenar columna';
-          
-          let grip = th.querySelector('.col-drag-grip');
-          if (!grip) {
-            grip = document.createElement('span');
-            grip.className = 'col-drag-grip';
-            grip.innerHTML = '<i class="fa-solid fa-grip-vertical"></i>';
-            th.insertBefore(grip, th.firstChild);
-          }
-
           th.onpointerdown = (e) => this.onHeaderPointerDown(e, tableId, th);
         });
 
@@ -10224,60 +10235,18 @@
         observer.observe(tbody, { childList: true });
         tableState.observer = observer;
 
-        this.injectResetControl(table, tableId);
-
         const savedOrder = this.getSavedOrder(tableId);
         if (savedOrder && !this.isDefaultOrder(originalKeys, savedOrder) && savedOrder.length === originalKeys.length) {
           this.applyOrderToTable(tableId, savedOrder, false);
         }
-        this.updateResetButtonVisibility(tableId);
       }
 
-      injectResetControl(table, tableId) {
-        const parent = table.closest('.rounded-2xl, .overflow-hidden, .card') || table.parentElement;
-        if (!parent) return;
-
-        let resetBtn = parent.querySelector(`.btn-reset-cols[data-for="${tableId}"]`);
-        if (!resetBtn) {
-          resetBtn = document.createElement('button');
-          resetBtn.className = 'btn-reset-cols hidden';
-          resetBtn.dataset.for = tableId;
-          resetBtn.innerHTML = '<i class="fa-solid fa-arrow-rotate-left"></i> Restablecer Columnas';
-          resetBtn.title = 'Volver al orden de columnas predeterminado';
-          resetBtn.onclick = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            this.resetTableOrder(tableId);
-          };
-
-          const headingArea = parent.querySelector('h2, h3, .flex.items-center.justify-between, .flex.items-center.gap-2');
-          if (headingArea) {
-            headingArea.appendChild(resetBtn);
-          } else {
-            table.parentElement.insertBefore(resetBtn, table);
-          }
-        }
-      }
-
-      updateResetButtonVisibility(tableId) {
-        const tableState = this.tables.get(tableId);
-        if (!tableState) return;
-        const parent = tableState.table.closest('.rounded-2xl, .overflow-hidden, .card') || tableState.table.parentElement;
-        if (!parent) return;
-        const resetBtn = parent.querySelector(`.btn-reset-cols[data-for="${tableId}"]`);
-        if (!resetBtn) return;
-
-        const isDefault = this.isDefaultOrder(tableState.originalKeys, tableState.currentOrder);
-        if (isDefault) {
-          resetBtn.classList.add('hidden');
-        } else {
-          resetBtn.classList.remove('hidden');
-        }
-      }
+      injectResetControl() {}
+      updateResetButtonVisibility() {}
 
       onHeaderPointerDown(e, tableId, th) {
         if (e.button !== undefined && e.button !== 0) return;
-        if (e.target.closest('button, input, select, a') && !e.target.closest('.col-drag-grip')) {
+        if (e.target.closest('button, input, select, a')) {
           return;
         }
 
@@ -10627,6 +10596,12 @@
         });
       }
 
+      resetAll() {
+        Array.from(this.tables.keys()).forEach((tId) => {
+          this.resetTableOrder(tId);
+        });
+      }
+
       isDefaultOrder(orig, curr) {
         if (!curr || orig.length !== curr.length) return true;
         return orig.every((key, i) => key === curr[i]);
@@ -10738,8 +10713,6 @@
           this.decorateCards(gridEl, gridId, cards, gridState);
         }
 
-        this.injectResetControl(gridEl, gridId);
-
         const observer = new MutationObserver(() => {
           if (gridState.isPermuting) return;
           const freshCards = this.getDirectCards(gridEl);
@@ -10754,7 +10727,6 @@
             if (savedOrder && savedOrder.length === gridState.originalKeys.length) {
               this.applyOrderToGrid(gridId, savedOrder, false);
             }
-            this.updateResetButtonVisibility(gridId);
           } finally {
             setTimeout(() => { gridState.isPermuting = false; }, 0);
           }
@@ -10766,7 +10738,6 @@
         if (savedOrder && savedOrder.length === originalKeys.length && !this.isDefaultOrder(originalKeys, savedOrder)) {
           this.applyOrderToGrid(gridId, savedOrder, false);
         }
-        this.updateResetButtonVisibility(gridId);
       }
 
       decorateCards(gridEl, gridId, cards, gridState) {
@@ -10780,56 +10751,12 @@
             card.addEventListener('dragstart', (e) => e.preventDefault());
             card._algrokDragPrevented = true;
           }
-
-          if (!card.querySelector(':scope > .kpi-drag-grip')) {
-            const grip = document.createElement('span');
-            grip.className = 'kpi-drag-grip';
-            grip.title = 'Mantén pulsado y arrastra para mover este KPI/tarjeta';
-            grip.innerHTML = '<i class="fa-solid fa-grip-vertical"></i>';
-            card.appendChild(grip);
-          }
-
           card.onpointerdown = (e) => this.onCardPointerDown(e, gridId, card);
         });
       }
 
-      injectResetControl(gridEl, gridId) {
-        if (!gridEl.parentElement) return;
-        let bar = gridEl.parentElement.querySelector(`.kpi-reset-bar[data-for="${gridId}"]`);
-        if (!bar) {
-          bar = document.createElement('div');
-          bar.className = 'kpi-reset-bar flex justify-end mb-1.5 hidden';
-          bar.dataset.for = gridId;
-
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'btn-reset-kpis';
-          btn.dataset.for = gridId;
-          btn.innerHTML = '<i class="fa-solid fa-arrow-rotate-left"></i> Restablecer KPIs';
-          btn.title = 'Restaurar el orden original de estas tarjetas/KPIs';
-          btn.onclick = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            this.resetGridOrder(gridId);
-          };
-          bar.appendChild(btn);
-          gridEl.parentElement.insertBefore(bar, gridEl);
-        }
-      }
-
-      updateResetButtonVisibility(gridId) {
-        const state = this.grids.get(gridId);
-        if (!state || !state.gridEl.parentElement) return;
-        const bar = state.gridEl.parentElement.querySelector(`.kpi-reset-bar[data-for="${gridId}"]`);
-        if (!bar) return;
-
-        const isDefault = this.isDefaultOrder(state.originalKeys, state.currentOrder);
-        if (isDefault) {
-          bar.classList.add('hidden');
-        } else {
-          bar.classList.remove('hidden');
-        }
-      }
+      injectResetControl() {}
+      updateResetButtonVisibility() {}
 
       onCardPointerDown(e, gridId, card) {
         if (e.button !== undefined && e.button !== 0) return;
@@ -10838,11 +10765,10 @@
         const closestGrid = e.target.closest('[data-kpi-grid]');
         if (closestGrid && closestGrid.dataset.kpiGrid !== gridId) return;
 
-        // En táctil usar el grip para no interferir con el scroll vertical
-        if (e.pointerType === 'touch' && !e.target.closest('.kpi-drag-grip')) return;
+        if (e.pointerType === 'touch') return;
 
         // Respetar controles interactivos internos
-        if (e.target.closest('button, input, select, textarea, a, .apexcharts-canvas') && !e.target.closest('.kpi-drag-grip')) {
+        if (e.target.closest('button, input, select, textarea, a, .apexcharts-canvas')) {
           return;
         }
 
@@ -11126,6 +11052,12 @@
         if (!curr || orig.length !== curr.length) return true;
         return orig.every((key, i) => key === curr[i]);
       }
+
+      resetAll() {
+        Array.from(this.grids.keys()).forEach((gId) => {
+          this.resetGridOrder(gId);
+        });
+      }
     }
 
     /**
@@ -11244,8 +11176,6 @@
           this.decorateSections(containerEl, gridId, sections, state);
         }
 
-        this.injectResetControl(containerEl, gridId);
-
         const observer = new MutationObserver(() => {
           if (state.isPermuting) return;
           const fresh = this.getDirectSections(containerEl);
@@ -11260,7 +11190,6 @@
             if (savedOrder && !this.isDefaultOrder(state.originalKeys, savedOrder)) {
               this.applyOrderToContainer(gridId, savedOrder, false);
             }
-            this.updateResetButtonVisibility(gridId);
           } finally {
             setTimeout(() => { state.isPermuting = false; }, 0);
           }
@@ -11272,7 +11201,6 @@
         if (savedOrder && !this.isDefaultOrder(originalKeys, savedOrder)) {
           this.applyOrderToContainer(gridId, savedOrder, false);
         }
-        this.updateResetButtonVisibility(gridId);
       }
 
       decorateSections(containerEl, gridId, sections, state) {
@@ -11281,58 +11209,15 @@
             sec.dataset.sectionKey = state.originalKeys[idx] || sec.id || `sec_${idx}`;
           }
           sec.classList.add('algrok-section-card');
-          // Si no es contenedor puro de otros KPIs, marcar cursor grab en cabeceras/superficie
           if (!sec.dataset.kpiGrid && !sec.dataset.sectionGrid) {
             sec.classList.add('section-draggable-surface');
           }
-
-          if (!sec.querySelector(':scope > .section-drag-grip')) {
-            const grip = document.createElement('span');
-            grip.className = 'section-drag-grip';
-            grip.title = 'Mantén pulsado y arrastra para mover esta tarjeta/sección';
-            grip.innerHTML = '<i class="fa-solid fa-grip-vertical"></i> Mover';
-            sec.appendChild(grip);
-          }
-
           sec.onpointerdown = (e) => this.onSectionPointerDown(e, gridId, sec);
         });
       }
 
-      injectResetControl(containerEl, gridId) {
-        const host = containerEl.parentElement;
-        if (!host) return;
-        let bar = containerEl.querySelector(`:scope > .section-reset-bar[data-for="${gridId}"]`);
-        if (!bar) {
-          bar = document.createElement('div');
-          bar.className = 'section-reset-bar flex justify-end mb-1 hidden';
-          bar.dataset.for = gridId;
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'btn-reset-sections';
-          btn.innerHTML = '<i class="fa-solid fa-arrow-rotate-left"></i> Restablecer Diseño';
-          btn.title = 'Restaurar orden original de tarjetas y gráficos';
-          btn.onclick = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            this.resetContainerOrder(gridId);
-          };
-          bar.appendChild(btn);
-          containerEl.insertBefore(bar, containerEl.firstChild);
-        }
-      }
-
-      updateResetButtonVisibility(gridId) {
-        const state = this.containers.get(gridId);
-        if (!state) return;
-        const bar = state.containerEl.querySelector(`:scope > .section-reset-bar[data-for="${gridId}"]`);
-        if (!bar) return;
-
-        if (this.isDefaultOrder(state.originalKeys, state.currentOrder)) {
-          bar.classList.add('hidden');
-        } else {
-          bar.classList.remove('hidden');
-        }
-      }
+      injectResetControl() {}
+      updateResetButtonVisibility() {}
 
       getSectionTitle(sec) {
         const h = sec.querySelector('h2, h3, h4, .overline-text');
@@ -11348,20 +11233,15 @@
         const state = this.containers.get(gridId);
         if (!state) return;
 
-        const gripClicked = e.target.closest('.section-drag-grip');
-        if (gripClicked) {
-          if (gripClicked.parentElement !== sec) return;
-        } else {
-          // Respetar contenedores anidados más específicos
-          const directContainer = e.target.closest('[data-section-grid], .tab-pane');
-          if (directContainer && directContainer !== state.containerEl) return;
+        // Respetar contenedores anidados más específicos
+        const directContainer = e.target.closest('[data-section-grid], .tab-pane');
+        if (directContainer && directContainer !== state.containerEl) return;
 
-          if (e.pointerType === 'touch') return; // En táctil usar el grip central
+        if (e.pointerType === 'touch') return;
 
-          // Respetar tarjetas KPI internas, tablas, gráficos y controles interactivos
-          if (e.target.closest('button, input, select, textarea, a, table, .apexcharts-canvas, .tv-lightweight-charts, canvas, [data-kpi-grid], [onclick], .overflow-x-auto, .overflow-y-auto, [id^="chart-"]')) {
-            return;
-          }
+        // Respetar tarjetas KPI internas, tablas, gráficos y controles interactivos
+        if (e.target.closest('button, input, select, textarea, a, table, .apexcharts-canvas, .tv-lightweight-charts, canvas, [data-kpi-grid], [onclick], .overflow-x-auto, .overflow-y-auto, [id^="chart-"]')) {
+          return;
         }
 
         const sections = this.getDirectSections(state.containerEl);
@@ -11676,6 +11556,12 @@
         if (!curr || orig.length !== curr.length) return true;
         return orig.every((key, i) => key === curr[i]);
       }
+
+      resetAll() {
+        Array.from(this.containers.keys()).forEach((cId) => {
+          this.resetContainerOrder(cId);
+        });
+      }
     }
 
     /**
@@ -11688,12 +11574,10 @@
       constructor() {
         this.storageKey = 'algrok_nav_prefs_v1';
         this.navEl = document.getElementById('sidebar-nav');
-        this.isEditMode = false;
         this.defaultTabs = [];
         this.tabsConfig = [];
         this.activeDrag = null;
         this.ghostEl = null;
-        this.iconPopoverEl = null;
         this.suppressClickUntil = 0;
         this.availableIcons = [
           'fa-gauge-high', 'fa-chart-line', 'fa-satellite-dish', 'fa-compass-drafting',
@@ -11723,6 +11607,7 @@
 
         this.renderMenuFromConfig(false);
         this.bindGlobalEvents();
+        if (window.AlgrokUiPopover) window.AlgrokUiPopover.render();
       }
 
       captureDefaultTabs() {
@@ -11790,12 +11675,10 @@
           });
         });
 
-        // Añadir pestañas nuevas que no existieran en la config guardada
         this.defaultTabs.forEach(def => {
           if (!seen.has(def.id)) merged.push({ ...def });
         });
 
-        // Garantizar al menos 1 pestaña visible
         if (merged.length > 0 && merged.every(t => t.hidden)) {
           merged[0].hidden = false;
         }
@@ -11803,58 +11686,17 @@
       }
 
       bindGlobalEvents() {
-        // Bloquear clic fantasma tras arrastre o acciones de edición interna
+        // Bloquear clic fantasma exclusivamente tras terminar un arrastre en el menú lateral
         this.navEl.addEventListener('click', (e) => {
           if (performance.now() < this.suppressClickUntil) {
-            e.preventDefault();
-            e.stopPropagation();
-            return;
-          }
-          if (this.isEditMode && e.target.closest('.sidebar-item-actions, .sidebar-inline-input, .sidebar-drag-grip')) {
             e.preventDefault();
             e.stopPropagation();
           }
         }, true);
 
-        document.addEventListener('pointerdown', (e) => {
-          if (this.iconPopoverEl && !this.iconPopoverEl.contains(e.target) && !e.target.closest('.sidebar-tab-icon')) {
-            this.closeIconPopover();
-          }
-        });
-
         window.addEventListener('pointermove', (e) => this.onGlobalPointerMove(e), { passive: false });
         window.addEventListener('pointerup', (e) => this.onGlobalPointerUp(e), { passive: false });
         window.addEventListener('pointercancel', (e) => this.onGlobalPointerUp(e), { passive: false });
-      }
-
-      toggleEditMode(forceState) {
-        this.isEditMode = typeof forceState === 'boolean' ? forceState : !this.isEditMode;
-        const btnLabel = document.getElementById('btn-edit-sidebar-label');
-        const btnEdit = document.getElementById('btn-edit-sidebar-nav');
-        const toolbar = document.getElementById('sidebar-edit-toolbar');
-
-        if (this.isEditMode) {
-          this.navEl.classList.add('sidebar-editing');
-          if (toolbar) toolbar.classList.remove('hidden');
-          if (btnLabel) btnLabel.innerText = 'Listo';
-          if (btnEdit) btnEdit.classList.add('text-[#3C45A5]', 'bg-[#FAF7F2]', 'border-[#D6D1C7]');
-        } else {
-          this.closeIconPopover();
-          this.navEl.classList.remove('sidebar-editing');
-          if (toolbar) toolbar.classList.add('hidden');
-          if (btnLabel) btnLabel.innerText = 'Editar';
-          if (btnEdit) btnEdit.classList.remove('text-[#3C45A5]', 'bg-[#FAF7F2]', 'border-[#D6D1C7]');
-
-          // Si la pestaña actualmente abierta quedó oculta, saltar a la primera visible
-          const activeCfg = this.tabsConfig.find(t => t.id === window.currentActiveTab);
-          if (activeCfg && activeCfg.hidden) {
-            const firstVisible = this.tabsConfig.find(t => !t.hidden);
-            if (firstVisible && typeof switchTab === 'function') {
-              switchTab(firstVisible.id);
-            }
-          }
-        }
-        this.renderMenuFromConfig(false);
       }
 
       syncHeaderTitles() {
@@ -11880,194 +11722,85 @@
           const btn = existingBtns.get(cfg.id);
           if (!btn) return;
 
-          this.decorateTabButton(btn, cfg);
-          this.navEl.appendChild(btn);
+          // Limpiar restos antiguos si los hubiera y dejar el botón limpio
+          btn.querySelectorAll('.sidebar-drag-grip, .sidebar-item-actions').forEach(el => el.remove());
 
-          // Visibilidad según modo edición vs normal
-          btn.classList.remove('hidden', 'sidebar-nav-hidden-in-edit');
-          if (cfg.hidden) {
-            if (this.isEditMode) {
-              btn.classList.add('sidebar-nav-hidden-in-edit');
-            } else {
-              btn.classList.add('hidden');
-            }
+          const iconEl = btn.querySelector('i');
+          if (iconEl) {
+            iconEl.className = `fa-solid ${cfg.icon} text-xs text-[#3C45A5] mr-2.5 w-4 text-center`;
           }
+
+          const labelSpan = btn.querySelector('span');
+          if (labelSpan) {
+            labelSpan.className = 'truncate';
+            labelSpan.textContent = cfg.label;
+          }
+
+          btn.setAttribute('draggable', 'false');
+          btn.onpointerdown = (e) => this.onTabPointerDown(e, btn, cfg);
+
+          this.navEl.appendChild(btn);
+          btn.classList.toggle('hidden', Boolean(cfg.hidden));
         });
 
         if (animate && firstRects) {
           playFlipShift(Array.from(existingBtns.values()), firstRects, null, 220);
         }
         this.syncHeaderTitles();
+        if (window.AlgrokUiPopover) window.AlgrokUiPopover.render();
       }
 
-      decorateTabButton(btn, cfg) {
-        if (!btn.querySelector(':scope > .sidebar-drag-grip')) {
-          const grip = document.createElement('span');
-          grip.className = 'sidebar-drag-grip';
-          grip.title = 'Arrastra para mover pestaña';
-          grip.innerHTML = '<i class="fa-solid fa-grip-vertical text-[10px]"></i>';
-          btn.insertBefore(grip, btn.firstChild);
-        }
-
-        const iconEl = btn.querySelector('i.fa-solid:not(.fa-grip-vertical), i.fa-regular, i.fa-brands');
-        if (iconEl) {
-          const preserved = ['text-xs', 'text-[#3C45A5]', 'mr-2.5', 'w-4', 'text-center', 'sidebar-tab-icon'];
-          iconEl.className = `fa-solid ${cfg.icon} ${preserved.join(' ')}`;
-          iconEl.title = this.isEditMode ? 'Cambiar icono' : '';
-          iconEl.onclick = (e) => {
-            if (!this.isEditMode) return;
-            e.preventDefault();
-            e.stopPropagation();
-            this.suppressClickUntil = performance.now() + 200;
-            this.openIconPopover(btn, cfg, iconEl);
-          };
-        }
-
-        const labelSpan = btn.querySelector(':scope > span:not(.sidebar-drag-grip):not(.sidebar-item-actions)');
-        if (labelSpan) {
-          labelSpan.classList.add('sidebar-tab-label', 'truncate');
-          if (!labelSpan.querySelector('input')) {
-            labelSpan.textContent = cfg.label;
-          }
-        }
-
-        let actions = btn.querySelector(':scope > .sidebar-item-actions');
-        if (!actions) {
-          actions = document.createElement('span');
-          actions.className = 'sidebar-item-actions';
-
-          const renameBtn = document.createElement('button');
-          renameBtn.type = 'button';
-          renameBtn.className = 'sidebar-act-btn sidebar-btn-rename';
-          renameBtn.title = 'Renombrar pestaña';
-          renameBtn.innerHTML = '<i class="fa-solid fa-pen"></i>';
-          renameBtn.onclick = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            this.suppressClickUntil = performance.now() + 250;
-            this.startInlineRename(btn, cfg);
-          };
-
-          const eyeBtn = document.createElement('button');
-          eyeBtn.type = 'button';
-          eyeBtn.className = 'sidebar-act-btn sidebar-btn-eye';
-          eyeBtn.onclick = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            this.suppressClickUntil = performance.now() + 250;
-            this.toggleTabVisibility(cfg.id);
-          };
-
-          actions.appendChild(renameBtn);
-          actions.appendChild(eyeBtn);
-          btn.appendChild(actions);
-        }
-
-        const eyeBtn = actions.querySelector('.sidebar-btn-eye');
-        if (eyeBtn) {
-          eyeBtn.title = cfg.hidden ? 'Mostrar pestaña en el menú' : 'Ocultar pestaña del menú';
-          eyeBtn.innerHTML = cfg.hidden
-            ? '<i class="fa-solid fa-eye-slash text-[#D70015]"></i>'
-            : '<i class="fa-solid fa-eye"></i>';
-        }
-
-        btn.setAttribute('draggable', 'false');
-        btn.onpointerdown = (e) => this.onTabPointerDown(e, btn, cfg);
-      }
-
-      startInlineRename(btn, cfg) {
-        const labelSpan = btn.querySelector('.sidebar-tab-label');
-        if (!labelSpan || labelSpan.querySelector('input')) return;
-
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.value = cfg.label;
-        input.maxLength = 32;
-        input.className = 'sidebar-inline-input';
-
-        const commit = () => {
-          const next = input.value.trim();
-          if (next) {
-            cfg.label = next;
-            this.saveServerPrefs();
-            this.syncHeaderTitles();
-          }
-          labelSpan.textContent = cfg.label;
-        };
-
-        input.onclick = (e) => { e.stopPropagation(); };
-        input.onpointerdown = (e) => { e.stopPropagation(); };
-        input.onkeydown = (e) => {
-          e.stopPropagation();
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            commit();
-          } else if (e.key === 'Escape') {
-            labelSpan.textContent = cfg.label;
-          }
-        };
-        input.onblur = commit;
-
-        labelSpan.textContent = '';
-        labelSpan.appendChild(input);
-        input.focus();
-        input.select();
-      }
-
-      openIconPopover(btn, cfg, anchorEl) {
-        this.closeIconPopover();
-        const pop = document.createElement('div');
-        pop.className = 'sidebar-icon-popover';
-
-        this.availableIcons.forEach(ic => {
-          const choice = document.createElement('button');
-          choice.type = 'button';
-          choice.className = 'sidebar-icon-choice';
-          if (cfg.icon === ic) {
-            choice.classList.add('border-[#3C45A5]', 'bg-[#EEF2FF]', 'text-[#3C45A5]');
-          }
-          choice.innerHTML = `<i class="fa-solid ${ic} text-xs"></i>`;
-          choice.onclick = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            cfg.icon = ic;
-            this.saveServerPrefs();
-            this.renderMenuFromConfig(false);
-            this.closeIconPopover();
-          };
-          pop.appendChild(choice);
-        });
-
-        const rect = anchorEl.getBoundingClientRect();
-        pop.style.left = `${Math.max(12, rect.left)}px`;
-        pop.style.top = `${Math.min(window.innerHeight - 160, rect.bottom + 6)}px`;
-        document.body.appendChild(pop);
-        this.iconPopoverEl = pop;
-      }
-
-      closeIconPopover() {
-        if (this.iconPopoverEl) {
-          this.iconPopoverEl.remove();
-          this.iconPopoverEl = null;
-        }
-      }
-
-      toggleTabVisibility(tabId) {
-        const target = this.tabsConfig.find(t => t.id === tabId);
-        if (!target) return;
-
-        const visibleCount = this.tabsConfig.filter(t => !t.hidden).length;
-        if (!target.hidden && visibleCount <= 1) return; // Siempre dejar al menos 1 visible
-
-        target.hidden = !target.hidden;
+      renameTab(tabId, newLabel) {
+        const cfg = this.tabsConfig.find(t => t.id === tabId);
+        if (!cfg) return;
+        const clean = String(newLabel || '').trim();
+        if (!clean || clean === cfg.label) return;
+        cfg.label = clean;
         this.saveServerPrefs();
         this.renderMenuFromConfig(false);
       }
 
+      setTabIcon(tabId, iconClass) {
+        const cfg = this.tabsConfig.find(t => t.id === tabId);
+        if (!cfg || !iconClass) return;
+        cfg.icon = iconClass;
+        this.saveServerPrefs();
+        this.renderMenuFromConfig(false);
+      }
+
+      toggleTabVisibility(tabId) {
+        const target = this.tabsConfig.find(t => t.id === tabId);
+        if (!target) return false;
+
+        const visibleCount = this.tabsConfig.filter(t => !t.hidden).length;
+        if (!target.hidden && visibleCount <= 1) return false;
+
+        target.hidden = !target.hidden;
+        this.saveServerPrefs();
+        this.renderMenuFromConfig(false);
+
+        if (target.hidden && window.currentActiveTab === tabId) {
+          const firstVisible = this.tabsConfig.find(t => !t.hidden);
+          if (firstVisible && typeof switchTab === 'function') {
+            switchTab(firstVisible.id);
+          }
+        }
+        return true;
+      }
+
+      moveTab(tabId, delta) {
+        const idx = this.tabsConfig.findIndex(t => t.id === tabId);
+        const nextIdx = idx + delta;
+        if (idx === -1 || nextIdx < 0 || nextIdx >= this.tabsConfig.length) return;
+        const [item] = this.tabsConfig.splice(idx, 1);
+        this.tabsConfig.splice(nextIdx, 0, item);
+        this.saveServerPrefs();
+        this.renderMenuFromConfig(true);
+      }
+
       onTabPointerDown(e, btn, cfg) {
         if (e.button !== undefined && e.button !== 0) return;
-        if (e.target.closest('.sidebar-item-actions, .sidebar-inline-input')) return;
-        if (e.pointerType === 'touch' && !e.target.closest('.sidebar-drag-grip')) return;
+        if (e.pointerType === 'touch') return;
 
         try {
           if (btn.setPointerCapture) btn.setPointerCapture(e.pointerId);
@@ -12097,7 +11830,6 @@
         const dist = Math.hypot(e.clientX - drag.startX, e.clientY - drag.startY);
         if (!drag.isDragging && dist > 6) {
           drag.isDragging = true;
-          this.closeIconPopover();
           document.body.style.cursor = 'grabbing';
           this.createGhost(drag, e);
           drag.btn.classList.add('sidebar-is-dragging');
@@ -12171,7 +11903,6 @@
             this.navEl.insertBefore(drag.btn, targetBtn);
           }
 
-          // Sincronizar orden de this.tabsConfig
           const newIds = Array.from(this.navEl.querySelectorAll('button[data-nav-id]')).map(b => b.dataset.navId);
           const cfgMap = new Map(this.tabsConfig.map(c => [c.id, c]));
           this.tabsConfig = newIds.map(id => cfgMap.get(id)).filter(Boolean);
@@ -12212,12 +11943,12 @@
               } catch (err) {}
             }
             this.saveServerPrefs();
+            if (window.AlgrokUiPopover) window.AlgrokUiPopover.render();
           }
         }
       }
 
       resetNav() {
-        this.closeIconPopover();
         this.tabsConfig = this.defaultTabs.map(t => ({ ...t }));
         try {
           localStorage.removeItem(this.storageKey);
@@ -12228,11 +11959,208 @@
       }
     }
 
-    // Inicializar controladores globales únicos (Tablas + KPIs + Secciones/Tarjetas + Menú Lateral)
+    /**
+     * =========================================================================
+     * ALGROK TOP-RIGHT UI CUSTOMIZER POPOVER (JUNTO A LA CAMPANITA)
+     * Centraliza la edición de pestañas (nombre, icono, visibilidad, orden)
+     * y los botones de restablecimiento para mantener las tarjetas limpias.
+     * =========================================================================
+     */
+    class AlgrokUiPopoverController {
+      constructor() {
+        this.dropdownEl = document.getElementById('ui-customizer-dropdown');
+        this.wrapperEl = document.getElementById('ui-customizer-wrapper');
+        this.listEl = document.getElementById('ui-customizer-tabs-list');
+        this.iconPopoverEl = null;
+        this.init();
+      }
+
+      init() {
+        document.addEventListener('pointerdown', (e) => {
+          if (this.iconPopoverEl && !this.iconPopoverEl.contains(e.target) && !e.target.closest('.ui-pop-icon-btn')) {
+            this.closeIconPopover();
+          }
+          if (this.dropdownEl && !this.dropdownEl.classList.contains('hidden')) {
+            if (this.wrapperEl && !this.wrapperEl.contains(e.target) && (!this.iconPopoverEl || !this.iconPopoverEl.contains(e.target))) {
+              this.close();
+            }
+          }
+        });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            this.closeIconPopover();
+            this.close();
+          }
+        });
+        this.render();
+      }
+
+      toggle() {
+        if (!this.dropdownEl) return;
+        const notifDrop = document.getElementById('notifications-dropdown');
+        if (notifDrop) notifDrop.classList.add('hidden');
+        this.dropdownEl.classList.toggle('hidden');
+        if (!this.dropdownEl.classList.contains('hidden')) {
+          this.render();
+        } else {
+          this.closeIconPopover();
+        }
+      }
+
+      close() {
+        this.closeIconPopover();
+        if (this.dropdownEl) this.dropdownEl.classList.add('hidden');
+      }
+
+      closeIconPopover() {
+        if (this.iconPopoverEl) {
+          this.iconPopoverEl.remove();
+          this.iconPopoverEl = null;
+        }
+      }
+
+      openIconPopover(cfg, anchorEl) {
+        this.closeIconPopover();
+        const sidebar = window.AlgrokSidebar;
+        if (!sidebar) return;
+
+        const pop = document.createElement('div');
+        pop.className = 'sidebar-icon-popover';
+        sidebar.availableIcons.forEach(ic => {
+          const choice = document.createElement('button');
+          choice.type = 'button';
+          choice.className = 'sidebar-icon-choice';
+          if (cfg.icon === ic) {
+            choice.classList.add('border-[#3C45A5]', 'bg-[#EEF2FF]', 'text-[#3C45A5]');
+          }
+          choice.innerHTML = `<i class="fa-solid ${ic} text-xs"></i>`;
+          choice.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            sidebar.setTabIcon(cfg.id, ic);
+            this.closeIconPopover();
+          };
+          pop.appendChild(choice);
+        });
+
+        const rect = anchorEl.getBoundingClientRect();
+        pop.style.left = `${Math.min(window.innerWidth - 150, Math.max(12, rect.left))}px`;
+        pop.style.top = `${Math.min(window.innerHeight - 160, rect.bottom + 6)}px`;
+        document.body.appendChild(pop);
+        this.iconPopoverEl = pop;
+      }
+
+      render() {
+        if (!this.listEl || !window.AlgrokSidebar) return;
+        const tabs = window.AlgrokSidebar.tabsConfig || [];
+        this.listEl.innerHTML = '';
+
+        tabs.forEach((cfg, idx) => {
+          const row = document.createElement('div');
+          row.className = `flex items-center gap-1.5 px-2 py-1.5 rounded-lg hover:bg-[#FAFAFC] transition ${cfg.hidden ? 'opacity-50' : ''}`;
+
+          const iconBtn = document.createElement('button');
+          iconBtn.type = 'button';
+          iconBtn.className = 'ui-pop-icon-btn w-7 h-7 rounded-md bg-[#F2F2F7] hover:bg-[#EEF2FF] text-[#3C45A5] flex items-center justify-center shrink-0 cursor-pointer transition';
+          iconBtn.title = 'Cambiar icono';
+          iconBtn.innerHTML = `<i class="fa-solid ${cfg.icon} text-xs"></i>`;
+          iconBtn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.openIconPopover(cfg, iconBtn);
+          };
+
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.value = cfg.label;
+          input.maxLength = 32;
+          input.className = 'flex-1 min-w-0 bg-transparent hover:bg-[#FFFFFF] focus:bg-[#FFFFFF] border border-transparent focus:border-[#3C45A5] rounded-md px-2 py-1 text-xs font-semibold text-[#1D1D1F] outline-none transition';
+          const commit = () => {
+            const val = input.value.trim();
+            if (val) {
+              window.AlgrokSidebar.renameTab(cfg.id, val);
+            } else {
+              input.value = cfg.label;
+            }
+          };
+          input.onchange = commit;
+          input.onblur = commit;
+          input.onkeydown = (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              commit();
+              input.blur();
+            } else if (e.key === 'Escape') {
+              input.value = cfg.label;
+              input.blur();
+            }
+          };
+
+          const pencilBtn = document.createElement('button');
+          pencilBtn.type = 'button';
+          pencilBtn.className = 'w-6 h-6 rounded-md hover:bg-[#EEF2FF] text-[#6E6E73] hover:text-[#3C45A5] flex items-center justify-center shrink-0 cursor-pointer transition';
+          pencilBtn.title = 'Renombrar pestaña';
+          pencilBtn.innerHTML = '<i class="fa-solid fa-pen text-[10px]"></i>';
+          pencilBtn.onclick = () => {
+            input.focus();
+            input.select();
+          };
+
+          const upBtn = document.createElement('button');
+          upBtn.type = 'button';
+          upBtn.className = `w-5 h-6 rounded hover:bg-[#EAE5DC] text-[#6E6E73] flex items-center justify-center shrink-0 cursor-pointer ${idx === 0 ? 'opacity-25 pointer-events-none' : ''}`;
+          upBtn.title = 'Subir';
+          upBtn.innerHTML = '<i class="fa-solid fa-chevron-up text-[9px]"></i>';
+          upBtn.onclick = () => window.AlgrokSidebar.moveTab(cfg.id, -1);
+
+          const downBtn = document.createElement('button');
+          downBtn.type = 'button';
+          downBtn.className = `w-5 h-6 rounded hover:bg-[#EAE5DC] text-[#6E6E73] flex items-center justify-center shrink-0 cursor-pointer ${idx === tabs.length - 1 ? 'opacity-25 pointer-events-none' : ''}`;
+          downBtn.title = 'Bajar';
+          downBtn.innerHTML = '<i class="fa-solid fa-chevron-down text-[9px]"></i>';
+          downBtn.onclick = () => window.AlgrokSidebar.moveTab(cfg.id, 1);
+
+          const eyeBtn = document.createElement('button');
+          eyeBtn.type = 'button';
+          eyeBtn.className = 'w-6 h-6 rounded-md hover:bg-[#F2F2F7] flex items-center justify-center shrink-0 cursor-pointer transition';
+          eyeBtn.title = cfg.hidden ? 'Mostrar pestaña' : 'Ocultar pestaña';
+          eyeBtn.innerHTML = cfg.hidden
+            ? '<i class="fa-solid fa-eye-slash text-[#D70015] text-[11px]"></i>'
+            : '<i class="fa-solid fa-eye text-[#1D1D1F] text-[11px]"></i>';
+          eyeBtn.onclick = () => window.AlgrokSidebar.toggleTabVisibility(cfg.id);
+
+          row.appendChild(iconBtn);
+          row.appendChild(input);
+          row.appendChild(pencilBtn);
+          row.appendChild(upBtn);
+          row.appendChild(downBtn);
+          row.appendChild(eyeBtn);
+          this.listEl.appendChild(row);
+        });
+      }
+
+      resetTarget(kind) {
+        if (kind === 'nav' || kind === 'all') {
+          if (window.AlgrokSidebar) window.AlgrokSidebar.resetNav();
+        }
+        if (kind === 'kpis' || kind === 'all') {
+          if (window.AlgrokKpis) window.AlgrokKpis.resetAll();
+        }
+        if (kind === 'sections' || kind === 'all') {
+          if (window.AlgrokSections) window.AlgrokSections.resetAll();
+        }
+        if (kind === 'tables' || kind === 'all') {
+          if (window.AlgrokTables) window.AlgrokTables.resetAll();
+        }
+      }
+    }
+
+    // Inicializar controladores globales únicos (Tablas + KPIs + Secciones/Tarjetas + Menú + Popover UI)
     window.AlgrokTables = new AlgrokTableColumnReorderController();
     window.AlgrokKpis = new AlgrokKpiReorderController();
     window.AlgrokSections = new AlgrokSectionReorderController();
     window.AlgrokSidebar = new AlgrokSidebarEditorController();
+    window.AlgrokUiPopover = new AlgrokUiPopoverController();
   })();
   </script>
 
