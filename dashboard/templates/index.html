@@ -788,10 +788,74 @@
       border: 1px solid #E5E5EA;
       border-radius: 12px;
       padding: 8px;
-      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.14);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.16);
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 4px;
+      min-width: 148px;
+    }
+    .sidebar-icon-popover-header {
+      grid-column: 1 / -1;
+      font-size: 9px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #3C45A5;
+      background: #EEF2FF;
+      border-radius: 6px;
+      padding: 3px 6px;
+      margin-bottom: 3px;
+      text-align: center;
+    }
+    body.algrok-edit-mode .algrok-icon-editable {
+      cursor: pointer !important;
+      border-radius: 4px;
+      transition: transform 0.12s ease, outline-color 0.12s ease, background-color 0.12s ease;
+    }
+    body.algrok-edit-mode .algrok-icon-editable:hover {
+      outline: 1.5px dashed #3C45A5;
+      outline-offset: 2px;
+      background-color: rgba(238, 242, 255, 0.7);
+      transform: scale(1.12);
+    }
+    .algrok-color-palette-popover {
+      position: fixed;
+      z-index: 999999;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid #E5E5EA;
+      border-radius: 9999px;
+      padding: 5px 8px;
+      box-shadow: 0 14px 32px rgba(24, 26, 32, 0.18), 0 0 0 1px rgba(60, 69, 165, 0.12);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .algrok-color-swatch {
+      width: 18px;
+      height: 18px;
+      border-radius: 9999px;
+      border: 1.5px solid rgba(0, 0, 0, 0.14);
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+      flex-shrink: 0;
+    }
+    .algrok-color-swatch:hover {
+      transform: scale(1.18);
+      box-shadow: 0 0 0 2px rgba(60, 69, 165, 0.35);
+    }
+    .algrok-color-native {
+      width: 20px;
+      height: 20px;
+      padding: 0;
+      border: 1px solid #D6D1C7;
+      border-radius: 9999px;
+      background: transparent;
+      cursor: pointer;
+      overflow: hidden;
+      flex-shrink: 0;
     }
     .sidebar-icon-choice {
       width: 28px;
@@ -11590,6 +11654,77 @@
      * ocultar/mostrar directamente sobre el menú lateral cuando está activo.
      * =========================================================================
      */
+    /**
+     * =========================================================================
+     * ALGROK SEMANTIC ICON TAXONOMY
+     * Agrupa cada icono por concepto o significado para mostrar solo alternativas
+     * semánticamente equivalentes al icono original.
+     * =========================================================================
+     */
+    const AlgrokIconSemantics = {
+      groups: [
+        {
+          id: 'charts_analytics',
+          label: 'Gráficos y Analítica',
+          icons: ['fa-chart-line', 'fa-chart-simple', 'fa-chart-column', 'fa-chart-area', 'fa-arrow-trend-up', 'fa-arrow-trend-down', 'fa-wave-square', 'fa-signal', 'fa-chart-pie']
+        },
+        {
+          id: 'cockpit_control',
+          label: 'Panel y Orquestación',
+          icons: ['fa-gauge-high', 'fa-gauge', 'fa-sliders', 'fa-compass-drafting', 'fa-compass', 'fa-microchip', 'fa-gears', 'fa-sitemap', 'fa-terminal']
+        },
+        {
+          id: 'finance_capital',
+          label: 'Capital y Balance',
+          icons: ['fa-wallet', 'fa-coins', 'fa-vault', 'fa-money-bill-trend-up', 'fa-sack-dollar', 'fa-building-columns', 'fa-landmark', 'fa-gem', 'fa-dollar-sign']
+        },
+        {
+          id: 'risk_guard',
+          label: 'Riesgo y Protección',
+          icons: ['fa-shield-halved', 'fa-shield', 'fa-lock', 'fa-triangle-exclamation', 'fa-scale-balanced', 'fa-gavel', 'fa-ban', 'fa-circle-exclamation', 'fa-user-shield']
+        },
+        {
+          id: 'time_live',
+          label: 'Tiempo y Señal Live',
+          icons: ['fa-clock', 'fa-clock-rotate-left', 'fa-stopwatch', 'fa-calendar-days', 'fa-calendar-check', 'fa-bolt', 'fa-satellite-dish', 'fa-tower-broadcast', 'fa-hourglass-half']
+        },
+        {
+          id: 'targets_wins',
+          label: 'Objetivos y Logros',
+          icons: ['fa-bullseye', 'fa-trophy', 'fa-flag-checkered', 'fa-award', 'fa-medal', 'fa-star', 'fa-fire', 'fa-crown', 'fa-circle-check']
+        },
+        {
+          id: 'lab_strategy',
+          label: 'Laboratorio y Modelos',
+          icons: ['fa-flask-vial', 'fa-flask', 'fa-microscope', 'fa-magnifying-glass-chart', 'fa-brain', 'fa-robot', 'fa-wand-magic-sparkles', 'fa-atom', 'fa-code-branch']
+        },
+        {
+          id: 'docs_catalog',
+          label: 'Bitácora y Datos',
+          icons: ['fa-book-bookmark', 'fa-book-open', 'fa-file-lines', 'fa-file-invoice', 'fa-clipboard-list', 'fa-folder-open', 'fa-layer-group', 'fa-table-list', 'fa-database']
+        },
+        {
+          id: 'team_swarm',
+          label: 'Equipo y Enjambre',
+          icons: ['fa-users-gear', 'fa-users', 'fa-user-tie', 'fa-network-wired', 'fa-people-group', 'fa-diagram-project', 'fa-hive', 'fa-user-astronaut', 'fa-comments']
+        },
+        {
+          id: 'ops_tools',
+          label: 'Operativa y Filtros',
+          icons: ['fa-scissors', 'fa-dice', 'fa-snowflake', 'fa-arrows-left-right', 'fa-filter', 'fa-crosshairs', 'fa-code-compare', 'fa-cubes', 'fa-percent']
+        }
+      ],
+      getSemanticSet(iconClass) {
+        const found = this.groups.find(g => g.icons.includes(iconClass));
+        if (found) return found;
+        return {
+          id: 'general',
+          label: 'Panel y Analítica',
+          icons: [iconClass || 'fa-circle-dot', 'fa-chart-line', 'fa-gauge-high', 'fa-wallet', 'fa-shield-halved', 'fa-bullseye', 'fa-flask-vial', 'fa-file-lines']
+        };
+      }
+    };
+
     class AlgrokSidebarEditorController {
       constructor() {
         this.storageKey = 'algrok_nav_prefs_v1';
@@ -11849,8 +11984,21 @@
         const labelSpan = btn.querySelector(':scope > span:not(.sidebar-drag-grip):not(.sidebar-item-actions)');
         if (labelSpan) {
           labelSpan.classList.add('sidebar-tab-label', 'truncate', 'algrok-editable-text');
+          labelSpan.dataset.textKey = `nav:${cfg.id}`;
+          if (!labelSpan.dataset.defaultText) labelSpan.dataset.defaultText = cfg.label;
           if (document.activeElement !== labelSpan) {
-            labelSpan.textContent = cfg.label;
+            const te = window.AlgrokTextEditor;
+            const savedHtml = te && te.htmlByKey && te.htmlByKey[`nav:${cfg.id}`];
+            if (savedHtml) {
+              labelSpan.innerHTML = te.sanitizeColorHtml(savedHtml);
+            } else {
+              labelSpan.textContent = cfg.label;
+            }
+            if (te && te.colorByKey && te.colorByKey[`nav:${cfg.id}`]) {
+              labelSpan.style.color = te.colorByKey[`nav:${cfg.id}`];
+            } else {
+              labelSpan.style.removeProperty('color');
+            }
           }
           if (this.isEditMode) {
             labelSpan.setAttribute('contenteditable', 'true');
@@ -11952,10 +12100,16 @@
 
       openIconPopover(btn, cfg, anchorEl) {
         this.closeIconPopover();
+        const sem = AlgrokIconSemantics.getSemanticSet(cfg.icon);
         const pop = document.createElement('div');
         pop.className = 'sidebar-icon-popover';
 
-        this.availableIcons.forEach(ic => {
+        const header = document.createElement('div');
+        header.className = 'sidebar-icon-popover-header';
+        header.textContent = sem.label;
+        pop.appendChild(header);
+
+        sem.icons.forEach(ic => {
           const choice = document.createElement('button');
           choice.type = 'button';
           choice.className = 'sidebar-icon-choice';
@@ -11975,8 +12129,8 @@
         });
 
         const rect = anchorEl.getBoundingClientRect();
-        pop.style.left = `${Math.max(12, rect.left)}px`;
-        pop.style.top = `${Math.min(window.innerHeight - 160, rect.bottom + 6)}px`;
+        pop.style.left = `${Math.min(window.innerWidth - 170, Math.max(12, rect.left))}px`;
+        pop.style.top = `${Math.min(window.innerHeight - 190, rect.bottom + 6)}px`;
         document.body.appendChild(pop);
         this.iconPopoverEl = pop;
       }
@@ -12178,16 +12332,38 @@
         this.storageKey = 'algrok_text_prefs_v1';
         this.byKey = {};
         this.aliases = {};
+        this.htmlByKey = {};
+        this.colorByKey = {};
+        this.iconByKey = {};
         this.elements = [];
+        this.iconElements = [];
         this.isEditMode = false;
         this.isApplying = false;
+        this.colorPopoverEl = null;
+        this.iconPopoverEl = null;
+        this.activeSelectionCtx = null;
+        this.selectionCheckTimer = null;
+        this.paletteColors = [
+          { hex: '#1D1D1F', name: 'Grafito' },
+          { hex: '#3C45A5', name: 'Índigo' },
+          { hex: '#065F46', name: 'Esmeralda oscuro' },
+          { hex: '#10B981', name: 'Verde señal' },
+          { hex: '#D70015', name: 'Rojo alerta' },
+          { hex: '#D97706', name: 'Ámbar' },
+          { hex: '#0284C7', name: 'Azul cian' },
+          { hex: '#7C3AED', name: 'Violeta' },
+          { hex: '#6E6E73', name: 'Pizarra' },
+          { hex: '#FFFFFF', name: 'Blanco' }
+        ];
         this.init();
       }
 
       async init() {
         this.loadLocal();
         this.installActionLocker();
+        this.installSelectionPaletteHandlers();
         this.scanEligibleElements();
+        this.scanIcons();
         this.applySavedTexts();
         this.installDynamicObserver();
 
@@ -12196,10 +12372,16 @@
           if (res.ok) {
             const data = await res.json();
             if (data && typeof data === 'object') {
-              const serverByKey = data.by_key || (!data.aliases ? data : {});
+              const serverByKey = data.by_key || (!data.aliases && !data.html_by_key ? data : {});
               const serverAliases = data.aliases || {};
+              const serverHtml = data.html_by_key || {};
+              const serverColor = data.color_by_key || {};
+              const serverIcon = data.icon_by_key || {};
               this.byKey = { ...this.byKey, ...serverByKey };
               this.aliases = { ...this.aliases, ...serverAliases };
+              this.htmlByKey = { ...this.htmlByKey, ...serverHtml };
+              this.colorByKey = { ...this.colorByKey, ...serverColor };
+              this.iconByKey = { ...this.iconByKey, ...serverIcon };
               this.saveLocal();
               this.applySavedTexts();
             }
@@ -12214,12 +12396,21 @@
         this._lockerInstalled = true;
 
         // En Modo Edición Global: bloquear acciones de botones/enlaces para editar su texto
-        // sin disparar navegación ni salir del modo edición.
+        // o abrir selectores de icono/color sin disparar navegación ni salir del modo edición.
         document.addEventListener('click', (e) => {
           if (!window.algrokEditMode) return;
-          if (e.target.closest('#btn-ui-customizer, #btn-ui-reset-all, .sidebar-btn-eye, .sidebar-tab-icon, .sidebar-icon-popover, .sidebar-icon-choice')) {
+          if (e.target.closest('#btn-ui-customizer, #btn-ui-reset-all, .sidebar-btn-eye, .sidebar-tab-icon, .sidebar-icon-popover, .sidebar-icon-choice, .algrok-color-palette-popover, .algrok-color-swatch, .algrok-color-native')) {
             return;
           }
+
+          const iconEl = e.target.closest('.algrok-icon-editable');
+          if (iconEl) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.openDashboardIconPopover(iconEl);
+            return;
+          }
+
           const interactive = e.target.closest('button, a, [onclick], .cursor-pointer');
           if (interactive) {
             e.stopPropagation();
@@ -12230,7 +12421,8 @@
             const editable = e.target.closest('.algrok-editable-text[contenteditable="true"]')
               || interactive.querySelector('.algrok-editable-text[contenteditable="true"]');
             if (editable && document.activeElement !== editable) {
-              editable.focus();
+              const sel = window.getSelection();
+              if (!sel || sel.isCollapsed) editable.focus();
             }
           }
         }, true);
@@ -12242,10 +12434,18 @@
         let timer = null;
         const obs = new MutationObserver(() => {
           if (this.isApplying) return;
-          if (Object.keys(this.byKey).length === 0 && Object.keys(this.aliases).length === 0 && !this.isEditMode) return;
+          const hasSaved = (
+            Object.keys(this.byKey).length > 0 ||
+            Object.keys(this.aliases).length > 0 ||
+            Object.keys(this.htmlByKey).length > 0 ||
+            Object.keys(this.colorByKey).length > 0 ||
+            Object.keys(this.iconByKey).length > 0
+          );
+          if (!hasSaved && !this.isEditMode) return;
           clearTimeout(timer);
           timer = setTimeout(() => {
             this.scanEligibleElements();
+            this.scanIcons();
             this.applySavedTexts();
             if (this.isEditMode) this.setEditMode(true);
           }, 180);
@@ -12259,12 +12459,18 @@
           if (raw) {
             const parsed = JSON.parse(raw);
             if (parsed && typeof parsed === 'object') {
-              if (parsed.by_key || parsed.aliases) {
+              if (parsed.by_key || parsed.aliases || parsed.html_by_key || parsed.color_by_key || parsed.icon_by_key) {
                 this.byKey = parsed.by_key || {};
                 this.aliases = parsed.aliases || {};
+                this.htmlByKey = parsed.html_by_key || {};
+                this.colorByKey = parsed.color_by_key || {};
+                this.iconByKey = parsed.icon_by_key || {};
               } else {
                 this.byKey = parsed;
                 this.aliases = {};
+                this.htmlByKey = {};
+                this.colorByKey = {};
+                this.iconByKey = {};
               }
             }
           }
@@ -12273,7 +12479,13 @@
 
       saveLocal() {
         try {
-          localStorage.setItem(this.storageKey, JSON.stringify({ by_key: this.byKey, aliases: this.aliases }));
+          localStorage.setItem(this.storageKey, JSON.stringify({
+            by_key: this.byKey,
+            aliases: this.aliases,
+            html_by_key: this.htmlByKey,
+            color_by_key: this.colorByKey,
+            icon_by_key: this.iconByKey
+          }));
         } catch (e) {}
       }
 
@@ -12296,11 +12508,12 @@
               btn.closest('#sidebar-nav') ||
               btn.closest('#notifications-dropdown') ||
               btn.closest('#ui-customizer-wrapper') ||
+              btn.closest('.algrok-color-palette-popover') ||
+              btn.closest('.sidebar-icon-popover') ||
               btn.classList.contains('sidebar-icon-choice') ||
               btn.classList.contains('notif-filter-btn')
             ) return;
 
-            // Si ya tiene spans hijos con texto, no envolver nodos sueltos
             const hasLabelSpan = Array.from(btn.querySelectorAll('span')).some(s => (s.textContent || '').trim().length >= 2);
             if (hasLabelSpan) return;
 
@@ -12337,11 +12550,12 @@
           const candidates = scope.querySelectorAll('h1, h2, h3, h4, p, span, label, div.overline-text');
           candidates.forEach(el => {
             if (el.dataset.textKey) {
+              el.classList.add('algrok-editable-text');
               this.bindElementEvents(el);
               found.push(el);
               return;
             }
-            if (el.closest('select, option, input, textarea, tbody, canvas, svg, .apexcharts-canvas, .tv-lightweight-charts, #notifications-dropdown, #ui-customizer-wrapper, #sidebar-nav, [id^="chart-"]')) {
+            if (el.closest('select, option, input, textarea, tbody, canvas, svg, .apexcharts-canvas, .tv-lightweight-charts, #notifications-dropdown, #ui-customizer-wrapper, #sidebar-nav, [id^="chart-"], .algrok-color-palette-popover, .sidebar-icon-popover')) {
               return;
             }
             if (el.closest('button') && el.closest('button').id && /^(btn-ui-|btn-notifications-bell)/.test(el.closest('button').id)) {
@@ -12349,7 +12563,11 @@
             }
             if (this.isDynamicMetricElement(el)) return;
 
-            const badChildren = Array.from(el.children).some(ch => ch.tagName !== 'I');
+            const badChildren = Array.from(el.children).some(ch => {
+              if (ch.tagName === 'I') return false;
+              if (ch.tagName === 'SPAN' && ch.style && ch.style.color && !ch.className && !ch.id) return false;
+              return true;
+            });
             if (badChildren) return;
 
             const txt = (el.textContent || '').trim();
@@ -12371,13 +12589,468 @@
         this.elements = found;
       }
 
+      extractIconBaseClass(iconEl) {
+        const classes = Array.from(iconEl.classList);
+        const faName = classes.find(c => /^fa-[a-z0-9-]+$/i.test(c) && !['fa-solid', 'fa-regular', 'fa-brands', 'fa-spin', 'fa-pulse', 'fa-beat', 'fa-bounce', 'fa-fade', 'fa-fw', 'fa-lg', 'fa-sm', 'fa-xs'].includes(c));
+        if (!faName) return null;
+        const stylePrefix = classes.find(c => c === 'fa-solid' || c === 'fa-regular' || c === 'fa-brands') || 'fa-solid';
+        return `${stylePrefix} ${faName}`;
+      }
+
+      applyIconClass(iconEl, fullIconClass) {
+        if (!iconEl || !fullIconClass) return;
+        const parts = String(fullIconClass).trim().split(/\s+/).filter(Boolean);
+        const newStyle = parts.find(c => c === 'fa-solid' || c === 'fa-regular' || c === 'fa-brands') || 'fa-solid';
+        const newName = parts.find(c => /^fa-[a-z0-9-]+$/i.test(c) && !['fa-solid', 'fa-regular', 'fa-brands'].includes(c));
+        if (!newName) return;
+
+        Array.from(iconEl.classList).forEach(c => {
+          if (c === 'fa-solid' || c === 'fa-regular' || c === 'fa-brands' || (/^fa-[a-z0-9-]+$/i.test(c) && !['fa-spin', 'fa-pulse', 'fa-beat', 'fa-bounce', 'fa-fade', 'fa-fw', 'fa-lg', 'fa-sm', 'fa-xs'].includes(c))) {
+            iconEl.classList.remove(c);
+          }
+        });
+        iconEl.classList.add(newStyle, newName);
+      }
+
+      scanIcons() {
+        const asideInner = document.querySelector('aside > div');
+        const mainHeader = document.querySelector('main > header');
+        const tabsWrapper = document.getElementById('tabs-wrapper');
+        const roots = [asideInner, mainHeader, tabsWrapper].filter(Boolean);
+
+        const foundIcons = [];
+        let seq = 0;
+
+        roots.forEach(scope => {
+          const icons = scope.querySelectorAll('i[class*="fa-"]');
+          icons.forEach(iconEl => {
+            if (iconEl.dataset.iconKey) {
+              iconEl.classList.add('algrok-icon-editable');
+              foundIcons.push(iconEl);
+              return;
+            }
+            if (iconEl.closest('#sidebar-nav, #ui-customizer-wrapper, #notifications-dropdown, .sidebar-icon-popover, .algrok-color-palette-popover, #btn-ui-customizer, #btn-ui-reset-all, #btn-notifications-bell, .apexcharts-canvas, svg, canvas')) {
+              return;
+            }
+            if (iconEl.classList.contains('fa-spin') || iconEl.classList.contains('fa-pulse') || iconEl.classList.contains('animate-pulse') || iconEl.classList.contains('animate-ping')) {
+              return;
+            }
+            // Ignorar micro-puntos indicadores tipo text-[5px]..text-[8px] fa-circle
+            if (iconEl.classList.contains('fa-circle') && /\btext-\[[4-8]px\]/.test(iconEl.className)) {
+              return;
+            }
+
+            const baseIcon = this.extractIconBaseClass(iconEl);
+            if (!baseIcon) return;
+
+            const pane = iconEl.closest('.tab-pane');
+            const scopeId = pane ? pane.id.replace('tab-content-', '') : (iconEl.closest('aside') ? 'aside' : 'header');
+            const hostWithId = iconEl.closest('[id]:not(.tab-pane)');
+            const key = iconEl.id
+              ? `ico:id:${iconEl.id}`
+              : (hostWithId && hostWithId.id
+                ? `ico:${scopeId}:${hostWithId.id}:${baseIcon.split(' ').pop()}:${seq++}`
+                : `ico:${scopeId}:${baseIcon.split(' ').pop()}:${seq++}`);
+
+            iconEl.dataset.iconKey = key;
+            iconEl.dataset.defaultIcon = baseIcon;
+            iconEl.classList.add('algrok-icon-editable');
+            foundIcons.push(iconEl);
+          });
+        });
+
+        this.iconElements = foundIcons;
+      }
+
+      closeDashboardIconPopover() {
+        if (this.iconPopoverEl) {
+          this.iconPopoverEl.remove();
+          this.iconPopoverEl = null;
+        }
+      }
+
+      openDashboardIconPopover(iconEl) {
+        this.closeDashboardIconPopover();
+        this.hideColorPalette();
+        if (window.AlgrokSidebar && typeof window.AlgrokSidebar.closeIconPopover === 'function') {
+          window.AlgrokSidebar.closeIconPopover();
+        }
+
+        const key = iconEl.dataset.iconKey;
+        if (!key) return;
+        const curIcon = this.iconByKey[key] || this.extractIconBaseClass(iconEl) || iconEl.dataset.defaultIcon || 'fa-solid fa-star';
+        const defIcon = iconEl.dataset.defaultIcon || curIcon;
+        const semantic = window.AlgrokIconSemantics
+          ? window.AlgrokIconSemantics.getSemanticSet(defIcon)
+          : { id: 'general', label: 'Relacionados', icons: [defIcon] };
+
+        const choiceSet = Array.from(new Set([...semantic.icons, defIcon, curIcon].filter(Boolean)));
+
+        const pop = document.createElement('div');
+        pop.className = 'sidebar-icon-popover';
+
+        const header = document.createElement('div');
+        header.className = 'sidebar-icon-popover-header';
+        header.textContent = semantic.label;
+        pop.appendChild(header);
+
+        choiceSet.forEach(iconClass => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'sidebar-icon-choice' + (curIcon === iconClass ? ' active-icon' : '');
+          b.title = iconClass === defIcon ? `${iconClass} (original)` : iconClass;
+          b.innerHTML = `<i class="${iconClass}"></i>`;
+          b.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          });
+          b.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.applyIconClass(iconEl, iconClass);
+            if (iconClass === defIcon) {
+              delete this.iconByKey[key];
+            } else {
+              this.iconByKey[key] = iconClass;
+            }
+            this.saveLocal();
+            this.closeDashboardIconPopover();
+            fetch('/api/text_preferences', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ iconKey: key, icon: iconClass === defIcon ? '' : iconClass })
+            }).catch(err => console.warn('Error saving dashboard icon:', err));
+          });
+          pop.appendChild(b);
+        });
+
+        document.body.appendChild(pop);
+        const rect = iconEl.getBoundingClientRect();
+        const topPos = Math.min(window.innerHeight - 180, Math.max(8, rect.bottom + 6));
+        const leftPos = Math.min(window.innerWidth - 190, Math.max(8, rect.left));
+        pop.style.top = `${topPos}px`;
+        pop.style.left = `${leftPos}px`;
+        this.iconPopoverEl = pop;
+      }
+
+      sanitizeColorHtml(rawHtml) {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = String(rawHtml || '');
+
+        const walk = (node) => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            return document.createTextNode(node.textContent || '');
+          }
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            const tag = node.tagName.toUpperCase();
+            if (tag === 'BR') return document.createTextNode(' ');
+            const frag = document.createDocumentFragment();
+            let colorVal = '';
+            if (tag === 'FONT' && node.getAttribute('color')) {
+              colorVal = node.getAttribute('color').trim();
+            } else if (tag === 'SPAN' && node.style && node.style.color) {
+              colorVal = node.style.color.trim();
+            }
+            const validColor = /^(#[0-9a-f]{3,8}|rgba?\([\d\s.,%]+\)|[a-z]{3,20})$/i.test(colorVal);
+            if (validColor) {
+              const span = document.createElement('span');
+              span.style.color = colorVal;
+              Array.from(node.childNodes).forEach(ch => span.appendChild(walk(ch)));
+              return span;
+            }
+            Array.from(node.childNodes).forEach(ch => frag.appendChild(walk(ch)));
+            return frag;
+          }
+          return document.createDocumentFragment();
+        };
+
+        const out = document.createElement('div');
+        Array.from(tmp.childNodes).forEach(ch => out.appendChild(walk(ch)));
+        return out.innerHTML;
+      }
+
+      getSelectionColorContext() {
+        const sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return null;
+        if (!sel.toString().trim()) return null;
+
+        const range = sel.getRangeAt(0);
+        const anchorEl = sel.anchorNode && (sel.anchorNode.nodeType === Node.ELEMENT_NODE ? sel.anchorNode : sel.anchorNode.parentElement);
+        const focusEl = sel.focusNode && (sel.focusNode.nodeType === Node.ELEMENT_NODE ? sel.focusNode : sel.focusNode.parentElement);
+        if (!anchorEl || !focusEl) return null;
+
+        const editableAnchor = anchorEl.closest('.algrok-editable-text[contenteditable="true"]');
+        const editableFocus = focusEl.closest('.algrok-editable-text[contenteditable="true"]');
+        if (!editableAnchor || editableAnchor !== editableFocus) return null;
+
+        const rect = range.getBoundingClientRect();
+        if (!rect || (rect.width === 0 && rect.height === 0)) return null;
+
+        return {
+          el: editableAnchor,
+          key: editableAnchor.dataset.textKey,
+          range: range.cloneRange(),
+          rect
+        };
+      }
+
+      installSelectionPaletteHandlers() {
+        if (this._selectionPaletteInstalled) return;
+        this._selectionPaletteInstalled = true;
+
+        const scheduleCheck = () => {
+          if (!this.isEditMode) return;
+          clearTimeout(this.selectionCheckTimer);
+          this.selectionCheckTimer = setTimeout(() => {
+            const activeInPalette = document.activeElement && document.activeElement.closest('.algrok-color-palette-popover');
+            const ctx = this.getSelectionColorContext();
+            if (ctx) {
+              this.showColorPaletteForSelection(ctx);
+            } else if (!activeInPalette) {
+              this.hideColorPalette();
+            }
+          }, 30);
+        };
+
+        document.addEventListener('mouseup', (e) => {
+          if (!this.isEditMode) return;
+          if (e.target.closest('.algrok-color-palette-popover')) return;
+          scheduleCheck();
+        });
+        document.addEventListener('keyup', (e) => {
+          if (!this.isEditMode) return;
+          if (e.shiftKey || e.key === 'a' || e.key === 'A' || e.key.startsWith('Arrow')) {
+            scheduleCheck();
+          }
+        });
+        document.addEventListener('selectionchange', () => {
+          if (!this.isEditMode) return;
+          scheduleCheck();
+        });
+        document.addEventListener('pointerdown', (e) => {
+          if (this.iconPopoverEl && !e.target.closest('.sidebar-icon-popover, .algrok-icon-editable')) {
+            this.closeDashboardIconPopover();
+          }
+          if (this.colorPopoverEl && !e.target.closest('.algrok-color-palette-popover')) {
+            const isInsideEditable = e.target.closest('.algrok-editable-text[contenteditable="true"]');
+            if (!isInsideEditable) {
+              this.hideColorPalette();
+            }
+          }
+        }, true);
+        window.addEventListener('scroll', () => {
+          if (this.colorPopoverEl) this.hideColorPalette();
+          if (this.iconPopoverEl) this.closeDashboardIconPopover();
+        }, true);
+      }
+
+      hideColorPalette() {
+        if (this.colorPopoverEl) {
+          this.colorPopoverEl.remove();
+          this.colorPopoverEl = null;
+        }
+        this.activeSelectionCtx = null;
+      }
+
+      showColorPaletteForSelection(ctx) {
+        this.closeDashboardIconPopover();
+        this.activeSelectionCtx = ctx;
+
+        if (!this.colorPopoverEl) {
+          const pop = document.createElement('div');
+          pop.className = 'algrok-color-palette-popover';
+          pop.addEventListener('pointerdown', (e) => {
+            if (!e.target.classList.contains('algrok-color-native')) {
+              e.preventDefault();
+            }
+            e.stopPropagation();
+          });
+          pop.addEventListener('mousedown', (e) => {
+            if (!e.target.classList.contains('algrok-color-native')) {
+              e.preventDefault();
+            }
+            e.stopPropagation();
+          });
+
+          this.paletteColors.forEach(c => {
+            const sw = document.createElement('button');
+            sw.type = 'button';
+            sw.className = 'algrok-color-swatch';
+            sw.style.backgroundColor = c.hex;
+            sw.title = `Color ${c.name}`;
+            sw.addEventListener('click', (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              this.applyColorToSelection(c.hex);
+            });
+            pop.appendChild(sw);
+          });
+
+          const nativeInput = document.createElement('input');
+          nativeInput.type = 'color';
+          nativeInput.className = 'algrok-color-native';
+          nativeInput.value = '#3C45A5';
+          nativeInput.title = 'Elegir color personalizado';
+          nativeInput.addEventListener('input', (e) => {
+            this.applyColorToSelection(e.target.value, true);
+          });
+          nativeInput.addEventListener('change', (e) => {
+            this.applyColorToSelection(e.target.value, false);
+          });
+          pop.appendChild(nativeInput);
+
+          const resetBtn = document.createElement('button');
+          resetBtn.type = 'button';
+          resetBtn.className = 'algrok-color-swatch flex items-center justify-center bg-[#F4F5F7] text-[#6E6E73] text-[10px]';
+          resetBtn.title = 'Quitar color de la selección';
+          resetBtn.innerHTML = '<i class="fa-solid fa-eraser"></i>';
+          resetBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.applyColorToSelection(null);
+          });
+          pop.appendChild(resetBtn);
+
+          document.body.appendChild(pop);
+          this.colorPopoverEl = pop;
+        }
+
+        const pop = this.colorPopoverEl;
+        const popRect = pop.getBoundingClientRect();
+        const width = popRect.width || 240;
+        const height = popRect.height || 34;
+
+        let top = ctx.rect.top - height - 10;
+        if (top < 8) {
+          top = Math.min(window.innerHeight - height - 8, ctx.rect.bottom + 8);
+        }
+        const centerX = ctx.rect.left + (ctx.rect.width / 2);
+        const left = Math.min(window.innerWidth - width - 10, Math.max(10, centerX - (width / 2)));
+
+        pop.style.top = `${Math.round(top)}px`;
+        pop.style.left = `${Math.round(left)}px`;
+      }
+
+      applyColorToSelection(hexColor, skipServerSave = false) {
+        const ctx = this.activeSelectionCtx;
+        if (!ctx || !ctx.el) return;
+
+        const el = ctx.el;
+        const key = ctx.key;
+        const selectedStr = (ctx.range ? ctx.range.toString() : '').trim();
+        const totalStr = (el.textContent || '').trim();
+        const isWholeElement = Boolean(selectedStr && totalStr && selectedStr.length >= totalStr.length);
+
+        this.isApplying = true;
+        try {
+          // Restaurar selección antes de aplicar formato
+          if (ctx.range) {
+            if (document.activeElement !== el) el.focus({ preventScroll: true });
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(ctx.range.cloneRange());
+          }
+
+          if (hexColor === null) {
+            // Quitar color del rango o elemento completo
+            if (isWholeElement) {
+              el.style.color = '';
+              el.textContent = totalStr;
+              if (key) {
+                delete this.colorByKey[key];
+                delete this.htmlByKey[key];
+              }
+            } else if (ctx.range) {
+              const sel = window.getSelection();
+              const frag = ctx.range.extractContents();
+              const cleanFrag = document.createDocumentFragment();
+              const unwrap = (node) => {
+                if (node.nodeType === Node.TEXT_NODE) {
+                  cleanFrag.appendChild(node.cloneNode(true));
+                } else if (node.nodeType === Node.ELEMENT_NODE) {
+                  if (node.tagName === 'SPAN' || node.tagName === 'FONT') {
+                    Array.from(node.childNodes).forEach(unwrap);
+                  } else {
+                    const cloned = node.cloneNode(false);
+                    if (cloned.style) cloned.style.color = '';
+                    Array.from(node.childNodes).forEach(ch => cloned.appendChild(ch.cloneNode(true)));
+                    cleanFrag.appendChild(cloned);
+                  }
+                }
+              };
+              Array.from(frag.childNodes).forEach(unwrap);
+              ctx.range.insertNode(cleanFrag);
+              el.normalize();
+              if (sel) sel.removeAllRanges();
+            }
+          } else {
+            // Verificar si el elemento tiene hijos <i> que no deban mezclarse en innerHTML
+            const hasIconChild = Array.from(el.children).some(ch => ch.tagName === 'I');
+            if (hasIconChild && isWholeElement) {
+              el.style.color = hexColor;
+              if (key) this.colorByKey[key] = hexColor;
+            } else {
+              try {
+                document.execCommand('styleWithCSS', false, true);
+                document.execCommand('foreColor', false, hexColor);
+              } catch (e) {
+                if (isWholeElement) {
+                  el.style.color = hexColor;
+                }
+              }
+              // Normalizar <font> o spans generados y mantener ctx.range actualizado
+              const sanitized = this.sanitizeColorHtml(el.innerHTML);
+              if (sanitized !== el.innerHTML && !hasIconChild) {
+                el.innerHTML = sanitized;
+              }
+            }
+          }
+
+          if (key) {
+            const hasIconChild = Array.from(el.children).some(ch => ch.tagName === 'I');
+            if (!hasIconChild) {
+              const sanitized = this.sanitizeColorHtml(el.innerHTML);
+              if (/<span\s+style="[^"]*color:/i.test(sanitized)) {
+                this.htmlByKey[key] = sanitized;
+              } else {
+                delete this.htmlByKey[key];
+              }
+            }
+            this.saveLocal();
+            if (!skipServerSave) {
+              const payload = {
+                key,
+                text: (el.textContent || '').trim(),
+                html: this.htmlByKey[key] || '',
+                color: this.colorByKey[key] || ''
+              };
+              fetch('/api/text_preferences', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+              }).catch(err => console.warn('Error saving text color:', err));
+            }
+          }
+        } finally {
+          setTimeout(() => { this.isApplying = false; }, 0);
+        }
+
+        if (!skipServerSave && hexColor !== null) {
+          // Mantener paleta visible tras elegir swatch? Cerrar suavemente si se quitó color
+        } else if (hexColor === null) {
+          this.hideColorPalette();
+        }
+      }
+
       bindElementEvents(el) {
         if (el._algrokTextBound) return;
         el._algrokTextBound = true;
 
         let preFocusText = '';
+        let preFocusHtml = '';
         el.addEventListener('focus', () => {
           preFocusText = el.textContent.trim();
+          preFocusHtml = el.innerHTML;
         });
         el.addEventListener('pointerdown', (e) => {
           if (this.isEditMode) {
@@ -12389,9 +13062,11 @@
           e.stopPropagation();
           if (e.key === 'Enter') {
             e.preventDefault();
+            this.hideColorPalette();
             el.blur();
           } else if (e.key === 'Escape') {
-            el.textContent = preFocusText || el.dataset.defaultText || '';
+            el.innerHTML = preFocusHtml;
+            this.hideColorPalette();
             el.blur();
           }
         });
@@ -12407,11 +13082,27 @@
           const key = el.dataset.textKey;
           if (!key) return;
           if (!clean) {
-            el.textContent = preFocusText || el.dataset.defaultText || '';
+            el.innerHTML = preFocusHtml;
             return;
+          }
+          const hasIconChild = Array.from(el.children).some(ch => ch.tagName === 'I');
+          if (!hasIconChild) {
+            const sanitized = this.sanitizeColorHtml(el.innerHTML);
+            if (/<span\s+style="[^"]*color:/i.test(sanitized)) {
+              this.htmlByKey[key] = sanitized;
+            } else {
+              delete this.htmlByKey[key];
+            }
           }
           if (clean !== preFocusText) {
             this.saveAliasPropagation(key, preFocusText, clean);
+          } else if (el.innerHTML !== preFocusHtml) {
+            this.saveLocal();
+            fetch('/api/text_preferences', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ key, text: clean, html: this.htmlByKey[key] || '' })
+            }).catch(err => console.warn('Error syncing formatted html:', err));
           }
         });
       }
@@ -12434,7 +13125,13 @@
         fetch('/api/text_preferences', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ key, text: cleanNew, oldText: cleanOld, propagate: true })
+          body: JSON.stringify({
+            key,
+            text: cleanNew,
+            oldText: cleanOld,
+            propagate: true,
+            html: this.htmlByKey[key] || ''
+          })
         }).catch(err => console.warn('Error saving custom text:', err));
       }
 
@@ -12442,6 +13139,11 @@
         if (el.children.length === 0) {
           if (el.textContent.trim() !== val) el.textContent = val;
         } else {
+          const hasOnlyColorSpans = Array.from(el.children).every(ch => ch.tagName === 'SPAN' && ch.style && ch.style.color);
+          if (hasOnlyColorSpans) {
+            if (el.textContent.trim() !== val) el.textContent = val;
+            return;
+          }
           const textNodes = Array.from(el.childNodes).filter(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim().length > 0);
           if (textNodes.length > 0 && textNodes[0].textContent.trim() !== val) {
             textNodes[0].textContent = ' ' + val;
@@ -12452,12 +13154,27 @@
       applySavedTexts() {
         this.isApplying = true;
         try {
+          this.iconElements.forEach(iconEl => {
+            const ikey = iconEl.dataset.iconKey;
+            if (ikey && Object.prototype.hasOwnProperty.call(this.iconByKey, ikey) && this.iconByKey[ikey]) {
+              this.applyIconClass(iconEl, this.iconByKey[ikey]);
+            }
+          });
+
           this.elements.forEach(el => {
             if (document.activeElement === el) return;
             const key = el.dataset.textKey;
             const cur = (el.textContent || '').trim();
+            const hasIconChild = Array.from(el.children).some(ch => ch.tagName === 'I');
 
-            if (key && Object.prototype.hasOwnProperty.call(this.byKey, key)) {
+            if (key && Object.prototype.hasOwnProperty.call(this.colorByKey, key) && this.colorByKey[key]) {
+              el.style.color = this.colorByKey[key];
+            }
+
+            if (key && Object.prototype.hasOwnProperty.call(this.htmlByKey, key) && this.htmlByKey[key] && !hasIconChild) {
+              const safeHtml = this.sanitizeColorHtml(this.htmlByKey[key]);
+              if (el.innerHTML !== safeHtml) el.innerHTML = safeHtml;
+            } else if (key && Object.prototype.hasOwnProperty.call(this.byKey, key)) {
               this.setNodeText(el, this.byKey[key]);
             } else if (cur && Object.prototype.hasOwnProperty.call(this.aliases, cur)) {
               this.setNodeText(el, this.aliases[cur]);
@@ -12472,7 +13189,13 @@
 
       setEditMode(enabled) {
         this.isEditMode = Boolean(enabled);
-        if (this.isEditMode) this.scanEligibleElements();
+        if (this.isEditMode) {
+          this.scanEligibleElements();
+          this.scanIcons();
+        } else {
+          this.hideColorPalette();
+          this.closeDashboardIconPopover();
+        }
 
         this.elements.forEach(el => {
           if (this.isEditMode) {
@@ -12489,6 +13212,11 @@
       resetAll() {
         this.byKey = {};
         this.aliases = {};
+        this.htmlByKey = {};
+        this.colorByKey = {};
+        this.iconByKey = {};
+        this.hideColorPalette();
+        this.closeDashboardIconPopover();
         try {
           localStorage.removeItem(this.storageKey);
         } catch (e) {}
@@ -12497,9 +13225,21 @@
 
         this.isApplying = true;
         try {
+          this.iconElements.forEach(iconEl => {
+            const defIcon = iconEl.dataset.defaultIcon;
+            if (defIcon) this.applyIconClass(iconEl, defIcon);
+          });
           this.elements.forEach(el => {
+            el.style.color = '';
             const def = el.dataset.defaultText;
-            if (def !== undefined) this.setNodeText(el, def);
+            if (def !== undefined) {
+              const hasIconChild = Array.from(el.children).some(ch => ch.tagName === 'I');
+              if (hasIconChild) {
+                this.setNodeText(el, def);
+              } else {
+                el.textContent = def;
+              }
+            }
           });
         } finally {
           setTimeout(() => { this.isApplying = false; }, 0);

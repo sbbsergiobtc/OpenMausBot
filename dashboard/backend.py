@@ -3953,10 +3953,14 @@ TEXT_PREFS_FILE = BASE_DIR / 'data/text_preferences.json'
 
 
 class TextPreferencePayload(BaseModel):
-    key: str
-    text: str
+    key: Optional[str] = None
+    text: Optional[str] = None
     oldText: Optional[str] = None
     propagate: bool = True
+    html: Optional[str] = None
+    color: Optional[str] = None
+    iconKey: Optional[str] = None
+    icon: Optional[str] = None
 
 
 class TableColumnPreferencePayload(BaseModel):
@@ -4100,13 +4104,16 @@ _PROTECTED_JSON_KEYS = {
 
 def _normalize_text_prefs(raw: dict) -> dict:
     if not isinstance(raw, dict):
-        return {"by_key": {}, "aliases": {}}
-    if "by_key" in raw or "aliases" in raw:
+        return {"by_key": {}, "aliases": {}, "html_by_key": {}, "color_by_key": {}, "icon_by_key": {}}
+    if any(k in raw for k in ("by_key", "aliases", "html_by_key", "color_by_key", "icon_by_key")):
         return {
             "by_key": dict(raw.get("by_key") or {}),
             "aliases": dict(raw.get("aliases") or {}),
+            "html_by_key": dict(raw.get("html_by_key") or {}),
+            "color_by_key": dict(raw.get("color_by_key") or {}),
+            "icon_by_key": dict(raw.get("icon_by_key") or {}),
         }
-    return {"by_key": dict(raw), "aliases": {}}
+    return {"by_key": dict(raw), "aliases": {}, "html_by_key": {}, "color_by_key": {}, "icon_by_key": {}}
 
 
 def _get_text_prefs_cached() -> dict:
@@ -4182,22 +4189,48 @@ def save_text_preference(payload: TextPreferencePayload):
     prefs = _get_text_prefs_cached()
     by_key = dict(prefs.get("by_key") or {})
     aliases = dict(prefs.get("aliases") or {})
+    html_by_key = dict(prefs.get("html_by_key") or {})
+    color_by_key = dict(prefs.get("color_by_key") or {})
+    icon_by_key = dict(prefs.get("icon_by_key") or {})
 
-    by_key[payload.key] = payload.text
-    if payload.propagate and payload.oldText:
-        old_clean = payload.oldText.strip()
-        new_clean = payload.text.strip()
-        if len(old_clean) >= 2 and old_clean != new_clean and not old_clean.isupper():
-            # Actualizar cadenas encadenadas de alias existentes -> new_clean
-            for src, dst in list(aliases.items()):
-                if dst == old_clean:
-                    aliases[src] = new_clean
-            aliases[old_clean] = new_clean
+    if payload.key:
+        if payload.text is not None:
+            by_key[payload.key] = payload.text
+            if payload.propagate and payload.oldText:
+                old_clean = payload.oldText.strip()
+                new_clean = payload.text.strip()
+                if len(old_clean) >= 2 and old_clean != new_clean and not old_clean.isupper():
+                    for src, dst in list(aliases.items()):
+                        if dst == old_clean:
+                            aliases[src] = new_clean
+                    aliases[old_clean] = new_clean
+        if payload.html is not None:
+            if payload.html:
+                html_by_key[payload.key] = payload.html
+            else:
+                html_by_key.pop(payload.key, None)
+        if payload.color is not None:
+            if payload.color:
+                color_by_key[payload.key] = payload.color
+            else:
+                color_by_key.pop(payload.key, None)
 
-    updated = {"by_key": by_key, "aliases": aliases}
+    if payload.iconKey and payload.icon is not None:
+        if payload.icon:
+            icon_by_key[payload.iconKey] = payload.icon
+        else:
+            icon_by_key.pop(payload.iconKey, None)
+
+    updated = {
+        "by_key": by_key,
+        "aliases": aliases,
+        "html_by_key": html_by_key,
+        "color_by_key": color_by_key,
+        "icon_by_key": icon_by_key,
+    }
     try:
         _save_text_prefs_cached(updated)
-        return {"status": "ok", "key": payload.key, "text": payload.text, "aliases_count": len(aliases)}
+        return {"status": "ok", "key": payload.key, "iconKey": payload.iconKey, "aliases_count": len(aliases)}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -4207,11 +4240,23 @@ def delete_text_preferences(key: str = Query(None)):
     prefs = _get_text_prefs_cached()
     if key:
         by_key = dict(prefs.get("by_key") or {})
+        html_by_key = dict(prefs.get("html_by_key") or {})
+        color_by_key = dict(prefs.get("color_by_key") or {})
+        icon_by_key = dict(prefs.get("icon_by_key") or {})
         by_key.pop(key, None)
-        updated = {"by_key": by_key, "aliases": dict(prefs.get("aliases") or {})}
+        html_by_key.pop(key, None)
+        color_by_key.pop(key, None)
+        icon_by_key.pop(key, None)
+        updated = {
+            "by_key": by_key,
+            "aliases": dict(prefs.get("aliases") or {}),
+            "html_by_key": html_by_key,
+            "color_by_key": color_by_key,
+            "icon_by_key": icon_by_key,
+        }
         _save_text_prefs_cached(updated)
         return {"status": "ok", "deleted": key}
-    updated = {"by_key": {}, "aliases": {}}
+    updated = {"by_key": {}, "aliases": {}, "html_by_key": {}, "color_by_key": {}, "icon_by_key": {}}
     try:
         _save_text_prefs_cached(updated)
         return {"status": "ok", "cleared": True}
