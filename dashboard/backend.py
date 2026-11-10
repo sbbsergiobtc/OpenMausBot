@@ -3961,6 +3961,16 @@ class TextPreferencePayload(BaseModel):
     color: Optional[str] = None
     iconKey: Optional[str] = None
     icon: Optional[str] = None
+    iconColorKey: Optional[str] = None
+    iconColor: Optional[str] = None
+    btnKey: Optional[str] = None
+    btnStyle: Optional[Dict[str, str]] = None
+    typeScope: Optional[str] = None
+    typeColor: Optional[str] = None
+    typeIconColor: Optional[str] = None
+    typeIcon: Optional[str] = None
+    typeBtnStyle: Optional[Dict[str, str]] = None
+    clearTypeKeys: Optional[List[str]] = None
 
 
 class TableColumnPreferencePayload(BaseModel):
@@ -3983,6 +3993,7 @@ class NavTabItemPayload(BaseModel):
     label: str
     icon: str
     hidden: bool = False
+    iconColor: Optional[str] = None
 
 
 class NavPreferencePayload(BaseModel):
@@ -4102,18 +4113,33 @@ _PROTECTED_JSON_KEYS = {
 }
 
 
+_TEXT_PREF_MAP_KEYS = (
+    "by_key",
+    "aliases",
+    "html_by_key",
+    "color_by_key",
+    "color_by_type",
+    "icon_by_key",
+    "icon_by_type",
+    "icon_color_by_key",
+    "icon_color_by_type",
+    "btn_style_by_key",
+    "btn_style_by_type",
+)
+
+
+def _empty_text_prefs() -> dict:
+    return {k: {} for k in _TEXT_PREF_MAP_KEYS}
+
+
 def _normalize_text_prefs(raw: dict) -> dict:
     if not isinstance(raw, dict):
-        return {"by_key": {}, "aliases": {}, "html_by_key": {}, "color_by_key": {}, "icon_by_key": {}}
-    if any(k in raw for k in ("by_key", "aliases", "html_by_key", "color_by_key", "icon_by_key")):
-        return {
-            "by_key": dict(raw.get("by_key") or {}),
-            "aliases": dict(raw.get("aliases") or {}),
-            "html_by_key": dict(raw.get("html_by_key") or {}),
-            "color_by_key": dict(raw.get("color_by_key") or {}),
-            "icon_by_key": dict(raw.get("icon_by_key") or {}),
-        }
-    return {"by_key": dict(raw), "aliases": {}, "html_by_key": {}, "color_by_key": {}, "icon_by_key": {}}
+        return _empty_text_prefs()
+    if any(k in raw for k in _TEXT_PREF_MAP_KEYS):
+        return {k: dict(raw.get(k) or {}) for k in _TEXT_PREF_MAP_KEYS}
+    out = _empty_text_prefs()
+    out["by_key"] = dict(raw)
+    return out
 
 
 def _get_text_prefs_cached() -> dict:
@@ -4184,53 +4210,97 @@ def get_text_preferences():
     return _get_text_prefs_cached()
 
 
+def _set_or_pop(target: dict, key: Optional[str], value: Any):
+    if not key or value is None:
+        return
+    if value:
+        target[key] = value
+    else:
+        target.pop(key, None)
+
+
+def _merge_style_or_pop(target: dict, key: Optional[str], patch: Optional[dict]):
+    if not key or patch is None:
+        return
+    if not isinstance(patch, dict) or patch.get("_reset"):
+        target.pop(key, None)
+        return
+    cur = dict(target.get(key) or {})
+    for prop in ("bg", "border", "color"):
+        if prop in patch:
+            if patch[prop]:
+                cur[prop] = str(patch[prop])
+            else:
+                cur.pop(prop, None)
+    if cur:
+        target[key] = cur
+    else:
+        target.pop(key, None)
+
+
 @app.post("/api/text_preferences")
 def save_text_preference(payload: TextPreferencePayload):
     prefs = _get_text_prefs_cached()
-    by_key = dict(prefs.get("by_key") or {})
-    aliases = dict(prefs.get("aliases") or {})
-    html_by_key = dict(prefs.get("html_by_key") or {})
-    color_by_key = dict(prefs.get("color_by_key") or {})
-    icon_by_key = dict(prefs.get("icon_by_key") or {})
+    updated = {k: dict(prefs.get(k) or {}) for k in _TEXT_PREF_MAP_KEYS}
 
     if payload.key:
         if payload.text is not None:
-            by_key[payload.key] = payload.text
+            updated["by_key"][payload.key] = payload.text
             if payload.propagate and payload.oldText:
                 old_clean = payload.oldText.strip()
                 new_clean = payload.text.strip()
                 if len(old_clean) >= 2 and old_clean != new_clean and not old_clean.isupper():
-                    for src, dst in list(aliases.items()):
+                    for src, dst in list(updated["aliases"].items()):
                         if dst == old_clean:
-                            aliases[src] = new_clean
-                    aliases[old_clean] = new_clean
-        if payload.html is not None:
-            if payload.html:
-                html_by_key[payload.key] = payload.html
-            else:
-                html_by_key.pop(payload.key, None)
-        if payload.color is not None:
-            if payload.color:
-                color_by_key[payload.key] = payload.color
-            else:
-                color_by_key.pop(payload.key, None)
+                            updated["aliases"][src] = new_clean
+                    updated["aliases"][old_clean] = new_clean
+        _set_or_pop(updated["html_by_key"], payload.key, payload.html)
+        _set_or_pop(updated["color_by_key"], payload.key, payload.color)
 
-    if payload.iconKey and payload.icon is not None:
-        if payload.icon:
-            icon_by_key[payload.iconKey] = payload.icon
-        else:
-            icon_by_key.pop(payload.iconKey, None)
+    _set_or_pop(updated["icon_by_key"], payload.iconKey, payload.icon)
+    _set_or_pop(updated["icon_color_by_key"], payload.iconColorKey, payload.iconColor)
+    _merge_style_or_pop(updated["btn_style_by_key"], payload.btnKey, payload.btnStyle)
 
-    updated = {
-        "by_key": by_key,
-        "aliases": aliases,
-        "html_by_key": html_by_key,
-        "color_by_key": color_by_key,
-        "icon_by_key": icon_by_key,
-    }
+    if payload.typeScope:
+        clear_keys = payload.clearTypeKeys or []
+        if payload.typeColor is not None:
+            _set_or_pop(updated["color_by_type"], payload.typeScope, payload.typeColor)
+            for ck in clear_keys:
+                updated["color_by_key"].pop(ck, None)
+                updated["html_by_key"].pop(ck, None)
+        if payload.typeIconColor is not None:
+            _set_or_pop(updated["icon_color_by_type"], payload.typeScope, payload.typeIconColor)
+            for ck in clear_keys:
+                updated["icon_color_by_key"].pop(ck, None)
+        if payload.typeIcon is not None:
+            _set_or_pop(updated["icon_by_type"], payload.typeScope, payload.typeIcon)
+            for ck in clear_keys:
+                updated["icon_by_key"].pop(ck, None)
+        if payload.typeBtnStyle is not None:
+            _merge_style_or_pop(updated["btn_style_by_type"], payload.typeScope, payload.typeBtnStyle)
+            for ck in clear_keys:
+                if payload.typeBtnStyle.get("_reset"):
+                    updated["btn_style_by_key"].pop(ck, None)
+                else:
+                    cur_single = dict(updated["btn_style_by_key"].get(ck) or {})
+                    for p in ("bg", "border", "color"):
+                        if p in payload.typeBtnStyle:
+                            cur_single.pop(p, None)
+                    if cur_single:
+                        updated["btn_style_by_key"][ck] = cur_single
+                    else:
+                        updated["btn_style_by_key"].pop(ck, None)
+
     try:
         _save_text_prefs_cached(updated)
-        return {"status": "ok", "key": payload.key, "iconKey": payload.iconKey, "aliases_count": len(aliases)}
+        return {
+            "status": "ok",
+            "key": payload.key,
+            "iconKey": payload.iconKey,
+            "btnKey": payload.btnKey,
+            "typeScope": payload.typeScope,
+            "aliases_count": len(updated["aliases"]),
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -4239,29 +4309,261 @@ def save_text_preference(payload: TextPreferencePayload):
 def delete_text_preferences(key: str = Query(None)):
     prefs = _get_text_prefs_cached()
     if key:
-        by_key = dict(prefs.get("by_key") or {})
-        html_by_key = dict(prefs.get("html_by_key") or {})
-        color_by_key = dict(prefs.get("color_by_key") or {})
-        icon_by_key = dict(prefs.get("icon_by_key") or {})
-        by_key.pop(key, None)
-        html_by_key.pop(key, None)
-        color_by_key.pop(key, None)
-        icon_by_key.pop(key, None)
-        updated = {
-            "by_key": by_key,
-            "aliases": dict(prefs.get("aliases") or {}),
-            "html_by_key": html_by_key,
-            "color_by_key": color_by_key,
-            "icon_by_key": icon_by_key,
-        }
+        updated = {k: dict(prefs.get(k) or {}) for k in _TEXT_PREF_MAP_KEYS}
+        for map_name in ("by_key", "html_by_key", "color_by_key", "icon_by_key", "icon_color_by_key", "btn_style_by_key"):
+            updated[map_name].pop(key, None)
         _save_text_prefs_cached(updated)
         return {"status": "ok", "deleted": key}
-    updated = {"by_key": {}, "aliases": {}, "html_by_key": {}, "color_by_key": {}, "icon_by_key": {}}
+    updated = _empty_text_prefs()
     try:
         _save_text_prefs_cached(updated)
         return {"status": "ok", "cleared": True}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+_SEMANTIC_ICON_GROUPS = [
+    {
+        "id": "sync_refresh",
+        "label": "Sincronización y Refresco",
+        "keywords": ["rotate", "refresh", "refrescar", "sync", "spin", "reload", "actualizar", "recargar", "loop", "repeat", "stream"],
+        "icons": [
+            "fa-rotate", "fa-arrows-rotate", "fa-rotate-right", "fa-rotate-left",
+            "fa-clock-rotate-left", "fa-sync", "fa-arrows-spin", "fa-spinner",
+            "fa-circle-notch", "fa-recycle", "fa-repeat", "fa-retweet",
+            "fa-bolt", "fa-satellite-dish",
+        ],
+    },
+    {
+        "id": "charts_analytics",
+        "label": "Gráficos y Analítica",
+        "keywords": ["chart", "trend", "wave", "signal", "metric", "backtest", "equity", "curva", "drawdown", "sharpe", "flotante", "profit", "matriz"],
+        "icons": [
+            "fa-chart-line", "fa-chart-simple", "fa-chart-column", "fa-chart-area",
+            "fa-chart-bar", "fa-chart-pie", "fa-chart-gantt", "fa-arrow-trend-up",
+            "fa-arrow-trend-down", "fa-wave-square", "fa-signal", "fa-magnifying-glass-chart",
+        ],
+    },
+    {
+        "id": "cockpit_control",
+        "label": "Panel y Orquestación",
+        "keywords": ["gauge", "cockpit", "slider", "gear", "sitemap", "microchip", "terminal", "regimen", "orquest", "control", "config", "ajustes"],
+        "icons": [
+            "fa-gauge-high", "fa-gauge", "fa-sliders", "fa-compass-drafting",
+            "fa-compass", "fa-microchip", "fa-gears", "fa-gear",
+            "fa-sitemap", "fa-terminal", "fa-toggle-on", "fa-desktop",
+        ],
+    },
+    {
+        "id": "finance_capital",
+        "label": "Capital, PnL y Finanzas",
+        "keywords": ["wallet", "coin", "vault", "dollar", "scale", "pnl", "balance", "capital", "fondeo", "cuenta", "cuentas", "landmark", "gem", "broker", "dinero"],
+        "icons": [
+            "fa-wallet", "fa-coins", "fa-vault", "fa-money-bill-trend-up",
+            "fa-sack-dollar", "fa-building-columns", "fa-landmark", "fa-gem",
+            "fa-dollar-sign", "fa-scale-balanced", "fa-piggy-bank", "fa-hand-holding-dollar",
+            "fa-credit-card", "fa-percent",
+        ],
+    },
+    {
+        "id": "risk_guard",
+        "label": "Riesgo, Pausa y Protección",
+        "keywords": ["shield", "lock", "hand", "ban", "stop", "pause", "pausa", "riesgo", "guard", "kill", "emergencia", "preventiva", "proteccion", "limite"],
+        "icons": [
+            "fa-shield-halved", "fa-shield", "fa-lock", "fa-hand",
+            "fa-ban", "fa-triangle-exclamation", "fa-circle-exclamation", "fa-gavel",
+            "fa-user-shield", "fa-circle-stop", "fa-power-off", "fa-circle-pause",
+            "fa-pause", "fa-life-ring",
+        ],
+    },
+    {
+        "id": "time_live",
+        "label": "Tiempo, Reloj y Señal Live",
+        "keywords": ["clock", "stopwatch", "calendar", "fecha", "hora", "live", "vivo", "latencia", "feed", "tiempo", "stream", "polling"],
+        "icons": [
+            "fa-clock", "fa-clock-rotate-left", "fa-stopwatch", "fa-hourglass-half",
+            "fa-calendar-days", "fa-calendar-check", "fa-calendar", "fa-bolt",
+            "fa-satellite-dish", "fa-tower-broadcast", "fa-rss", "fa-signal",
+        ],
+    },
+    {
+        "id": "targets_wins",
+        "label": "Objetivos, Rachas y Logros",
+        "keywords": ["bullseye", "trophy", "flag", "award", "medal", "star", "fire", "crown", "rocket", "acierto", "target", "objetivo", "win", "racha"],
+        "icons": [
+            "fa-bullseye", "fa-trophy", "fa-flag-checkered", "fa-award",
+            "fa-medal", "fa-star", "fa-fire", "fa-fire-flame-curved",
+            "fa-crown", "fa-rocket", "fa-circle-check", "fa-thumbs-up",
+        ],
+    },
+    {
+        "id": "lab_strategy",
+        "label": "IA, Laboratorio y Modelos",
+        "keywords": ["flask", "microscope", "brain", "robot", "wand", "atom", "vial", "dna", "lab", "estrategia", "modelo", "ia", "gemini", "robustez"],
+        "icons": [
+            "fa-flask-vial", "fa-flask", "fa-microscope", "fa-brain",
+            "fa-robot", "fa-wand-magic-sparkles", "fa-atom", "fa-code-branch",
+            "fa-vial", "fa-lightbulb", "fa-dna", "fa-graduation-cap",
+        ],
+    },
+    {
+        "id": "docs_catalog",
+        "label": "Bitácora, Informes y Datos",
+        "keywords": ["book", "file", "csv", "clipboard", "folder", "layer", "table", "database", "bitacora", "informe", "catalogo", "historial", "exportar"],
+        "icons": [
+            "fa-book-bookmark", "fa-book-open", "fa-book", "fa-file-lines",
+            "fa-file-invoice", "fa-file-csv", "fa-clipboard-list", "fa-clipboard-check",
+            "fa-folder-open", "fa-layer-group", "fa-table-list", "fa-database",
+        ],
+    },
+    {
+        "id": "team_swarm",
+        "label": "Equipo, Agentes y Enjambre",
+        "keywords": ["user", "users", "network", "people", "diagram", "briefcase", "enjambre", "agente", "roster", "equipo", "swarm"],
+        "icons": [
+            "fa-users-gear", "fa-users", "fa-user-tie", "fa-user-astronaut",
+            "fa-network-wired", "fa-people-group", "fa-diagram-project", "fa-comments",
+            "fa-briefcase", "fa-handshake", "fa-id-badge", "fa-address-card",
+        ],
+    },
+    {
+        "id": "ops_actions",
+        "label": "Acciones, Zoom y Comparación",
+        "keywords": ["play", "expand", "magnifying", "filter", "crosshairs", "compare", "zoom", "buscar", "explorar", "ejecutar", "contraste", "descargar"],
+        "icons": [
+            "fa-play", "fa-pause", "fa-stop", "fa-expand",
+            "fa-compress", "fa-magnifying-glass", "fa-magnifying-glass-plus", "fa-magnifying-glass-minus",
+            "fa-filter", "fa-crosshairs", "fa-code-compare", "fa-arrows-left-right",
+            "fa-download", "fa-share-nodes",
+        ],
+    },
+    {
+        "id": "ui_tools",
+        "label": "Herramientas y Diseño",
+        "keywords": ["scissors", "dice", "snowflake", "cubes", "ruler", "palette", "wrench", "broom", "clamp", "estudio", "herramienta"],
+        "icons": [
+            "fa-scissors", "fa-dice", "fa-dice-d20", "fa-snowflake",
+            "fa-cubes", "fa-pen-ruler", "fa-ruler-horizontal", "fa-palette",
+            "fa-wand-sparkles", "fa-wrench", "fa-screwdriver-wrench", "fa-broom",
+        ],
+    },
+    {
+        "id": "alerts_status",
+        "label": "Alertas, Avisos y Visibilidad",
+        "keywords": ["bell", "check", "info", "xmark", "eye", "alert", "notif", "estado", "visible", "ocultar"],
+        "icons": [
+            "fa-bell", "fa-circle-check", "fa-check", "fa-check-double",
+            "fa-circle-info", "fa-info", "fa-circle-xmark", "fa-xmark",
+            "fa-triangle-exclamation", "fa-bullhorn", "fa-envelope", "fa-eye",
+        ],
+    },
+]
+_SEMANTIC_ICON_ALLOWED = {ic for g in _SEMANTIC_ICON_GROUPS for ic in g["icons"]}
+_SEMANTIC_ICON_CACHE: Dict[str, dict] = {}
+
+
+def _clean_fa_icon(icon_name: str) -> str:
+    parts = [p.strip() for p in str(icon_name or "").split() if p.strip()]
+    for p in parts:
+        if p.startswith("fa-") and p not in ("fa-solid", "fa-regular", "fa-brands", "fa-spin", "fa-pulse"):
+            return p
+    return "fa-star"
+
+
+def _infer_semantic_icons_ai(icon: str, context: str = "") -> dict:
+    base = _clean_fa_icon(icon)
+    cache_key = f"{base}|{(context or '').strip().lower()[:80]}"
+    if cache_key in _SEMANTIC_ICON_CACHE:
+        return _SEMANTIC_ICON_CACHE[cache_key]
+
+    norm_ctx = (context or "").lower()
+    norm_icon = base.lower()
+
+    best_group = None
+    best_score = -1
+    ranked_groups = []
+    for grp in _SEMANTIC_ICON_GROUPS:
+        score = 0
+        if base in grp["icons"]:
+            score += 50
+        for kw in grp["keywords"]:
+            if kw in norm_icon:
+                score += 18
+            if kw in norm_ctx:
+                score += 10
+        ranked_groups.append((score, grp))
+        if score > best_score:
+            best_score = score
+            best_group = grp
+
+    if best_group is None or best_score <= 0:
+        best_group = _SEMANTIC_ICON_GROUPS[0]
+
+    icons_out: List[str] = []
+    seen = set()
+
+    def add_ic(ic_name: str):
+        if ic_name and ic_name not in seen:
+            seen.add(ic_name)
+            icons_out.append(ic_name)
+
+    add_ic(base)
+    for ic in best_group["icons"]:
+        add_ic(ic)
+
+    ranked_groups.sort(key=lambda x: x[0], reverse=True)
+    for sc, grp in ranked_groups[1:3]:
+        if sc > 0:
+            for ic in grp["icons"][:4]:
+                add_ic(ic)
+                if len(icons_out) >= 16:
+                    break
+        if len(icons_out) >= 16:
+            break
+
+    api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+    if api_key and cache_key:
+        try:
+            prompt = (
+                f"Given current FontAwesome 6 Free Solid icon '{base}' and UI label/context '{context[:60]}', "
+                f"pick up to 12 most semantically similar FontAwesome 6 Free icon class names (starting with 'fa-') "
+                f"from standard free solid set. Return ONLY a JSON array of strings."
+            )
+            resp = requests.post(
+                f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}",
+                json={
+                    "contents": [{"parts": [{"text": prompt}]}],
+                    "generationConfig": {"temperature": 0.2, "maxOutputTokens": 180},
+                },
+                timeout=2.5,
+            )
+            if resp.ok:
+                txt = resp.json()["candidates"][0]["content"]["parts"][0]["text"]
+                m = re.search(r"\[[\s\S]*?\]", txt)
+                if m:
+                    ai_list = json.loads(m.group(0))
+                    valid_ai = [
+                        _clean_fa_icon(x) for x in ai_list
+                        if isinstance(x, str) and _clean_fa_icon(x) in _SEMANTIC_ICON_ALLOWED
+                    ]
+                    if valid_ai:
+                        icons_out = [base] + [x for x in valid_ai if x != base] + [x for x in icons_out if x not in valid_ai and x != base]
+        except Exception:
+            pass
+
+    result = {
+        "id": best_group["id"],
+        "label": best_group["label"],
+        "icons": icons_out[:16],
+        "source": "ai+semantic",
+    }
+    _SEMANTIC_ICON_CACHE[cache_key] = result
+    return result
+
+
+@app.get("/api/semantic_icons")
+def get_semantic_icons(icon: str = Query("fa-star"), context: str = Query("")):
+    return _infer_semantic_icons_ai(icon, context)
 
 
 @app.get("/api/strategy_vault")
