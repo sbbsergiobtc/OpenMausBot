@@ -937,6 +937,47 @@
       transform: scale(1.18);
       box-shadow: 0 0 0 2px rgba(60, 69, 165, 0.35);
     }
+    .algrok-color-swatch.is-active {
+      box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 3.5px #3C45A5;
+      transform: scale(1.08);
+    }
+    .algrok-color-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 4px 6px;
+      background: #F8F8FA;
+      border: 1px solid #ECECEF;
+      border-radius: 8px;
+      font-size: 9px;
+      font-family: 'JetBrains Mono', monospace;
+      color: #6E6E73;
+    }
+    .algrok-orig-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      border: 1px solid #D6D1C7;
+      background: #FFFFFF;
+      color: #1D1D1F;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.12s ease;
+    }
+    .algrok-orig-chip:hover {
+      border-color: #3C45A5;
+      background: #EEF2FF;
+    }
+    .algrok-orig-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 9999px;
+      border: 1px solid rgba(0, 0, 0, 0.20);
+      flex-shrink: 0;
+    }
     .algrok-color-native {
       width: 20px;
       height: 20px;
@@ -11890,12 +11931,130 @@
 
         const best = ranked[0] && ranked[0].score > 0 ? ranked[0].grp : this.groups[0];
         const out = [base];
-        const add = (ic) => { if (ic && !out.includes(ic)) out.push(ic); };
+        const add = (ic) => { if (ic && !out.includes(ic) && out.length < 16) out.push(ic); };
         best.icons.forEach(add);
-        ranked.slice(1, 3).forEach(r => {
-          if (r.score > 0 && out.length < 16) r.grp.icons.slice(0, 4).forEach(add);
-        });
+        for (let i = 1; i < ranked.length && out.length < 16; i++) {
+          ranked[i].grp.icons.forEach(add);
+        }
         return { id: best.id, label: best.label, icons: out.slice(0, 16) };
+      },
+      rgbToHex(colorStr) {
+        if (!colorStr) return '';
+        const s = String(colorStr).trim();
+        if (s === 'transparent' || s === 'rgba(0, 0, 0, 0)') return 'transparent';
+        if (/^#[0-9a-f]{6}$/i.test(s)) return s.toUpperCase();
+        if (/^#[0-9a-f]{3}$/i.test(s)) {
+          return ('#' + s[1] + s[1] + s[2] + s[2] + s[3] + s[3]).toUpperCase();
+        }
+        const m = s.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)/i);
+        if (!m) return '';
+        if (m[4] !== undefined && parseFloat(m[4]) === 0) return 'transparent';
+        const toH = (n) => Math.max(0, Math.min(255, parseInt(n, 10))).toString(16).padStart(2, '0').toUpperCase();
+        return `#${toH(m[1])}${toH(m[2])}${toH(m[3])}`;
+      },
+      renderColorControls({ container, paletteColors, currentHex, defaultHex, onApply }) {
+        const meta = document.createElement('div');
+        meta.className = 'algrok-color-meta';
+
+        const origValidHex = /^#[0-9A-F]{6}$/i.test(defaultHex || '') ? defaultHex.toUpperCase() : '';
+        let activeHex = /^#[0-9A-F]{6}$/i.test(currentHex || '') ? currentHex.toUpperCase() : origValidHex;
+
+        const origBtn = document.createElement('button');
+        origBtn.type = 'button';
+        origBtn.className = 'algrok-orig-chip';
+        origBtn.title = origValidHex
+          ? `Restaurar color original (${origValidHex})`
+          : 'Restaurar color predeterminado';
+        origBtn.innerHTML = `<span class="algrok-orig-dot" style="background:${origValidHex || 'repeating-linear-gradient(45deg,#eee,#eee 2px,#ccc 2px,#ccc 4px)'}"></span><span>Orig${origValidHex ? ' ' + origValidHex : ''}</span>`;
+
+        const curLabel = document.createElement('span');
+        curLabel.className = 'font-bold text-[#1D1D1F]';
+        const updateMetaLabel = (hexVal) => {
+          const cleanH = /^#[0-9A-F]{6}$/i.test(hexVal || '') ? hexVal.toUpperCase() : (hexVal === 'transparent' ? 'Transp.' : 'Predet.');
+          curLabel.textContent = `Actual: ${cleanH}`;
+        };
+        updateMetaLabel(currentHex || defaultHex);
+
+        meta.appendChild(origBtn);
+        meta.appendChild(curLabel);
+        container.appendChild(meta);
+
+        const row = document.createElement('div');
+        row.className = 'algrok-swatch-row';
+
+        // Construir lista de swatches incluyendo primero el color original si no está en los predeterminados
+        const presetList = [...paletteColors];
+        if (origValidHex && !presetList.some(c => c.hex.toUpperCase() === origValidHex)) {
+          presetList.unshift({ hex: origValidHex, name: `Original (${origValidHex})` });
+        }
+
+        const swatchButtons = [];
+        const syncActiveUi = (selectedHex) => {
+          const normSel = /^#[0-9A-F]{6}$/i.test(selectedHex || '') ? selectedHex.toUpperCase() : '';
+          swatchButtons.forEach(({ btn, hex }) => {
+            btn.classList.toggle('is-active', normSel && hex.toUpperCase() === normSel);
+          });
+          if (normSel) nativePicker.value = normSel;
+          updateMetaLabel(selectedHex || defaultHex);
+        };
+
+        presetList.forEach(c => {
+          const sw = document.createElement('button');
+          sw.type = 'button';
+          sw.className = 'algrok-color-swatch';
+          sw.style.backgroundColor = c.hex;
+          sw.title = c.hex.toUpperCase() === origValidHex ? `${c.name} · Predeterminado` : `Color ${c.name}`;
+          sw.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            activeHex = c.hex.toUpperCase();
+            syncActiveUi(activeHex);
+            onApply(c.hex, false);
+          };
+          swatchButtons.push({ btn: sw, hex: c.hex });
+          row.appendChild(sw);
+        });
+
+        const nativePicker = document.createElement('input');
+        nativePicker.type = 'color';
+        nativePicker.className = 'algrok-color-native';
+        nativePicker.value = activeHex || '#3C45A5';
+        nativePicker.title = 'Elegir color personalizado';
+        nativePicker.oninput = (e) => {
+          activeHex = e.target.value.toUpperCase();
+          syncActiveUi(activeHex);
+          onApply(e.target.value, true);
+        };
+        nativePicker.onchange = (e) => {
+          activeHex = e.target.value.toUpperCase();
+          syncActiveUi(activeHex);
+          onApply(e.target.value, false);
+        };
+        row.appendChild(nativePicker);
+
+        const resetBtn = document.createElement('button');
+        resetBtn.type = 'button';
+        resetBtn.className = 'algrok-color-swatch flex items-center justify-center bg-[#F4F5F7] text-[#6E6E73] text-[10px]';
+        resetBtn.title = 'Restaurar color original';
+        resetBtn.innerHTML = '<i class="fa-solid fa-eraser"></i>';
+        resetBtn.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          syncActiveUi(origValidHex);
+          onApply(null, false);
+        };
+        row.appendChild(resetBtn);
+
+        origBtn.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          syncActiveUi(origValidHex);
+          onApply(null, false);
+        };
+
+        syncActiveUi(currentHex || origValidHex);
+        container.appendChild(row);
+        return { syncActiveUi };
       },
       async fetchAiSemanticSet(iconClass, contextText = '') {
         const base = this.extractName(iconClass);
@@ -12162,6 +12321,10 @@
           iconEl.className = `fa-solid ${cfg.icon} ${preserved.join(' ')}`;
           iconEl.dataset.iconKey = `nav-ico:${cfg.id}`;
           iconEl.dataset.iconType = 'icon-sidebar';
+          if (!iconEl.dataset.defaultColor) {
+            iconEl.style.removeProperty('color');
+            iconEl.dataset.defaultColor = window.AlgrokIconSemantics.rgbToHex(window.getComputedStyle(iconEl).color) || '#3C45A5';
+          }
           iconEl.title = this.isEditMode ? 'Cambiar icono y color' : '';
           const te = window.AlgrokTextEditor;
           const resolvedIconColor = cfg.iconColor
@@ -12190,6 +12353,10 @@
           labelSpan.dataset.textKey = `nav:${cfg.id}`;
           labelSpan.dataset.styleType = 'sidebar-tab';
           if (!labelSpan.dataset.defaultText) labelSpan.dataset.defaultText = cfg.label;
+          if (!labelSpan.dataset.defaultColor) {
+            labelSpan.style.removeProperty('color');
+            labelSpan.dataset.defaultColor = window.AlgrokIconSemantics.rgbToHex(window.getComputedStyle(labelSpan).color) || '#181A20';
+          }
           if (document.activeElement !== labelSpan) {
             const te = window.AlgrokTextEditor;
             const savedHtml = te && te.htmlByKey && te.htmlByKey[`nav:${cfg.id}`];
@@ -12362,9 +12529,14 @@
 
         const grid = document.createElement('div');
         grid.className = 'sidebar-icon-grid';
+        const fallbackIcons = sem.icons;
         const renderGrid = (iconsList) => {
+          const out16 = [];
+          const push16 = (ic) => { if (ic && !out16.includes(ic) && out16.length < 16) out16.push(ic); };
+          (iconsList || []).forEach(push16);
+          fallbackIcons.forEach(push16);
           grid.innerHTML = '';
-          iconsList.forEach(ic => {
+          out16.forEach(ic => {
             const choice = document.createElement('button');
             choice.type = 'button';
             choice.className = 'sidebar-icon-choice';
@@ -12391,24 +12563,19 @@
         renderGrid(sem.icons);
         pop.appendChild(grid);
 
-        // Color del icono
+        // Color del icono con visualización de Original + Actual
         const colorLbl = document.createElement('div');
         colorLbl.className = 'algrok-popover-section-label';
         colorLbl.textContent = 'Color icono';
         pop.appendChild(colorLbl);
 
-        const swatchRow = document.createElement('div');
-        swatchRow.className = 'algrok-swatch-row';
-
-        const applySidebarIconColor = (hexOrEmpty, skipServerSave = false) => {
+        const applySidebarIconColor = (hexOrNull, skipServerSave = false) => {
+          const hexOrEmpty = hexOrNull === null ? '' : hexOrNull;
           const te = window.AlgrokTextEditor;
           if (scopeMode === 'type') {
             this.tabsConfig.forEach(t => {
-              if (hexOrEmpty) {
-                t.iconColor = hexOrEmpty;
-              } else {
-                delete t.iconColor;
-              }
+              if (hexOrEmpty) t.iconColor = hexOrEmpty;
+              else delete t.iconColor;
             });
             if (te) {
               if (hexOrEmpty) te.iconColorByType['icon-sidebar'] = hexOrEmpty;
@@ -12445,45 +12612,25 @@
           }
         };
 
-        window.AlgrokIconSemantics.paletteColors.forEach(c => {
-          const sw = document.createElement('button');
-          sw.type = 'button';
-          sw.className = 'algrok-color-swatch';
-          sw.style.backgroundColor = c.hex;
-          sw.title = c.name;
-          sw.onclick = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            applySidebarIconColor(c.hex, false);
-          };
-          swatchRow.appendChild(sw);
+        const defaultIconHex = anchorEl.dataset.defaultColor || '#3C45A5';
+        const teInst = window.AlgrokTextEditor;
+        const currentIconHex = cfg.iconColor
+          || (teInst && teInst.iconColorByKey && teInst.iconColorByKey[`nav-ico:${cfg.id}`])
+          || (teInst && teInst.iconColorByType && teInst.iconColorByType['icon-sidebar'])
+          || window.AlgrokIconSemantics.rgbToHex(window.getComputedStyle(anchorEl).color)
+          || defaultIconHex;
+
+        window.AlgrokIconSemantics.renderColorControls({
+          container: pop,
+          paletteColors: window.AlgrokIconSemantics.paletteColors,
+          currentHex: currentIconHex,
+          defaultHex: defaultIconHex,
+          onApply: applySidebarIconColor
         });
 
-        const nativePicker = document.createElement('input');
-        nativePicker.type = 'color';
-        nativePicker.className = 'algrok-color-native';
-        nativePicker.value = cfg.iconColor || '#3C45A5';
-        nativePicker.title = 'Color personalizado';
-        nativePicker.oninput = (e) => applySidebarIconColor(e.target.value, true);
-        nativePicker.onchange = (e) => applySidebarIconColor(e.target.value, false);
-        swatchRow.appendChild(nativePicker);
-
-        const resetBtn = document.createElement('button');
-        resetBtn.type = 'button';
-        resetBtn.className = 'algrok-color-swatch flex items-center justify-center bg-[#F4F5F7] text-[#6E6E73] text-[10px]';
-        resetBtn.title = 'Restaurar color original';
-        resetBtn.innerHTML = '<i class="fa-solid fa-eraser"></i>';
-        resetBtn.onclick = (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          applySidebarIconColor('', false);
-        };
-        swatchRow.appendChild(resetBtn);
-        pop.appendChild(swatchRow);
-
         const rect = anchorEl.getBoundingClientRect();
-        pop.style.left = `${Math.min(window.innerWidth - 230, Math.max(12, rect.left))}px`;
-        pop.style.top = `${Math.min(window.innerHeight - 280, rect.bottom + 6)}px`;
+        pop.style.left = `${Math.min(window.innerWidth - 250, Math.max(12, rect.left))}px`;
+        pop.style.top = `${Math.min(window.innerHeight - 330, rect.bottom + 6)}px`;
         document.body.appendChild(pop);
         this.iconPopoverEl = pop;
 
@@ -12911,17 +13058,56 @@
         return false;
       }
 
+      inferButtonCategory(btn) {
+        if (!btn) return 'btn-other';
+        if (btn.classList.contains('cta-primary-btn')) return 'btn-cta';
+        if (btn.classList.contains('btn-secondary')) return 'btn-secondary';
+        if (btn.id === 'btn-kill-switch' || /bg-\[#D70015\]/.test(btn.className || '')) return 'btn-danger';
+        if (btn.classList.contains('segmented-pill')) return 'btn-segmented';
+        if (btn.classList.contains('trade-filter-btn') || btn.classList.contains('notif-filter-btn')) return 'btn-filter';
+        const textLen = (btn.textContent || '').trim().length;
+        if (textLen <= 2 && btn.querySelector('i[class*="fa-"]')) return 'btn-icon';
+        return 'btn-other';
+      }
+
+      captureBaselineColors(el, kind = 'text') {
+        if (!el || !window.AlgrokIconSemantics) return;
+        const rgbToHex = (v) => window.AlgrokIconSemantics.rgbToHex(v);
+        if (kind === 'button') {
+          if (!el.dataset.defaultColor) {
+            const cs = window.getComputedStyle(el);
+            el.dataset.defaultBg = rgbToHex(cs.backgroundColor) || 'transparent';
+            const bw = parseFloat(cs.borderTopWidth || '0');
+            el.dataset.defaultBorder = (bw > 0 ? rgbToHex(cs.borderTopColor) : '') || 'transparent';
+            el.dataset.defaultColor = rgbToHex(cs.color) || '#1D1D1F';
+          }
+          return;
+        }
+        if (!el.dataset.defaultColor) {
+          const cs = window.getComputedStyle(el);
+          el.dataset.defaultColor = rgbToHex(cs.color) || '#1D1D1F';
+        }
+      }
+
       inferStyleType(el) {
         if (el.dataset.styleType) return el.dataset.styleType;
         if (el.closest('#sidebar-nav')) return 'sidebar-tab';
-        if (el.closest('button.algrok-btn-editable') || el.classList.contains('algrok-btn-label')) return 'button-label';
+        const parentBtn = el.closest('button.algrok-btn-editable');
+        if (parentBtn || el.classList.contains('algrok-btn-label')) {
+          return parentBtn ? `btnlbl:${this.inferButtonCategory(parentBtn)}` : 'btnlbl:btn-other';
+        }
         if (el.id === 'live-clock' || el.closest('#live-clock') || el.id === 'daemon-health-text' || el.id === 'daemon-health-container') return 'clock';
         if (this.isDynamicMetricElement(el)) {
           return el.closest('[data-kpi-grid]') ? 'kpi-metric' : 'metric';
         }
-        if (/^H[1-4]$/.test(el.tagName) || el.classList.contains('overline-text')) return 'heading';
-        if (el.closest('[data-kpi-grid]')) return 'kpi-label';
+        if (el.classList.contains('overline-text')) return 'overline';
+        if (el.tagName === 'H1') return 'h1';
+        if (el.tagName === 'H2') return 'h2';
+        if (el.tagName === 'H3') return 'h3';
+        if (el.tagName === 'H4') return 'h4';
         if (el.className && /(badge-|rounded-full)/i.test(el.className)) return 'badge';
+        if (el.closest('[data-kpi-grid]')) return 'kpi-label';
+        if (el.tagName === 'P') return 'subtitle';
         return 'text';
       }
 
@@ -12959,7 +13145,7 @@
               const scopeId = pane ? pane.id.replace('tab-content-', '') : (btn.closest('aside') ? 'aside' : 'header');
               wrapSpan.dataset.textKey = btn.id ? `btn:${btn.id}` : `btnlbl:${scopeId}:${btnWrapSeq++}`;
               wrapSpan.dataset.defaultText = clean;
-              wrapSpan.dataset.styleType = 'button-label';
+              wrapSpan.dataset.styleType = `btnlbl:${this.inferButtonCategory(btn)}`;
               wrapSpan.textContent = clean;
               btn.replaceChild(wrapSpan, tn);
               btn.insertBefore(document.createTextNode(' '), wrapSpan);
@@ -13000,7 +13186,9 @@
             } else {
               seq++;
             }
-            btn.dataset.btnType = 'button';
+            const cat = this.inferButtonCategory(btn);
+            btn.dataset.btnType = cat;
+            this.captureBaselineColors(btn, 'button');
             btn.classList.add('algrok-btn-editable');
             found.push(btn);
           });
@@ -13016,12 +13204,10 @@
 
         const found = [];
         roots.forEach(scope => {
-          // Spans internos del reloj en vivo + métricas con IDs dinámicos
           const candidates = scope.querySelectorAll('.algrok-clock-utc, .algrok-clock-es, #live-clock, #daemon-health-text, [id]');
           candidates.forEach(el => {
             if (el.closest('#notifications-dropdown, #ui-customizer-wrapper, #sidebar-nav, .apexcharts-canvas, .tv-lightweight-charts, svg, canvas')) return;
             if (el.id === 'live-clock' && el.querySelector('.algrok-clock-utc')) {
-              // El contenedor #live-clock tiene dos sub-spans independientes UTC y CET
               return;
             }
             const isClockSpan = el.classList.contains('algrok-clock-utc') || el.classList.contains('algrok-clock-es');
@@ -13032,6 +13218,7 @@
             }
             if (!el.dataset.textKey) return;
             el.dataset.styleType = this.inferStyleType(el);
+            this.captureBaselineColors(el, 'text');
             el.classList.add('algrok-styleable-metric');
             found.push(el);
           });
@@ -13059,6 +13246,7 @@
             }
             if (el.dataset.textKey) {
               el.dataset.styleType = this.inferStyleType(el);
+              this.captureBaselineColors(el, 'text');
               el.classList.add('algrok-editable-text');
               this.bindElementEvents(el);
               found.push(el);
@@ -13089,6 +13277,7 @@
             el.dataset.textKey = key;
             el.dataset.defaultText = txt;
             el.dataset.styleType = this.inferStyleType(el);
+            this.captureBaselineColors(el, 'text');
             el.classList.add('algrok-editable-text');
             this.bindElementEvents(el);
             found.push(el);
@@ -13126,34 +13315,74 @@
           const peers = this.iconElements.filter(i => i.closest('[data-kpi-grid]'));
           return { type: 'icon-kpi', label: 'Iconos KPI', count: peers.length, peers };
         }
-        if (iconEl.closest('button')) {
-          const peers = this.iconElements.filter(i => i.closest('button'));
-          return { type: 'icon-btn', label: 'Iconos botón', count: peers.length, peers };
+        const parentBtn = iconEl.closest('button');
+        if (parentBtn) {
+          const cat = this.inferButtonCategory(parentBtn);
+          const peers = this.iconElements.filter(i => {
+            const b = i.closest('button');
+            return b && this.inferButtonCategory(b) === cat;
+          });
+          const btnIconLabels = {
+            'btn-cta': 'Iconos CTA',
+            'btn-secondary': 'Iconos Secund.',
+            'btn-danger': 'Iconos Alerta',
+            'btn-segmented': 'Iconos Pill',
+            'btn-filter': 'Iconos Filtro',
+            'btn-icon': 'Iconos Acción',
+            'btn-other': 'Iconos Botón'
+          };
+          return { type: `icon-${cat}`, label: btnIconLabels[cat] || 'Iconos Botón', count: peers.length, peers };
         }
-        const peers = this.iconElements.filter(i => !i.closest('[data-kpi-grid]') && !i.closest('button'));
-        return { type: 'icon-section', label: 'Iconos sección', count: peers.length, peers };
+        if (iconEl.closest('h1, h2, h3, h4')) {
+          const peers = this.iconElements.filter(i => !i.closest('[data-kpi-grid]') && !i.closest('button') && i.closest('h1, h2, h3, h4'));
+          return { type: 'icon-heading', label: 'Iconos Título', count: peers.length, peers };
+        }
+        const peers = this.iconElements.filter(i => !i.closest('[data-kpi-grid]') && !i.closest('button') && !i.closest('h1, h2, h3, h4'));
+        return { type: 'icon-section', label: 'Iconos Sección', count: peers.length, peers };
       }
 
       getStyleTypeMeta(typeScope, fallbackEl) {
+        const btnLabelMap = {
+          'btn-cta': 'Botones CTA',
+          'btn-secondary': 'Botones Secund.',
+          'btn-danger': 'Botones Alerta',
+          'btn-segmented': 'Selectores Pill',
+          'btn-filter': 'Botones Filtro',
+          'btn-icon': 'Botones Icono',
+          'btn-other': 'Otros Botones'
+        };
+        if (typeScope && typeScope.startsWith('btn-')) {
+          const peers = this.buttons.filter(b => (b.dataset.btnType || this.inferButtonCategory(b)) === typeScope);
+          return { type: typeScope, label: btnLabelMap[typeScope] || 'Botones', count: Math.max(1, peers.length), els: peers };
+        }
+        if (typeScope && typeScope.startsWith('btnlbl:')) {
+          const btnCat = typeScope.slice(7);
+          const peers = this.elements.filter(e => this.inferStyleType(e) === typeScope);
+          return { type: typeScope, label: `Texto ${btnLabelMap[btnCat] || 'Botón'}`, count: Math.max(1, peers.length), els: peers };
+        }
         if (typeScope === 'button') {
-          return { type: 'button', label: 'Todos botones', count: this.buttons.length, els: this.buttons };
+          return { type: 'btn-other', label: 'Otros Botones', count: Math.max(1, this.buttons.length), els: this.buttons };
         }
         if (typeScope === 'sidebar-tab') {
           const peers = this.elements.filter(e => e.dataset.styleType === 'sidebar-tab');
-          return { type: 'sidebar-tab', label: 'Menú lateral', count: peers.length, els: peers };
+          return { type: 'sidebar-tab', label: 'Menú lateral', count: Math.max(1, peers.length), els: peers };
         }
         if (typeScope === 'clock' || typeScope === 'kpi-metric' || typeScope === 'metric') {
           const peers = this.styleableMetrics.filter(e => e.dataset.styleType === typeScope);
-          const lbl = typeScope === 'clock' ? 'Reloj y estado' : (typeScope === 'kpi-metric' ? 'Valores KPI' : 'Métricas');
-          return { type: typeScope, label: lbl, count: peers.length, els: peers };
+          const lbl = typeScope === 'clock' ? 'Fecha y reloj' : (typeScope === 'kpi-metric' ? 'Valores KPI' : 'Métricas Live');
+          return { type: typeScope, label: lbl, count: Math.max(1, peers.length), els: peers };
         }
         const peers = this.elements.filter(e => (e.dataset.styleType || this.inferStyleType(e)) === typeScope);
         const labelMap = {
+          'overline': 'Overlines',
+          'h1': 'Títulos H1',
+          'h2': 'Títulos H2',
+          'h3': 'Títulos H3',
+          'h4': 'Títulos H4',
+          'subtitle': 'Subtítulos',
           'kpi-label': 'Etiquetas KPI',
-          'heading': 'Todos títulos',
-          'button-label': 'Textos botón',
-          'badge': 'Badges',
-          'text': 'Textos similares'
+          'badge': 'Badges y chips',
+          'text': 'Textos grales'
         };
         return {
           type: typeScope || 'text',
@@ -13218,6 +13447,7 @@
 
             iconEl.dataset.iconKey = key;
             iconEl.dataset.defaultIcon = baseIcon;
+            this.captureBaselineColors(iconEl, 'icon');
             iconEl.classList.add('algrok-icon-editable');
             foundIcons.push(iconEl);
           });
@@ -13301,13 +13531,24 @@
         grid.className = 'sidebar-icon-grid';
         const curShort = semApi ? semApi.extractName(curIcon) : curIcon;
         const defShort = semApi ? semApi.extractName(defIcon) : defIcon;
+        const localFallback = semantic.icons || [];
 
         const renderGrid = (iconsList) => {
-          const merged = Array.from(new Set([...(iconsList || []), defShort, curShort].filter(Boolean)));
+          const out16 = [];
+          const push16 = (ic) => {
+            const shortIc = semApi ? semApi.extractName(ic) : ic;
+            if (shortIc && !out16.includes(shortIc) && out16.length < 16) out16.push(shortIc);
+          };
+          (iconsList || []).forEach(push16);
+          push16(defShort);
+          push16(curShort);
+          localFallback.forEach(push16);
+          if (semApi && semApi.groups && out16.length < 16) {
+            semApi.groups.forEach(g => g.icons.forEach(push16));
+          }
           grid.innerHTML = '';
-          merged.forEach(iconClass => {
-            const fullClass = iconClass.includes(' ') ? iconClass : `fa-solid ${iconClass}`;
-            const shortName = semApi ? semApi.extractName(fullClass) : iconClass;
+          out16.slice(0, 16).forEach(shortName => {
+            const fullClass = `fa-solid ${shortName}`;
             const b = document.createElement('button');
             b.type = 'button';
             b.className = 'sidebar-icon-choice' + (curShort === shortName ? ' active-icon border-[#3C45A5] bg-[#EEF2FF] text-[#3C45A5]' : '');
@@ -13350,16 +13591,14 @@
         renderGrid(semantic.icons);
         pop.appendChild(grid);
 
-        // Color de icono (Solo este / Todos de este tipo)
+        // Color de icono con visualización de Original + Actual
         const colorLbl = document.createElement('div');
         colorLbl.className = 'algrok-popover-section-label';
         colorLbl.textContent = 'Color icono';
         pop.appendChild(colorLbl);
 
-        const swatchRow = document.createElement('div');
-        swatchRow.className = 'algrok-swatch-row';
-
-        const applyDashIconColor = (hexOrEmpty, skipServerSave = false) => {
+        const applyDashIconColor = (hexOrNull, skipServerSave = false) => {
+          const hexOrEmpty = hexOrNull === null ? '' : hexOrNull;
           if (scopeMode === 'type') {
             const peerKeys = typeInfo.peers.map(p => p.dataset.iconKey).filter(Boolean);
             if (hexOrEmpty) this.iconColorByType[typeInfo.type] = hexOrEmpty;
@@ -13398,46 +13637,25 @@
           }
         };
 
-        this.paletteColors.forEach(c => {
-          const sw = document.createElement('button');
-          sw.type = 'button';
-          sw.className = 'algrok-color-swatch';
-          sw.style.backgroundColor = c.hex;
-          sw.title = c.name;
-          sw.onclick = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            applyDashIconColor(c.hex, false);
-          };
-          swatchRow.appendChild(sw);
-        });
+        const defaultIconHex = iconEl.dataset.defaultColor || (semApi ? semApi.rgbToHex(window.getComputedStyle(iconEl).color) : '#1D1D1F');
+        const currentIconHex = this.iconColorByKey[key]
+          || this.iconColorByType[typeInfo.type]
+          || (semApi ? semApi.rgbToHex(window.getComputedStyle(iconEl).color) : defaultIconHex);
 
-        const nativeInput = document.createElement('input');
-        nativeInput.type = 'color';
-        nativeInput.className = 'algrok-color-native';
-        nativeInput.value = this.iconColorByKey[key] || this.iconColorByType[typeInfo.type] || '#3C45A5';
-        nativeInput.title = 'Elegir color personalizado';
-        nativeInput.oninput = (e) => applyDashIconColor(e.target.value, true);
-        nativeInput.onchange = (e) => applyDashIconColor(e.target.value, false);
-        swatchRow.appendChild(nativeInput);
-
-        const resetBtn = document.createElement('button');
-        resetBtn.type = 'button';
-        resetBtn.className = 'algrok-color-swatch flex items-center justify-center bg-[#F4F5F7] text-[#6E6E73] text-[10px]';
-        resetBtn.title = 'Restaurar color original';
-        resetBtn.innerHTML = '<i class="fa-solid fa-eraser"></i>';
-        resetBtn.onclick = (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          applyDashIconColor('', false);
-        };
-        swatchRow.appendChild(resetBtn);
-        pop.appendChild(swatchRow);
+        if (semApi && typeof semApi.renderColorControls === 'function') {
+          semApi.renderColorControls({
+            container: pop,
+            paletteColors: this.paletteColors,
+            currentHex: currentIconHex,
+            defaultHex: defaultIconHex,
+            onApply: applyDashIconColor
+          });
+        }
 
         document.body.appendChild(pop);
         const rect = iconEl.getBoundingClientRect();
-        const topPos = Math.min(window.innerHeight - 280, Math.max(8, rect.bottom + 6));
-        const leftPos = Math.min(window.innerWidth - 230, Math.max(8, rect.left));
+        const topPos = Math.min(window.innerHeight - 330, Math.max(8, rect.bottom + 6));
+        const leftPos = Math.min(window.innerWidth - 250, Math.max(8, rect.left));
         pop.style.top = `${topPos}px`;
         pop.style.left = `${leftPos}px`;
         this.iconPopoverEl = pop;
@@ -13626,9 +13844,54 @@
 
         const getEffectiveTypeScope = () => {
           if (ctx.btnEl && (activeProp === 'bg' || activeProp === 'border' || ctx.mode === 'button')) {
-            return 'button';
+            return ctx.btnEl.dataset.btnType || this.inferButtonCategory(ctx.btnEl);
           }
           return ctx.el ? this.inferStyleType(ctx.el) : 'text';
+        };
+
+        const resolveCurrentAndDefaultHex = () => {
+          const semApi = window.AlgrokIconSemantics;
+          const rgb = (v) => (semApi ? semApi.rgbToHex(v) : '');
+          if (ctx.btnEl && activeProp === 'bg') {
+            const defBg = ctx.btnEl.dataset.defaultBg || rgb(window.getComputedStyle(ctx.btnEl).backgroundColor) || '#FFFFFF';
+            const bkey = ctx.btnEl.dataset.btnKey;
+            const bcat = ctx.btnEl.dataset.btnType || this.inferButtonCategory(ctx.btnEl);
+            const saved = (bkey && this.btnStyleByKey[bkey] && this.btnStyleByKey[bkey].bg)
+              || (this.btnStyleByType[bcat] && this.btnStyleByType[bcat].bg)
+              || rgb(window.getComputedStyle(ctx.btnEl).backgroundColor)
+              || defBg;
+            return { currentHex: saved, defaultHex: defBg };
+          }
+          if (ctx.btnEl && activeProp === 'border') {
+            const defBd = ctx.btnEl.dataset.defaultBorder || 'transparent';
+            const bkey = ctx.btnEl.dataset.btnKey;
+            const bcat = ctx.btnEl.dataset.btnType || this.inferButtonCategory(ctx.btnEl);
+            const curComp = window.getComputedStyle(ctx.btnEl);
+            const curBd = parseFloat(curComp.borderTopWidth || '0') > 0 ? rgb(curComp.borderTopColor) : 'transparent';
+            const saved = (bkey && this.btnStyleByKey[bkey] && this.btnStyleByKey[bkey].border)
+              || (this.btnStyleByType[bcat] && this.btnStyleByType[bcat].border)
+              || curBd
+              || defBd;
+            return { currentHex: saved, defaultHex: defBd };
+          }
+          const target = ctx.el || ctx.btnEl;
+          const defTxt = (target && target.dataset.defaultColor)
+            || (target ? rgb(window.getComputedStyle(target).color) : '#1D1D1F')
+            || '#1D1D1F';
+          let curTxt = '';
+          if (ctx.btnEl) {
+            const bkey = ctx.btnEl.dataset.btnKey;
+            const bcat = ctx.btnEl.dataset.btnType || this.inferButtonCategory(ctx.btnEl);
+            curTxt = (bkey && this.btnStyleByKey[bkey] && this.btnStyleByKey[bkey].color)
+              || (this.btnStyleByType[bcat] && this.btnStyleByType[bcat].color)
+              || '';
+          }
+          if (!curTxt && target) {
+            const tkey = target.dataset.textKey;
+            const st = this.inferStyleType(target);
+            curTxt = (tkey && this.colorByKey[tkey]) || this.colorByType[st] || rgb(window.getComputedStyle(target).color) || defTxt;
+          }
+          return { currentHex: curTxt || defTxt, defaultHex: defTxt };
         };
 
         const pop = document.createElement('div');
@@ -13642,7 +13905,7 @@
           e.stopPropagation();
         });
 
-        // 1. Selector de alcance: Solo este / Todos similares
+        // 1. Selector de alcance: Solo este / Todos de este tipo jerárquico
         const scopeBar = document.createElement('div');
         scopeBar.className = 'algrok-scope-bar';
         const btnSingle = document.createElement('button');
@@ -13676,6 +13939,34 @@
         scopeBar.appendChild(btnType);
         pop.appendChild(scopeBar);
 
+        const colorControlsHolder = document.createElement('div');
+        colorControlsHolder.className = 'flex flex-col gap-1.5';
+
+        const dispatchColor = (hexOrNull, skipServerSave = false) => {
+          this.applyStyleChoice({
+            ctx,
+            prop: activeProp,
+            scopeMode,
+            typeScope: getEffectiveTypeScope(),
+            hexColor: hexOrNull,
+            skipServerSave
+          });
+        };
+
+        const mountColorControls = () => {
+          colorControlsHolder.innerHTML = '';
+          const { currentHex, defaultHex } = resolveCurrentAndDefaultHex();
+          if (window.AlgrokIconSemantics && typeof window.AlgrokIconSemantics.renderColorControls === 'function') {
+            window.AlgrokIconSemantics.renderColorControls({
+              container: colorControlsHolder,
+              paletteColors: this.paletteColors,
+              currentHex,
+              defaultHex,
+              onApply: dispatchColor
+            });
+          }
+        };
+
         // 2. Si es un botón: pestañas Texto | Fondo | Borde
         if (ctx.btnEl) {
           const propTabs = document.createElement('div');
@@ -13698,6 +13989,7 @@
               tabBtns.forEach(b => b.classList.remove('active'));
               tb.classList.add('active');
               refreshScopeLabel();
+              mountColorControls();
             };
             tabBtns.push(tb);
             propTabs.appendChild(tb);
@@ -13705,63 +13997,15 @@
           pop.appendChild(propTabs);
         }
 
-        // 3. Fila de colores + picker nativo + reset
-        const swatchRow = document.createElement('div');
-        swatchRow.className = 'algrok-swatch-row';
-
-        const dispatchColor = (hexOrNull, skipServerSave = false) => {
-          this.applyStyleChoice({
-            ctx,
-            prop: activeProp,
-            scopeMode,
-            typeScope: getEffectiveTypeScope(),
-            hexColor: hexOrNull,
-            skipServerSave
-          });
-        };
-
-        this.paletteColors.forEach(c => {
-          const sw = document.createElement('button');
-          sw.type = 'button';
-          sw.className = 'algrok-color-swatch';
-          sw.style.backgroundColor = c.hex;
-          sw.title = `Color ${c.name}`;
-          sw.onclick = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            dispatchColor(c.hex, false);
-          };
-          swatchRow.appendChild(sw);
-        });
-
-        const nativeInput = document.createElement('input');
-        nativeInput.type = 'color';
-        nativeInput.className = 'algrok-color-native';
-        nativeInput.value = '#3C45A5';
-        nativeInput.title = 'Elegir color personalizado';
-        nativeInput.oninput = (e) => dispatchColor(e.target.value, true);
-        nativeInput.onchange = (e) => dispatchColor(e.target.value, false);
-        swatchRow.appendChild(nativeInput);
-
-        const resetBtn = document.createElement('button');
-        resetBtn.type = 'button';
-        resetBtn.className = 'algrok-color-swatch flex items-center justify-center bg-[#F4F5F7] text-[#6E6E73] text-[10px]';
-        resetBtn.title = 'Restaurar color original';
-        resetBtn.innerHTML = '<i class="fa-solid fa-eraser"></i>';
-        resetBtn.onclick = (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          dispatchColor(null, false);
-        };
-        swatchRow.appendChild(resetBtn);
-
-        pop.appendChild(swatchRow);
+        // 3. Meta Original/Actual + swatches + picker nativo + reset
+        mountColorControls();
+        pop.appendChild(colorControlsHolder);
         document.body.appendChild(pop);
         this.colorPopoverEl = pop;
 
         const popRect = pop.getBoundingClientRect();
         const width = popRect.width || 256;
-        const height = popRect.height || 86;
+        const height = popRect.height || 108;
 
         let top = ctx.rect.top - height - 10;
         if (top < 8) {
@@ -13820,12 +14064,13 @@
           const valStr = hexColor === null ? '' : hexColor;
 
           if (scopeMode === 'type') {
-            const peerBtns = this.buttons;
+            const btnCat = ctx.btnEl.dataset.btnType || this.inferButtonCategory(ctx.btnEl);
+            const peerBtns = this.buttons.filter(b => (b.dataset.btnType || this.inferButtonCategory(b)) === btnCat);
             const peerKeys = peerBtns.map(b => b.dataset.btnKey).filter(Boolean);
-            if (!this.btnStyleByType.button) this.btnStyleByType.button = {};
-            if (valStr) this.btnStyleByType.button[styleProp] = valStr;
-            else delete this.btnStyleByType.button[styleProp];
-            if (Object.keys(this.btnStyleByType.button).length === 0) delete this.btnStyleByType.button;
+            if (!this.btnStyleByType[btnCat]) this.btnStyleByType[btnCat] = {};
+            if (valStr) this.btnStyleByType[btnCat][styleProp] = valStr;
+            else delete this.btnStyleByType[btnCat][styleProp];
+            if (Object.keys(this.btnStyleByType[btnCat]).length === 0) delete this.btnStyleByType[btnCat];
 
             peerKeys.forEach(pk => {
               if (this.btnStyleByKey[pk]) {
@@ -13850,7 +14095,7 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  typeScope: 'button',
+                  typeScope: btnCat,
                   typeBtnStyle: { [styleProp]: valStr },
                   clearTypeKeys: peerKeys
                 })
@@ -14196,12 +14441,14 @@
             }
           });
 
-          // 2. Estilos de botones (fondo, borde, color de texto)
-          const typeBtnStyle = this.btnStyleByType.button || {};
+          // 2. Estilos de botones (por categoría de botón -> por botón individual)
+          const legacyBtnStyle = this.btnStyleByType.button || {};
           this.buttons.forEach(btn => {
             const bkey = btn.dataset.btnKey;
+            const bcat = btn.dataset.btnType || this.inferButtonCategory(btn);
+            const catStyle = this.btnStyleByType[bcat] || {};
             const singleStyle = (bkey && this.btnStyleByKey[bkey]) || {};
-            const merged = { ...typeBtnStyle, ...singleStyle };
+            const merged = { ...legacyBtnStyle, ...catStyle, ...singleStyle };
             if (merged.bg) this.applyButtonInlineStyle(btn, 'bg', merged.bg);
             if (merged.border) this.applyButtonInlineStyle(btn, 'border', merged.border);
             if (merged.color) this.applyButtonInlineStyle(btn, 'color', merged.color);

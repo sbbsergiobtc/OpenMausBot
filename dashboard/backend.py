@@ -4512,12 +4512,11 @@ def _infer_semantic_icons_ai(icon: str, context: str = "") -> dict:
         add_ic(ic)
 
     ranked_groups.sort(key=lambda x: x[0], reverse=True)
-    for sc, grp in ranked_groups[1:3]:
-        if sc > 0:
-            for ic in grp["icons"][:4]:
-                add_ic(ic)
-                if len(icons_out) >= 16:
-                    break
+    for _sc, grp in ranked_groups[1:]:
+        for ic in grp["icons"]:
+            add_ic(ic)
+            if len(icons_out) >= 16:
+                break
         if len(icons_out) >= 16:
             break
 
