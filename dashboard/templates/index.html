@@ -563,8 +563,37 @@
       z-index: 15;
       transition: opacity 0.16s ease, color 0.15s ease, background-color 0.15s ease;
     }
-    .algrok-kpi-card:hover > .kpi-drag-grip {
-      opacity: 0.9;
+    body:not(.algrok-edit-mode) .kpi-drag-grip {
+      display: none !important;
+    }
+    .algrok-kpi-card:hover > .kpi-drag-grip,
+    body.algrok-edit-mode .algrok-kpi-card > .kpi-drag-grip {
+      opacity: 0.82;
+    }
+    .algrok-grid-stacked {
+      grid-template-columns: minmax(0, 1fr) !important;
+    }
+    .algrok-row-drop-guide {
+      grid-column: 1 / -1;
+      min-height: 44px;
+      border-radius: 14px;
+      border: 2px dashed #3C45A5;
+      background: rgba(60, 69, 165, 0.10);
+      color: #3C45A5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      pointer-events: none;
+      padding: 8px 14px;
+    }
+    html[data-theme="dark"] .algrok-row-drop-guide {
+      background: rgba(99, 102, 241, 0.20);
+      border-color: #818CF8;
+      color: #A5B4FC;
     }
     .kpi-drag-grip:hover {
       opacity: 1 !important;
@@ -1159,7 +1188,8 @@
     html[data-theme="dark"] .glass-card,
     html[data-theme="dark"] .panel-card,
     html[data-theme="dark"] .strategy-card,
-    html[data-theme="dark"] .algrok-kpi-card {
+    html[data-theme="dark"] .algrok-kpi-card,
+    html[data-theme="dark"] .kpi-drag-ghost {
       background: #192132 !important;
       border-color: #283349 !important;
       color: #F1F5F9 !important;
@@ -2396,7 +2426,7 @@
       <div data-kpi-grid="forward-accounts-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-5">
         
         <!-- Tarjeta Cuenta 1: TradFi Broker MT5 / Prop Firm CFD (#53138341) -->
-        <div id="ft-propfirm-card" class="glass-card rounded-2xl p-5 space-y-4 border-l-4 border-cyan-400" style="transition: all 0.3s ease;">
+        <div id="ft-propfirm-card" class="glass-card rounded-2xl p-5 space-y-4 border-l-4 border-cyan-400">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-borderWarm pb-3">
             <div>
               <div class="flex flex-wrap items-center gap-2 mb-1">
@@ -2527,7 +2557,7 @@
         </div>
 
         <!-- Tarjeta Cuenta 2: Crypto DEX (Capital Propio) / Enjambre CME & CFDs (Fondeo) -->
-        <div id="ft-hyperliquid-card" class="glass-card rounded-2xl p-5 space-y-4 border-l-4 border-amber-400" style="transition: all 0.3s ease;">
+        <div id="ft-hyperliquid-card" class="glass-card rounded-2xl p-5 space-y-4 border-l-4 border-amber-400">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-borderWarm pb-3">
             <div>
               <div class="flex items-center gap-2 mb-1">
@@ -11274,6 +11304,7 @@
         this.serverPreferences = {};
         this.activeDrag = null;
         this.ghostEl = null;
+        this.dropGuideEl = null;
         this.init();
       }
 
@@ -11289,6 +11320,7 @@
                   localStorage.setItem(this.storagePrefix + gId, JSON.stringify(ord));
                 } catch (e) {}
               }
+              this.scanAndAttachAll();
             }
           }
         } catch (e) {
@@ -11321,7 +11353,34 @@
       }
 
       getDirectCards(gridEl) {
-        return Array.from(gridEl.children).filter(el => el.nodeType === 1 && el.tagName === 'DIV');
+        return Array.from(gridEl.children).filter(el =>
+          el.nodeType === 1 &&
+          el.tagName === 'DIV' &&
+          !el.classList.contains('algrok-row-drop-guide')
+        );
+      }
+
+      isGridStackable(gridEl) {
+        return /\b(sm:|md:|lg:|xl:)?grid-cols-[2-6]\b/.test(gridEl.className || '');
+      }
+
+      getSavedStacked(gridId) {
+        const key = `${gridId}__stacked`;
+        if (this.serverPreferences && Object.prototype.hasOwnProperty.call(this.serverPreferences, key)) {
+          return Boolean(this.serverPreferences[key]);
+        }
+        try {
+          const raw = localStorage.getItem(this.storagePrefix + key);
+          return raw ? Boolean(JSON.parse(raw)) : false;
+        } catch (e) {
+          return false;
+        }
+      }
+
+      applyStackedClass(gridId, gridEl) {
+        if (!gridEl) return;
+        const stacked = this.getSavedStacked(gridId);
+        gridEl.classList.toggle('algrok-grid-stacked', Boolean(stacked));
       }
 
       attachToGrid(gridEl) {
@@ -11333,8 +11392,8 @@
 
         if (this.grids.has(gridId)) {
           const state = this.grids.get(gridId);
-          // Re-decorar si los hijos cambiaron dinámicamente (ej. orch-desk-breakdown-grid)
-          if (cards.length >= 2 && cards.some(c => !c.classList.contains('algrok-kpi-card'))) {
+          this.applyStackedClass(gridId, gridEl);
+          if (cards.length >= 2 && cards.some(c => !c.classList.contains('algrok-kpi-card') || !c.querySelector(':scope > .kpi-drag-grip'))) {
             this.decorateCards(gridEl, gridId, cards, state);
             const savedOrder = this.getSavedOrder(gridId);
             if (savedOrder && savedOrder.length === state.originalKeys.length) {
@@ -11345,6 +11404,7 @@
         }
 
         gridEl.classList.add('algrok-kpi-grid');
+        this.applyStackedClass(gridId, gridEl);
         const originalKeys = cards.map((card, idx) => {
           const key = card.dataset.kpiKey || card.id || `kpi_${idx}`;
           card.dataset.kpiKey = key;
@@ -11375,6 +11435,7 @@
               gridState.originalKeys = freshCards.map((c, idx) => c.dataset.kpiKey || c.id || `kpi_${idx}`);
             }
             this.decorateCards(gridEl, gridId, freshCards, gridState);
+            this.applyStackedClass(gridId, gridEl);
             const savedOrder = this.getSavedOrder(gridId);
             if (savedOrder && savedOrder.length === gridState.originalKeys.length) {
               this.applyOrderToGrid(gridId, savedOrder, false);
@@ -11399,6 +11460,13 @@
           }
           card.classList.add('algrok-kpi-card');
           card.setAttribute('draggable', 'false');
+          if (!card.querySelector(':scope > .kpi-drag-grip')) {
+            const grip = document.createElement('span');
+            grip.className = 'kpi-drag-grip';
+            grip.title = 'Arrastra para mover (lleva debajo/arriba para ocupar toda la fila)';
+            grip.innerHTML = '<i class="fa-solid fa-grip-vertical"></i>';
+            card.appendChild(grip);
+          }
           if (!card._algrokDragPrevented) {
             card.addEventListener('dragstart', (e) => e.preventDefault());
             card._algrokDragPrevented = true;
@@ -11414,15 +11482,22 @@
         if (!window.algrokEditMode) return;
         if (e.button !== undefined && e.button !== 0) return;
 
-        // Respetar grids anidados: solo atiende el grid directo al que pertenece el punto pulsado
-        const closestGrid = e.target.closest('[data-kpi-grid]');
-        if (closestGrid && closestGrid.dataset.kpiGrid !== gridId) return;
+        const gripHit = e.target.closest('.kpi-drag-grip');
+        const isOwnGrip = Boolean(gripHit && gripHit.parentElement === card);
 
-        if (e.pointerType === 'touch') return;
+        if (!isOwnGrip) {
+          // Respetar grids anidados: solo atiende el grid directo al que pertenece el punto pulsado
+          const closestGrid = e.target.closest('[data-kpi-grid]');
+          if (closestGrid && closestGrid.dataset.kpiGrid !== gridId) return;
 
-        // Respetar edición de texto inline, iconos editables, métricas y controles interactivos internos
-        if (e.target.closest('button, input, select, textarea, a, .apexcharts-canvas, .algrok-icon-editable, .algrok-styleable-metric, .sidebar-icon-popover, .algrok-color-palette-popover, .algrok-editable-text[contenteditable="true"]')) {
-          return;
+          if (e.pointerType === 'touch') return;
+
+          // Respetar edición de texto inline, iconos editables, métricas y controles interactivos internos
+          if (e.target.closest('button, input, select, textarea, a, .apexcharts-canvas, .algrok-icon-editable, .algrok-styleable-metric, .sidebar-icon-popover, .algrok-color-palette-popover, .algrok-editable-text[contenteditable="true"]')) {
+            return;
+          }
+        } else {
+          if (e.pointerType === 'touch') return;
         }
 
         const state = this.grids.get(gridId);
@@ -11454,8 +11529,34 @@
           width: rect.width,
           height: rect.height,
           lastSwapTime: 0,
+          pendingLayout: null,
           isDragging: false
         };
+      }
+
+      removeRowDropGuide() {
+        if (this.dropGuideEl) {
+          this.dropGuideEl.remove();
+          this.dropGuideEl = null;
+        }
+      }
+
+      showRowDropGuide(gridEl, textLabel, insertBeforeEl = null) {
+        if (!this.dropGuideEl) {
+          const g = document.createElement('div');
+          g.className = 'algrok-row-drop-guide';
+          this.dropGuideEl = g;
+        }
+        this.dropGuideEl.innerHTML = `<i class="fa-solid fa-arrows-up-down-left-right text-xs"></i><span>${textLabel}</span>`;
+        if (insertBeforeEl && insertBeforeEl.parentElement === gridEl) {
+          if (this.dropGuideEl.nextSibling !== insertBeforeEl) {
+            gridEl.insertBefore(this.dropGuideEl, insertBeforeEl);
+          }
+        } else {
+          if (this.dropGuideEl.parentElement !== gridEl || this.dropGuideEl.nextSibling !== null) {
+            gridEl.appendChild(this.dropGuideEl);
+          }
+        }
       }
 
       onGlobalPointerMove(e) {
@@ -11520,13 +11621,58 @@
       updateCardDropTarget(e) {
         if (!this.activeDrag) return;
         const drag = this.activeDrag;
-        const now = performance.now();
-        if (now - drag.lastSwapTime < 110) return;
-
         const { gridEl } = drag.state;
         const allCards = this.getDirectCards(gridEl);
         const curIdx = allCards.indexOf(drag.card);
         if (curIdx === -1) return;
+
+        const visibleSiblings = allCards.filter(c => c !== drag.card && c.offsetParent !== null && !c.classList.contains('hidden'));
+        const isStackable = this.isGridStackable(gridEl) && visibleSiblings.length >= 1;
+        const isStacked = gridEl.classList.contains('algrok-grid-stacked');
+
+        // Detectar apilamiento vertical (ancho completo) o retorno a columnas en grids multi-columna
+        if (isStackable && !isStacked) {
+          const allVis = allCards.filter(c => c.offsetParent !== null && !c.classList.contains('hidden'));
+          const rowTop = Math.min(...allVis.map(c => c.getBoundingClientRect().top));
+          const rowBottom = Math.max(...allVis.map(c => c.getBoundingClientRect().bottom));
+          const rowHeight = Math.max(80, rowBottom - rowTop);
+          const bottomTrigger = rowBottom - Math.min(110, rowHeight * 0.34);
+          const topTrigger = rowTop + 26;
+
+          if (e.clientY > bottomTrigger && e.clientY > drag.startY + 35) {
+            drag.pendingLayout = { stacked: true, position: 'bottom' };
+            this.showRowDropGuide(gridEl, 'Soltar aquí debajo · Ancho completo (100% fila)', null);
+            return;
+          }
+          if (e.clientY < topTrigger && e.clientY < drag.startY - 35) {
+            drag.pendingLayout = { stacked: true, position: 'top' };
+            this.showRowDropGuide(gridEl, 'Soltar aquí arriba · Ancho completo (100% fila)', allCards[0]);
+            return;
+          }
+        } else if (isStackable && isStacked) {
+          for (const candidate of visibleSiblings) {
+            const rect = candidate.getBoundingClientRect();
+            if (e.clientY >= rect.top && e.clientY <= rect.bottom) {
+              const edgeW = Math.max(60, rect.width * 0.22);
+              if (e.clientX < rect.left + edgeW) {
+                drag.pendingLayout = { stacked: false, side: 'left', targetCard: candidate };
+                this.showRowDropGuide(gridEl, 'Soltar a la izquierda · Volver a 2 columnas', candidate);
+                return;
+              }
+              if (e.clientX > rect.right - edgeW) {
+                drag.pendingLayout = { stacked: false, side: 'right', targetCard: candidate };
+                this.showRowDropGuide(gridEl, 'Soltar a la derecha · Volver a 2 columnas', candidate.nextSibling);
+                return;
+              }
+            }
+          }
+        }
+
+        drag.pendingLayout = null;
+        this.removeRowDropGuide();
+
+        const now = performance.now();
+        if (now - drag.lastSwapTime < 110) return;
 
         const dragRect = drag.card.getBoundingClientRect();
         let targetCard = null;
@@ -11555,7 +11701,6 @@
               break;
             }
           } else {
-            // Cambio entre filas de un grid 2D
             targetCard = candidate;
             targetIdx = idx;
             break;
@@ -11593,6 +11738,7 @@
         const drag = this.activeDrag;
         this.activeDrag = null;
         document.body.style.cursor = '';
+        this.removeRowDropGuide();
 
         try {
           if (drag.card.releasePointerCapture && drag.pointerId !== undefined) {
@@ -11607,10 +11753,44 @@
             this.ghostEl = null;
           }
 
-          const newOrder = this.getDirectCards(drag.state.gridEl).map(c => c.dataset.kpiKey);
-          drag.state.currentOrder = [...newOrder];
+          const { gridEl } = drag.state;
+          let layoutToggled = false;
+          if (drag.pendingLayout) {
+            const cardsBefore = this.getDirectCards(gridEl).filter(c => c.offsetParent !== null && !c.classList.contains('hidden'));
+            const firstRects = captureRects(cardsBefore);
+            drag.state.isPermuting = true;
+            try {
+              if (drag.pendingLayout.stacked) {
+                gridEl.classList.add('algrok-grid-stacked');
+                if (drag.pendingLayout.position === 'top' && cardsBefore[0] && cardsBefore[0] !== drag.card) {
+                  gridEl.insertBefore(drag.card, cardsBefore[0]);
+                } else {
+                  gridEl.appendChild(drag.card);
+                }
+                layoutToggled = true;
+              } else {
+                gridEl.classList.remove('algrok-grid-stacked');
+                const tgt = drag.pendingLayout.targetCard;
+                if (tgt && tgt.parentElement === gridEl && tgt !== drag.card) {
+                  if (drag.pendingLayout.side === 'left') {
+                    gridEl.insertBefore(drag.card, tgt);
+                  } else {
+                    gridEl.insertBefore(drag.card, tgt.nextSibling);
+                  }
+                }
+                layoutToggled = true;
+              }
+              playFlipShift(cardsBefore, firstRects, null, 260);
+            } finally {
+              setTimeout(() => { drag.state.isPermuting = false; }, 0);
+            }
+          }
 
-          const changed = !this.isDefaultOrder(drag.initialOrder, newOrder);
+          const newOrder = this.getDirectCards(gridEl).map(c => c.dataset.kpiKey);
+          drag.state.currentOrder = [...newOrder];
+          const isStackedNow = gridEl.classList.contains('algrok-grid-stacked');
+
+          const changed = layoutToggled || !this.isDefaultOrder(drag.initialOrder, newOrder);
           if (changed) {
             drag.card.classList.add('kpi-reorder-flash');
             setTimeout(() => drag.card.classList.remove('kpi-reorder-flash'), 650);
@@ -11621,7 +11801,7 @@
                 });
               } catch (err) {}
             }
-            this.saveOrder(drag.gridId, newOrder);
+            this.saveOrder(drag.gridId, newOrder, isStackedNow);
           }
           this.updateResetButtonVisibility(drag.gridId);
         }
@@ -11663,10 +11843,15 @@
         const state = this.grids.get(gridId);
         if (!state) return;
 
+        state.gridEl.classList.remove('algrok-grid-stacked');
         this.applyOrderToGrid(gridId, state.originalKeys, true);
-        if (this.serverPreferences) delete this.serverPreferences[gridId];
+        if (this.serverPreferences) {
+          delete this.serverPreferences[gridId];
+          delete this.serverPreferences[`${gridId}__stacked`];
+        }
         try {
           localStorage.removeItem(this.storagePrefix + gridId);
+          localStorage.removeItem(this.storagePrefix + gridId + '__stacked');
         } catch (e) {}
         fetch(`/api/kpi_preferences?gridId=${encodeURIComponent(gridId)}`, {
           method: 'DELETE'
@@ -11686,18 +11871,25 @@
         }
       }
 
-      saveOrder(gridId, order) {
+      saveOrder(gridId, order, stacked = null) {
         if (!this.serverPreferences) this.serverPreferences = {};
         this.serverPreferences[gridId] = order;
+        if (stacked !== null) {
+          this.serverPreferences[`${gridId}__stacked`] = Boolean(stacked);
+        }
         try {
           localStorage.setItem(this.storagePrefix + gridId, JSON.stringify(order));
+          if (stacked !== null) {
+            localStorage.setItem(this.storagePrefix + gridId + '__stacked', JSON.stringify(Boolean(stacked)));
+          }
         } catch (e) {
           console.warn('Error saving KPI order locally:', e);
         }
+        const payload = stacked === null ? { gridId, order } : { gridId, order, stacked: Boolean(stacked) };
         fetch('/api/kpi_preferences', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ gridId, order })
+          body: JSON.stringify(payload)
         }).catch(err => console.warn('Error syncing KPI order to server:', err));
       }
 
@@ -11742,6 +11934,7 @@
                   localStorage.setItem(this.storagePrefix + gId, JSON.stringify(ord));
                 } catch (e) {}
               }
+              this.scanAndAttachAll();
             }
           }
         } catch (e) {
@@ -13425,7 +13618,7 @@
         // o abrir selectores de icono/color sin disparar navegación ni salir del modo edición.
         document.addEventListener('click', (e) => {
           if (!window.algrokEditMode) return;
-          if (e.target.closest('#btn-ui-customizer, #btn-ui-reset-all, #btn-notifications-bell, #btn-theme-toggle, .sidebar-btn-eye, .sidebar-tab-icon, .sidebar-icon-popover, .sidebar-icon-choice, .algrok-color-palette-popover, .algrok-color-swatch, .algrok-color-native, .algrok-scope-btn, .algrok-prop-tab, .algrok-hex-copy, .algrok-orig-chip, .algrok-undo-color-btn')) {
+          if (e.target.closest('#btn-ui-customizer, #btn-ui-reset-all, #btn-notifications-bell, #btn-theme-toggle, .kpi-drag-grip, .section-drag-grip, .sidebar-btn-eye, .sidebar-tab-icon, .sidebar-icon-popover, .sidebar-icon-choice, .algrok-color-palette-popover, .algrok-color-swatch, .algrok-color-native, .algrok-scope-btn, .algrok-prop-tab, .algrok-hex-copy, .algrok-orig-chip, .algrok-undo-color-btn')) {
             return;
           }
 

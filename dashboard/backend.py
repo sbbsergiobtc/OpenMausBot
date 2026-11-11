@@ -4027,6 +4027,7 @@ class TableColumnPreferencePayload(BaseModel):
 class KpiPreferencePayload(BaseModel):
     gridId: str
     order: List[str]
+    stacked: Optional[bool] = None
 
 
 class LayoutPreferencePayload(BaseModel):
@@ -4110,11 +4111,14 @@ def get_kpi_preferences():
 @app.post("/api/kpi_preferences")
 def save_kpi_preference(payload: KpiPreferencePayload):
     _save_json_pref(KPI_PREFS_FILE, payload.gridId, payload.order)
-    return {"status": "ok", "gridId": payload.gridId, "order": payload.order}
+    if payload.stacked is not None:
+        _save_json_pref(KPI_PREFS_FILE, f"{payload.gridId}__stacked", bool(payload.stacked))
+    return {"status": "ok", "gridId": payload.gridId, "order": payload.order, "stacked": payload.stacked}
 
 
 @app.delete("/api/kpi_preferences")
 def delete_kpi_preference(gridId: str = Query(...)):
+    _delete_json_pref(KPI_PREFS_FILE, f"{gridId}__stacked")
     return _delete_json_pref(KPI_PREFS_FILE, gridId)
 
 
