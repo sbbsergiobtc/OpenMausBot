@@ -1314,6 +1314,16 @@
       background-color: #1E273B !important;
       color: #FFFFFF !important;
     }
+    /* Garantizar contención horizontal estricta dentro del grid principal en todas las pestañas */
+    main, #tabs-wrapper, .tab-pane, .tab-pane > div, .glass-card, .panel-card, .algrok-section-card, [data-kpi-grid], [data-section-grid] {
+      min-width: 0;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+    .tab-pane .overflow-x-auto {
+      max-width: 100%;
+      min-width: 0;
+    }
 </style>
 
   <!-- TradingView Official Advanced Charts Script -->
@@ -1328,7 +1338,7 @@
   <!-- ==========================================================================
        APP SHELL PRINCIPAL (Max-width 1240px, centrado, radius 24px, sombra suave)
        ========================================================================== -->
-  <div class="max-w-[1240px] mx-auto rounded-[24px] shadow-[0_20px_50px_rgba(24,26,32,0.08)] overflow-clip border border-[#E6E2D8] bg-[#FDFDFB] flex flex-col lg:grid lg:grid-cols-[280px_1fr] min-h-[92vh]">
+  <div class="max-w-[1240px] mx-auto rounded-[24px] shadow-[0_20px_50px_rgba(24,26,32,0.08)] overflow-clip border border-[#E6E2D8] bg-[#FDFDFB] flex flex-col lg:grid lg:grid-cols-[280px_minmax(0,1fr)] min-h-[92vh]">
 
     <!-- ==================== SIDEBAR IZQUIERDO FIJO (#EFECE6, padding 24px) ==================== -->
     <aside class="bg-[#EFECE6] p-6 border-b lg:border-b-0 lg:border-r border-[#E6E2D8] lg:rounded-l-[24px] flex flex-col justify-between select-none">
@@ -1420,7 +1430,7 @@
       </aside>
 
     <!-- ==================== MAIN CONTENT SURFACE (#FDFDFB, padding 24px) ==================== -->
-    <main class="bg-[#FDFDFB] p-4 sm:p-6 lg:p-7 flex flex-col space-y-6 overflow-x-clip lg:rounded-r-[24px]">
+    <main class="bg-[#FDFDFB] p-4 sm:p-6 lg:p-7 flex flex-col space-y-6 overflow-x-clip lg:rounded-r-[24px] min-w-0">
 
       <!-- ==================== HEADER SUPERIOR FIJO DEL ÁREA DE CONTENIDO ==================== -->
       <header class="sticky top-0 z-30 -mx-4 sm:-mx-6 lg:-mx-7 -mt-4 sm:-mt-6 lg:-mt-7 px-4 sm:px-6 lg:px-7 pt-4 sm:pt-6 lg:pt-7 pb-4 border-b border-[#E6E2D8] bg-[#FDFDFB]/95 backdrop-blur-md lg:rounded-tr-[24px] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -1501,7 +1511,7 @@
       </header>
 
       <!-- ==================== CONTENEDORES DE PESTAÑAS OPERATIVAS ==================== -->
-      <div id="tabs-wrapper" class="w-full">
+      <div id="tabs-wrapper" class="w-full min-w-0">
         <div id="tab-content-dashboard" class="tab-pane space-y-6">
 
           <!-- ==================== HEADER EJECUTIVO & CONTROLES GLOBALES ==================== -->
