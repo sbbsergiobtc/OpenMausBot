@@ -1320,12 +1320,11 @@
             
             <!-- KPI 1: Balance Total en Forward Test -->
             <div class="p-4 sm:p-5 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] shadow-xs flex flex-col justify-between hover:border-[#D1D1D6] transition">
-              <div class="flex flex-wrap items-center justify-between gap-1.5 mb-2.5">
-                <div class="flex items-center gap-2 shrink-0 min-w-0">
+              <div class="flex items-center justify-between mb-2.5">
+                <div class="flex items-center gap-2 min-w-0">
                   <i class="fa-solid fa-wallet text-[#1D1D1F] text-xs shrink-0"></i>
                   <span class="text-[11px] uppercase tracking-wider font-semibold text-[#6E6E73] truncate">Balance Total FT</span>
                 </div>
-                <span id="cockpit-kpi-total-subtext" class="badge-brand-indigo font-mono text-[10px] py-0.5 px-1.5 max-w-full truncate">Sincronizando...</span>
               </div>
               <div class="text-lg sm:text-2xl font-bold font-mono text-[#1D1D1F] tracking-tight" id="cockpit-kpi-total-balance">$--.--</div>
             </div>
@@ -9516,9 +9515,7 @@
 
       // 1. Balance Total FT
       const kpiBal = document.getElementById('cockpit-kpi-total-balance');
-      const kpiSubText = document.getElementById('cockpit-kpi-total-subtext');
       if (kpiBal) kpiBal.innerText = '$' + Number(balVal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      setCustomAwareText(kpiSubText, subBadgeText);
 
       // 2. PnL Realizado Total
       const kpiRealized = document.getElementById('cockpit-kpi-realized-pnl');
