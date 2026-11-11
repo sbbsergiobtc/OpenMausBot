@@ -529,7 +529,6 @@
     }
     .algrok-kpi-card {
       position: relative;
-      will-change: transform;
     }
     body.algrok-edit-mode .algrok-kpi-card {
       cursor: grab;
@@ -572,6 +571,26 @@
     }
     .algrok-grid-stacked {
       grid-template-columns: minmax(0, 1fr) !important;
+    }
+    .algrok-grid-stacked > .algrok-kpi-card {
+      width: 100%;
+      transform: none !important;
+      filter: none !important;
+      -webkit-font-smoothing: subpixel-antialiased;
+    }
+    [data-kpi-grid^="forward-card"] .badge-success-live,
+    [data-kpi-grid^="forward-card"] .badge-neutral-soft,
+    [data-kpi-grid^="forward-card"] .badge-brand-indigo,
+    [data-kpi-grid^="forward-card"] .badge-warning-risk {
+      font-size: 9.5px !important;
+      padding: 1px 6px !important;
+      line-height: 1.35 !important;
+    }
+    .algrok-grid-stacked [data-kpi-grid^="forward-card"] {
+      gap: 0.75rem !important;
+    }
+    .algrok-grid-stacked [data-kpi-grid^="forward-card"] > div {
+      padding: 0.85rem 1rem !important;
     }
     .algrok-row-drop-guide {
       grid-column: 1 / -1;
@@ -634,7 +653,6 @@
        ========================================================================= */
     .algrok-section-card {
       position: relative;
-      will-change: transform;
     }
     body.algrok-edit-mode .algrok-section-card.section-draggable-surface {
       cursor: grab;
@@ -10758,14 +10776,26 @@
         const first = firstRects.get(el);
         if (!first) return;
         const last = el.getBoundingClientRect();
-        const dx = first.left - last.left;
-        const dy = first.top - last.top;
-        if (Math.abs(dx) < 0.8 && Math.abs(dy) < 0.8) return;
+        // Si el ancho cambia al cambiar de columnas (1 col <-> 2 cols), evitar transformaciones FLIP que rasterizan borroso
+        if (Math.abs(first.width - last.width) > 8) {
+          if (el._algrokFlipAnim) {
+            try { el._algrokFlipAnim.cancel(); } catch (err) {}
+            el._algrokFlipAnim = null;
+          }
+          el.style.transform = '';
+          el.style.willChange = '';
+          el.style.removeProperty('--motion-scale');
+          return;
+        }
+        const dx = Math.round(first.left - last.left);
+        const dy = Math.round(first.top - last.top);
+        if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
 
         try {
           if (el._algrokFlipAnim) {
             el._algrokFlipAnim.cancel();
           }
+          el.style.willChange = 'transform';
           el._algrokFlipAnim = el.animate(
             [
               { transform: `translate3d(${dx}px, ${dy}px, 0)` },
@@ -10776,8 +10806,16 @@
               easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
             }
           );
-          el._algrokFlipAnim.onfinish = () => { el._algrokFlipAnim = null; };
-        } catch (err) {}
+          const cleanup = () => {
+            el._algrokFlipAnim = null;
+            el.style.willChange = '';
+            el.style.transform = '';
+          };
+          el._algrokFlipAnim.onfinish = cleanup;
+          el._algrokFlipAnim.oncancel = cleanup;
+        } catch (err) {
+          el.style.willChange = '';
+        }
       });
     }
 
@@ -11780,7 +11818,9 @@
                 }
                 layoutToggled = true;
               }
-              playFlipShift(cardsBefore, firstRects, null, 260);
+              if (!layoutToggled) {
+                playFlipShift(cardsBefore, firstRects, null, 240);
+              }
             } finally {
               setTimeout(() => { drag.state.isPermuting = false; }, 0);
             }
@@ -11790,16 +11830,29 @@
           drag.state.currentOrder = [...newOrder];
           const isStackedNow = gridEl.classList.contains('algrok-grid-stacked');
 
+          drag.card.style.transform = '';
+          drag.card.style.willChange = '';
+          drag.card.style.removeProperty('--motion-scale');
+
           const changed = layoutToggled || !this.isDefaultOrder(drag.initialOrder, newOrder);
           if (changed) {
             drag.card.classList.add('kpi-reorder-flash');
             setTimeout(() => drag.card.classList.remove('kpi-reorder-flash'), 650);
-            if (window.Motion && Motion.animate) {
+            if (!layoutToggled && drag.card.offsetWidth <= 320 && window.Motion && Motion.animate) {
               try {
-                Motion.animate(drag.card, { scale: [0.97, 1.02, 1] }, {
+                const anim = Motion.animate(drag.card, { scale: [0.97, 1.02, 1] }, {
                   easing: Motion.spring({ stiffness: 450, damping: 24 })
                 });
+                if (anim && anim.finished) {
+                  anim.finished.then(() => {
+                    drag.card.style.transform = '';
+                    drag.card.style.removeProperty('--motion-scale');
+                  }).catch(() => {});
+                }
               } catch (err) {}
+            }
+            if (layoutToggled) {
+              requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
             }
             this.saveOrder(drag.gridId, newOrder, isStackedNow);
           }
@@ -12308,13 +12361,9 @@
           if (!this.isDefaultOrder(drag.initialOrder, newOrder)) {
             drag.sec.classList.add('kpi-reorder-flash');
             setTimeout(() => drag.sec.classList.remove('kpi-reorder-flash'), 650);
-            if (window.Motion && Motion.animate) {
-              try {
-                Motion.animate(drag.sec, { scale: [0.985, 1.012, 1] }, {
-                  easing: Motion.spring({ stiffness: 420, damping: 24 })
-                });
-              } catch (err) {}
-            }
+            drag.sec.style.transform = '';
+            drag.sec.style.willChange = '';
+            drag.sec.style.removeProperty('--motion-scale');
             this.saveOrder(drag.gridId, newOrder);
             window.dispatchEvent(new Event('resize'));
           }
