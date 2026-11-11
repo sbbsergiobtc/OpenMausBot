@@ -61,11 +61,43 @@ def get_available_chart_strategies() -> List[Dict[str, str]]:
             for r in rows:
                 sid = r['strategy_id']
                 dm = str(r['desk_mode'] or 'CAPITAL_PROPIO').upper()
-                stype = 'Prop Firm' if 'PROP' in dm else 'Capital Propio'
+                sid_u = str(sid or '').upper()
+                is_prop_v = False if sid_u.startswith(('CAP-', 'CRYPTO-', 'STRAT-')) else (('PROP_FIRM' in dm) or dm.startswith('PROP') or sid_u.startswith(('PROP', 'HYB')))
+                stype = 'Prop Firm' if is_prop_v else 'Capital Propio'
                 anchor = r['macro_anchor'] or sid
                 _add(sid, f"{anchor} [{r['status']}]", r['asset'] or 'NDX', r['timeframe'] or '1h', stype)
         except Exception:
             pass
+
+    # 2b. Leer todas las estrategias activas/shadow desde Orchestrator y Forward Test State
+    for json_path in (BASE_DIR / 'data/paper_trades/regime_orchestrator_state.json', BASE_DIR / 'data/paper_trades/prop_firm_forward_test_state.json'):
+        if json_path.exists():
+            try:
+                with open(json_path, 'r', encoding='utf-8') as f:
+                    jdata = json.load(f)
+                cand_lists = []
+                if 'strategies_ab_comparison' in jdata or 'strategies_ab' in jdata:
+                    cand_lists.append(jdata.get('strategies_ab_comparison') or jdata.get('strategies_ab') or [])
+                for b_key in ('capital_propio', 'prop_firm'):
+                    if isinstance(jdata.get(b_key), dict):
+                        cand_lists.append(jdata[b_key].get('active_strategies', []))
+                for clist in cand_lists:
+                    for s in clist:
+                        if not isinstance(s, dict):
+                            continue
+                        sid = str(s.get('strategy_id') or s.get('id') or '').strip()
+                        if not sid:
+                            continue
+                        dm = str(s.get('desk_mode') or s.get('branch') or 'CAPITAL_PROPIO').upper()
+                        sid_u = sid.upper()
+                        is_prop = False if sid_u.startswith(('CAP-', 'CRYPTO-', 'STRAT-')) else (('PROP_FIRM' in dm) or dm.startswith('PROP') or sid_u.startswith(('PROP', 'HYB')))
+                        asset = str(s.get('asset') or s.get('symbol') or ('SPX' if 'SPX' in sid else ('NDX' if 'NDX' in sid else 'BTC')))
+                        tf_s = str(s.get('timeframe') or s.get('tf') or ('5m RTH' if is_prop else '1h'))
+                        role_lbl = s.get('role') or ('TITULAR' if sid in ('CAP-SPX-006', 'CAP-NDX-005', 'CRYPTO-BTC-001', 'PROP-FX-EUR-001') else 'SUPLENTE')
+                        arch = s.get('family') or s.get('archetype') or s.get('macro_anchor') or sid
+                        _add(sid, f"{arch} [{role_lbl}]", asset, tf_s, 'Prop Firm' if is_prop else 'Capital Propio')
+            except Exception:
+                pass
 
     # 3. Asegurar presencia de modelos de referencia recientes
     _add("STRAT-20261028-035", "BTC 1h Donchian + Entropía Shannon", "BTC/USDT", "1h", "Capital Propio")

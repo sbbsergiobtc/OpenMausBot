@@ -2729,6 +2729,7 @@
                 <th class="py-2.5 px-3 text-center whitespace-nowrap">Orquestador Vivo</th>
                 <th class="py-2.5 px-3 text-right whitespace-nowrap">Libro A (Individual)</th>
                 <th class="py-2.5 px-3 text-right whitespace-nowrap">Libro B (Orquestado)</th>
+                <th class="py-2.5 px-3 text-right whitespace-nowrap">Libro C (Q-Learning)</th>
                 <th class="py-2.5 px-3 text-right whitespace-nowrap">Alfa Orq.</th>
                 <th class="py-2.5 px-3 text-center whitespace-nowrap">Acción</th>
               </tr>
@@ -7398,22 +7399,33 @@
         return '<span class="badge-brand-indigo font-mono">PROP FUTUROS CME (6%/3%)</span>';
       } else if (dm === 'PROP_FIRM_CFD') {
         return '<span class="badge-warning-risk font-mono">PROP CFD (8%/8%)</span>';
-      } else if (dm.includes('PROP')) {
+      } else if (dm.includes('PROP_FIRM') || dm.startsWith('PROP')) {
         return '<span class="badge-brand-indigo font-mono">PROP FIRM EOD</span>';
       }
       return '<span class="badge-success-live font-mono">CAPITAL PROPIO (1.0%)</span>';
     }
 
     function formatBacktestTargetOrBnhHtml(s) {
-      const dm = String(s.desk_mode || '').toUpperCase();
-      if (dm === 'CAPITAL_PROPIO' || (!dm.includes('PROP') && s.cagr_pct != null)) {
-        const cagr = Number(s.cagr_pct != null ? s.cagr_pct : (s.backtest_cagr_pct || 0)).toFixed(2);
-        const bnh = Number(s.bnh_cagr_pct || 0).toFixed(2);
-        const bnhSign = Number(bnh) >= 0 ? '+' : '';
-        return `<div class="font-bold text-[#065F46]">+${cagr}%/año</div><div class="text-[10px] text-[#6E6E73]">vs BnH ${bnhSign}${bnh}% (✅)</div>`;
+      const dm = String(s.desk_mode || s.branch || '').toUpperCase();
+      const sid = String(s.strategy_id || s.id || '').toUpperCase();
+      const isProp = dm.includes('PROP_FIRM') || dm.startsWith('PROP') || sid.startsWith('PROP') || sid.startsWith('HYB');
+      if (!isProp) {
+        const cagrVal = s.cagr_pct != null ? s.cagr_pct : (s.backtest_cagr_pct != null ? s.backtest_cagr_pct : null);
+        if (cagrVal == null) {
+          return `<div class="font-bold text-[#6E6E73]">Sin CAGR BT</div><div class="text-[10px] text-[#6E6E73]">Multi-Año</div>`;
+        }
+        const cagrNum = Number(cagrVal);
+        const cagr = cagrNum.toFixed(2);
+        const cagrSign = cagrNum >= 0 ? '+' : '';
+        const bnhNum = Number(s.bnh_cagr_pct || 0);
+        const bnh = bnhNum.toFixed(2);
+        const bnhSign = bnhNum >= 0 ? '+' : '';
+        const beats = (s.beats_bnh != null) ? Boolean(s.beats_bnh) : (cagrNum > bnhNum);
+        return `<div class="font-bold ${cagrNum >= 0 ? 'text-[#065F46]' : 'text-[#D70015]'}">${cagrSign}${cagr}%/año</div><div class="text-[10px] text-[#6E6E73]">vs BnH ${bnhSign}${bnh}% (${beats ? '✅' : '—'})</div>`;
       } else {
-        const dTarget = s.days_to_target != null ? `${Number(s.days_to_target).toFixed(1)}d` : '<15d';
-        return `<div class="font-bold text-[#3C45A5]">Target en ${dTarget}</div><div class="text-[10px] text-[#065F46] font-semibold">🏆 Tier Oro (&lt;15d)</div>`;
+        const dTarget = s.days_to_target != null ? `${Number(s.days_to_target).toFixed(1)}d` : (String(s.time_to_target || '').includes('(') ? String(s.time_to_target).split('(')[1].replace(')', '') : '<15d');
+        const tierTxt = s.time_to_target_tier || s.time_to_target || 'Tier Oro (<15d)';
+        return `<div class="font-bold text-[#3C45A5]">Target en ${dTarget}</div><div class="text-[10px] text-[#065F46] font-semibold">🏆 ${tierTxt}</div>`;
       }
     }
 
@@ -7438,12 +7450,14 @@
       const activeTbody = document.getElementById('ft-active-strategies-tbody');
       const activeCount = document.getElementById('ft-active-strat-count');
       const badgesCont = document.getElementById('ft-active-badges');
-      
-      if (activeCount) activeCount.innerText = `${activeStrats.length} Estrategias en Vivo`;
+
+      const titularesCnt = activeStrats.filter(x => (x.role || '').toUpperCase() === 'TITULAR').length;
+      const suplentesCnt = activeStrats.length - titularesCnt;
+      if (activeCount) activeCount.innerText = `${activeStrats.length} Estrategias (${titularesCnt} Titulares · ${suplentesCnt} Shadow $1k)`;
       if (window.AlgrokTables && typeof window.AlgrokTables.reapplyOrder === 'function') {
         setTimeout(() => window.AlgrokTables.reapplyOrder('table-ft-active'), 50);
       }
-      
+
       if (badgesCont && activeStrats.length > 0) {
         badgesCont.innerHTML = activeStrats.map(s => 
           `<span class="px-2 py-0.5 rounded bg-[#EEF2FF] text-[#3730A3] font-bold border border-[#C7D2FE] text-[11px]">${s.strategy_id || s.id}</span>`
@@ -7455,25 +7469,44 @@
           activeTbody.innerHTML = activeStrats.map(s => {
             const sid = s.strategy_id || s.id;
             const sym = s.symbol || s.asset || 'NDX';
-            const tf = s.timeframe || s.tf || (s.desk_mode === 'CAPITAL_PROPIO' ? '1h/4h' : '5m RTH');
-            const roiBt = Number(s.roi_total_pct != null ? s.roi_total_pct : (s.backtest_roi_total_pct || 0)).toFixed(2);
+            const tf = s.timeframe || s.tf || (isCap ? '1h/4h' : '5m RTH');
+            const roiBtNum = Number(s.roi_total_pct != null ? s.roi_total_pct : (s.backtest_roi_total_pct || 0));
+            const roiBtStr = `${roiBtNum >= 0 ? '+' : ''}${roiBtNum.toFixed(2)}%`;
             const isOrchOn = (s.orchestrator_state || 'ACTIVE_ON') === 'ACTIVE_ON';
             const orchBadge = isOrchOn
-              ? `<span class="badge-success-live font-mono">● ACTIVA [ON]</span>`
-              : `<span class="badge-warning-risk font-mono">⏸ PAUSADA [HOLD]</span>`;
-            const indEq = Number(s.individual_equity_usd || (s.individual_book && s.individual_book.equity_usd) || 1000.0).toFixed(2);
-            const indRoi = Number(s.individual_roi_pct != null ? s.individual_roi_pct : ((s.individual_book && s.individual_book.net_roi_pct) || 0)).toFixed(2);
-            const orchEq = Number(s.virtual_balance || (s.orchestrated_book && s.orchestrated_book.equity_usd) || 1000.0).toFixed(2);
-            const orchRoi = Number(s.orchestrated_roi_pct != null ? s.orchestrated_roi_pct : ((s.orchestrated_book && s.orchestrated_book.net_roi_pct) || 0)).toFixed(2);
-            const alphaPct = Number(s.orchestrator_alpha_pct || (orchRoi - indRoi)).toFixed(2);
+              ? `<span class="badge-success-live font-mono" title="${s.orchestrator_reason || ''}">● ACTIVA [ON]</span>`
+              : `<span class="badge-warning-risk font-mono" title="${s.orchestrator_reason || ''}">⏸ PAUSADA [HOLD]</span>`;
+
+            const bookA = s.individual_book || {};
+            const bookB = s.orchestrated_book || {};
+            const bookC = s.q_learning_book || {};
+
+            const indEq = Number(s.individual_equity_usd != null ? s.individual_equity_usd : (bookA.equity_usd != null ? bookA.equity_usd : 1000.0)).toFixed(2);
+            const indRoiNum = Number(s.individual_roi_pct != null ? s.individual_roi_pct : (bookA.net_roi_pct || 0));
+            const indTr = Number(bookA.trades_count || 0);
+
+            const orchEq = Number(bookB.equity_usd != null ? bookB.equity_usd : (s.virtual_equity != null ? s.virtual_equity : (s.virtual_balance || 1000.0))).toFixed(2);
+            const orchRoiNum = Number(s.orchestrated_roi_pct != null ? s.orchestrated_roi_pct : (bookB.net_roi_pct || 0));
+            const orchTr = Number(bookB.trades_count || 0);
+
+            const qlEq = Number(s.q_learning_equity_usd != null ? s.q_learning_equity_usd : (bookC.equity_usd != null ? bookC.equity_usd : 1000.0)).toFixed(2);
+            const qlRoiNum = Number(s.q_learning_roi_pct != null ? s.q_learning_roi_pct : (bookC.net_roi_pct || 0));
+            const qlMult = Number(bookC.q_multiplier != null ? bookC.q_multiplier : 1.0).toFixed(2);
+
+            const alphaNum = Number(s.orchestrator_alpha_pct != null ? s.orchestrator_alpha_pct : (orchRoiNum - indRoiNum));
+            const alphaSign = alphaNum >= 0 ? '+' : '';
+            const roleUpper = String(s.role || 'SUPLENTE').toUpperCase();
+            const rolePill = roleUpper === 'TITULAR'
+              ? `<span class="ml-1.5 px-1.5 py-0.5 rounded bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] text-[9px] font-bold">TITULAR VIVO</span>`
+              : `<span class="ml-1.5 px-1.5 py-0.5 rounded bg-[#F5F5F7] text-[#6E6E73] border border-[#E5E5EA] text-[9px] font-semibold">SHADOW $1K</span>`;
 
             return `
             <tr class="hover:bg-slate-900/60 transition font-mono text-xs">
               <td class="py-2.5 px-3 font-bold text-[#181A20] whitespace-nowrap">
-                <span class="text-[#3C45A5] font-bold">${sid}</span>
+                <span class="text-[#3C45A5] font-bold">${sid}</span>${rolePill}
               </td>
               <td class="py-2.5 px-3 whitespace-nowrap">
-                ${formatDeskBadgeHtml(s.desk_mode)}
+                ${formatDeskBadgeHtml(s.desk_mode || s.branch || (isCap ? 'CAPITAL_PROPIO' : 'PROP_FIRM'))}
               </td>
               <td class="py-2.5 px-3 whitespace-nowrap">
                 <span class="px-2 py-0.5 rounded bg-[#FAFAFC] border border-[#E5E5EA] text-[#181A20] font-bold">${sym} · ${tf}</span>
@@ -7481,8 +7514,8 @@
               <td class="py-2.5 px-3 text-[#181A20] whitespace-nowrap text-[11px]">
                 <span class="font-bold text-[#3C45A5]">${s.family || s.macro_anchor || 'QUANT'}</span> · <span class="text-[#6E6E73]">${s.params || s.symbolic_trigger || ''}</span>
               </td>
-              <td class="py-2.5 px-3 text-right font-bold text-[#065F46] whitespace-nowrap">
-                +${roiBt}%
+              <td class="py-2.5 px-3 text-right font-bold ${roiBtNum >= 0 ? 'text-[#065F46]' : 'text-[#D70015]'} whitespace-nowrap">
+                ${roiBtStr}
               </td>
               <td class="py-2.5 px-3 text-right whitespace-nowrap">
                 ${formatBacktestTargetOrBnhHtml(s)}
@@ -7492,14 +7525,18 @@
               </td>
               <td class="py-2.5 px-3 text-right whitespace-nowrap">
                 <div class="font-bold text-[#181A20]">$${indEq}</div>
-                <div class="text-[10px] ${Number(indRoi) >= 0 ? 'text-[#065F46]' : 'text-[#D70015]'}">${Number(indRoi) >= 0 ? '+' : ''}${indRoi}%</div>
+                <div class="text-[10px] ${indRoiNum >= 0 ? 'text-[#065F46]' : 'text-[#D70015]'}">${indRoiNum >= 0 ? '+' : ''}${indRoiNum.toFixed(2)}% · ${indTr} tr</div>
               </td>
               <td class="py-2.5 px-3 text-right whitespace-nowrap">
-                <div class="font-bold text-[#065F46]">$${orchEq}</div>
-                <div class="text-[10px] text-[#065F46] font-bold">+${orchRoi}%</div>
+                <div class="font-bold ${orchRoiNum >= 0 ? 'text-[#065F46]' : 'text-[#D70015]'}">$${orchEq}</div>
+                <div class="text-[10px] ${orchRoiNum >= 0 ? 'text-[#065F46]' : 'text-[#D70015]'} font-bold">${orchRoiNum >= 0 ? '+' : ''}${orchRoiNum.toFixed(2)}% · ${orchTr} tr</div>
               </td>
-              <td class="py-2.5 px-3 text-right font-bold text-[#3C45A5] whitespace-nowrap">
-                +${alphaPct}%
+              <td class="py-2.5 px-3 text-right whitespace-nowrap">
+                <div class="font-bold ${qlRoiNum >= 0 ? 'text-[#3C45A5]' : 'text-[#D70015]'}">$${qlEq}</div>
+                <div class="text-[10px] ${qlRoiNum >= 0 ? 'text-[#3C45A5]' : 'text-[#D70015]'} font-semibold">${qlRoiNum >= 0 ? '+' : ''}${qlRoiNum.toFixed(2)}% (${qlMult}x)</div>
+              </td>
+              <td class="py-2.5 px-3 text-right font-bold ${alphaNum >= 0 ? 'text-[#3C45A5]' : 'text-[#D70015]'} whitespace-nowrap">
+                ${alphaSign}${alphaNum.toFixed(2)}%
               </td>
               <td class="py-2.5 px-3 text-center whitespace-nowrap">
                 <button onclick="viewStrategy('${sid}')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-semibold bg-[#FAF7F2] text-[#181A20] hover:bg-[#EAE5DC] transition border border-[#D5D0C5] cursor-pointer">
@@ -7509,7 +7546,7 @@
             </tr>
           `}).join('');
         } else {
-          activeTbody.innerHTML = '<tr><td colspan="11" class="text-center py-6 text-slate-500">Sin estrategias en forward test activo</td></tr>';
+          activeTbody.innerHTML = '<tr><td colspan="12" class="text-center py-6 text-slate-500">Sin estrategias en forward test activo</td></tr>';
         }
       }
     }
@@ -7536,10 +7573,11 @@
       const tbody = document.getElementById('portfolio-table-tbody');
       if (!tbody) return;
       const d = orchData || cachedOrchestratorData;
-      if (!d || !d.strategies_ab_comparison) return;
+      const listRaw = (d && (d.strategies_ab_comparison || d.strategies_ab)) || [];
+      if (!d || listRaw.length === 0) return;
 
       const isCap = (currentDeskMode === 'CAPITAL_PROPIO');
-      const allStrats = d.strategies_ab_comparison || [];
+      const allStrats = listRaw;
       const visibleStrats = allStrats.filter(s => isCap ? (s.desk_mode === 'CAPITAL_PROPIO') : (s.desk_mode !== 'CAPITAL_PROPIO'));
 
       const countBadge = document.getElementById('portfolio-count-badge');
@@ -7550,38 +7588,41 @@
       }
 
       tbody.innerHTML = allStrats.map(s => {
+        const sid = s.strategy_id || s.id;
         const rowDesk = s.desk_mode === 'CAPITAL_PROPIO' ? 'CAPITAL_PROPIO' : 'PROP_FIRM';
         const displayStyle = (rowDesk === currentDeskMode) ? '' : 'display: none;';
         const isOn = s.orchestrator_state === 'ACTIVE_ON';
         const orchBadge = isOn
           ? `<span class="badge-success-live font-mono">● ACTIVA [ON]</span>`
           : `<span class="badge-warning-risk font-mono">⏸ PAUSADA [HOLD]</span>`;
-        const indEq = Number(s.individual_book.equity_usd).toFixed(2);
-        const indRoi = Number(s.individual_book.net_roi_pct).toFixed(2);
-        const orchEq = Number(s.orchestrated_book.equity_usd).toFixed(2);
-        const orchRoi = Number(s.orchestrated_book.net_roi_pct).toFixed(2);
+        const indB = s.individual_book || {};
+        const orcB = s.orchestrated_book || {};
+        const indEq = Number(indB.equity_usd != null ? indB.equity_usd : (indB.current_equity || 1000)).toFixed(2);
+        const indRoi = Number(indB.net_roi_pct || 0).toFixed(2);
+        const orchEq = Number(orcB.equity_usd != null ? orcB.equity_usd : (orcB.current_equity || 1000)).toFixed(2);
+        const orchRoi = Number(orcB.net_roi_pct || 0).toFixed(2);
 
         return `
           <tr class="strategy-row hover:bg-[#F5EFE6]/50 transition" data-desk="${rowDesk}" style="${displayStyle}">
             <td class="py-2.5 px-3 font-mono font-bold text-[#181A20] whitespace-nowrap">
-              <span class="w-2 h-2 rounded-full ${isOn ? 'bg-emerald-600' : 'bg-amber-500'} inline-block mr-1.5"></span>${s.id}
+              <span class="w-2 h-2 rounded-full ${isOn ? 'bg-emerald-600' : 'bg-amber-500'} inline-block mr-1.5"></span>${sid}
             </td>
             <td class="py-2.5 px-3 whitespace-nowrap">${formatDeskBadgeHtml(s.desk_mode)}</td>
-            <td class="py-2.5 px-3 font-mono font-semibold text-[#181A20] whitespace-nowrap">${s.asset} · ${s.timeframe}</td>
-            <td class="py-2.5 px-3 text-[#55544E] whitespace-nowrap"><strong class="text-[#181A20] font-mono">${s.family}</strong> · ${s.params}</td>
-            <td class="py-2.5 px-3 text-right font-mono font-bold text-[#065F46] whitespace-nowrap">+${Number(s.backtest_roi_total_pct).toFixed(2)}%</td>
+            <td class="py-2.5 px-3 font-mono font-semibold text-[#181A20] whitespace-nowrap">${s.asset} · ${s.timeframe || s.tf || '1h'}</td>
+            <td class="py-2.5 px-3 text-[#55544E] whitespace-nowrap"><strong class="text-[#181A20] font-mono">${s.family || s.archetype || 'QUANT'}</strong> · ${s.params || ''}</td>
+            <td class="py-2.5 px-3 text-right font-mono font-bold text-[#065F46] whitespace-nowrap">+${Number(s.backtest_roi_total_pct || 0).toFixed(2)}%</td>
             <td class="py-2.5 px-3 text-right font-mono whitespace-nowrap">${formatBacktestTargetOrBnhHtml(s)}</td>
             <td class="py-2.5 px-3 text-right font-mono whitespace-nowrap">
-              <div class="font-bold text-[#181A20]">PF ${Number(s.backtest_pf).toFixed(2)}</div>
-              <div class="text-[10px] text-[#C86D3B] font-semibold">DD ${Number(s.backtest_max_dd).toFixed(2)}%</div>
+              <div class="font-bold text-[#181A20]">PF ${Number(s.backtest_pf || s.profit_factor || 0).toFixed(2)}</div>
+              <div class="text-[10px] text-[#C86D3B] font-semibold">DD ${Number(s.backtest_max_dd || s.max_dd_pct || 0).toFixed(2)}%</div>
             </td>
             <td class="py-2.5 px-3 text-center whitespace-nowrap">${orchBadge}</td>
             <td class="py-2.5 px-3 text-right font-mono whitespace-nowrap">
-              <div class="text-[11px] text-[#6E6E73]">A: $${indEq} (${indRoi >= 0 ? '+' : ''}${indRoi}%)</div>
-              <div class="font-bold text-[#065F46]">B: $${orchEq} (+${orchRoi}%)</div>
+              <div class="text-[11px] text-[#6E6E73]">A: $${indEq} (${Number(indRoi) >= 0 ? '+' : ''}${indRoi}%)</div>
+              <div class="font-bold ${Number(orchRoi) >= 0 ? 'text-[#065F46]' : 'text-[#D70015]'}">B: $${orchEq} (${Number(orchRoi) >= 0 ? '+' : ''}${orchRoi}%)</div>
             </td>
             <td class="py-2.5 px-3 text-center whitespace-nowrap">
-              <button onclick="viewStrategy('${s.id}')" class="px-2.5 py-1 rounded bg-[#EFECE6] hover:bg-[#EAE5DC] text-[#181A20] font-mono text-[11px] font-bold border border-[#E6E2D8] transition shadow-xs cursor-pointer">
+              <button onclick="viewStrategy('${sid}')" class="px-2.5 py-1 rounded bg-[#EFECE6] hover:bg-[#EAE5DC] text-[#181A20] font-mono text-[11px] font-bold border border-[#E6E2D8] transition shadow-xs cursor-pointer">
                 Ficha
               </button>
             </td>
@@ -7592,14 +7633,14 @@
 
     function renderRegimeOrchestratorUI(data) {
       if (!data) return;
-      const sum = data.ab_portfolio_summary || {};
-      const ind = sum.individual_book || {};
-      const orch = sum.orchestrated_book || {};
+      const sum = data.ab_portfolio_summary || data.summary || {};
+      const ind = sum.individual_book || sum.individual_portfolio || {};
+      const orch = sum.orchestrated_book || sum.orchestrated_portfolio || {};
 
       const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
       setTxt('orch-last-update-badge', 'Actualizado: ' + (data.timestamp_utc || 'En vivo'));
 
-      const abList = data.strategies_ab_comparison || [];
+      const abList = data.strategies_ab_comparison || data.strategies_ab || [];
       const totalStrats = abList.length;
       const capCnt = abList.filter(s => s.desk_mode === 'CAPITAL_PROPIO').length;
       const futCnt = abList.filter(s => s.desk_mode === 'PROP_FIRM_FUTURES').length;
@@ -7671,16 +7712,15 @@
       const assetsGrid = document.getElementById('orch-assets-regime-grid');
       if (assetsGrid && data.regimes_by_asset) {
         assetsGrid.innerHTML = Object.values(data.regimes_by_asset).map(r => {
-          const isBull = r.regime === 'BULL_TREND';
-          const isBear = r.regime === 'BEAR_TREND';
-          const isRange = r.regime === 'RANGE_MEAN_REVERSION';
+          const isBull = r.regime === 'BULL_TREND' || r.regime === 'TRENDING_BULLISH';
+          const isRange = r.regime === 'RANGE_MEAN_REVERSION' || r.regime === 'RANGING_LATERAL';
           const badgeCls = isBull ? 'badge-success-live' : (isRange ? 'badge-brand-indigo' : 'badge-warning-risk');
           return `
             <div class="p-4 rounded-xl bg-[#FAFAFC] border border-[#E5E5EA] space-y-2.5">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                  <span class="text-sm font-bold font-mono text-[#181A20]">${r.asset}</span>
-                  <span class="text-xs font-mono text-[#6E6E73]">$${Number(r.last_close).toLocaleString('en-US', {maximumFractionDigits: 4})}</span>
+                  <span class="text-sm font-bold font-mono text-[#181A20]">${r.asset || r.symbol}</span>
+                  <span class="text-xs font-mono text-[#6E6E73]">$${Number(r.last_close != null ? r.last_close : (r.last_price || 0)).toLocaleString('en-US', {maximumFractionDigits: 4})}</span>
                 </div>
                 <span class="${badgeCls} font-mono">${r.regime_label}</span>
               </div>
@@ -7707,7 +7747,7 @@
                 <span>DI+/DI-: <strong class="text-[#181A20]">${r.plus_di}/${r.minus_di}</strong></span>
               </div>
               <div class="text-[11px] text-[#3C45A5] font-semibold bg-[#EEF2FF] px-2.5 py-1.5 rounded-lg border border-[#C7D2FE]">
-                <i class="fa-solid fa-bolt mr-1"></i> ${r.action_rule}
+                <i class="fa-solid fa-bolt mr-1"></i> ${r.action_rule || r.action_summary || ''}
               </div>
             </div>
           `;
@@ -7756,49 +7796,57 @@
 
     function renderOrchestratorStrategiesTable() {
       const tbody = document.getElementById('orch-ab-strategies-tbody');
-      if (!tbody || !cachedOrchestratorData || !cachedOrchestratorData.strategies_ab_comparison) return;
+      if (!tbody || !cachedOrchestratorData) return;
+      const all = cachedOrchestratorData.strategies_ab_comparison || cachedOrchestratorData.strategies_ab || [];
+      if (!all.length) return;
 
-      const all = cachedOrchestratorData.strategies_ab_comparison;
       const filtered = currentOrchDeskFilter === 'ALL'
         ? all
         : all.filter(s => s.desk_mode === currentOrchDeskFilter);
 
       tbody.innerHTML = filtered.map(s => {
-        const isOn = s.orchestrator_state === 'ACTIVE_ON';
+        const sid = s.strategy_id || s.id;
+        const isOn = s.orchestrator_state === 'ACTIVE_ON' || s.orchestrator_active === true;
         const stateBadge = isOn
           ? `<span class="badge-success-live font-mono">● ACTIVA [ON]</span>`
-          : `<span class="badge-warning-risk font-mono" title="${s.orchestrator_reason}">⏸ PAUSADA [HOLD]</span>`;
+          : `<span class="badge-warning-risk font-mono" title="${s.orchestrator_reason || ''}">⏸ PAUSADA [HOLD]</span>`;
         const ind = s.individual_book || {};
         const orch = s.orchestrated_book || {};
+        const indEq = Number(ind.equity_usd != null ? ind.equity_usd : (ind.current_equity || 1000)).toFixed(2);
+        const orchEq = Number(orch.equity_usd != null ? orch.equity_usd : (orch.current_equity || 1000)).toFixed(2);
+        const indRoi = Number(ind.net_roi_pct || 0);
+        const orchRoi = Number(orch.net_roi_pct || 0);
+        const alphaP = Number(s.orchestrator_alpha_pct || 0);
+        const ddSaved = Number(s.dd_saved_pct != null ? s.dd_saved_pct : (s.dd_reduction_pct || 0));
         return `
           <tr class="hover:bg-[#FAFAFC] transition">
-            <td class="py-2.5 px-3 font-bold text-[#3C45A5] whitespace-nowrap cursor-pointer" onclick="viewStrategy('${s.id}')">${s.id}</td>
+            <td class="py-2.5 px-3 font-bold text-[#3C45A5] whitespace-nowrap cursor-pointer" onclick="viewStrategy('${sid}')">${sid}</td>
             <td class="py-2.5 px-3 whitespace-nowrap">${formatDeskBadgeHtml(s.desk_mode)}</td>
-            <td class="py-2.5 px-3 font-bold text-[#181A20] whitespace-nowrap">${s.asset} · ${s.timeframe}</td>
+            <td class="py-2.5 px-3 font-bold text-[#181A20] whitespace-nowrap">${s.asset} · ${s.timeframe || s.tf || '1h'}</td>
             <td class="py-2.5 px-3 whitespace-nowrap">
-              <div class="font-bold text-[#181A20]">${s.family}</div>
-              <div class="text-[10px] text-[#6E6E73]">${s.params}</div>
+              <div class="font-bold text-[#181A20]">${s.family || s.archetype || 'QUANT'}</div>
+              <div class="text-[10px] text-[#6E6E73]">${s.params || ''}</div>
             </td>
             <td class="py-2.5 px-3 text-right whitespace-nowrap">
-              <div class="font-bold text-[#065F46]">ROI BT: +${Number(s.backtest_roi_total_pct).toFixed(2)}%</div>
+              <div class="font-bold text-[#065F46]">ROI BT: +${Number(s.backtest_roi_total_pct || 0).toFixed(2)}%</div>
               ${formatBacktestTargetOrBnhHtml(s)}
             </td>
             <td class="py-2.5 px-3 whitespace-nowrap">
-              <span class="badge-neutral-soft font-mono">${s.current_asset_regime_label} (H=${s.asset_h_norm})</span>
+              <span class="badge-neutral-soft font-mono">${s.current_asset_regime_label || s.current_regime_label || 'Rango'} (H=${Number(s.asset_h_norm || 0.65).toFixed(2)})</span>
             </td>
             <td class="py-2.5 px-3 text-center whitespace-nowrap">${stateBadge}</td>
             <td class="py-2.5 px-3 text-right whitespace-nowrap">
-              <div class="font-bold text-[#181A20]">$${Number(ind.equity_usd).toFixed(2)} (${ind.net_roi_pct >= 0 ? '+' : ''}${Number(ind.net_roi_pct).toFixed(2)}%)</div>
-              <div class="text-[10px] text-[#B45309]">DD: ${Number(ind.max_dd_pct).toFixed(2)}% · ${ind.trades_count} tr</div>
+              <div class="font-bold text-[#181A20]">$${indEq} (${indRoi >= 0 ? '+' : ''}${indRoi.toFixed(2)}%)</div>
+              <div class="text-[10px] text-[#B45309]">DD: ${Number(ind.max_dd_pct || 0).toFixed(2)}% · ${ind.trades_count || 0} tr</div>
             </td>
             <td class="py-2.5 px-3 text-right whitespace-nowrap bg-[#ECFDF5]/40">
-              <div class="font-bold text-[#065F46]">$${Number(orch.equity_usd).toFixed(2)} (+${Number(orch.net_roi_pct).toFixed(2)}%)</div>
-              <div class="text-[10px] text-[#065F46]">DD: ${Number(orch.max_dd_pct).toFixed(2)}% · ${orch.trades_count} tr</div>
+              <div class="font-bold ${orchRoi >= 0 ? 'text-[#065F46]' : 'text-[#D70015]'}">$${orchEq} (${orchRoi >= 0 ? '+' : ''}${orchRoi.toFixed(2)}%)</div>
+              <div class="text-[10px] text-[#065F46]">DD: ${Number(orch.max_dd_pct || 0).toFixed(2)}% · ${orch.trades_count || 0} tr</div>
             </td>
-            <td class="py-2.5 px-3 text-center font-bold text-[#B45309] whitespace-nowrap">${s.whipsaws_avoided} evitados</td>
-            <td class="py-2.5 px-3 text-right font-bold text-[#3C45A5] whitespace-nowrap">
-              +${Number(s.orchestrator_alpha_pct).toFixed(2)}%<br>
-              <span class="text-[10px] text-[#065F46]">(-${Number(s.dd_saved_pct).toFixed(2)}% DD)</span>
+            <td class="py-2.5 px-3 text-center font-bold text-[#B45309] whitespace-nowrap">${s.whipsaws_avoided || 0} evitados</td>
+            <td class="py-2.5 px-3 text-right font-bold ${alphaP >= 0 ? 'text-[#3C45A5]' : 'text-[#D70015]'} whitespace-nowrap">
+              ${alphaP >= 0 ? '+' : ''}${alphaP.toFixed(2)}%<br>
+              <span class="text-[10px] text-[#065F46]">(-${ddSaved.toFixed(2)}% DD)</span>
             </td>
           </tr>
         `;

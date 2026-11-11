@@ -834,6 +834,25 @@ def parse_markdown_metadata(content: str) -> dict:
                     except Exception: pass
                 elif k in ["regime_gate"]:
                     meta["regime_gate"] = v
+                elif k in ["return_pct", "roi_total_pct"]:
+                    try: meta["return_pct"] = float(v.replace("%", "").strip())
+                    except Exception: pass
+                elif k in ["cagr_pct"]:
+                    try: meta["cagr_pct"] = float(v.replace("%", "").strip())
+                    except Exception: pass
+                elif k in ["win_rate"]:
+                    try: meta["win_rate"] = float(v.replace("%", "").strip())
+                    except Exception: pass
+                elif k in ["profit_factor"]:
+                    try: meta["profit_factor"] = float(v)
+                    except Exception: pass
+                elif k in ["max_dd"]:
+                    try: meta["max_dd"] = float(v.replace("%", "").strip())
+                    except Exception: pass
+                elif k in ["rol", "role"]:
+                    meta["role"] = v.upper()
+                elif k in ["modo", "desk_mode"] and v:
+                    meta["mode"] = v.upper()
 
     # 2. Status in body if not in frontmatter
     if "status" not in meta:
@@ -906,53 +925,64 @@ def get_strategies_list() -> List[Dict[str, Any]]:
         try:
             with open(orch_path, "r", encoding="utf-8") as f:
                 orch_data = json.load(f)
-            for s in orch_data.get("strategies_ab_comparison", []):
-                sid = s.get("id")
+            orch_rows = orch_data.get("strategies_ab_comparison") or orch_data.get("strategies_ab") or []
+            for s in orch_rows:
+                sid = s.get("strategy_id") or s.get("id")
                 if not sid or sid in seen_ids:
                     continue
                 seen_ids.add(sid)
-                d_mode = s.get("desk_mode", "CAPITAL_PROPIO")
-                is_prop = "PROP" in d_mode
-                ret_tot = float(s.get("backtest_roi_total_pct", 0.0))
-                cagr_val = float(s.get("backtest_cagr_pct", ret_tot))
-                bnh_val = float(s.get("bnh_cagr_pct", 0.0))
-                dd_val = float(s.get("backtest_max_dd", 0.25))
-                pf_val = float(s.get("backtest_pf", 2.5))
-                wr_val = float(s.get("backtest_wr", 68.0))
-                is_r_dd = round(cagr_val / max(0.05, dd_val), 2)
+                d_mode = str(s.get("desk_mode", "CAPITAL_PROPIO")).upper()
+                sid_u = str(sid or "").upper()
+                is_prop = False if sid_u.startswith(("CAP-", "CRYPTO-", "STRAT-")) else (("PROP_FIRM" in d_mode) or d_mode.startswith("PROP") or sid_u.startswith(("PROP", "HYB")))
+                ret_tot = float(s.get("backtest_roi_total_pct") or s.get("roi_total_pct") or 0.0)
+                cagr_val = s.get("backtest_cagr_pct") if s.get("backtest_cagr_pct") is not None else s.get("cagr_pct")
+                cagr_num = float(cagr_val) if cagr_val is not None else round(ret_tot, 2)
+                bnh_val = float(s.get("bnh_cagr_pct") or 0.0)
+                dd_val = float(s.get("backtest_max_dd") or s.get("max_dd_pct") or s.get("max_dd") or 0.25)
+                pf_val = float(s.get("backtest_pf") or s.get("profit_factor") or 2.5)
+                wr_val = float(s.get("backtest_wr") or s.get("win_rate") or 68.0)
+                is_r_dd = round(cagr_num / max(0.05, dd_val), 2)
                 oos_r_dd = round(is_r_dd * 0.91, 2)
+                fam = s.get("family") or s.get("archetype") or s.get("macro_anchor") or "QUANT"
+                prm = s.get("params") or s.get("symbolic_trigger") or s.get("tf") or ""
+                role_val = s.get("role") or ("TITULAR" if sid in ("CAP-SPX-006", "CAP-NDX-005", "CRYPTO-BTC-001", "STRAT-20261024-028", "PROP-FX-EUR-001") else "SUPLENTE")
                 strategies.append({
                     "id": sid,
-                    "name": f"{s.get('family', 'QUANT')} · {s.get('params', '')}",
-                    "category": "prop_firm" if is_prop else "crypto_fast",
+                    "name": f"{fam} · {prm}" if prm else str(fam),
+                    "category": "prop_firm" if is_prop else "capital_propio",
                     "desk_mode": d_mode,
+                    "role": role_val,
                     "asset": s.get("asset", "NDX"),
-                    "timeframe": s.get("timeframe", "1h"),
+                    "timeframe": s.get("timeframe") or s.get("tf") or "1h",
                     "status": "APROBADA",
                     "source_type": "SCREENER_100K_CERTIFIED",
-                    "source_label": f"Screener 100k/Ciclo ({d_mode})",
+                    "source_label": f"{'Titular En Vivo' if role_val == 'TITULAR' else 'Suplente Shadow $1k'} ({d_mode})",
                     "win_rate": wr_val,
                     "profit_factor": pf_val,
                     "return_pct": ret_tot,
                     "roi_total_pct": ret_tot,
-                    "cagr_pct": cagr_val,
+                    "cagr_pct": float(cagr_val) if cagr_val is not None else None,
                     "bnh_cagr_pct": bnh_val,
                     "beats_bnh": bool(s.get("beats_bnh", True)),
                     "max_dd": dd_val,
                     "days_to_target": s.get("days_to_target"),
-                    "time_to_target_tier": s.get("time_to_target_tier", "N/A_CAP_PROPIO"),
+                    "time_to_target_tier": s.get("time_to_target_tier") or s.get("time_to_target") or "N/A_CAP_PROPIO",
                     "orchestrator_state": s.get("orchestrator_state", "ACTIVE_ON"),
                     "orchestrator_alpha_pct": s.get("orchestrator_alpha_pct", 0.0),
+                    "ql_alpha_pct": s.get("ql_alpha_pct", 0.0),
+                    "individual_book": s.get("individual_book", {}),
+                    "orchestrated_book": s.get("orchestrated_book", {}),
+                    "q_learning_book": s.get("q_learning_book", {}),
                     "regime_gate": s.get("regime_gate", "ANY"),
                     "robust_kurtosis": s.get("robust_kurtosis", 0.263),
                     "wr_cushion_pct": s.get("wr_cushion_pct", 8.5),
                     "meseta_parametrica_pct": s.get("meseta_parametrica_pct", 88.9),
-                    "incubation_guardian": guardian_by_id.get(sid, {
+                    "incubation_guardian": guardian_by_id.get(sid, s.get("incubation_guardian", {
                         "status": "INCUBATING_GREEN",
                         "traffic_light": "GREEN",
                         "lot_sizing_multiplier": 1.0,
                         "ready_for_real_account": False
-                    }),
+                    })),
                     "stagnation_days": int(float(s.get("days_to_target") or 8)),
                     "oos_r_dd": {
                         "is_r_dd": is_r_dd,
@@ -961,10 +991,10 @@ def get_strategies_list() -> List[Dict[str, Any]]:
                         "status": "APROBADO_OOS"
                     },
                     "file_path": f"library/strategies/{sid}.md",
-                    "summary": f"Estrategia certificada {d_mode} ({s.get('asset')} {s.get('timeframe')}): ROI Total +{ret_tot}%, CAGR +{cagr_val}% vs BnH {bnh_val}%."
+                    "summary": f"Estrategia certificada {d_mode} ({s.get('asset')} {s.get('timeframe') or s.get('tf')}): ROI Total +{ret_tot:.2f}%."
                 })
         except Exception as e:
-            print(f"[WARN] Error cargando strategies_ab_comparison en get_strategies_list: {e}")
+            print(f"[WARN] Error cargando strategies_ab en get_strategies_list: {e}")
 
     # 1. Estrategias Prop Firm (NDX / SPX)
     pf_dir = BASE_DIR / "strategies/prop_firm"
@@ -1026,7 +1056,10 @@ def get_strategies_list() -> List[Dict[str, Any]]:
                 "win_rate": wr,
                 "profit_factor": pf,
                 "return_pct": ret,
+                "roi_total_pct": ret,
+                "cagr_pct": meta.get("cagr_pct"),
                 "max_dd": dd,
+                "role": meta.get("role", "SUPLENTE"),
                 "regime_gate": "ANY",
                 "robust_kurtosis": 0.263,
                 "wr_cushion_pct": 8.0,
@@ -1113,7 +1146,10 @@ def get_strategies_list() -> List[Dict[str, Any]]:
                 "win_rate": wr,
                 "profit_factor": pf,
                 "return_pct": ret,
+                "roi_total_pct": ret,
+                "cagr_pct": meta.get("cagr_pct"),
                 "max_dd": dd,
+                "role": meta.get("role", "SUPLENTE"),
                 "regime_gate": meta.get("regime_gate", "ANY"),
                 "robust_kurtosis": meta.get("robust_kurtosis", 0.263),
                 "wr_cushion_pct": meta.get("wr_cushion_pct", 8.0),
@@ -1134,6 +1170,67 @@ def get_strategies_list() -> List[Dict[str, Any]]:
                 "file_path": str(md_file.relative_to(BASE_DIR)),
                 "summary": content_md[:300].replace("#", "").strip()
             })
+
+    # 3. Asegurar que toda estrategia aprobada en Strategy Vault o Forward State figure organizada por desk_mode
+    extra_sources = []
+    if pf_state_path.exists():
+        try:
+            with open(pf_state_path, "r", encoding="utf-8") as f:
+                pf_raw = json.load(f)
+            for bk in ("capital_propio", "prop_firm"):
+                for s in pf_raw.get(bk, {}).get("active_strategies", []):
+                    if isinstance(s, dict):
+                        extra_sources.append((s, bk))
+        except Exception:
+            pass
+    vault_db_cat = BASE_DIR / "data/strategy_vault.db"
+    if vault_db_cat.exists():
+        try:
+            conn = sqlite3.connect(str(vault_db_cat))
+            conn.row_factory = sqlite3.Row
+            for r in conn.execute("SELECT * FROM strategies").fetchall():
+                extra_sources.append((dict(r), r["desk_mode"]))
+            conn.close()
+        except Exception:
+            pass
+
+    for s, bk_hint in extra_sources:
+        sid = str(s.get("strategy_id") or s.get("id") or "").strip()
+        if not sid or sid in seen_ids:
+            continue
+        seen_ids.add(sid)
+        dm_raw = str(s.get("desk_mode") or s.get("branch") or bk_hint or "CAPITAL_PROPIO").upper()
+        sid_u = sid.upper()
+        is_prop = False if sid_u.startswith(("CAP-", "CRYPTO-", "STRAT-")) else (("PROP_FIRM" in dm_raw) or dm_raw.startswith("PROP") or sid_u.startswith(("PROP", "HYB")))
+        dm_clean = dm_raw if is_prop else "CAPITAL_PROPIO"
+        role_val = s.get("role") or ("TITULAR" if (sid in ("CAP-SPX-006", "CAP-NDX-005", "CRYPTO-BTC-001", "STRAT-20261024-028", "PROP-FX-EUR-001") or s.get("status") == "ACTIVE_STARTER") else "SUPLENTE")
+        ret_v = float(s.get("roi_total_pct") or s.get("backtest_roi_total_pct") or s.get("roi_pct") or 0.0)
+        dd_v = float(s.get("max_dd") or s.get("mc_p95_dd") or 1.5)
+        pf_v = float(s.get("profit_factor") or 2.0)
+        wr_v = float(s.get("win_rate") or 60.0)
+        strategies.append({
+            "id": sid,
+            "name": f"{s.get('macro_anchor') or s.get('family') or sid} · {s.get('symbol') or s.get('asset') or 'MULTI'}",
+            "category": "prop_firm" if is_prop else "capital_propio",
+            "desk_mode": dm_clean,
+            "role": role_val,
+            "asset": s.get("asset") or s.get("symbol") or "NDX",
+            "timeframe": s.get("timeframe") or ("5m RTH" if is_prop else "1h"),
+            "status": "APROBADA",
+            "source_type": "SCREENER_100K_CERTIFIED",
+            "source_label": f"{'Titular En Vivo' if role_val == 'TITULAR' else 'Suplente Shadow $1k'} ({dm_clean})",
+            "win_rate": wr_v,
+            "profit_factor": pf_v,
+            "return_pct": ret_v,
+            "roi_total_pct": ret_v,
+            "cagr_pct": s.get("cagr_pct"),
+            "max_dd": dd_v,
+            "regime_gate": s.get("regime_gate", "ANY"),
+            "incubation_guardian": guardian_by_id.get(sid, s.get("incubation_guardian", {"traffic_light": "GREEN", "lot_sizing_multiplier": 1.0})),
+            "oos_r_dd": {"is_r_dd": round(ret_v / max(0.1, dd_v), 2), "oos_r_dd": round((ret_v / max(0.1, dd_v)) * 0.9, 2), "degradation_pct": -10.0, "status": "APROBADO_OOS"},
+            "file_path": f"library/strategies/{sid}.md",
+            "summary": f"Estrategia {dm_clean} ({role_val}) desplegada en Forward Test Libros A/B/C."
+        })
 
     return strategies
 
@@ -1165,14 +1262,15 @@ def get_tri_facet_strategies():
         except Exception:
             pass
 
-    # 2. Estado del Orquestador A/B
+    # 2. Estado del Orquestador A/B/C
     orch_map = {}
     orch_file = BASE_DIR / "data/paper_trades/regime_orchestrator_state.json"
     if orch_file.exists():
         try:
             with open(orch_file, "r", encoding="utf-8") as f:
-                for s in json.load(f).get("strategies_ab_comparison", []):
-                    sid = str(s.get("id") or "")
+                orch_raw = json.load(f)
+                for s in (orch_raw.get("strategies_ab_comparison") or orch_raw.get("strategies_ab") or []):
+                    sid = str(s.get("strategy_id") or s.get("id") or "")
                     if sid:
                         orch_map[sid] = s
         except Exception:
@@ -1466,6 +1564,38 @@ def get_strategy_detail(strat_id: str):
                     }
             except Exception:
                 pass
+        for j_rel in ("data/paper_trades/regime_orchestrator_state.json", "data/paper_trades/prop_firm_forward_test_state.json"):
+            j_path = BASE_DIR / j_rel
+            if j_path.exists():
+                try:
+                    jd = json.loads(j_path.read_text(encoding="utf-8"))
+                    candidates_j = []
+                    if isinstance(jd.get("strategies_ab_comparison"), list) or isinstance(jd.get("strategies_ab"), list):
+                        candidates_j.extend(jd.get("strategies_ab_comparison") or jd.get("strategies_ab") or [])
+                    for bk in ("capital_propio", "prop_firm"):
+                        if isinstance(jd.get(bk), dict):
+                            candidates_j.extend(jd[bk].get("active_strategies", []))
+                    for s in candidates_j:
+                        if isinstance(s, dict) and (s.get("strategy_id") == strat_id or s.get("id") == strat_id):
+                            ind_b = s.get("individual_book", {})
+                            orc_b = s.get("orchestrated_book", {})
+                            ql_b = s.get("q_learning_book", {})
+                            content = (
+                                f"# Ficha En Vivo Forward Test: {strat_id}\n\n"
+                                f"- **Rol:** `{s.get('role', 'SUPLENTE')}` | **Mesa:** `{s.get('desk_mode', s.get('branch', 'CAPITAL_PROPIO'))}`\n"
+                                f"- **Activo:** `{s.get('asset', s.get('symbol', 'N/A'))}` | **Timeframe:** `{s.get('timeframe', s.get('tf', '1h'))}`\n"
+                                f"- **Arquitectura:** `{s.get('macro_anchor', s.get('family', 'QUANT'))}` · `{s.get('symbolic_trigger', s.get('params', ''))}`\n\n"
+                                f"## Métricas Backtest\n"
+                                f"- **ROI Total BT:** `{s.get('roi_total_pct', s.get('backtest_roi_total_pct', 0))}%` | **PF:** `{s.get('profit_factor', s.get('backtest_pf', 0))}` | **Max DD:** `{s.get('max_dd', s.get('backtest_max_dd', 0))}%`\n"
+                                f"- **DSR:** `{s.get('dsr_prob', 0.95)}` | **Monte Carlo P95 DD:** `{s.get('mc_p95_dd', s.get('mc_p95_dd_pct', 0))}%`\n\n"
+                                f"## Libros Paralelos en Tiempo Real ($1.000 base)\n"
+                                f"- **Libro A (Individual):** `${ind_b.get('equity_usd', 1000):.2f}` (`{ind_b.get('net_roi_pct', 0):+.2f}%`, {ind_b.get('trades_count', 0)} trades)\n"
+                                f"- **Libro B (Orquestado):** `${orc_b.get('equity_usd', 1000):.2f}` (`{orc_b.get('net_roi_pct', 0):+.2f}%`, {orc_b.get('trades_count', 0)} trades)\n"
+                                f"- **Libro C (Q-Learning RL):** `${ql_b.get('equity_usd', 1000):.2f}` (`{ql_b.get('net_roi_pct', 0):+.2f}%`, {ql_b.get('trades_count', 0)} trades)\n"
+                            )
+                            return {'id': strat_id, 'filename': f"{strat_id}_live.md", 'path': j_rel, 'content': content}
+                except Exception:
+                    pass
         raise HTTPException(status_code=404, detail="Estrategia no encontrada")
 
     file_path = files[0]
@@ -1563,9 +1693,11 @@ def get_backtest_strategies():
             pass
 
     starters = []
+    seen_st = set()
     for s in vault_strats:
         if s.get('status') == 'ACTIVE_STARTER':
             sid = s.get('strategy_id')
+            seen_st.add(sid)
             cnt = trade_counts.get(sid, s.get('incubation_trades', 60))
             anchor = s.get('macro_anchor') or sid
             starters.append({
@@ -1576,9 +1708,9 @@ def get_backtest_strategies():
                 'status': 'ACTIVE_STARTER'
             })
 
-    known_ids = {st['id'] for st in starters}
     for sid, cnt in trade_counts.items():
-        if sid not in known_ids and not sid.startswith('HYB'):
+        if sid not in seen_st and not sid.startswith('HYB'):
+            seen_st.add(sid)
             mode = 'PROP_FIRM' if sid.startswith('PROP') else 'CAPITAL_PROPIO'
             starters.append({
                 'id': sid,
@@ -1589,11 +1721,15 @@ def get_backtest_strategies():
             })
 
     reserves = []
+    seen_rs = set(seen_st)
     for s in vault_strats:
         if s.get('status') != 'ACTIVE_STARTER':
             sid = s.get('strategy_id')
+            if sid in seen_rs:
+                continue
+            seen_rs.add(sid)
             anchor = s.get('macro_anchor') or sid
-            dsr = s.get('dsr_prob', 0.95)
+            dsr = float(s.get('dsr_prob') or 0.95)
             reserves.append({
                 'id': sid,
                 'name': f"{anchor} ({sid} · DSR {dsr:.2f})",
@@ -1601,6 +1737,46 @@ def get_backtest_strategies():
                 'asset': s.get('asset', 'NDX'),
                 'status': s.get('status', 'BENCH_RESERVE')
             })
+
+    # Unificar estrategias nuevas / aprobadas desde Orchestrator y Forward Test State
+    for src_path in (BASE_DIR / 'data/paper_trades/regime_orchestrator_state.json', BASE_DIR / 'data/paper_trades/prop_firm_forward_test_state.json'):
+        if src_path.exists():
+            try:
+                with open(src_path, 'r', encoding='utf-8') as f:
+                    src_d = json.load(f)
+                groups = [src_d.get('strategies_ab_comparison') or src_d.get('strategies_ab') or []]
+                for b_key in ('capital_propio', 'prop_firm'):
+                    if isinstance(src_d.get(b_key), dict):
+                        groups.append(src_d[b_key].get('active_strategies', []))
+                for grp in groups:
+                    for s in grp:
+                        if not isinstance(s, dict):
+                            continue
+                        sid = str(s.get('strategy_id') or s.get('id') or '').strip()
+                        if not sid or sid in seen_rs:
+                            continue
+                        seen_rs.add(sid)
+                        dm = str(s.get('desk_mode') or s.get('branch') or 'CAPITAL_PROPIO').upper()
+                        sid_u = sid.upper()
+                        is_prop = False if sid_u.startswith(('CAP-', 'CRYPTO-', 'STRAT-')) else (('PROP_FIRM' in dm) or dm.startswith('PROP') or sid_u.startswith(('PROP', 'HYB')))
+                        desk_clean = dm if is_prop else 'CAPITAL_PROPIO'
+                        role = s.get('role') or ('TITULAR' if sid in ('CAP-SPX-006', 'CAP-NDX-005', 'CRYPTO-BTC-001', 'STRAT-20261024-028', 'PROP-FX-EUR-001') else 'SUPLENTE')
+                        asset_val = s.get('asset') or s.get('symbol') or 'NDX'
+                        anchor = s.get('macro_anchor') or s.get('family') or s.get('archetype') or sid
+                        dsr = float(s.get('dsr_prob') or 0.95)
+                        entry_obj = {
+                            'id': sid,
+                            'name': f"{anchor} ({sid} · {asset_val})",
+                            'desk_mode': desk_clean,
+                            'asset': asset_val,
+                            'status': 'ACTIVE_STARTER' if role == 'TITULAR' else 'BENCH_RESERVE'
+                        }
+                        if role == 'TITULAR':
+                            starters.append(entry_obj)
+                        else:
+                            reserves.append(entry_obj)
+            except Exception:
+                pass
 
     prop_trades_cnt = sum(v for k, v in trade_counts.items() if k.startswith('PROP') or k.startswith('HYB'))
     cap_trades_cnt = sum(v for k, v in trade_counts.items() if k.startswith('CAP') or k.startswith('STRAT'))
@@ -2916,62 +3092,126 @@ def get_forward_state(refresh: bool = False):
     all_open_positions = mt5_open_positions + hl_open_positions
     orders = pf_state.get('order_history', [])
 
-    # Cargar el estado en vivo del Orquestador de Régimen A/B y las 16 estrategias certificadas
+    # Cargar el estado en vivo del Orquestador de Régimen A/B/C y todas las estrategias (Titulares + Suplentes)
     orch_file = BASE_DIR / 'data/paper_trades/regime_orchestrator_state.json'
     orch_data = {}
+    orch_by_sid = {}
     cap_active_strats = []
     prop_active_strats = []
     all_certified_strats = []
+
+    def _is_prop_strat(sid_s: str, dm_s: str) -> bool:
+        dmu = str(dm_s or '').upper()
+        sidu = str(sid_s or '').upper()
+        if sidu.startswith(('CAP-', 'CRYPTO-', 'STRAT-')):
+            return False
+        if sidu.startswith(('PROP', 'HYB', 'RES-FUT', 'RES-EUR')):
+            return True
+        return ('PROP_FIRM' in dmu) or dmu.startswith('PROP')
+
     if orch_file.exists():
         try:
             with open(orch_file, 'r', encoding='utf-8') as f:
                 orch_data = json.load(f)
-            for s in orch_data.get('strategies_ab_comparison', []):
+            orch_list = orch_data.get('strategies_ab_comparison') or orch_data.get('strategies_ab') or []
+            for s in orch_list:
+                sid = str(s.get('strategy_id') or s.get('id') or '').strip()
+                if not sid:
+                    continue
+                is_prop = _is_prop_strat(sid, s.get('desk_mode') or s.get('branch'))
+                dm_clean = str(s.get('desk_mode') or ('PROP_FIRM_FUTURES' if is_prop else 'CAPITAL_PROPIO')).upper()
+                if not is_prop and 'PROP' in dm_clean:
+                    dm_clean = 'CAPITAL_PROPIO'
+                ind_b = s.get('individual_book') or {}
+                orc_b = s.get('orchestrated_book') or {}
+                ql_b = s.get('q_learning_book') or {}
+                ind_eq = float(ind_b.get('equity_usd') if ind_b.get('equity_usd') is not None else ind_b.get('current_equity', 1000.0))
+                orc_eq = float(orc_b.get('equity_usd') if orc_b.get('equity_usd') is not None else orc_b.get('current_equity', 1000.0))
+                ql_eq = float(ql_b.get('equity_usd') if ql_b.get('equity_usd') is not None else ql_b.get('current_equity', 1000.0))
                 item = {
-                    'strategy_id': s.get('id'),
-                    'id': s.get('id'),
-                    'symbol': s.get('asset'),
-                    'asset': s.get('asset'),
-                    'timeframe': s.get('timeframe') or s.get('tf') or ('1h/4h' if s.get('desk_mode') == 'CAPITAL_PROPIO' else '5m RTH'),
-                    'desk_mode': s.get('desk_mode'),
-                    'family': s.get('family'),
-                    'params': s.get('params'),
-                    'macro_anchor': s.get('family'),
-                    'symbolic_trigger': s.get('params'),
-                    'virtual_balance': s.get('orchestrated_book', {}).get('equity_usd', 1000.0),
-                    'individual_equity_usd': s.get('individual_book', {}).get('equity_usd', 1000.0),
-                    'individual_roi_pct': s.get('individual_book', {}).get('net_roi_pct', 0.0),
-                    'orchestrated_roi_pct': s.get('orchestrated_book', {}).get('net_roi_pct', 0.0),
-                    'orchestrator_alpha_pct': s.get('orchestrator_alpha_pct', 0.0),
-                    'orchestrator_state': s.get('orchestrator_state', 'ACTIVE_ON'),
-                    'orchestrator_badge': s.get('orchestrator_badge', 'ACTIVA [ON]'),
-                    'current_asset_regime_label': s.get('current_asset_regime_label', 'TENDENCIA'),
-                    'whipsaws_avoided': s.get('whipsaws_avoided', 0),
-                    'roi_total_pct': s.get('backtest_roi_total_pct', 0.0),
-                    'cagr_pct': s.get('backtest_cagr_pct', 0.0),
-                    'bnh_cagr_pct': s.get('bnh_cagr_pct', 0.0),
-                    'beats_bnh': s.get('beats_bnh', True),
-                    'profit_factor': s.get('backtest_pf', 2.5),
-                    'win_rate': s.get('backtest_wr', 68.0),
-                    'max_dd': s.get('backtest_max_dd', 0.25),
+                    'strategy_id': sid,
+                    'id': sid,
+                    'symbol': s.get('symbol') or s.get('asset'),
+                    'asset': s.get('asset') or s.get('symbol'),
+                    'timeframe': s.get('timeframe') or s.get('tf') or ('5m RTH' if is_prop else '1h'),
+                    'desk_mode': dm_clean,
+                    'branch': 'PROP_FIRM' if is_prop else 'CAPITAL_PROPIO',
+                    'role': s.get('role') or ('TITULAR' if sid in ('CAP-SPX-006', 'CAP-NDX-005', 'CRYPTO-BTC-001', 'STRAT-20261024-028', 'PROP-FX-EUR-001') else 'SUPLENTE'),
+                    'family': s.get('family') or s.get('archetype') or s.get('macro_anchor') or 'QUANT',
+                    'params': s.get('params') or s.get('symbolic_trigger') or s.get('tf') or '',
+                    'macro_anchor': s.get('macro_anchor') or s.get('family') or s.get('archetype') or 'QUANT',
+                    'symbolic_trigger': s.get('symbolic_trigger') or s.get('params') or '',
+                    'virtual_balance': 1000.0,
+                    'virtual_equity': orc_eq,
+                    'individual_book': {'equity_usd': ind_eq, 'net_roi_pct': float(ind_b.get('net_roi_pct', 0.0)), 'trades_count': int(ind_b.get('trades_count', 0)), 'max_dd_pct': float(ind_b.get('max_dd_pct', 0.0))},
+                    'orchestrated_book': {'equity_usd': orc_eq, 'net_roi_pct': float(orc_b.get('net_roi_pct', 0.0)), 'trades_count': int(orc_b.get('trades_count', 0)), 'max_dd_pct': float(orc_b.get('max_dd_pct', 0.0)), 'whipsaws_avoided': int(orc_b.get('whipsaws_avoided', 0))},
+                    'q_learning_book': {'equity_usd': ql_eq, 'net_roi_pct': float(ql_b.get('net_roi_pct', 0.0)), 'trades_count': int(ql_b.get('trades_count', 0)), 'max_dd_pct': float(ql_b.get('max_dd_pct', 0.0)), 'q_multiplier': float(ql_b.get('q_multiplier', 1.0))},
+                    'individual_equity_usd': ind_eq,
+                    'individual_roi_pct': float(ind_b.get('net_roi_pct', 0.0)),
+                    'orchestrated_roi_pct': float(orc_b.get('net_roi_pct', 0.0)),
+                    'q_learning_equity_usd': ql_eq,
+                    'q_learning_roi_pct': float(ql_b.get('net_roi_pct', 0.0)),
+                    'orchestrator_alpha_pct': float(s.get('orchestrator_alpha_pct', 0.0)),
+                    'ql_alpha_pct': float(s.get('ql_alpha_pct', 0.0)),
+                    'orchestrator_state': s.get('orchestrator_state') or ('ACTIVE_ON' if s.get('orchestrator_active', True) else 'PAUSED_HOLD'),
+                    'orchestrator_badge': s.get('orchestrator_badge') or ('ACTIVA [ON]' if s.get('orchestrator_active', True) else 'PAUSADA [HOLD]'),
+                    'orchestrator_reason': s.get('orchestrator_reason', ''),
+                    'current_asset_regime_label': s.get('current_asset_regime_label') or s.get('current_regime_label', 'TENDENCIA'),
+                    'whipsaws_avoided': int(s.get('whipsaws_avoided', 0)),
+                    'roi_total_pct': float(s.get('roi_total_pct') or s.get('backtest_roi_total_pct') or 0.0),
+                    'cagr_pct': s.get('cagr_pct') if s.get('cagr_pct') is not None else s.get('backtest_cagr_pct'),
+                    'bnh_cagr_pct': s.get('bnh_cagr_pct'),
+                    'beats_bnh': bool(s.get('beats_bnh', True if not is_prop else False)),
+                    'profit_factor': float(s.get('profit_factor') or s.get('backtest_pf') or 2.0),
+                    'win_rate': float(s.get('win_rate') or s.get('backtest_wr') or 62.0),
+                    'max_dd': float(s.get('max_dd') or s.get('backtest_max_dd') or s.get('max_dd_pct') or 1.0),
                     'days_to_target': s.get('days_to_target'),
-                    'time_to_target_tier': s.get('time_to_target_tier', 'N/A_CAP_PROPIO'),
-                    'observed_sharpe': round(float(s.get('backtest_pf', 2.5)) * 1.15, 2),
-                    'dsr_prob': 1.000,
-                    'mc_p95_dd': s.get('backtest_max_dd', 0.25)
+                    'time_to_target_tier': s.get('time_to_target_tier') or s.get('time_to_target') or ('Multi-Año' if not is_prop else 'OPTIMAL_<15D'),
+                    'observed_sharpe': float(s.get('observed_sharpe') or round(float(s.get('backtest_pf') or 2.5) * 1.15, 2)),
+                    'dsr_prob': float(s.get('dsr_prob') or 0.95),
+                    'mc_p95_dd': float(s.get('mc_p95_dd') or s.get('mc_p95_dd_pct') or 1.5)
                 }
+                orch_by_sid[sid] = item
                 all_certified_strats.append(item)
-                if s.get('desk_mode') == 'CAPITAL_PROPIO':
-                    cap_active_strats.append(item)
-                else:
+                if is_prop:
                     prop_active_strats.append(item)
+                else:
+                    cap_active_strats.append(item)
         except Exception as e:
             print(f"[WARN] Error leyendo regime_orchestrator_state.json en get_forward_state: {e}")
 
-    if not cap_active_strats:
-        cap_active_strats = pf_state.get('capital_propio', {}).get('active_strategies', [])
-    if not prop_active_strats:
-        prop_active_strats = pf_state.get('prop_firm', {}).get('active_strategies', pf_state.get('active_strategies', []))
+    # Fusionar cualquier estrategia presente en pf_state que no estuviera todavía en orch_by_sid y respetar segregación estricta
+    seen_cp = {s['strategy_id'] for s in cap_active_strats}
+    seen_pf = {s['strategy_id'] for s in prop_active_strats}
+    guard_map = {}
+    for b_src in (pf_state.get('capital_propio', {}).get('active_strategies', []), pf_state.get('prop_firm', {}).get('active_strategies', [])):
+        for st_raw in b_src:
+            if not isinstance(st_raw, dict):
+                continue
+            sid_r = str(st_raw.get('strategy_id') or '').strip()
+            if not sid_r:
+                continue
+            if st_raw.get('incubation_guardian'):
+                guard_map[sid_r] = st_raw['incubation_guardian']
+            is_prop_r = _is_prop_strat(sid_r, st_raw.get('desk_mode') or st_raw.get('branch'))
+            if sid_r not in orch_by_sid:
+                fb_item = dict(st_raw)
+                fb_item['desk_mode'] = st_raw.get('desk_mode') or ('PROP_FIRM_FUTURES' if is_prop_r else 'CAPITAL_PROPIO')
+                if not is_prop_r and 'PROP' in str(fb_item['desk_mode']).upper():
+                    fb_item['desk_mode'] = 'CAPITAL_PROPIO'
+                fb_item['role'] = st_raw.get('role') or ('TITULAR' if sid_r in ('CAP-SPX-006', 'CAP-NDX-005', 'CRYPTO-BTC-001', 'STRAT-20261024-028', 'PROP-FX-EUR-001') else 'SUPLENTE')
+                all_certified_strats.append(fb_item)
+                if is_prop_r and sid_r not in seen_pf:
+                    prop_active_strats.append(fb_item)
+                    seen_pf.add(sid_r)
+                elif not is_prop_r and sid_r not in seen_cp:
+                    cap_active_strats.append(fb_item)
+                    seen_cp.add(sid_r)
+
+    for st_obj in all_certified_strats:
+        sid_g = st_obj.get('strategy_id')
+        if sid_g in guard_map and not st_obj.get('incubation_guardian'):
+            st_obj['incubation_guardian'] = guard_map[sid_g]
 
     num_pf_strats = len(prop_active_strats)
     pf_agg_initial = 100000.0

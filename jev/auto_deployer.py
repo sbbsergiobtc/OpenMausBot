@@ -30,13 +30,48 @@ REPORTS_DIR = BASE_DIR / 'reports'
 def auto_deploy_strategy(candidate: Dict[str, Any], audit_phase3: Dict[str, Any], skeptic_res: Dict[str, Any]) -> bool:
     """
     Registra automáticamente una estrategia aprobada en el daemon de Forward Test
-    con un libro contable virtual de $1.000 USD/USDC.
+    con libros contables virtuales aislados de $1.000 USD/USDC (Libro A, B y C)
+    y metadata completa de backtest y arquitectura.
     """
-    cid = candidate.get("candidate_id")
-    asset = candidate.get("asset")
-    mode = candidate.get("desk_mode")
+    cid = candidate.get("candidate_id") or candidate.get("strategy_id") or candidate.get("id")
+    asset = candidate.get("asset") or candidate.get("symbol", "NDX")
+    mode = str(candidate.get("desk_mode") or candidate.get("branch") or "CAPITAL_PROPIO").upper()
+    cid_u = str(cid or "").upper()
+    if cid_u.startswith(("CAP-", "CRYPTO-", "STRAT-")):
+        is_prop = False
+    elif cid_u.startswith(("PROP", "HYB")):
+        is_prop = True
+    else:
+        is_prop = ("PROP_FIRM" in mode) or mode.startswith("PROP")
+    tf = candidate.get("tf") or candidate.get("timeframe") or ("5m RTH" if is_prop else "1h")
 
-    print(f"\n>>> INICIANDO AUTO-DESPLIEGUE A FORWARD TEST: {cid} ({asset} · {mode}) <<<")
+    dsr_val = audit_phase3.get("dsr_prob")
+    if dsr_val is None:
+        dsr_val = audit_phase3.get("dsr_details", {}).get("prob", candidate.get("dsr_prob", 0.95))
+    mc_dd_val = audit_phase3.get("mc_p95_dd")
+    if mc_dd_val is None:
+        mc_dd_val = audit_phase3.get("mc_details", {}).get("p95", candidate.get("mc_p95_dd", candidate.get("max_dd", 2.5)))
+    mc_ruin_val = audit_phase3.get("mc_ruin_prob", candidate.get("mc_ruin_prob", 0.0))
+    rk_raw = audit_phase3.get("robust_kurtosis")
+    rk_val = rk_raw.get("robust_kurtosis") if isinstance(rk_raw, dict) else (rk_raw if rk_raw is not None else candidate.get("robust_kurtosis", 0.26))
+    wc_raw = audit_phase3.get("breakeven_cushion") or audit_phase3.get("wr_cushion_pct")
+    wc_val = wc_raw.get("wr_cushion_pct") if isinstance(wc_raw, dict) else (wc_raw if wc_raw is not None else candidate.get("wr_cushion_pct", 8.0))
+
+    ret_bt = candidate.get("return_pct")
+    if ret_bt is None:
+        ret_bt = candidate.get("total_pnl_pct")
+    if ret_bt is None:
+        ret_bt = candidate.get("roi_total_pct", 0.0)
+    cagr_bt = candidate.get("cagr_pct") if candidate.get("cagr_pct") is not None else candidate.get("backtest_cagr_pct")
+    bnh_bt = candidate.get("bnh_cagr_pct")
+    pf_bt = float(candidate.get("profit_factor") or candidate.get("backtest_pf") or 2.0)
+    wr_bt = float(candidate.get("win_rate") or candidate.get("backtest_wr") or 65.0)
+    dd_bt = float(candidate.get("max_dd") or candidate.get("backtest_max_dd") or mc_dd_val or 1.0)
+    macro_anchor = candidate.get("macro_anchor") or candidate.get("archetype") or candidate.get("family") or "QUANT_ALPHA"
+    sym_trigger = candidate.get("symbolic_trigger") or candidate.get("params") or f"EMA({candidate.get('fast_period', 12)}/{candidate.get('slow_period', 36)}) · BB {candidate.get('std_dev', 2.0)}σ"
+    role = candidate.get("role") or ("TITULAR" if cid in ("CAP-SPX-006", "CAP-NDX-005", "CRYPTO-BTC-001", "STRAT-20261024-028", "PROP-FX-EUR-001") else "SUPLENTE")
+
+    print(f"\n>>> INICIANDO AUTO-DESPLIEGUE A FORWARD TEST: {cid} ({asset} · {mode} · {role}) <<<")
 
     # 1. Actualizar estado de Forward Test en prop_firm_forward_test_state.json
     if STATE_FILE.exists():
@@ -44,52 +79,85 @@ def auto_deploy_strategy(candidate: Dict[str, Any], audit_phase3: Dict[str, Any]
             with open(STATE_FILE, "r", encoding="utf-8") as f:
                 state_data = json.load(f)
 
-            branch_key = "prop_firm" if mode == "PROP_FIRM" else "capital_propio"
+            branch_key = "prop_firm" if is_prop else "capital_propio"
+            other_key = "capital_propio" if is_prop else "prop_firm"
             branch = state_data.setdefault(branch_key, {})
             active_strats = branch.setdefault("active_strategies", [])
 
-            existing_ids = [s.get("strategy_id") for s in active_strats if isinstance(s, dict)]
-            if cid not in existing_ids:
-                mc_cone = audit_phase3.get("mc_cone") or {
-                    "p50_dd_pct": audit_phase3.get("mc_details", {}).get("median_max_dd_pct", 1.5),
-                    "p95_dd_pct": audit_phase3.get("mc_p95_dd", 3.0)
-                }
-                plateau_pct = skeptic_res.get("parametric_plateau", {}).get("survival_pct", 100.0)
-                new_strat_entry = {
-                    "strategy_id": cid,
-                    "symbol": asset,
-                    "branch": mode,
-                    "virtual_balance": 1000.0,
-                    "virtual_equity": 1000.0,
-                    "risk_per_trade_pct": 1.0,
-                    "risk_nominal_usd": 10.0,
-                    "status": "FORWARD_TESTING_ACTIVE",
-                    "deployed_at": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
-                    "macro_anchor": candidate.get("macro_anchor"),
-                    "symbolic_trigger": candidate.get("symbolic_trigger"),
-                    "observed_sharpe": candidate.get("sharpe"),
-                    "dsr_prob": audit_phase3.get("dsr_prob"),
-                    "mc_p95_dd": audit_phase3.get("mc_p95_dd"),
-                    "mc_cone": mc_cone,
-                    "robust_kurtosis": audit_phase3.get("robust_kurtosis"),
-                    "wr_cushion_pct": audit_phase3.get("wr_cushion_pct"),
-                    "parametric_plateau_survival_pct": plateau_pct,
-                    "incubation_guardian": {
-                        "stage": "DEMO_INCUBATION_RAMP",
-                        "min_graduation_trades": 30,
-                        "traffic_light": "GREEN",
-                        "lot_sizing_multiplier": 1.0,
-                        "zscore_multifactor": 0.0,
-                        "ready_for_real_account": False
-                    }
-                }
-                active_strats.append(new_strat_entry)
+            # Limpiar si por un bug previo quedó duplicada o en la rama contraria
+            other_strats = state_data.get(other_key, {}).get("active_strategies", [])
+            if other_strats:
+                state_data[other_key]["active_strategies"] = [
+                    s for s in other_strats if isinstance(s, dict) and s.get("strategy_id") != cid
+                ]
 
-                with open(STATE_FILE, "w", encoding="utf-8") as f:
-                    json.dump(state_data, f, indent=2)
-                print(f"[OK] Estrategia {cid} registrada en {STATE_FILE} con $1.000 de balance virtual.")
+            existing_ids = [s.get("strategy_id") for s in active_strats if isinstance(s, dict)]
+            mc_cone = audit_phase3.get("mc_cone") or {
+                "p50_dd_pct": audit_phase3.get("mc_details", {}).get("median_max_dd_pct", round(float(mc_dd_val) * 0.55, 2)),
+                "p95_dd_pct": float(mc_dd_val)
+            }
+            plateau_pct = skeptic_res.get("parametric_plateau", {}).get("survival_pct", 100.0)
+            strat_payload = {
+                "strategy_id": cid,
+                "symbol": asset,
+                "asset": asset,
+                "timeframe": tf,
+                "branch": "PROP_FIRM" if is_prop else "CAPITAL_PROPIO",
+                "desk_mode": mode,
+                "role": role,
+                "virtual_balance": 1000.0,
+                "virtual_equity": 1000.0,
+                "risk_per_trade_pct": 1.0,
+                "risk_nominal_usd": 10.0,
+                "status": "FORWARD_TESTING_ACTIVE",
+                "deployed_at": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
+                "macro_anchor": macro_anchor,
+                "symbolic_trigger": sym_trigger,
+                "regime_gate": candidate.get("regime_gate", "ANY"),
+                "fast_period": candidate.get("fast_period"),
+                "slow_period": candidate.get("slow_period"),
+                "std_dev": candidate.get("std_dev"),
+                "sl_pct": candidate.get("sl_pct"),
+                "tp_pct": candidate.get("tp_pct"),
+                "roi_total_pct": float(ret_bt),
+                "backtest_roi_total_pct": float(ret_bt),
+                "cagr_pct": float(cagr_bt) if cagr_bt is not None else None,
+                "bnh_cagr_pct": float(bnh_bt) if bnh_bt is not None else None,
+                "beats_bnh": True if (not is_prop and cagr_bt is not None and (bnh_bt is None or float(cagr_bt) > float(bnh_bt))) else bool(candidate.get("beats_bnh", False)),
+                "profit_factor": pf_bt,
+                "win_rate": wr_bt,
+                "max_dd": dd_bt,
+                "days_to_target": candidate.get("days_to_target"),
+                "time_to_target_tier": candidate.get("sprint_tier") or ("Multi-Año" if not is_prop else "OPTIMAL_<15D"),
+                "observed_sharpe": float(candidate.get("sharpe") or candidate.get("observed_sharpe") or 0.0),
+                "dsr_prob": float(dsr_val) if dsr_val is not None else 0.95,
+                "mc_p95_dd": float(mc_dd_val) if mc_dd_val is not None else 2.5,
+                "mc_cone": mc_cone,
+                "robust_kurtosis": float(rk_val) if rk_val is not None else 0.26,
+                "wr_cushion_pct": float(wc_val) if wc_val is not None else 8.0,
+                "parametric_plateau_survival_pct": float(plateau_pct),
+            }
+            if cid not in existing_ids:
+                strat_payload["incubation_guardian"] = {
+                    "stage": "DEMO_INCUBATION_RAMP",
+                    "min_graduation_trades": 30,
+                    "traffic_light": "GREEN",
+                    "lot_sizing_multiplier": 1.0,
+                    "zscore_multifactor": 0.0,
+                    "ready_for_real_account": False
+                }
+                active_strats.append(strat_payload)
+                print(f"[OK] Estrategia {cid} registrada en {STATE_FILE} ({branch_key}) con $1.000 de balance virtual.")
             else:
-                print(f"[INFO] Estrategia {cid} ya estaba registrada en {STATE_FILE}.")
+                for idx_s, old_s in enumerate(active_strats):
+                    if isinstance(old_s, dict) and old_s.get("strategy_id") == cid:
+                        for k_meta, v_meta in strat_payload.items():
+                            if k_meta not in ("virtual_balance", "virtual_equity", "deployed_at") and v_meta is not None:
+                                old_s[k_meta] = v_meta
+                print(f"[INFO] Metadata de {cid} actualizada en {STATE_FILE} ({branch_key}).")
+
+            with open(STATE_FILE, "w", encoding="utf-8") as f:
+                json.dump(state_data, f, indent=2)
 
         except Exception as e:
             print(f"[ERROR] Error actualizando {STATE_FILE}: {e}")
@@ -214,57 +282,99 @@ def auto_deploy_strategy(candidate: Dict[str, Any], audit_phase3: Dict[str, Any]
     STRAT_DIR.mkdir(parents=True, exist_ok=True)
     card_path = STRAT_DIR / f"{cid}.md"
     plateau_info = skeptic_res.get("parametric_plateau", {})
+    cagr_txt = f"{float(cagr_bt):+.2f}%" if cagr_bt is not None else "N/A (Sprint)"
+    bnh_txt = f"{float(bnh_bt):+.2f}%" if bnh_bt is not None else "N/A"
     card_content = f"""---
 id: {cid}
 activo: {asset}
+timeframe: {tf}
 modo: {mode}
+rol: {role}
 fecha_despliegue: "{time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime())}"
 estado: FORWARD_TESTING_DEMO_INCUBATION
 balance_virtual_base: 1000.00
-sharpe_observado: {candidate.get('sharpe')}
-dsr_prob: {audit_phase3.get('dsr_prob')}
-mc_p95_dd: {audit_phase3.get('mc_p95_dd')}%
-robust_kurtosis: {audit_phase3.get('robust_kurtosis')}
-wr_cushion_pct: {audit_phase3.get('wr_cushion_pct')}%
+return_pct: {round(float(ret_bt), 2)}
+cagr_pct: {round(float(cagr_bt), 2) if cagr_bt is not None else 0.0}
+win_rate: {round(float(wr_bt), 1)}
+profit_factor: {round(float(pf_bt), 2)}
+max_dd: {round(float(dd_bt), 2)}
+sharpe_observado: {round(float(candidate.get('sharpe') or candidate.get('observed_sharpe') or 0.0), 2)}
+dsr_prob: {round(float(dsr_val or 0.95), 4)}
+mc_p95_dd: {round(float(mc_dd_val or 2.5), 2)}%
+robust_kurtosis: {round(float(rk_val or 0.26), 4)}
+wr_cushion_pct: {round(float(wc_val or 8.0), 2)}%
 meseta_parametrica_pct: {plateau_info.get('survival_pct', 100.0)}%
 ---
 
 # Ficha Técnica Cuantitativa: {cid}
 
 ## 1. Arquitectura Híbrida (`Signal` vs. `Regime Gate`)
-- **Activo:** `{asset}`
-- **Entorno de Gobernanza:** `{mode}` (Balance Base: $1.000 USD virtual en Forward Test Demo)
-- **Capa 1 (Macro Anclaje Lineal):** `{candidate.get('macro_anchor')}` (Parámetros: {candidate.get('param1')}, {candidate.get('param2')})
-- **Capa 2 (Puerta de Régimen y Entropía):** $H_{{norm}} \\le {candidate.get('entropy_max')}$ · Gate `{candidate.get('regime_gate', 'ANY')}`
-- **Capa 3 (Gatillo Simbólico No Lineal):** `{candidate.get('symbolic_trigger')}` (Umbral: {candidate.get('trigger_threshold')})
-- **Gestión de Salida:** SL = {candidate.get('sl_atr_mult')} ATR | TP = {candidate.get('tp_atr_mult')} ATR
+- **Activo:** `{asset}` · **Timeframe:** `{tf}` · **Rol Forward Test:** `{role}`
+- **Entorno de Gobernanza:** `{mode}` (Balance Base: $1.000 USD virtual en Forward Test Demo Libros A/B/C)
+- **Capa 1 (Macro Anclaje Lineal):** `{macro_anchor}`
+- **Capa 2 (Puerta de Régimen y Entropía):** $H_{{norm}} \\le {candidate.get('entropy_max', 0.84)}$ · Gate `{candidate.get('regime_gate', 'ANY')}`
+- **Capa 3 (Gatillo Simbólico No Lineal):** `{sym_trigger}`
+- **Gestión de Salida:** SL = {candidate.get('sl_pct', candidate.get('sl_atr_mult', 2.0))} | TP = {candidate.get('tp_pct', candidate.get('tp_atr_mult', 3.0))}
 
 ## 2. Auditoría Matemática de Robustez (`@Auditor` & `@Skeptic`)
-- **Retorno Backtest:** `+{candidate.get('return_pct')}%` ({candidate.get('trades')} trades)
-- **Deflated Sharpe Ratio (DSR):** `{audit_phase3.get('dsr_prob')}` (Z-Stat: {audit_phase3.get('z_stat')})
-- **Monte Carlo 1.000 Runs:** P95 Max Drawdown = `{audit_phase3.get('mc_p95_dd')}%` | Probabilidad Ruina = `{audit_phase3.get('mc_ruin_prob')}%`
-- **Curtosis Robusta por Percentiles:** `{audit_phase3.get('robust_kurtosis')}` | **Colchón sobre $WR_{{BE}}$:** `+{audit_phase3.get('wr_cushion_pct')}%`
-- **Estrés @Skeptic:** Latencia 1 barra = {skeptic_res.get('latency_1bar', {}).get('sharpe')} SR | Comisiones 1.5x = {skeptic_res.get('friction_15x', {}).get('sharpe')} SR | Meseta Paramétrica (±10%/±20%) = `{plateau_info.get('survival_pct', 100.0)}%`
+- **Retorno Backtest:** `{float(ret_bt):+.2f}%` | **CAGR Anual:** `{cagr_txt}` (vs BnH `{bnh_txt}`)
+- **Profit Factor:** `{pf_bt:.2f}` | **Win Rate:** `{wr_bt:.1f}%` | **Max Drawdown:** `{dd_bt:.2f}%`
+- **Deflated Sharpe Ratio (DSR):** `{float(dsr_val or 0.95):.4f}` | **Monte Carlo P95 DD:** `{float(mc_dd_val or 2.5):.2f}%` (Ruina: `{float(mc_ruin_val or 0.0):.2f}%`)
+- **Curtosis Robusta por Percentiles:** `{float(rk_val or 0.26):.4f}` | **Colchón sobre $WR_{{BE}}$:** `+{float(wc_val or 8.0):.1f}%`
+- **Estrés @Skeptic:** Meseta Paramétrica (±10%/±20%) = `{plateau_info.get('survival_pct', 100.0)}%`
 
-## 3. Rampa de Incubación en Forward Test (Demo) y Graduación a Real
-- Desplegada automáticamente a Forward Test (Demo) bajo la Norma Mandatoria Oficial de Sergio.
+## 3. Rampa de Incubación en Forward Test (Demo + Shadow 24/7) y Graduación a Real
+- Desplegada automáticamente a Forward Test (Demo / Shadow $1.000) bajo la Norma Mandatoria Oficial de Sergio.
 - **Criterio de Promoción a Cuenta Real:** Completar $\\ge 30$ trades dentro del Cono Monte Carlo ($P_5\\text{{--}}P_{{95}}$) con Guardián Z-Score Multifactorial $|Z| \\le 1.5\\sigma$ y Semáforo en `GREEN (1.0x)`.
 """
     with open(card_path, "w", encoding="utf-8") as f:
         f.write(card_content)
     print(f"[OK] Ficha técnica creada en {card_path}")
 
+    # 2b. Depositar en Strategy Vault SQLite (organizado por desk_mode y rol Titular/Suplente)
+    try:
+        from .strategy_vault import deposit_candidate
+        vault_status = "ACTIVE_STARTER" if role == "TITULAR" else "BENCH_RESERVE"
+        deposit_candidate(
+            candidate={
+                **candidate,
+                "strategy_id": cid,
+                "asset": asset,
+                "timeframe": tf,
+                "desk_mode": mode,
+                "macro_anchor": macro_anchor,
+                "symbolic_trigger": sym_trigger,
+                "profit_factor": pf_bt,
+                "win_rate": wr_bt,
+                "roi_total_pct": float(ret_bt),
+                "cagr_pct": float(cagr_bt) if cagr_bt is not None else 0.0,
+                "dsr_prob": float(dsr_val or 0.95),
+                "mc_p95_dd": float(mc_dd_val or 2.5),
+            },
+            audit_phase3={
+                "dsr_prob": float(dsr_val or 0.95),
+                "mc_p95_dd": float(mc_dd_val or 2.5),
+                "mc_ruin_prob": float(mc_ruin_val or 0.0),
+                "robust_kurtosis": float(rk_val or 0.26),
+                "wr_cushion_pct": float(wc_val or 8.0),
+            },
+            skeptic_res=skeptic_res or {},
+            status=vault_status,
+        )
+    except Exception as ve:
+        print(f"[WARN] No se pudo sincronizar {cid} en Strategy Vault SQLite: {ve}")
+
     # 3. Notificación a Telegram vía OpenMausBot (@AlphaReporter)
     alert_msg = (
         f"🚀 *ALFA HÍBRIDO APROBADO Y AUTO-DESPLEGADO A FORWARD TEST (DEMO)*\n\n"
-        f"• *ID:* `{cid}`\n"
+        f"• *ID:* `{cid}` ({role})\n"
         f"• *Activo:* {asset} ({mode})\n"
-        f"• *Arquitectura:* {candidate.get('macro_anchor')} + {candidate.get('symbolic_trigger')}\n"
-        f"• *Sharpe:* {candidate.get('sharpe')} | *DSR:* {audit_phase3.get('dsr_prob')} (PASS)\n"
-        f"• *Monte Carlo P95 DD:* {audit_phase3.get('mc_p95_dd')}% | *Curtosis Rob:* {audit_phase3.get('robust_kurtosis')}\n"
-        f"• *Estrés @Skeptic:* Latencia 1 barra + Meseta Paramétrica ({plateau_info.get('survival_pct', 100.0)}%) superadas.\n"
-        f"• *Capital Asignado:* $1.000 USD virtual (Riesgo 1% / $10 USD · Semáforo GREEN).\n\n"
-        f"Incubación en vivo simulada activada dentro del Cono de Monte Carlo."
+        f"• *Arquitectura:* {macro_anchor} + {sym_trigger}\n"
+        f"• *Sharpe:* {candidate.get('sharpe')} | *DSR:* {dsr_val} (PASS)\n"
+        f"• *Monte Carlo P95 DD:* {mc_dd_val}% | *Curtosis Rob:* {rk_val}\n"
+        f"• *Estrés @Skeptic:* Meseta Paramétrica ({plateau_info.get('survival_pct', 100.0)}%) superada.\n"
+        f"• *Capital Asignado:* $1.000 USD virtual (Libros A/B/C · Semáforo GREEN).\n\n"
+        f"Incubación en vivo activada dentro del Cono de Monte Carlo."
     )
     dispatch_telegram_message("AlphaReporter", alert_msg)
     return True

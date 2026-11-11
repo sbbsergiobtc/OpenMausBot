@@ -438,9 +438,10 @@ print("\n[ETAPA 3 & 4] Auditoría Destructiva: DSR (N=100k), Monte Carlo (1.000 
 stage4_approved = []
 stage4_rejected = []
 
+TODAY_TAG = time.strftime("%Y%m%d", time.gmtime())
 for idx, c in enumerate(stage2_candidates, start=1):
     prefix = "CAP" if c["desk_mode"] == "CAPITAL_PROPIO" else "PROP"
-    cid = f"{prefix}-20261107-{idx:03d}"
+    cid = f"{prefix}-{TODAY_TAG}-{idx:03d}"
     c["candidate_id"] = cid
     mode = c["desk_mode"]
     asset = c["asset"]
@@ -610,9 +611,17 @@ for a in stage4_approved:
 
 print(f"[FIN ETAPA 5] Desplegadas con éxito en Forward Test: {deployed_count} | Depositadas en Banco de Reserva (DSR >= 0.85): {vault_deposited_count}")
 
+# 6b. Sincronizar inmediatamente Orquestador A/B/C y Tracking Shadow de Suplentes
+try:
+    from jev.regime_orchestrator import run_parallel_orchestrator_evaluation
+    orch_state = run_parallel_orchestrator_evaluation()
+    print(f"[ORQUESTADOR A/B/C] Sincronizado ({orch_state['summary']['total_strategies']} estrategias activas/shadow).")
+except Exception as oe:
+    print(f"[WARN] Error sincronizando Orquestador tras screener: {oe}")
+
 # 7. Informe Oficial
 # ------------------------------------------------------------------------------
-report_path = BASE_DIR / "reports/SCREENER_100K_20261107.md"
+report_path = BASE_DIR / f"reports/SCREENER_100K_{TODAY_TAG}.md"
 report_content = f"""# INFORME OFICIAL: BÚSQUEDA Y AUDITORÍA MASIVA DE 100.000 ESTRATEGIAS
 **Fecha:** {time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime())}
 **Arquitectura:** Embudo Dinámico por Umbrales Objetivos (LESSON-20261107-016) + Bloques Cuantitativos Ignacio Ayago (Techain)
