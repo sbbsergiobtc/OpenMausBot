@@ -978,6 +978,73 @@
       border: 1px solid rgba(0, 0, 0, 0.20);
       flex-shrink: 0;
     }
+    .algrok-hex-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .algrok-hex-copy {
+      width: 64px;
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: #1D1D1F;
+      background: #FFFFFF;
+      border: 1px solid #D6D1C7;
+      border-radius: 6px;
+      padding: 1px 5px;
+      text-align: center;
+      cursor: pointer;
+      user-select: text !important;
+      -webkit-user-select: text !important;
+      outline: none;
+      transition: border-color 0.12s ease, background-color 0.12s ease;
+    }
+    .algrok-hex-copy:hover,
+    .algrok-hex-copy:focus {
+      border-color: #3C45A5;
+      background: #EEF2FF;
+    }
+    .algrok-copy-badge {
+      font-size: 9px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: #065F46;
+      background: #D1FAE5;
+      padding: 1px 4px;
+      border-radius: 4px;
+    }
+    .algrok-color-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      padding-top: 2px;
+    }
+    .algrok-undo-color-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 7px;
+      border-radius: 6px;
+      border: 1px solid #D6D1C7;
+      background: #FFFFFF;
+      color: #1D1D1F;
+      font-size: 9px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.12s ease;
+    }
+    .algrok-undo-color-btn:hover:not(:disabled) {
+      border-color: #3C45A5;
+      background: #EEF2FF;
+      color: #3C45A5;
+    }
+    .algrok-undo-color-btn:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
     .algrok-color-native {
       width: 20px;
       height: 20px;
@@ -1213,7 +1280,7 @@
           <!-- Botón de Edición Directa de Menú y Diseño (junto a la campanita, sin desplegable) -->
           <div class="flex items-center gap-1.5" id="ui-customizer-wrapper">
             <button id="btn-ui-customizer" type="button" onclick="window.AlgrokSidebar && window.AlgrokSidebar.toggleEditMode()" class="relative p-2 text-[#181A20] hover:bg-[#EAE5DC] rounded-lg transition border border-[#E6E2D8] flex items-center justify-center cursor-pointer" title="Activar/Desactivar Edición Directa del Menú y Dashboard">
-              <i class="fa-solid fa-sliders text-sm"></i>
+              <i class="fa-solid fa-pencil text-sm"></i>
             </button>
             <button id="btn-ui-reset-all" type="button" onclick="window.AlgrokResetAll && window.AlgrokResetAll()" class="hidden px-2.5 py-1.5 rounded-lg border border-[#D6D1C7] bg-[#FAF7F2] hover:bg-[#EAE5DC] text-[10px] font-mono font-bold text-[#1D1D1F] items-center gap-1 cursor-pointer transition" title="Restablecer orden y nombres originales de menú, tarjetas, KPIs y columnas">
               <i class="fa-solid fa-arrow-rotate-left text-[10px]"></i>
@@ -11958,6 +12025,7 @@
 
         const origValidHex = /^#[0-9A-F]{6}$/i.test(defaultHex || '') ? defaultHex.toUpperCase() : '';
         let activeHex = /^#[0-9A-F]{6}$/i.test(currentHex || '') ? currentHex.toUpperCase() : origValidHex;
+        const historyStack = [activeHex || defaultHex || ''];
 
         const origBtn = document.createElement('button');
         origBtn.type = 'button';
@@ -11967,26 +12035,88 @@
           : 'Restaurar color predeterminado';
         origBtn.innerHTML = `<span class="algrok-orig-dot" style="background:${origValidHex || 'repeating-linear-gradient(45deg,#eee,#eee 2px,#ccc 2px,#ccc 4px)'}"></span><span>Orig${origValidHex ? ' ' + origValidHex : ''}</span>`;
 
-        const curLabel = document.createElement('span');
-        curLabel.className = 'font-bold text-[#1D1D1F]';
+        const hexWrap = document.createElement('div');
+        hexWrap.className = 'algrok-hex-wrap';
+
+        const hexInput = document.createElement('input');
+        hexInput.type = 'text';
+        hexInput.readOnly = true;
+        hexInput.className = 'algrok-hex-copy';
+        hexInput.title = 'Haz clic para copiar el código o selecciónalo con Ctrl+C';
+
+        const copyBadge = document.createElement('span');
+        copyBadge.className = 'algrok-copy-badge hidden';
+        copyBadge.textContent = '✓';
+
+        const copyCurrentCode = () => {
+          const val = hexInput.value;
+          if (!val) return;
+          hexInput.focus();
+          hexInput.select();
+          try { hexInput.setSelectionRange(0, val.length); } catch (e) {}
+          const showCopied = () => {
+            copyBadge.classList.remove('hidden');
+            clearTimeout(copyBadge._t);
+            copyBadge._t = setTimeout(() => copyBadge.classList.add('hidden'), 1100);
+          };
+          if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+            navigator.clipboard.writeText(val).then(showCopied).catch(() => {
+              try { if (document.execCommand('copy')) showCopied(); } catch (err) {}
+            });
+          } else {
+            try { if (document.execCommand('copy')) showCopied(); } catch (err) {}
+          }
+        };
+        hexInput.addEventListener('click', (e) => {
+          e.stopPropagation();
+          copyCurrentCode();
+        });
+
+        hexWrap.appendChild(hexInput);
+        hexWrap.appendChild(copyBadge);
+
         const updateMetaLabel = (hexVal) => {
-          const cleanH = /^#[0-9A-F]{6}$/i.test(hexVal || '') ? hexVal.toUpperCase() : (hexVal === 'transparent' ? 'Transp.' : 'Predet.');
-          curLabel.textContent = `Actual: ${cleanH}`;
+          const cleanH = /^#[0-9A-F]{6}$/i.test(hexVal || '')
+            ? hexVal.toUpperCase()
+            : (hexVal === 'transparent' ? 'Transp.' : (origValidHex || '#1D1D1F'));
+          hexInput.value = cleanH;
         };
         updateMetaLabel(currentHex || defaultHex);
 
         meta.appendChild(origBtn);
-        meta.appendChild(curLabel);
+        meta.appendChild(hexWrap);
         container.appendChild(meta);
 
         const row = document.createElement('div');
         row.className = 'algrok-swatch-row';
 
-        // Construir lista de swatches incluyendo primero el color original si no está en los predeterminados
         const presetList = [...paletteColors];
         if (origValidHex && !presetList.some(c => c.hex.toUpperCase() === origValidHex)) {
           presetList.unshift({ hex: origValidHex, name: `Original (${origValidHex})` });
         }
+
+        const footer = document.createElement('div');
+        footer.className = 'algrok-color-footer';
+        const undoBtn = document.createElement('button');
+        undoBtn.type = 'button';
+        undoBtn.className = 'algrok-undo-color-btn';
+        footer.appendChild(undoBtn);
+
+        const updateUndoUi = () => {
+          if (historyStack.length > 1) {
+            const prevVal = historyStack[historyStack.length - 2];
+            const prevHexValid = /^#[0-9A-F]{6}$/i.test(prevVal || '') ? prevVal.toUpperCase() : '';
+            undoBtn.disabled = false;
+            undoBtn.title = `Volver al color anterior (${prevHexValid || 'predeterminado'})`;
+            undoBtn.innerHTML = `<span class="algrok-orig-dot" style="background:${prevHexValid || '#EAE5DC'}"></span><i class="fa-solid fa-arrow-rotate-left"></i><span>${prevHexValid || 'Ant.'}</span>`;
+          } else {
+            const curVal = historyStack[0] || origValidHex;
+            const curHexValid = /^#[0-9A-F]{6}$/i.test(curVal || '') ? curVal.toUpperCase() : '';
+            undoBtn.disabled = true;
+            undoBtn.title = 'Sin cambios recientes aún';
+            undoBtn.innerHTML = `<span class="algrok-orig-dot" style="background:${curHexValid || '#EAE5DC'}"></span><i class="fa-solid fa-arrow-rotate-left"></i><span>Anterior</span>`;
+          }
+        };
 
         const swatchButtons = [];
         const syncActiveUi = (selectedHex) => {
@@ -11996,6 +12126,19 @@
           });
           if (normSel) nativePicker.value = normSel;
           updateMetaLabel(selectedHex || defaultHex);
+          updateUndoUi();
+        };
+
+        const commitColorChange = (nextHexOrNull, skipServerSave, pushHistory = true) => {
+          const nextNorm = nextHexOrNull === null
+            ? (origValidHex || '')
+            : (/^#[0-9A-F]{6}$/i.test(nextHexOrNull) ? nextHexOrNull.toUpperCase() : nextHexOrNull);
+          if (pushHistory && !skipServerSave && historyStack[historyStack.length - 1] !== nextNorm) {
+            historyStack.push(nextNorm);
+          }
+          activeHex = /^#[0-9A-F]{6}$/i.test(nextNorm || '') ? nextNorm : origValidHex;
+          syncActiveUi(activeHex || nextNorm);
+          onApply(nextHexOrNull, skipServerSave);
         };
 
         presetList.forEach(c => {
@@ -12007,9 +12150,7 @@
           sw.onclick = (e) => {
             e.preventDefault();
             e.stopPropagation();
-            activeHex = c.hex.toUpperCase();
-            syncActiveUi(activeHex);
-            onApply(c.hex, false);
+            commitColorChange(c.hex, false, true);
           };
           swatchButtons.push({ btn: sw, hex: c.hex });
           row.appendChild(sw);
@@ -12020,15 +12161,17 @@
         nativePicker.className = 'algrok-color-native';
         nativePicker.value = activeHex || '#3C45A5';
         nativePicker.title = 'Elegir color personalizado';
+        let preNativeHex = activeHex || origValidHex;
+        nativePicker.onfocus = () => { preNativeHex = activeHex || origValidHex; };
         nativePicker.oninput = (e) => {
-          activeHex = e.target.value.toUpperCase();
-          syncActiveUi(activeHex);
-          onApply(e.target.value, true);
+          commitColorChange(e.target.value, true, false);
         };
         nativePicker.onchange = (e) => {
-          activeHex = e.target.value.toUpperCase();
-          syncActiveUi(activeHex);
-          onApply(e.target.value, false);
+          const nextU = e.target.value.toUpperCase();
+          if (historyStack[historyStack.length - 1] !== preNativeHex && preNativeHex) {
+            historyStack.push(preNativeHex);
+          }
+          commitColorChange(nextU, false, true);
         };
         row.appendChild(nativePicker);
 
@@ -12040,20 +12183,31 @@
         resetBtn.onclick = (e) => {
           e.preventDefault();
           e.stopPropagation();
-          syncActiveUi(origValidHex);
-          onApply(null, false);
+          commitColorChange(null, false, true);
         };
         row.appendChild(resetBtn);
 
         origBtn.onclick = (e) => {
           e.preventDefault();
           e.stopPropagation();
-          syncActiveUi(origValidHex);
-          onApply(null, false);
+          commitColorChange(null, false, true);
+        };
+
+        undoBtn.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (historyStack.length <= 1) return;
+          historyStack.pop();
+          const prevVal = historyStack[historyStack.length - 1];
+          const applyVal = (!prevVal || prevVal === origValidHex || prevVal === defaultHex) ? null : prevVal;
+          activeHex = /^#[0-9A-F]{6}$/i.test(prevVal || '') ? prevVal.toUpperCase() : origValidHex;
+          syncActiveUi(activeHex);
+          onApply(applyVal, false);
         };
 
         syncActiveUi(currentHex || origValidHex);
         container.appendChild(row);
+        container.appendChild(footer);
         return { syncActiveUi };
       },
       async fetchAiSemanticSet(iconClass, contextText = '') {
@@ -12483,11 +12637,11 @@
         const pop = document.createElement('div');
         pop.className = 'sidebar-icon-popover';
         pop.addEventListener('pointerdown', (e) => {
-          if (!e.target.classList.contains('algrok-color-native')) e.preventDefault();
+          if (!e.target.classList.contains('algrok-color-native') && !e.target.classList.contains('algrok-hex-copy')) e.preventDefault();
           e.stopPropagation();
         });
         pop.addEventListener('mousedown', (e) => {
-          if (!e.target.classList.contains('algrok-color-native')) e.preventDefault();
+          if (!e.target.classList.contains('algrok-color-native') && !e.target.classList.contains('algrok-hex-copy')) e.preventDefault();
           e.stopPropagation();
         });
 
@@ -12922,7 +13076,7 @@
         // o abrir selectores de icono/color sin disparar navegación ni salir del modo edición.
         document.addEventListener('click', (e) => {
           if (!window.algrokEditMode) return;
-          if (e.target.closest('#btn-ui-customizer, #btn-ui-reset-all, .sidebar-btn-eye, .sidebar-tab-icon, .sidebar-icon-popover, .sidebar-icon-choice, .algrok-color-palette-popover, .algrok-color-swatch, .algrok-color-native, .algrok-scope-btn, .algrok-prop-tab')) {
+          if (e.target.closest('#btn-ui-customizer, #btn-ui-reset-all, .sidebar-btn-eye, .sidebar-tab-icon, .sidebar-icon-popover, .sidebar-icon-choice, .algrok-color-palette-popover, .algrok-color-swatch, .algrok-color-native, .algrok-scope-btn, .algrok-prop-tab, .algrok-hex-copy, .algrok-orig-chip, .algrok-undo-color-btn')) {
             return;
           }
 
@@ -13484,11 +13638,11 @@
         const pop = document.createElement('div');
         pop.className = 'sidebar-icon-popover';
         pop.addEventListener('pointerdown', (e) => {
-          if (!e.target.classList.contains('algrok-color-native')) e.preventDefault();
+          if (!e.target.classList.contains('algrok-color-native') && !e.target.classList.contains('algrok-hex-copy')) e.preventDefault();
           e.stopPropagation();
         });
         pop.addEventListener('mousedown', (e) => {
-          if (!e.target.classList.contains('algrok-color-native')) e.preventDefault();
+          if (!e.target.classList.contains('algrok-color-native') && !e.target.classList.contains('algrok-hex-copy')) e.preventDefault();
           e.stopPropagation();
         });
 
@@ -13740,9 +13894,11 @@
 
         const scheduleCheck = () => {
           if (!this.isEditMode) return;
+          if (document.activeElement && document.activeElement.closest('.algrok-color-palette-popover, .sidebar-icon-popover')) return;
           clearTimeout(this.selectionCheckTimer);
           this.selectionCheckTimer = setTimeout(() => {
-            const activeInPalette = document.activeElement && document.activeElement.closest('.algrok-color-palette-popover');
+            const activeInPalette = document.activeElement && document.activeElement.closest('.algrok-color-palette-popover, .sidebar-icon-popover');
+            if (activeInPalette) return;
             const ctx = this.getSelectionColorContext();
             if (ctx) {
               this.showStylePopover(ctx);
@@ -13897,11 +14053,11 @@
         const pop = document.createElement('div');
         pop.className = 'algrok-color-palette-popover';
         pop.addEventListener('pointerdown', (e) => {
-          if (!e.target.classList.contains('algrok-color-native')) e.preventDefault();
+          if (!e.target.classList.contains('algrok-color-native') && !e.target.classList.contains('algrok-hex-copy')) e.preventDefault();
           e.stopPropagation();
         });
         pop.addEventListener('mousedown', (e) => {
-          if (!e.target.classList.contains('algrok-color-native')) e.preventDefault();
+          if (!e.target.classList.contains('algrok-color-native') && !e.target.classList.contains('algrok-hex-copy')) e.preventDefault();
           e.stopPropagation();
         });
 
