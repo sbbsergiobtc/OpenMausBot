@@ -645,7 +645,10 @@ def get_notifications():
                         "title": "Drift Trigger Activado",
                         "message": drift.get('reason', 'Deriva de régimen detectada en el forward test'),
                         "timestamp": fstate.get('last_drift_retrain_time', 'Reciente'),
-                        "badge": "warning"
+                        "badge": "warning",
+                        "target_tab": "orchestrator",
+                        "target_selector": "#q-learning-orchestrator-panel",
+                        "target_label": "Orquestador · Drift Q-Learning"
                     })
                 elif drift.get('in_cooldown'):
                     notifications.append({
@@ -655,7 +658,10 @@ def get_notifications():
                         "title": "Drift Watchdog en Cooldown (4h)",
                         "message": "Enfriamiento preventivo activo tras recalibración Polyak",
                         "timestamp": "En curso",
-                        "badge": "neutral"
+                        "badge": "neutral",
+                        "target_tab": "orchestrator",
+                        "target_selector": "#q-learning-orchestrator-panel",
+                        "target_label": "Orquestador · Watchdog"
                     })
 
             # Check incubation guardian counts
@@ -672,7 +678,10 @@ def get_notifications():
                     "title": f"Guardián: {len(amber_strats)} Modelos en AMBER",
                     "message": f"Estrategias bajo lote defensivo (0.50x) por desviación |Z| > 1.5σ: {', '.join(amber_strats[:3])}",
                     "timestamp": fstate.get('last_eval_timestamp', 'Reciente'),
-                    "badge": "warning"
+                    "badge": "warning",
+                    "target_tab": "forward",
+                    "target_selector": "#ft-propfirm-card, #tab-content-forward",
+                    "target_label": "Forward Test · Guardián"
                 })
 
             green_count = sum(1 for s in all_strats if s.get('incubation_guardian', {}).get('traffic_light') == 'GREEN')
@@ -683,7 +692,10 @@ def get_notifications():
                 "title": f"Guardián: {green_count} Modelos en GREEN",
                 "message": "Operando dentro del Cono Monte Carlo (P05-P95) con multiplicador 1.0x-1.25x",
                 "timestamp": fstate.get('last_eval_timestamp', 'Reciente'),
-                "badge": "success"
+                "badge": "success",
+                "target_tab": "forward",
+                "target_selector": "#ft-propfirm-card, #tab-content-forward",
+                "target_label": "Forward Test · Guardián"
             })
         except Exception as e:
             print(f"Error loading state for notifications: {e}")
@@ -704,7 +716,10 @@ def get_notifications():
                         "title": f"Hard 40% TP Clamp: {ev.get('symbol')}",
                         "message": f"Take Profit recortado para cumplir regla del 40% ({ev.get('details', {}).get('reason', 'OK')})",
                         "timestamp": ev.get('timestamp_utc', 'Reciente'),
-                        "badge": "purple"
+                        "badge": "purple",
+                        "target_tab": "orchestrator",
+                        "target_selector": "#ql-telemetry-stream",
+                        "target_label": "Orquestador · Stream Libro C"
                     })
                     break
                 elif ev.get('event_type') == 'TRADE_BLOCKED_BY_Q':
@@ -715,7 +730,10 @@ def get_notifications():
                         "title": f"Whipsaw Evitado: {ev.get('symbol')}",
                         "message": f"Agente Q asignó 0.00x en {ev.get('regime_code')}",
                         "timestamp": ev.get('timestamp_utc', 'Reciente'),
-                        "badge": "neutral"
+                        "badge": "neutral",
+                        "target_tab": "orchestrator",
+                        "target_selector": "#ql-telemetry-stream",
+                        "target_label": "Orquestador · Libro C"
                     })
                     break
                 elif ev.get('event_type') == 'REJECTED_SAME_FIRM_HEDGING':
@@ -726,7 +744,10 @@ def get_notifications():
                         "title": f"Anti-Hedging: {ev.get('symbol')}",
                         "message": f"Bloqueada posición opuesta en misma firma ({ev.get('details', {}).get('firm', 'Firma')})",
                         "timestamp": ev.get('timestamp_utc', 'Reciente'),
-                        "badge": "warning"
+                        "badge": "warning",
+                        "target_tab": "config",
+                        "target_selector": "#tab-content-config",
+                        "target_label": "Reglas de Riesgo"
                     })
                     break
                 elif ev.get('event_type') == 'TRADE_BLOCKED_PORTFOLIO_CAP':
@@ -737,7 +758,10 @@ def get_notifications():
                         "title": f"Cap Concurrencia: {ev.get('symbol')}",
                         "message": f"Tope de 3 trades alcanzado en cartera ({ev.get('details', {}).get('reason', 'Cap')})",
                         "timestamp": ev.get('timestamp_utc', 'Reciente'),
-                        "badge": "neutral"
+                        "badge": "neutral",
+                        "target_tab": "orchestrator",
+                        "target_selector": "#ql-telemetry-stream",
+                        "target_label": "Orquestador · Libro C"
                     })
                     break
         except Exception as e:
@@ -751,7 +775,10 @@ def get_notifications():
             "title": "Sistema en Vigilancia Activa",
             "message": "Daemon 24/7 y orquestador Double Q-Learning sincronizados sin alertas críticas",
             "timestamp": "En tiempo real",
-            "badge": "success"
+            "badge": "success",
+            "target_tab": "dashboard",
+            "target_selector": "#cockpit-accounts-cap-propio, #tab-content-dashboard",
+            "target_label": "Cockpit General"
         })
 
     return {"notifications": notifications, "unread_count": len(notifications)}
@@ -3950,6 +3977,25 @@ KPI_PREFS_FILE = BASE_DIR / 'data/kpi_preferences.json'
 LAYOUT_PREFS_FILE = BASE_DIR / 'data/layout_preferences.json'
 NAV_PREFS_FILE = BASE_DIR / 'data/nav_preferences.json'
 TEXT_PREFS_FILE = BASE_DIR / 'data/text_preferences.json'
+THEME_PREFS_FILE = BASE_DIR / 'data/theme_preferences.json'
+
+
+class ThemePreferencePayload(BaseModel):
+    theme: str
+
+
+@app.get("/api/theme_preferences")
+def get_theme_preferences():
+    data = _load_json_prefs(THEME_PREFS_FILE)
+    theme = str(data.get("theme") or "light").lower()
+    return {"theme": "dark" if theme == "dark" else "light"}
+
+
+@app.post("/api/theme_preferences")
+def save_theme_preference(payload: ThemePreferencePayload):
+    t = "dark" if str(payload.theme or "").lower() == "dark" else "light"
+    _save_json_pref(THEME_PREFS_FILE, "theme", t)
+    return {"status": "ok", "theme": t}
 
 
 class TextPreferencePayload(BaseModel):

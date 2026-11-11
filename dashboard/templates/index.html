@@ -4,6 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ALGROK QUANT · Institutional Quantitative Desk</title>
+  <script>
+    (function() {
+      try {
+        if (localStorage.getItem('algrok_theme_v1') === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
 
   <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1113,6 +1122,198 @@
       color: #FFFFFF !important;
       font-weight: 700 !important;
     }
+
+    /* Resaltado temporal al navegar desde una notificación clicable */
+    @keyframes algrokNotifPulse {
+      0% { box-shadow: 0 0 0 0 rgba(60, 69, 165, 0.55); border-color: #3C45A5; }
+      50% { box-shadow: 0 0 0 6px rgba(60, 69, 165, 0.20); border-color: #6366F1; }
+      100% { box-shadow: 0 0 0 0 rgba(60, 69, 165, 0); }
+    }
+    .algrok-notif-focus-ring {
+      animation: algrokNotifPulse 1.0s ease-in-out 2;
+      outline: 2px solid #6366F1 !important;
+      outline-offset: 2px;
+    }
+
+    /* =========================================================================
+       ALGROK QUANT — MODO OSCURO INSTITUCIONAL ([data-theme="dark"])
+       ========================================================================= */
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --canvas-bg: #0B0E14;
+      --shell-bg: #111622;
+      --sidebar-bg: #151B29;
+      --card-bg: #192132;
+      --card-subtle: #141A27;
+      --border-subtle: #283349;
+      --border-divider: #222C40;
+      --text-primary: #F1F5F9;
+      --text-secondary: #94A3B8;
+      --text-tertiary: #64748B;
+      --brand-accent: #818CF8;
+    }
+    html[data-theme="dark"] body {
+      background-color: #0B0E14 !important;
+      color: #F1F5F9 !important;
+    }
+    html[data-theme="dark"] .glass-card,
+    html[data-theme="dark"] .panel-card,
+    html[data-theme="dark"] .strategy-card,
+    html[data-theme="dark"] .algrok-kpi-card {
+      background: #192132 !important;
+      border-color: #283349 !important;
+      color: #F1F5F9 !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28) !important;
+    }
+    html[data-theme="dark"] .bg-\[\#FFFFFF\],
+    html[data-theme="dark"] .bg-white {
+      background-color: #192132 !important;
+    }
+    html[data-theme="dark"] .bg-\[\#FDFDFB\],
+    html[data-theme="dark"] .bg-\[\#FDFDFB\]\/95 {
+      background-color: #111622 !important;
+    }
+    html[data-theme="dark"] main > header.sticky {
+      background-color: rgba(17, 22, 34, 0.94) !important;
+      border-color: #283349 !important;
+    }
+    html[data-theme="dark"] .bg-\[\#EFECE6\],
+    html[data-theme="dark"] aside {
+      background-color: #151B29 !important;
+      border-color: #283349 !important;
+    }
+    html[data-theme="dark"] .bg-\[\#FAFAFC\],
+    html[data-theme="dark"] .bg-\[\#FBFBFD\],
+    html[data-theme="dark"] .bg-\[\#FAF7F2\],
+    html[data-theme="dark"] .bg-\[\#F5F5F7\],
+    html[data-theme="dark"] .bg-\[\#F4F5F7\],
+    html[data-theme="dark"] .bg-\[\#F2F2F7\],
+    html[data-theme="dark"] .bg-\[\#EAE5DC\],
+    html[data-theme="dark"] .bg-\[\#F5EFE6\],
+    html[data-theme="dark"] .bg-\[\#EEF2FF\] {
+      background-color: #1E273B !important;
+    }
+    html[data-theme="dark"] .border-\[\#E5E5EA\],
+    html[data-theme="dark"] .border-\[\#E6E2D8\],
+    html[data-theme="dark"] .border-\[\#D6D1C7\],
+    html[data-theme="dark"] .border-\[\#F2F2F7\],
+    html[data-theme="dark"] .border-\[\#E0E7FF\] {
+      border-color: #283349 !important;
+    }
+    html[data-theme="dark"] .text-\[\#1D1D1F\],
+    html[data-theme="dark"] .text-\[\#181A20\],
+    html[data-theme="dark"] .text-txtPrimary,
+    html[data-theme="dark"] h1,
+    html[data-theme="dark"] h2,
+    html[data-theme="dark"] h3,
+    html[data-theme="dark"] h4,
+    html[data-theme="dark"] h5 {
+      color: #F1F5F9 !important;
+    }
+    html[data-theme="dark"] .text-\[\#6E6E73\],
+    html[data-theme="dark"] .text-\[\#86868B\],
+    html[data-theme="dark"] .text-\[\#6E6D68\],
+    html[data-theme="dark"] .text-txtSecondary,
+    html[data-theme="dark"] .overline-text {
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .text-white {
+      color: #FFFFFF !important;
+    }
+    html[data-theme="dark"] .text-\[\#3C45A5\] {
+      color: #818CF8 !important;
+    }
+    html[data-theme="dark"] .text-\[\#065F46\],
+    html[data-theme="dark"] .text-\[\#107C41\] {
+      color: #34D399 !important;
+    }
+    html[data-theme="dark"] .text-\[\#D70015\] {
+      color: #FB7185 !important;
+    }
+    html[data-theme="dark"] .sidebar-link:hover {
+      background-color: rgba(255, 255, 255, 0.06) !important;
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .sidebar-link.active {
+      background-color: #1E293B !important;
+      color: #FFFFFF !important;
+      border-color: #334155 !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+    }
+    html[data-theme="dark"] .segmented-control {
+      background: #101622 !important;
+      border-color: #283349 !important;
+    }
+    html[data-theme="dark"] .segmented-pill.active {
+      background: #232D44 !important;
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .btn-secondary {
+      background-color: #1E273B !important;
+      border-color: #334155 !important;
+      color: #E2E8F0 !important;
+    }
+    html[data-theme="dark"] .btn-secondary:hover {
+      background-color: #28354F !important;
+    }
+    html[data-theme="dark"] select,
+    html[data-theme="dark"] input:not([type="color"]):not(.algrok-hex-copy),
+    html[data-theme="dark"] textarea {
+      background-color: #141A27 !important;
+      color: #F1F5F9 !important;
+      border-color: #283349 !important;
+    }
+    html[data-theme="dark"] #notifications-dropdown,
+    html[data-theme="dark"] .sidebar-icon-popover,
+    html[data-theme="dark"] .algrok-color-palette-popover {
+      background: rgba(21, 27, 41, 0.98) !important;
+      border-color: #334155 !important;
+      color: #F1F5F9 !important;
+    }
+    html[data-theme="dark"] .sidebar-icon-popover-header,
+    html[data-theme="dark"] .algrok-color-meta,
+    html[data-theme="dark"] .algrok-scope-bar {
+      background: #1E273B !important;
+      border-color: #334155 !important;
+      color: #CBD5E1 !important;
+    }
+    html[data-theme="dark"] .algrok-scope-btn.active {
+      background: #28354F !important;
+      color: #A5B4FC !important;
+    }
+    html[data-theme="dark"] .algrok-orig-chip,
+    html[data-theme="dark"] .algrok-hex-copy,
+    html[data-theme="dark"] .algrok-undo-color-btn {
+      background: #141A27 !important;
+      border-color: #334155 !important;
+      color: #F1F5F9 !important;
+    }
+    html[data-theme="dark"] .badge-neutral-soft {
+      background: #1E273B !important;
+      color: #CBD5E1 !important;
+      border-color: #334155 !important;
+    }
+    html[data-theme="dark"] .badge-brand-indigo {
+      background: rgba(99, 102, 241, 0.18) !important;
+      color: #A5B4FC !important;
+      border-color: rgba(99, 102, 241, 0.35) !important;
+    }
+    html[data-theme="dark"] .badge-success-live {
+      background: rgba(16, 185, 129, 0.16) !important;
+      color: #34D399 !important;
+      border-color: rgba(16, 185, 129, 0.35) !important;
+    }
+    html[data-theme="dark"] table th,
+    html[data-theme="dark"] table td {
+      border-color: #242E42 !important;
+    }
+    html[data-theme="dark"] tbody tr:hover {
+      background-color: rgba(255, 255, 255, 0.03) !important;
+    }
+    html[data-theme="dark"] body.algrok-edit-mode .algrok-editable-text[contenteditable="true"]:focus {
+      background-color: #1E273B !important;
+      color: #FFFFFF !important;
+    }
 </style>
 
   <!-- TradingView Official Advanced Charts Script -->
@@ -1237,7 +1438,7 @@
           </div>
           <!-- Centro de Alertas & Notificaciones Cuantitativas -->
           <div class="relative" id="notifications-wrapper">
-            <button id="btn-notifications-bell" onclick="toggleNotificationsCenter()" class="relative p-2 text-[#181A20] hover:bg-[#EAE5DC] rounded-lg transition border border-[#E6E2D8] flex items-center justify-center" title="Centro de Notificaciones y Alertas">
+            <button id="btn-notifications-bell" type="button" onclick="toggleNotificationsCenter(event)" class="relative p-2 text-[#181A20] hover:bg-[#EAE5DC] rounded-lg transition border border-[#E6E2D8] flex items-center justify-center cursor-pointer" title="Centro de Notificaciones y Alertas">
               <i class="fa-regular fa-bell text-sm"></i>
               <span id="notifications-badge" class="hidden absolute -top-1 -right-1 min-w-[17px] h-[17px] px-1 bg-[#D70015] text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-white">0</span>
             </button>
@@ -1252,16 +1453,16 @@
                 </div>
                 <div class="flex items-center gap-2">
                   <span id="notifications-count-chip" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#F2F2F7] text-[#6E6E73] font-semibold">0 eventos</span>
-                  <button onclick="markAllNotificationsRead()" class="text-[11px] text-[#3C45A5] hover:underline font-semibold" title="Marcar como leídas">Limpiar</button>
+                  <button type="button" onclick="markAllNotificationsRead()" class="text-[11px] text-[#3C45A5] hover:underline font-semibold" title="Marcar como leídas">Limpiar</button>
                 </div>
               </div>
 
               <!-- Filtros por Segmento / Categoría -->
               <div class="flex items-center gap-1.5 px-3 py-2 border-b border-[#F2F2F7] bg-[#FFFFFF] overflow-x-auto">
-                <button onclick="filterNotifications('ALL')" id="notif-filter-ALL" class="px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold notif-filter-btn active" style="color: #FFFFFF !important; background-color: #1D1D1F !important;">Todas</button>
-                <button onclick="filterNotifications('GUARDIAN')" id="notif-filter-GUARDIAN" class="px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-medium notif-filter-btn">Guardián</button>
-                <button onclick="filterNotifications('Q_LEARNING')" id="notif-filter-Q_LEARNING" class="px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-medium notif-filter-btn">Q-Learning</button>
-                <button onclick="filterNotifications('PROP_FIRM')" id="notif-filter-PROP_FIRM" class="px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-medium notif-filter-btn">40% Clamps</button>
+                <button type="button" onclick="filterNotifications('ALL')" id="notif-filter-ALL" class="px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold notif-filter-btn active" style="color: #FFFFFF !important; background-color: #1D1D1F !important;">Todas</button>
+                <button type="button" onclick="filterNotifications('GUARDIAN')" id="notif-filter-GUARDIAN" class="px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-medium notif-filter-btn">Guardián</button>
+                <button type="button" onclick="filterNotifications('Q_LEARNING')" id="notif-filter-Q_LEARNING" class="px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-medium notif-filter-btn">Q-Learning</button>
+                <button type="button" onclick="filterNotifications('PROP_FIRM')" id="notif-filter-PROP_FIRM" class="px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-medium notif-filter-btn">40% Clamps</button>
               </div>
 
               <!-- Lista scrolleable de alertas -->
@@ -1272,7 +1473,7 @@
               <!-- Footer del Popover -->
               <div class="p-2.5 border-t border-[#F2F2F7] bg-[#FAFAFC] flex items-center justify-between text-[11px] text-[#6E6E73] font-mono">
                 <span class="flex items-center gap-1"><i class="fa-solid fa-satellite-dish text-[#107C41]"></i> Polling 30s</span>
-                <span class="text-[10px]">Daemon & Libro C Feed</span>
+                <span class="text-[10px]">Pulsa un aviso para ir al módulo</span>
               </div>
             </div>
           </div>
@@ -1287,6 +1488,11 @@
               <span>Restablecer</span>
             </button>
           </div>
+
+          <!-- Selector de Modo Claro / Modo Oscuro (a la derecha del botón de editar) -->
+          <button id="btn-theme-toggle" type="button" onclick="window.toggleDashboardTheme && window.toggleDashboardTheme()" class="relative p-2 text-[#181A20] hover:bg-[#EAE5DC] rounded-lg transition border border-[#E6E2D8] flex items-center justify-center cursor-pointer" title="Activar / Desactivar Modo Oscuro">
+            <i class="fa-solid fa-moon text-sm" id="theme-toggle-icon"></i>
+          </button>
 
           <button onclick="fetchCurrentDashboard()" class="p-2 text-[#181A20] hover:bg-[#EAE5DC] rounded-lg transition border border-[#E6E2D8]" title="Refrescar datos">
             <i class="fa-solid fa-rotate text-sm" id="refresh-icon"></i>
@@ -8338,15 +8544,71 @@
     let currentNotifications = [];
     let currentNotifFilter = 'ALL';
 
-    function toggleNotificationsCenter() {
+    function toggleNotificationsCenter(ev) {
+      if (ev && typeof ev.stopPropagation === 'function') ev.stopPropagation();
       if (window.AlgrokUiPopover) window.AlgrokUiPopover.close();
       const dropdown = document.getElementById('notifications-dropdown');
       if (!dropdown) return;
       dropdown.classList.toggle('hidden');
       if (!dropdown.classList.contains('hidden')) {
         renderNotificationsUI();
+        fetchNotifications();
       }
     }
+
+    function resolveNotificationTarget(n) {
+      if (n && n.target_tab) {
+        return {
+          tab: n.target_tab,
+          selector: n.target_selector || `#tab-content-${n.target_tab}`,
+          label: n.target_label || n.target_tab
+        };
+      }
+      const cat = String((n && n.category) || '').toUpperCase();
+      const nid = String((n && n.id) || '').toUpperCase();
+      if (nid.includes('HEDGE')) {
+        return { tab: 'config', selector: '#tab-content-config', label: 'Reglas de Riesgo' };
+      }
+      if (cat === 'Q_LEARNING' || cat === 'PROP_FIRM') {
+        return { tab: 'orchestrator', selector: '#ql-telemetry-stream, #q-learning-orchestrator-panel', label: 'Orquestador · Libro C' };
+      }
+      if (cat === 'GUARDIAN' && !nid.includes('INIT')) {
+        return { tab: 'forward', selector: '#ft-propfirm-card, #tab-content-forward', label: 'Forward Test · Guardián' };
+      }
+      return { tab: 'dashboard', selector: '#cockpit-accounts-cap-propio, #tab-content-dashboard', label: 'Cockpit General' };
+    }
+
+    window.navigateFromNotification = function(tabId, selector) {
+      const dropdown = document.getElementById('notifications-dropdown');
+      if (dropdown) dropdown.classList.add('hidden');
+      if (typeof switchTab === 'function' && tabId) {
+        switchTab(tabId);
+      }
+      setTimeout(() => {
+        let targetEl = selector ? document.querySelector(selector) : null;
+        if (!targetEl && tabId) {
+          targetEl = document.getElementById(`tab-content-${tabId}`);
+        }
+        if (targetEl) {
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          targetEl.classList.remove('algrok-notif-focus-ring');
+          void targetEl.offsetWidth;
+          targetEl.classList.add('algrok-notif-focus-ring');
+          setTimeout(() => targetEl.classList.remove('algrok-notif-focus-ring'), 2400);
+        }
+      }, 160);
+    };
+
+    window.openNotificationTargetByIndex = function(idx) {
+      const filtered = (currentNotifications || []).filter(n => {
+        if (currentNotifFilter === 'ALL') return true;
+        return n.category === currentNotifFilter;
+      });
+      const item = filtered[idx];
+      if (!item) return;
+      const tgt = resolveNotificationTarget(item);
+      window.navigateFromNotification(tgt.tab, tgt.selector);
+    };
 
     function filterNotifications(category) {
       currentNotifFilter = category;
@@ -8403,37 +8665,44 @@
         return;
       }
 
-      listEl.innerHTML = filtered.map(n => {
+      listEl.innerHTML = filtered.map((n, idx) => {
         let iconHtml = '<i class="fa-solid fa-info text-xs"></i>';
         let iconBg = 'bg-[#EEF2FF] text-[#3C45A5]';
         if (n.level === 'WARNING' || n.badge === 'warning') {
           iconHtml = '<i class="fa-solid fa-triangle-exclamation text-xs"></i>';
           iconBg = 'bg-[#FEF3C7] text-[#B45309]';
         } else if (n.level === 'SUCCESS' || n.badge === 'success') {
-          iconHtml = '<i class="fa-solid fa-shield-check text-xs"></i>';
+          iconHtml = '<i class="fa-solid fa-shield-halved text-xs"></i>';
           iconBg = 'bg-[#ECFDF5] text-[#107C41]';
         } else if (n.badge === 'purple' || n.category === 'PROP_FIRM') {
           iconHtml = '<i class="fa-solid fa-scissors text-xs"></i>';
           iconBg = 'bg-[#F3E8FF] text-[#7E22CE]';
         }
+        const tgt = resolveNotificationTarget(n);
 
         return `
-          <div class="p-3.5 hover:bg-[#FBFBFD] transition flex items-start gap-3">
+          <button type="button" onclick="window.openNotificationTargetByIndex(${idx})" class="w-full text-left p-3.5 hover:bg-[#F5F7FF] transition flex items-start gap-3 cursor-pointer group focus:outline-none">
             <div class="w-7 h-7 rounded-lg ${iconBg} flex items-center justify-center shrink-0 mt-0.5">
               ${iconHtml}
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-center justify-between gap-1 mb-0.5">
-                <h5 class="text-xs font-bold text-[#1D1D1F] truncate">${n.title}</h5>
+                <h5 class="text-xs font-bold text-[#1D1D1F] group-hover:text-[#3C45A5] truncate">${n.title}</h5>
                 <span class="text-[9px] font-mono text-[#86868B] shrink-0">${n.timestamp || 'Ahora'}</span>
               </div>
               <p class="text-[11px] text-[#6E6E73] leading-relaxed break-words">${n.message}</p>
-              <div class="mt-1.5 flex items-center gap-2">
-                <span class="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-[#F2F2F7] text-[#6E6E73] font-semibold">${n.category}</span>
-                <span class="text-[9px] font-mono text-[#86868B]">${n.id || ''}</span>
+              <div class="mt-2 flex items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <span class="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-[#F2F2F7] text-[#6E6E73] font-semibold">${n.category}</span>
+                  <span class="text-[9px] font-mono text-[#86868B] truncate">${n.id || ''}</span>
+                </div>
+                <span class="text-[10px] font-mono font-bold text-[#3C45A5] shrink-0 flex items-center gap-1 opacity-85 group-hover:opacity-100">
+                  <span>${tgt.label}</span>
+                  <i class="fa-solid fa-arrow-right text-[9px]"></i>
+                </span>
               </div>
             </div>
-          </div>
+          </button>
         `;
       }).join('');
     }
@@ -8478,6 +8747,62 @@
         }
       }
     });
+
+    // =========================================================================
+    // MODO OSCURO / CLARO INSTITUCIONAL (CON PERSISTENCIA LOCAL + SERVIDOR)
+    // =========================================================================
+    window.applyDashboardTheme = function(themeName, persistServer = false) {
+      const isDark = String(themeName || '').toLowerCase() === 'dark';
+      const targetTheme = isDark ? 'dark' : 'light';
+      if (isDark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+      }
+      try {
+        localStorage.setItem('algrok_theme_v1', targetTheme);
+      } catch (e) {}
+
+      const iconEl = document.getElementById('theme-toggle-icon');
+      const btnEl = document.getElementById('btn-theme-toggle');
+      if (iconEl) {
+        iconEl.className = isDark
+          ? 'fa-solid fa-sun text-sm text-amber-400'
+          : 'fa-solid fa-moon text-sm';
+      }
+      if (btnEl) {
+        btnEl.title = isDark ? 'Cambiar a Modo Claro' : 'Activar Modo Oscuro';
+      }
+
+      if (persistServer) {
+        fetch('/api/theme_preferences', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ theme: targetTheme })
+        }).catch(err => console.warn('Error saving theme preference:', err));
+      }
+    };
+
+    window.toggleDashboardTheme = function() {
+      const curDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      window.applyDashboardTheme(curDark ? 'light' : 'dark', true);
+    };
+
+    (function initDashboardTheme() {
+      let savedLocal = 'light';
+      try {
+        savedLocal = localStorage.getItem('algrok_theme_v1') || 'light';
+      } catch (e) {}
+      window.applyDashboardTheme(savedLocal, false);
+      fetch('/api/theme_preferences')
+        .then(r => (r.ok ? r.json() : null))
+        .then(data => {
+          if (data && (data.theme === 'dark' || data.theme === 'light')) {
+            window.applyDashboardTheme(data.theme, false);
+          }
+        })
+        .catch(() => {});
+    })();
 
     async function fetchCurrentDashboard() {
       const icon = document.getElementById('refresh-icon');
@@ -13090,7 +13415,7 @@
         // o abrir selectores de icono/color sin disparar navegación ni salir del modo edición.
         document.addEventListener('click', (e) => {
           if (!window.algrokEditMode) return;
-          if (e.target.closest('#btn-ui-customizer, #btn-ui-reset-all, .sidebar-btn-eye, .sidebar-tab-icon, .sidebar-icon-popover, .sidebar-icon-choice, .algrok-color-palette-popover, .algrok-color-swatch, .algrok-color-native, .algrok-scope-btn, .algrok-prop-tab, .algrok-hex-copy, .algrok-orig-chip, .algrok-undo-color-btn')) {
+          if (e.target.closest('#btn-ui-customizer, #btn-ui-reset-all, #btn-notifications-bell, #btn-theme-toggle, .sidebar-btn-eye, .sidebar-tab-icon, .sidebar-icon-popover, .sidebar-icon-choice, .algrok-color-palette-popover, .algrok-color-swatch, .algrok-color-native, .algrok-scope-btn, .algrok-prop-tab, .algrok-hex-copy, .algrok-orig-chip, .algrok-undo-color-btn')) {
             return;
           }
 
@@ -13288,6 +13613,7 @@
               btn.id === 'btn-ui-customizer' ||
               btn.id === 'btn-ui-reset-all' ||
               btn.id === 'btn-notifications-bell' ||
+              btn.id === 'btn-theme-toggle' ||
               btn.closest('#sidebar-nav') ||
               btn.closest('#notifications-dropdown') ||
               btn.closest('#ui-customizer-wrapper') ||
@@ -13338,6 +13664,7 @@
               btn.id === 'btn-ui-customizer' ||
               btn.id === 'btn-ui-reset-all' ||
               btn.id === 'btn-notifications-bell' ||
+              btn.id === 'btn-theme-toggle' ||
               btn.closest('#sidebar-nav') ||
               btn.closest('#notifications-dropdown') ||
               btn.closest('#ui-customizer-wrapper') ||
@@ -13585,7 +13912,7 @@
         roots.forEach(scope => {
           const icons = scope.querySelectorAll('i[class*="fa-"]');
           icons.forEach(iconEl => {
-            if (iconEl.closest('#sidebar-nav, #ui-customizer-wrapper, #notifications-dropdown, .sidebar-icon-popover, .algrok-color-palette-popover, #btn-ui-customizer, #btn-ui-reset-all, #btn-notifications-bell, .apexcharts-canvas, svg, canvas')) {
+            if (iconEl.closest('#sidebar-nav, #ui-customizer-wrapper, #notifications-dropdown, .sidebar-icon-popover, .algrok-color-palette-popover, #btn-ui-customizer, #btn-ui-reset-all, #btn-notifications-bell, #btn-theme-toggle, .apexcharts-canvas, svg, canvas')) {
               return;
             }
             if (iconEl.classList.contains('fa-spin') || iconEl.classList.contains('fa-pulse') || iconEl.classList.contains('animate-pulse') || iconEl.classList.contains('animate-ping')) {
