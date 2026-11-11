@@ -1,6 +1,6 @@
 ---
 title: "Roadmap Cuantitativo Institucional - AlgrokQuant"
-updated_at: "2026-11-08"
+updated_at: "2026-11-11"
 status: "ACTIVO Y VIGILADO"
 author: "Director Supremo Sergio & Desk Lead Nexus"
 tags:
@@ -9,6 +9,7 @@ tags:
   - real-execution-bridge
   - double-q-learning
   - incubation-guardian
+  - mt5-500k-hedging-sandbox
 ---
 
 # Roadmap Cuantitativo Institucional · AlgrokQuant
@@ -26,10 +27,35 @@ Este documento formaliza la planificación estratégica, el estado de desarrollo
 - [x] **Orquestador Double Q-Learning Tabular:** 10 regímenes canónicos ($S_0 \dots S_9$), 3 arquetipos, 2 políticas independientes (`PROP_FIRM` vs. `CAPITAL_PROPIO`), Hard 40% Consistency Take-Profit Clamp para apuestas 1.25x en fondeo, memoria dual 80/20 y soft-update Polyak $\tau=0.25$.
 - [x] **Despachador en Vivo & Buffer de Replay Online:** Integración lock-free en `scripts/prop_firm_forward_test_daemon.py`, telemetría de Libro C y watchdog de deriva con cooldown preventivo de 4 horas.
 - [x] **Dashboard Web en Vivo (`:8080`):** Top HUD de activos, visualizador Triple Book (A vs. B vs. C), matriz $10 \times 3$, modal de explicabilidad causal (*Explainable RL*), simulador interactivo *"What-If"* y terminal en streaming de telemetría.
+- [x] **Pipeline Tiempo Real Libros A/B/C + Shadow $1K + Edición UI (`2026-11-11`):**
+  * Eliminación de fórmulas sintéticas y conexión de **Libro A (Individual)**, **Libro B (Orquestado Régimen)** y **Libro C (Double Q-Learning RL)** a velas reales en vivo (`^GSPC`, `^NDX`, `EURUSD=X`, Binance `BTC`/`ETH`/`SOL`) + bróker MT5 / Hyperliquid.
+  * Cobertura continua **100% Sin Truncamiento** (`55` estrategias activas: `23` Capital Propio + `32` Fondeo): las **Titulares** operan en bróker y las **Suplentes (`SHADOW $1K`)** se evalúan barra a barra sin exceder el `%` de riesgo de cuenta.
+  * Segregación estricta `CAPITAL_PROPIO` vs. `PROP_FIRM_*` corregida en [`auto_deployer.py`](file:///C:/Users/Sergio/Documents/Antigravity/OpenMausBot/jev/auto_deployer.py), [`regime_orchestrator.py`](file:///C:/Users/Sergio/Documents/Antigravity/OpenMausBot/jev/regime_orchestrator.py), [`backend.py`](file:///C:/Users/Sergio/Documents/Antigravity/OpenMausBot/dashboard/backend.py) e [`index.html`](file:///C:/Users/Sergio/Documents/Antigravity/OpenMausBot/dashboard/templates/index.html).
+  * Contención CSS Grid `minmax(0,1fr)`, notificaciones clicables, **Modo Oscuro** en cabecera (`#btn-theme-toggle`) y drag-and-drop con tirador `.kpi-drag-grip` y apilado a fila completa sin distorsión ni borrosidad GPU.
 
 ---
 
-## 2. Hito Prioritario a Medio Plazo (En Espera por Graduación de Trades)
+## 2. Próximo Hito Inmediato (Siguiente Sesión)
+
+### 🚀 Incubadora Real de Ejecución Masiva: Cuenta Demo IC Markets MT5 `500K` (Hedging) + Subcuentas / Orderbook Cripto para Libro A
+
+> **Objetivo:** Sustituir el tracking meramente causal de velas de las suplentes por **ejecución real física de Libro A en cuenta demo dedicada** sin riesgo para las cuentas titulares ni evaluación, midiendo **spread vivo, slippage de servidor, comisiones y swaps exactos por estrategia**.
+
+#### Plan Técnico Acordado para la Próxima Sesión:
+1. **Alta de Cuenta Demo `500,000 USD` en IC Markets MT5 (`Hedging` obligatorio):**
+   * Registrar la nueva cuenta `INCUBADORA_500K` en `config/brokers.json` y [`scripts/mt5_server.py`](file:///C:/Users/Sergio/Documents/Antigravity/OpenMausBot/scripts/mt5_server.py), manteniendo intactas `53138338` ($1k), `53138341` ($50k CFD) y `53138343` ($50k Futuros).
+   * Configurar el riesgo por trade entre `0.04%–0.20%` (`$200–$1,000` por trade), eliminando imprecisiones de redondeo del lote mínimo `0.01`.
+2. **Routing Multi-Estrategia por `magic` + `ticket` en Modo Hedging:**
+   * En [`execution/mt5_client.py`](file:///C:/Users/Sergio/Documents/Antigravity/OpenMausBot/execution/mt5_client.py) y `scripts/prop_firm_forward_test_daemon.py`, asignar un `magic` determinista único por estrategia y gestionar aperturas/cierres por `(strategy_id, magic, ticket)` (nunca solo por `symbol`), permitiendo convivencia simultánea de estrategias sobre `US500`, `USTEC` y `EURUSD`.
+   * Agrupar consultas y órdenes por cuenta para evitar conmutaciones innecesarias de `mt5.login()`.
+3. **Ecosistema Cripto Sin Colisiones de *Netting* (`BTC`, `ETH`, `SOL`):**
+   * Aislamiento por subcuentas / *API wallets* (o medición directa contra profundidad real *bid/ask* del libro en vivo para evitar el *netting* por par y la iliquidez artificial del Testnet con nocionales altos).
+4. **Contraste En Vivo A vs. B vs. C sobre Fills Reales:**
+   * Alimentar **Libro B (Orquestado)** y **Libro C (Q-Learning RL)** con los precios de *fill* y *slippage* reales capturados de la cuenta `500K` (Libro A físico).
+
+---
+
+## 3. Hito Prioritario a Medio Plazo (En Espera por Graduación de Trades)
 
 ### 📌 Opción 3: Pasarela de Despliegue Real para Estrategias Graduadas (`Real Execution Bridge`)
 
